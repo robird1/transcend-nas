@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/file_manage_editor_action_transmission"
+        android:icon="@drawable/ic_file_download_white_24dp"
+        android:title="@string/more"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/file_manage_editor_action_more"
+        android:icon="@drawable/ic_more_vert_white_24dp"
+        android:title="@string/more"
+        app:showAsAction="always">
+
+        <menu>
+
+            <item
+                android:id="@+id/file_manage_editor_action_rename"
+                android:icon="@drawable/ic_rename_gray_24dp"
+                android:title="@string/rename"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/file_manage_editor_action_share"
+                android:icon="@drawable/ic_share_gray_24dp"
+                android:title="@string/share"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/file_manage_editor_action_copy"
+                android:icon="@drawable/ic_content_copy_gray_24dp"
+                android:title="@string/copy"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/file_manage_editor_action_cut"
+                android:icon="@drawable/ic_content_cut_gray_24dp"
+                android:title="@string/cut"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/file_manage_editor_action_delete"
+                android:icon="@drawable/ic_delete_gray_24dp"
+                android:title="@string/delete"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/file_manage_editor_action_new_folder"
+                android:icon="@drawable/ic_create_new_folder_gray_24dp"
+                android:title="@string/new_folder"
+                app:showAsAction="never" />
+
+        </menu>
+
+    </item>
+
+</menu>

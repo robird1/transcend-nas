@@ -1,0 +1,42 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColorPrimary">@color/textColorPrimary</item>
+        <item name="alertDialogTheme">@style/AppDialog</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="actionModeBackground">@color/colorAccent</item>
+        <item name="actionModeCloseDrawable">@drawable/ic_close_white_24dp</item>
+    </style>
+    
+    <style name="AppDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:textColorPrimary">@color/textColorPrimary</item>
+        <item name="colorAccent">@color/colorAccentDialog</item>
+        <item name="buttonBarNegativeButtonStyle">@style/AlertDialogButtonNegative</item>
+    </style>
+
+    <style name="AlertDialogButtonPositive"
+        parent="Base.Widget.AppCompat.Button.Borderless.Colored">
+        <item name="android:textColor">@color/colorAccentDialog</item>
+    </style>
+
+    <style name="AlertDialogButtonNegative"
+        parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:textColor">@color/textColorSecondary</item>
+    </style>
+
+    <style name="AppTheme.Dark" parent="AppTheme">
+        <item name="android:background">@color/colorAccent</item>
+        <item name="android:textColorSecondary">@color/colorPrimary</item>
+        <item name="android:textColorTertiary">@color/colorPrimary</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+</resources>
