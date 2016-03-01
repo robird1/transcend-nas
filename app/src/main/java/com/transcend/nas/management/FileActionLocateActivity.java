@@ -73,13 +73,14 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         Log.w(TAG, "onCreate");
         setContentView(R.layout.activity_file_locate);
-        init();
+        initData();
         initToolbar();
         initDropdown();
         initRecyclerView();
         initFabs();
         initProgressView();
         doRefresh();
+        toast(getHintResId(), Toast.LENGTH_LONG);
     }
 
     /**
@@ -87,11 +88,11 @@ public class FileActionLocateActivity extends AppCompatActivity implements
      * INITIALIZATION
      *
      */
-    private void init() {
-        Bundle bundle = getIntent().getExtras();
-        mType = bundle.getString("type");
-        mRoot = bundle.getString("root");
-        mPath = bundle.getString("path");
+    private void initData() {
+        Bundle args = getIntent().getExtras();
+        mType = args.getString("type");
+        mRoot = args.getString("root");
+        mPath = args.getString("path");
         mFileList = new ArrayList<FileInfo>();
         //mFileList = (ArrayList<FileInfo>)bundle.getSerializable("list");
         //for (FileInfo file :mFileList)
@@ -181,7 +182,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         if (fileInfo.type.equals(FileInfo.TYPE.MUSIC)) {
             MediaManager.open(this, fileInfo.path);
         } else {
-            toast(R.string.unsupported_format);
+            toast(R.string.unsupported_format, Toast.LENGTH_SHORT);
         }
     }
 
@@ -246,7 +247,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
             doLoad(parent);
         }
         else {
-            toast(R.string.on_top);
+            toast(R.string.on_top, Toast.LENGTH_SHORT);
         }
     }
 
@@ -389,24 +390,25 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         array.recycle();
     }
 
-    private void toast(int resId) {
+    private void toast(int resId, int duration) {
         if (mToast != null)
             mToast.cancel();
-        mToast = Toast.makeText(this, resId, Toast.LENGTH_SHORT);
+        mToast = Toast.makeText(this, resId, duration);
         mToast.setGravity(Gravity.CENTER, 0, 0);
         mToast.show();
     }
 
+    private int getHintResId() {
+        return FileAction.COPY.equals(mType) ? R.string.msg_paste_to
+                : FileAction.MOVE.equals(mType) ? R.string.msg_paste_to
+                : FileAction.UPLOAD.equals(mType) ? R.string.msg_upload_to
+                : FileAction.DOWNLOAD.equals(mType) ? R.string.msg_download_to
+                : R.string.msg_direct_to;
+    }
+
     private void popupConfirmDialog() {
-        String title
-                = FileAction.COPY.equals(mType) ? "Paste to"
-                : FileAction.MOVE.equals(mType) ? "Paste to"
-                : FileAction.DIRECT.equals(mType) ? "Direct to"
-                : FileAction.UPLOAD.equals(mType) ? "Upload to"
-                : FileAction.DOWNLOAD.equals(mType) ? "Download to"
-                : null;
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(title);
+        builder.setTitle(getHintResId());
         builder.setMessage(mPath);
         builder.setNegativeButton(R.string.cancel, null);
         builder.setPositiveButton(R.string.confirm, null);

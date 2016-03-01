@@ -39,6 +39,7 @@ import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
+import com.transcend.nas.viewer.ViewerActivity;
 import com.tutk.IOTC.P2PTunnelAPIs;
 import com.tutk.IOTC.sP2PTunnelSessionInfo;
 
@@ -315,17 +316,16 @@ public class FileManageActivity extends AppCompatActivity implements
         if (mEditorMode == null) {
             // browser
             FileInfo fileInfo = mFileList.get(position);
-            if (fileInfo.type.equals(FileInfo.TYPE.DIR)) {
+            if (FileInfo.TYPE.DIR.equals(fileInfo.type)) {
                 doLoad(fileInfo.path);
             } else
-            if (fileInfo.type.equals(FileInfo.TYPE.PHOTO)) {
-                // TODO: photo viewer
-                Toast.makeText(this, "Photo", Toast.LENGTH_SHORT).show();
+            if (FileInfo.TYPE.PHOTO.equals(fileInfo.type)) {
+                startViewerActivity(fileInfo.path);
             } else
-            if (fileInfo.type.equals(FileInfo.TYPE.VIDEO)) {
+            if (FileInfo.TYPE.VIDEO.equals(fileInfo.type)) {
                 MediaManager.open(this, fileInfo.path);
             } else
-            if (fileInfo.type.equals(FileInfo.TYPE.MUSIC)) {
+            if (FileInfo.TYPE.MUSIC.equals(fileInfo.type)) {
                 MediaManager.open(this, fileInfo.path);
             } else {
                 toast(R.string.unsupported_format);
@@ -368,18 +368,14 @@ public class FileManageActivity extends AppCompatActivity implements
                 /*/ expanded fabs
                 resetActionFabs();
                 /*/
-                showFabEdit();
                 //*/
-                closeEditorMode();
                 doLoad(ROOT_SMB);
                 break;
             case R.id.nav_downloads:
                 /*/ expanded fabs
                 resetActionFabs();
                 /*/
-                showFabEdit();
                 //*/
-                closeEditorMode();
                 doLoad(NASPref.getDownloadsPath(this));
                 break;
             case R.id.nav_settings:
@@ -409,6 +405,7 @@ public class FileManageActivity extends AppCompatActivity implements
         /*/
         toggleFabSelectAll(false);
         //*/
+        toast(R.string.edit_mode);
         return true ;
     }
 
@@ -474,7 +471,7 @@ public class FileManageActivity extends AppCompatActivity implements
         /*/ expanded fabs
         resetActionFabs();
         /*/
-        showFabEdit();
+        enableFabEdit(true);
         //*/
     }
 
@@ -526,6 +523,7 @@ public class FileManageActivity extends AppCompatActivity implements
      */
     @Override
     public void onBackPressed() {
+        toggleDrawerCheckedItem();
         if (mDrawer.isDrawerOpen(GravityCompat.START)) {
             mDrawer.closeDrawer(GravityCompat.START);
             return;
@@ -658,13 +656,9 @@ public class FileManageActivity extends AppCompatActivity implements
                 else
                     resetActionFabs();
                 /*/
-                if (mPath.equals(mRoot))
-                    hideFabEdit();
-                else
-                    showFabEdit();
+                enableFabEdit(!mPath.equals(mRoot));
                 //*/
                 updateScreen();
-
             }
         } else
         if (loader instanceof LocalFileListLoader) {
@@ -678,7 +672,7 @@ public class FileManageActivity extends AppCompatActivity implements
                 /*// expanded fabs
                 resetActionFabs();
                 /*/
-                showFabEdit();
+                enableFabEdit(true);
                 //*/
                 updateScreen();
             }
@@ -688,6 +682,7 @@ public class FileManageActivity extends AppCompatActivity implements
                 doRefresh();
             }
         }
+        toggleDrawerCheckedItem();
         mProgressView.setVisibility(View.INVISIBLE);
         Log.w(TAG, loader.getClass().getSimpleName() + " " + success);
     }
@@ -962,13 +957,10 @@ public class FileManageActivity extends AppCompatActivity implements
         mFabNewFile.setVisibility(View.INVISIBLE);
     }
     /*/
-    private void showFabEdit() {
-        mFab.setImageResource(R.drawable.ic_edit_white_24dp);
-        mFab.setVisibility(View.VISIBLE);
-    }
 
-    private void hideFabEdit() {
-        mFab.setVisibility(View.INVISIBLE);
+    private void enableFabEdit(boolean enabled) {
+        mFab.setImageResource(R.drawable.ic_edit_white_24dp);
+        mFab.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
     }
 
     private void toggleFabSelectAll (boolean selectAll) {
@@ -1033,6 +1025,7 @@ public class FileManageActivity extends AppCompatActivity implements
             clearAllSelection();
         else
             checkAllSelection();
+        selectAll = !selectAll;
         count = selectAll ? mFileList.size() : 0;
         updateEditorModeTitle(count);
         toggleEditorModeAction(count);
@@ -1061,6 +1054,13 @@ public class FileManageActivity extends AppCompatActivity implements
         mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_share).setVisible(visible);
     }
 
+    private void toggleDrawerCheckedItem() {
+        int id = State.REMOTE.equals(mState)
+                ? R.id.nav_storage : R.id.nav_downloads;
+        mNavView.setCheckedItem(id);
+        Log.w(TAG, "toggleDrawerCheckedItem: " + mState);
+    }
+
     private void toast(int resId) {
         if (mToast != null)
             mToast.cancel();
@@ -1079,14 +1079,30 @@ public class FileManageActivity extends AppCompatActivity implements
                 : FileAction.DOWNLOAD.equals(type) ? NASPref.getDownloadsPath(this)
                 : mPath;
 
-        Bundle bundle = new Bundle();
-        bundle.putString("type", type);
-        bundle.putString("root", root);
-        bundle.putString("path", path);
-        bundle.putSerializable("list", mFileList);
+        Bundle args = new Bundle();
+        args.putString("type", type);
+        args.putString("root", root);
+        args.putString("path", path);
+        args.putSerializable("list", mFileList);
         Intent intent = new Intent();
         intent.setClass(FileManageActivity.this, FileActionLocateActivity.class);
-        intent.putExtras(bundle);
+        intent.putExtras(args);
+        startActivity(intent);
+    }
+
+    private void startViewerActivity(String path) {
+        ArrayList<String> list = new ArrayList<String>();
+        for (FileInfo info : mFileList) {
+            if (FileInfo.TYPE.PHOTO.equals(info.type))
+                list.add(info.path);
+        }
+        Bundle args = new Bundle();
+        args.putString("stat", mState.toString());
+        args.putString("path", path);
+        args.putStringArrayList("list", list);
+        Intent intent = new Intent();
+        intent.setClass(FileManageActivity.this, ViewerActivity.class);
+        intent.putExtras(args);
         startActivity(intent);
     }
 

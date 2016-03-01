@@ -117,6 +117,8 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
             count += length;
             updateProgressPerSecond(name, count, total);
         }
+        mOS.close();
+        mIS.close();
         updateProgressPerSecond(name, count, total);
     }
 

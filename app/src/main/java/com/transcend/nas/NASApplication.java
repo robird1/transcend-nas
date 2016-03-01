@@ -4,6 +4,8 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Environment;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.realtek.nasfun.api.ServerManager;
 
 import java.io.File;
@@ -22,6 +24,7 @@ public class NASApplication extends Application {
         super.onCreate();
         mContext = getApplicationContext();
         initServerManager();
+        initImageLoader();
         createDownloadsDirectory();
 
         // TODO: P2P case
@@ -39,6 +42,11 @@ public class NASApplication extends Application {
 
         // TODO: P2P case
         //P2PService.getInstance().P2PConnectStop();
+    }
+
+    private void initImageLoader() {
+        ImageLoaderConfiguration config = ImageLoaderConfiguration.createDefault(this);
+        ImageLoader.getInstance().init(config);
     }
 
 

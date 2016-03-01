@@ -48,6 +48,11 @@
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 
+        <activity
+            android:name=".viewer.ViewerActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
+
     </application>
 
 </manifest>

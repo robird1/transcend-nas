@@ -21,6 +21,7 @@
     <string name="download">Download</string>
     <string name="downloads">Downloads</string>
     <string name="duplicate_name">Duplicate name</string>
+    <string name="edit_mode">Edit mode</string>
     <string name="email">Email</string>
     <string name="error">Error</string>
     <string name="exit">Exit</string>
@@ -58,7 +59,10 @@
 
     <string name="msg_conj_deleted">%1$d item(s) will be deleted.</string>
     <string name="msg_exit_app">Are you sure you want to exit the app?</string>
-
+    <string name="msg_paste_to">Paste to…</string>
+    <string name="msg_direct_to">Direct to…</string>
+    <string name="msg_upload_to">Upload to…</string>
+    <string name="msg_download_to">Download to…</string>
 
     <!-- realtek -->
 

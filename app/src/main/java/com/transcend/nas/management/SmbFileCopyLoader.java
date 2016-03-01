@@ -18,8 +18,6 @@ import org.apache.commons.io.FilenameUtils;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;

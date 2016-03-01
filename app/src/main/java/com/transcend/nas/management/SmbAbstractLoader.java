@@ -7,14 +7,6 @@ import com.realtek.nasfun.api.SambaStatus;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import jcifs.smb.SmbException;
-import jcifs.smb.SmbFile;
-import jcifs.smb.SmbFileFilter;
-import jcifs.smb.SmbFilenameFilter;
-
 /**
  * Created by silverhsu on 16/1/20.
  */
@@ -27,6 +19,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
 
     public SmbAbstractLoader(Context context) {
         super(context);
+        //System.setProperty("jcifs.smb.client.dfs.disabled", "true");
         mServer = ServerManager.INSTANCE.getCurrentServer();
         mUsername = mServer.getUsername();
         mPassword = mServer.getPassword();
