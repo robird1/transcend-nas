@@ -3,10 +3,7 @@ package com.transcend.nas.management;
 import android.content.Context;
 
 import com.transcend.nas.NASPref;
-import com.transcend.nas.utils.MimeTypeMapExt;
-import com.transcend.nas.utils.MimeUtil;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
 import java.util.Comparator;
@@ -18,7 +15,7 @@ public class FileInfoSort {
 
 
     public static Comparator<FileInfo> comparator(Context context) {
-        NASPref.Sort sort = NASPref.getFileSort(context);
+        NASPref.Sort sort = NASPref.getFileSortType(context);
         if (sort.equals(NASPref.Sort.DATE)) {
             return new FileInfoSort.byDate();
         }

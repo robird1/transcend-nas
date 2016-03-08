@@ -9,7 +9,6 @@ import android.util.Log;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
-import com.transcend.nas.utils.PrefUtil;
 
 /**
  * Created by silverhsu on 15/12/30.
@@ -54,9 +53,9 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
     }
 
     private boolean loginThroughIntranet() {
-        String hostname = NASPref.getLoginHostname(getContext());
-        String username = NASPref.getLoginUsername(getContext());
-        String password = NASPref.getLoginPassword(getContext());
+        String hostname = NASPref.getHostname(getContext());
+        String username = NASPref.getUsername(getContext());
+        String password = NASPref.getPassword(getContext());
         Log.w(TAG, "hostname: " + hostname);
         Log.w(TAG, "username: " + username);
         Log.w(TAG, "password: " + password);

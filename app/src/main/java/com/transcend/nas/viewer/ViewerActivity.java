@@ -11,6 +11,7 @@ import android.widget.ImageView;
 
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.NASApp;
 import com.transcend.nas.R;
 
 import java.util.ArrayList;
@@ -32,8 +33,8 @@ public class ViewerActivity extends AppCompatActivity implements
     private ViewerPager mPager;
     private ViewerPagerAdapter mPagerAdapter;
 
+    private String mMode;
     private String mPath;
-    private String mStat;
     private ArrayList<String> mList;
     private ArrayList<String> mUrls;
 
@@ -83,7 +84,7 @@ public class ViewerActivity extends AppCompatActivity implements
     private void initData() {
         Bundle args = getIntent().getExtras();
         mPath = args.getString("path");
-        mStat = args.getString("stat");
+        mMode = args.getString("mode");
         mList = args.getStringArrayList("list");
         mUrls = new ArrayList<String>();
         for (String path : mList) {
@@ -116,7 +117,7 @@ public class ViewerActivity extends AppCompatActivity implements
 
     private String parseImageURL(String path) {
         String url = null;
-        if (mStat.equals("LOCAL")) {
+        if (NASApp.MODE_STG.equals(mMode)) {
             url = "file://" + path;
         }
         else {

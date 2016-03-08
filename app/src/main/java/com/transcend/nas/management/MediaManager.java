@@ -3,16 +3,11 @@ package com.transcend.nas.management;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
-import android.text.TextUtils;
 
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
-import com.transcend.nas.NASApplication;
 import com.transcend.nas.NASPref;
-import com.transcend.nas.utils.MimeTypeMapExt;
 import com.transcend.nas.utils.MimeUtil;
-
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -30,7 +25,7 @@ public class MediaManager {
     private final static String PUBLIC = "PUBLIC";
 
     public static void open(Activity act, String path) {
-        if (path.startsWith(NASPref.getDownloadsPath(act))) {
+        if (path.startsWith(NASPref.getDownloadLocation(act))) {
             // local
             Uri uri = Uri.fromFile(new File(path));
             String type = MimeUtil.getMimeType(path);

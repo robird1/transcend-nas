@@ -3,13 +3,9 @@ package com.transcend.nas.management;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ListView;
 
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
-import com.transcend.nas.utils.PrefUtil;
 
 /**
  * Created by silverhsu on 16/1/26.
@@ -38,14 +34,14 @@ public abstract class FileActionSortDialog implements DialogInterface.OnClickLis
     }
 
     private void initPreference() {
-        int pos = NASPref.getFileSort(mContext).ordinal();
+        int pos = NASPref.getFileSortType(mContext).ordinal();
         mDialog.getListView().setItemChecked(pos, true);
     }
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
         NASPref.Sort sort = NASPref.Sort.values()[which];
-        NASPref.setFileSort(mContext, sort);
+        NASPref.setFileSortType(mContext, sort);
         onConfirm();
         mDialog.dismiss();
     }

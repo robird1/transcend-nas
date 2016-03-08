@@ -25,9 +25,9 @@
             android:icon="@drawable/ic_settings_black_24dp"
             android:title="@string/settings" />
         <item
-            android:id="@+id/nav_help"
+            android:id="@+id/nav_about"
             android:icon="@drawable/ic_help_outline_black_24dp"
-            android:title="@string/help" />
+            android:title="@string/about" />
 
     </group>
 

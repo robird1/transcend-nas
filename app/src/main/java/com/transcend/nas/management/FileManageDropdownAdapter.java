@@ -1,6 +1,6 @@
 package com.transcend.nas.management;
 
-import android.content.Context;
+import android.os.Environment;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -10,10 +10,10 @@ import android.widget.BaseAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.transcend.nas.NASApplication;
-import com.transcend.nas.NASPref;
+import com.transcend.nas.NASApp;
 import com.transcend.nas.R;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,12 +27,11 @@ public class FileManageDropdownAdapter extends BaseAdapter {
 
     private static final String TAG = FileManageDropdownAdapter.class.getSimpleName();
 
-    private static final String PREFIX_REMOTE = NASApplication.getContext().getResources().
+    private static final String PREFIX_REMOTE = NASApp.getContext().getResources().
             getString(R.string.app_name);
-    private static final String PREFIX_LOCAL = NASApplication.getContext().getResources().
-            getString(R.string.downloads_name);
+    private static final String PREFIX_LOCAL = NASApp.getContext().getResources().
+            getString(R.string.storage_name);
 
-    private Context mContext;
     private Spinner mDropdown;
     private List<String> mList;
 
@@ -42,25 +41,24 @@ public class FileManageDropdownAdapter extends BaseAdapter {
         void onDropdownItemSelected(int position);
     }
 
-    public FileManageDropdownAdapter(String path) {
-        mContext = NASApplication.getContext();
-        updateList(path);
+    public FileManageDropdownAdapter() {
+        mList = new ArrayList<String>();
     }
 
     public void setOnDropdownItemSelectedListener(OnDropdownItemSelectedListener l) {
         mCallback = l;
     }
 
-    public void updateList(String path) {
-        List<String> list = new ArrayList<String>();
-        String downloadsPath = NASPref.getDownloadsPath(mContext);
-        boolean isLocal = path.startsWith(downloadsPath);
-        if (isLocal) {
-            path = path.replaceFirst(downloadsPath, PREFIX_LOCAL);
-        }
-        else {
+    public void updateList(String path, String mode) {
+        if (NASApp.MODE_SMB.equals(mode)) {
             path = PREFIX_REMOTE + path;
         }
+        else {
+            File storage = Environment.getExternalStorageDirectory();
+            String root = storage.getAbsolutePath();
+            path = path.replaceFirst(root, PREFIX_LOCAL);
+        }
+        List<String> list = new ArrayList<String>();
         String[] items = path.split("/");
         list = Arrays.asList(items);
         Collections.reverse(list);
@@ -76,13 +74,13 @@ public class FileManageDropdownAdapter extends BaseAdapter {
             builder.append("/");
         }
         String path = builder.toString();
-        boolean isLocal = path.startsWith(PREFIX_LOCAL);
-        if (isLocal) {
-            String downloadsPath = NASPref.getDownloadsPath(mContext);
-            path = path.replaceFirst(PREFIX_LOCAL, downloadsPath);
+        if (path.startsWith(PREFIX_REMOTE)) {
+            path = path.replaceFirst(PREFIX_REMOTE, "");
         }
         else {
-            path = path.replaceFirst(PREFIX_REMOTE, "");
+            File storage = Environment.getExternalStorageDirectory();
+            String root = storage.getAbsolutePath();
+            path = path.replaceFirst(PREFIX_LOCAL, root);
         }
         return path;
     }

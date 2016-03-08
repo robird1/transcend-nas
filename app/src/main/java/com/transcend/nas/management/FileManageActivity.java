@@ -36,9 +36,11 @@ import android.widget.Toast;
 
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
+import com.transcend.nas.settings.SettingsActivity;
 import com.transcend.nas.viewer.ViewerActivity;
 import com.tutk.IOTC.P2PTunnelAPIs;
 import com.tutk.IOTC.sP2PTunnelSessionInfo;
@@ -61,13 +63,6 @@ public class FileManageActivity extends AppCompatActivity implements
 
     private static final int GRID_PORTRAIT  = 3;
     private static final int GRID_LANDSCAPE = 5;
-
-    private static final String ROOT_SMB = "/";
-
-    private enum State {
-        REMOTE,
-        LOCAL
-    }
 
     private Toolbar mToolbar;
     private AppCompatSpinner mDropdown;
@@ -94,8 +89,8 @@ public class FileManageActivity extends AppCompatActivity implements
     private RelativeLayout mEditorModeView;
     private TextView mEditorModeTitle;
     private Toast mToast;
-
-    private State mState;
+    
+    private String mMode;
     private String mRoot;
     private String mPath;
     private ArrayList<FileInfo> mFileList;
@@ -142,7 +137,6 @@ public class FileManageActivity extends AppCompatActivity implements
     protected void onPause() {
         super.onPause();
         Log.w(TAG, "onPause");
-        //closeEditorMode();
     }
 
     @Override
@@ -160,22 +154,25 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        Log.w(TAG, "onNewIntent");
-        Bundle bundle = intent.getExtras();
-        if (bundle != null) {
-            String type = bundle.getString("type");
-            String path = bundle.getString("path");
-            if (FileAction.UPLOAD.equals(type))
-                doUpload(path);
-            if (FileAction.DOWNLOAD.equals(type))
-                doDownload(path);
-            if (FileAction.COPY.equals(type))
-                doCopy(path);
-            if (FileAction.MOVE.equals(type))
-                doMove(path);
-            closeEditorMode();
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.w(TAG, "onActivityResult");
+        if (requestCode == FileActionLocateActivity.REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                Bundle bundle = data.getExtras();
+                if (bundle == null) return;
+                String type = bundle.getString("type");
+                String path = bundle.getString("path");
+                if (NASApp.ACT_UPLOAD.equals(type))
+                    doUpload(path);
+                if (NASApp.ACT_DOWNLOAD.equals(type))
+                    doDownload(path);
+                if (NASApp.ACT_COPY.equals(type))
+                    doCopy(path);
+                if (NASApp.ACT_MOVE.equals(type))
+                    doMove(path);
+                closeEditorMode();
+            }
         }
     }
 
@@ -186,8 +183,8 @@ public class FileManageActivity extends AppCompatActivity implements
      *
      */
     private void init() {
-        mState = State.REMOTE;
-        mPath = mRoot = ROOT_SMB;
+        mMode = NASApp.MODE_SMB;
+        mPath = mRoot = NASApp.ROOT_SMB;
         mFileList = new ArrayList<FileInfo>();
         mServer = ServerManager.INSTANCE.getCurrentServer();
         // TODO: P2P case
@@ -203,7 +200,7 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void initDropdown() {
-        mDropdownAdapter = new FileManageDropdownAdapter(mPath);
+        mDropdownAdapter = new FileManageDropdownAdapter();
         mDropdownAdapter.setOnDropdownItemSelectedListener(this);
         mDropdown = (AppCompatSpinner)findViewById(R.id.main_dropdown);
         mDropdown.setAdapter(mDropdownAdapter);
@@ -339,7 +336,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
     @Override
     public void onRecyclerItemLongClick(int position) {
-        if (mPath.equals(ROOT_SMB))
+        if (mPath.equals(NASApp.ROOT_SMB))
             return;
         if (mEditorMode == null) {
             startEditorMode();
@@ -369,20 +366,20 @@ public class FileManageActivity extends AppCompatActivity implements
                 resetActionFabs();
                 /*/
                 //*/
-                doLoad(ROOT_SMB);
+                doLoad(NASApp.ROOT_SMB);
                 break;
             case R.id.nav_downloads:
                 /*/ expanded fabs
                 resetActionFabs();
                 /*/
                 //*/
-                doLoad(NASPref.getDownloadsPath(this));
+                doLoad(NASPref.getDownloadLocation(this));
                 break;
             case R.id.nav_settings:
-                // TODO: settings
+                startSettingsActivity();
                 break;
-            case R.id.nav_help:
-                // TODO: help
+            case R.id.nav_about:
+                startAboutActivity();
                 break;
         }
         return true;
@@ -418,8 +415,8 @@ public class FileManageActivity extends AppCompatActivity implements
     private void initMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.file_manage_editor, menu);
         MenuItem item = menu.findItem(R.id.file_manage_editor_action_transmission);
-        item.setTitle(mState.equals(State.REMOTE) ? R.string.download : R.string.upload);
-        item.setIcon(mState.equals(State.REMOTE) ? R.drawable.ic_file_download_white_24dp : R.drawable.ic_file_upload_white_24dp);
+        item.setTitle(NASApp.MODE_SMB.equals(mMode) ? R.string.download : R.string.upload);
+        item.setIcon(NASApp.MODE_SMB.equals(mMode) ? R.drawable.ic_file_download_white_24dp : R.drawable.ic_file_upload_white_24dp);
     }
 
     @Override
@@ -432,7 +429,7 @@ public class FileManageActivity extends AppCompatActivity implements
         boolean isEmpty = (getSelectedCount() == 0);
         switch (item.getItemId()) {
             case R.id.file_manage_editor_action_transmission:
-                String type = mState.equals(State.REMOTE) ? FileAction.DOWNLOAD : FileAction.UPLOAD;
+                String type = NASApp.MODE_SMB.equals(mMode) ? NASApp.ACT_DOWNLOAD : NASApp.ACT_UPLOAD;
                 if (isEmpty) toast(R.string.no_item_selected);
                 else startFileActionLocateActivity(type);
                 break;
@@ -446,11 +443,11 @@ public class FileManageActivity extends AppCompatActivity implements
                 break;
             case R.id.file_manage_editor_action_copy:
                 if (isEmpty) toast(R.string.no_item_selected);
-                else startFileActionLocateActivity(FileAction.COPY);
+                else startFileActionLocateActivity(NASApp.ACT_COPY);
                 break;
             case R.id.file_manage_editor_action_cut:
                 if (isEmpty) toast(R.string.no_item_selected);
-                else startFileActionLocateActivity(FileAction.MOVE);
+                else startFileActionLocateActivity(NASApp.ACT_MOVE);
                 break;
             case R.id.file_manage_editor_action_delete:
                 if (isEmpty) toast(R.string.no_item_selected);
@@ -543,11 +540,11 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private boolean isOnTop() {
-        if (mState.equals(State.REMOTE)) {
+        if (NASApp.MODE_SMB.equals(mMode)) {
             return mPath.equals(mRoot);
         }
         else {
-            File root = new File(NASPref.getDownloadsPath(this));
+            File root = new File(mRoot);
             File file = new File(mPath);
             return file.equals(root);
         }
@@ -644,8 +641,8 @@ public class FileManageActivity extends AppCompatActivity implements
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
         if (loader instanceof SmbFileListLoader) {
             if (success) {
-                mState = State.REMOTE;
-                mRoot = ROOT_SMB;
+                mMode = NASApp.MODE_SMB;
+                mRoot = NASApp.ROOT_SMB;
                 mPath = ((SmbFileListLoader) loader).getPath();
                 mFileList = ((SmbFileListLoader) loader).getFileList();
                 Collections.sort(mFileList, FileInfoSort.comparator(this));
@@ -663,8 +660,8 @@ public class FileManageActivity extends AppCompatActivity implements
         } else
         if (loader instanceof LocalFileListLoader) {
             if (success) {
-                mState = State.LOCAL;
-                mRoot = NASPref.getDownloadsPath(this);
+                mMode = NASApp.MODE_STG;
+                mRoot = NASApp.ROOT_STG;
                 mPath = ((LocalFileListLoader) loader).getPath();
                 mFileList = ((LocalFileListLoader) loader).getFileList();
                 Collections.sort(mFileList, FileInfoSort.comparator(this));
@@ -699,7 +696,7 @@ public class FileManageActivity extends AppCompatActivity implements
      *
      */
     private void doLoad(String path) {
-        int id = path.startsWith(NASPref.getDownloadsPath(this))
+        int id = path.startsWith(NASApp.ROOT_STG)
                 ? LoaderID.LOCAL_FILE_LIST : LoaderID.SMB_FILE_LIST;
         Bundle args = new Bundle();
         args.putString("path", path);
@@ -728,10 +725,6 @@ public class FileManageActivity extends AppCompatActivity implements
                 mRecyclerAdapter.notifyDataSetChanged();
             }
         };
-    }
-
-    private void doNewFile() {
-        // TODO: upload / download
     }
 
 
@@ -792,7 +785,7 @@ public class FileManageActivity extends AppCompatActivity implements
             public void onConfirm(String newName) {
                 if (newName.equals(name))
                     return;
-                int id = (mState.equals(State.REMOTE))
+                int id = (NASApp.MODE_SMB.equals(mMode))
                         ? LoaderID.SMB_FILE_RENAME
                         : LoaderID.LOCAL_FILE_RENAME;
                 Bundle args = new Bundle();
@@ -811,7 +804,7 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void doCopy(String dest) {
-        int id = (mState.equals(State.REMOTE))
+        int id = (NASApp.MODE_SMB.equals(mMode))
                 ? LoaderID.SMB_FILE_COPY
                 : LoaderID.LOCAL_FILE_COPY;
         ArrayList<String> paths = getSelectedPaths();
@@ -823,7 +816,7 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void doMove(String dest) {
-        int id = (mState.equals(State.REMOTE))
+        int id = (NASApp.MODE_SMB.equals(mMode))
                 ? LoaderID.SMB_FILE_MOVE
                 : LoaderID.LOCAL_FILE_MOVE;
         ArrayList<String> paths = getSelectedPaths();
@@ -844,7 +837,7 @@ public class FileManageActivity extends AppCompatActivity implements
         new FileActionDeleteDialog(this, paths) {
             @Override
             public void onConfirm(ArrayList<String> paths) {
-                int id = (mState.equals(State.REMOTE))
+                int id = (NASApp.MODE_SMB.equals(mMode))
                         ? LoaderID.SMB_FILE_DELETE
                         : LoaderID.LOCAL_FILE_DELETE;
                 Bundle args = new Bundle();
@@ -864,7 +857,7 @@ public class FileManageActivity extends AppCompatActivity implements
         new FileActionNewFolderDialog(this, folderNames) {
             @Override
             public void onConfirm(String newName) {
-                int id = (mState.equals(State.REMOTE))
+                int id = (NASApp.MODE_SMB.equals(mMode))
                         ? LoaderID.SMB_NEW_FOLDER
                         : LoaderID.LOCAL_NEW_FOLDER;
                 StringBuilder builder = new StringBuilder(mPath);
@@ -887,7 +880,7 @@ public class FileManageActivity extends AppCompatActivity implements
      *
      */
     private void updateScreen() {
-        mDropdownAdapter.updateList(mPath);
+        mDropdownAdapter.updateList(mPath, mMode);
         mDropdownAdapter.notifyDataSetChanged();
         mRecyclerAdapter.updateList(mFileList);
         mRecyclerAdapter.notifyDataSetChanged();
@@ -931,7 +924,7 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void resetActionFabs() {
-        int resId = (mState == State.REMOTE)
+        int resId = (NASApp.MODE_SMB.equals(mMode))
                 ? R.drawable.ic_file_upload_white_24dp
                 : R.drawable.ic_file_download_white_24dp;
         mFabNewFile.setImageResource(resId);
@@ -1055,10 +1048,10 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void toggleDrawerCheckedItem() {
-        int id = State.REMOTE.equals(mState)
+        int id = NASApp.MODE_SMB.equals(mMode)
                 ? R.id.nav_storage : R.id.nav_downloads;
         mNavView.setCheckedItem(id);
-        Log.w(TAG, "toggleDrawerCheckedItem: " + mState);
+        Log.w(TAG, "toggleDrawerCheckedItem: " + mMode);
     }
 
     private void toast(int resId) {
@@ -1070,24 +1063,28 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void startFileActionLocateActivity(String type) {
+        String mode
+                = NASApp.ACT_UPLOAD.equals(type) ? NASApp.MODE_SMB
+                : NASApp.ACT_DOWNLOAD.equals(type) ? NASApp.MODE_STG
+                : mMode;
         String root
-                = FileAction.UPLOAD.equals(type) ? ROOT_SMB
-                : FileAction.DOWNLOAD.equals(type) ? NASPref.getDownloadsPath(this)
+                = NASApp.ACT_UPLOAD.equals(type) ? NASApp.ROOT_SMB
+                : NASApp.ACT_DOWNLOAD.equals(type) ? NASApp.ROOT_STG
                 : mRoot;
         String path
-                = FileAction.UPLOAD.equals(type) ? ROOT_SMB
-                : FileAction.DOWNLOAD.equals(type) ? NASPref.getDownloadsPath(this)
+                = NASApp.ACT_UPLOAD.equals(type) ? NASApp.ROOT_SMB
+                : NASApp.ACT_DOWNLOAD.equals(type) ? NASPref.getDownloadLocation(this)
                 : mPath;
-
         Bundle args = new Bundle();
+        args.putString("mode", mode);
         args.putString("type", type);
         args.putString("root", root);
         args.putString("path", path);
-        args.putSerializable("list", mFileList);
+        //args.putSerializable("list", mFileList);
         Intent intent = new Intent();
         intent.setClass(FileManageActivity.this, FileActionLocateActivity.class);
         intent.putExtras(args);
-        startActivity(intent);
+        startActivityForResult(intent, FileActionLocateActivity.REQUEST_CODE);
     }
 
     private void startViewerActivity(String path) {
@@ -1097,13 +1094,23 @@ public class FileManageActivity extends AppCompatActivity implements
                 list.add(info.path);
         }
         Bundle args = new Bundle();
-        args.putString("stat", mState.toString());
+        args.putString("mode", mMode);
         args.putString("path", path);
         args.putStringArrayList("list", list);
         Intent intent = new Intent();
         intent.setClass(FileManageActivity.this, ViewerActivity.class);
         intent.putExtras(args);
         startActivity(intent);
+    }
+
+    private void startSettingsActivity() {
+        Intent intent = new Intent();
+        intent.setClass(FileManageActivity.this, SettingsActivity.class);
+        startActivity(intent);
+    }
+
+    private void startAboutActivity() {
+        //TODO: implement about page
     }
 
 

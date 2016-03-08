@@ -26,9 +26,10 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.transcend.nas.NASPref;
+import com.transcend.nas.NASApp;
 import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
+import com.transcend.nas.viewer.ViewerActivity;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -44,12 +45,9 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Boolean>,
         View.OnClickListener {
 
-    private static final String TAG = FileActionLocateActivity.class.getSimpleName();
+    public static final int REQUEST_CODE = FileActionLocateActivity.class.hashCode() & 0xFFFF;
 
-    private enum State {
-        REMOTE,
-        LOCAL
-    }
+    private static final String TAG = FileActionLocateActivity.class.getSimpleName();
 
     private Toolbar mToolbar;
     private AppCompatSpinner mDropdown;
@@ -58,9 +56,10 @@ public class FileActionLocateActivity extends AppCompatActivity implements
     private FileManageRecyclerAdapter mRecyclerAdapter;
     private FloatingActionButton mFabControl;
     private RelativeLayout mProgressView;
+    private MenuItem mNewFolder;
     private Toast mToast;
 
-    private State mState;
+    private String mMode;
     private String mType;
     private String mRoot;
     private String mPath;
@@ -90,14 +89,11 @@ public class FileActionLocateActivity extends AppCompatActivity implements
      */
     private void initData() {
         Bundle args = getIntent().getExtras();
+        mMode = args.getString("mode");
         mType = args.getString("type");
         mRoot = args.getString("root");
         mPath = args.getString("path");
         mFileList = new ArrayList<FileInfo>();
-        //mFileList = (ArrayList<FileInfo>)bundle.getSerializable("list");
-        //for (FileInfo file :mFileList)
-        //    file.checked = false;
-        mState = mRoot.equals(NASPref.getDownloadsPath(this)) ? State.LOCAL : State.REMOTE;
     }
 
     private void initToolbar() {
@@ -110,8 +106,9 @@ public class FileActionLocateActivity extends AppCompatActivity implements
     }
 
     private void initDropdown() {
-        mDropdownAdapter = new FileManageDropdownAdapter(mPath);
+        mDropdownAdapter = new FileManageDropdownAdapter();
         mDropdownAdapter.setOnDropdownItemSelectedListener(this);
+        mDropdownAdapter.updateList(mPath, mMode);
         mDropdown = (AppCompatSpinner)findViewById(R.id.locate_dropdown);
         mDropdown.setAdapter(mDropdownAdapter);
     }
@@ -128,11 +125,11 @@ public class FileActionLocateActivity extends AppCompatActivity implements
     private void initFabs() {
         mFabControl = (FloatingActionButton) findViewById(R.id.locate_fab_control);
         mFabControl.setOnClickListener(this);
-        if (mType.equals(FileAction.COPY) || mType.equals(FileAction.MOVE))
+        if (NASApp.ACT_COPY.equals(mType) || NASApp.ACT_MOVE.equals(mType))
             mFabControl.setImageResource(R.drawable.ic_content_paste_white_24dp);
-        if (mType.equals(FileAction.UPLOAD))
+        if (NASApp.ACT_UPLOAD.equals(mType))
             mFabControl.setImageResource(R.drawable.ic_file_upload_white_24dp);
-        if (mType.equals(FileAction.DOWNLOAD))
+        if (NASApp.ACT_DOWNLOAD.equals(mType))
             mFabControl.setImageResource(R.drawable.ic_file_download_white_24dp);
     }
 
@@ -173,8 +170,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
             doLoad(fileInfo.path);
         } else
         if (fileInfo.type.equals(FileInfo.TYPE.PHOTO)) {
-            // TODO: photo viewer
-            Toast.makeText(this, "Photo", Toast.LENGTH_SHORT).show();
+            startViewerActivity(fileInfo.path);
         } else
         if (fileInfo.type.equals(FileInfo.TYPE.VIDEO)) {
             MediaManager.open(this, fileInfo.path);
@@ -200,6 +196,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.file_locate, menu);
+        mNewFolder = menu.findItem(R.id.file_locate_action_new_folder);
         return true;
     }
 
@@ -252,14 +249,15 @@ public class FileActionLocateActivity extends AppCompatActivity implements
     }
 
     private boolean isOnTop() {
-        if (mState.equals(State.LOCAL)) {
-            File root = new File(NASPref.getDownloadsPath(this));
+        if (NASApp.MODE_SMB.equals(mMode)) {
+            return mPath.equals(mRoot);
+        }
+        else  {
+            File root = new File(mRoot);
             File file = new File(mPath);
             return file.equals(root);
         }
-        else {
-            return mPath.equals(mRoot);
-        }
+
     }
 
     @Override
@@ -289,6 +287,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
             case LoaderID.SMB_NEW_FOLDER:
                 return new SmbFolderCreateLoader(this, path);
             case LoaderID.LOCAL_NEW_FOLDER:
+                return new LocalFolderCreateLoader(this, path);
         }
         return null;
     }
@@ -301,6 +300,8 @@ public class FileActionLocateActivity extends AppCompatActivity implements
                 mFileList = ((SmbFileListLoader) loader).getFileList();
                 Collections.sort(mFileList, FileInfoSort.comparator(this));
                 updateScreen();
+                mNewFolder.setVisible(!mRoot.equals(mPath));
+                mFabControl.setVisibility(mRoot.equals(mPath) ? View.INVISIBLE : View.VISIBLE);
             }
         } else
         if (loader instanceof LocalFileListLoader) {
@@ -331,8 +332,8 @@ public class FileActionLocateActivity extends AppCompatActivity implements
      *
      */
     private void doLoad(String path) {
-        int id = path.startsWith(NASPref.getDownloadsPath(this))
-                ? LoaderID.LOCAL_FILE_LIST : LoaderID.SMB_FILE_LIST;
+        int id = NASApp.MODE_SMB.equals(mMode)
+                ? LoaderID.SMB_FILE_LIST : LoaderID.LOCAL_FILE_LIST;
         Bundle args = new Bundle();
         args.putString("path", path);
         getLoaderManager().restartLoader(id, args, this).forceLoad();
@@ -353,7 +354,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         new FileActionNewFolderDialog(this, folderNames) {
             @Override
             public void onConfirm(String newName) {
-                int id = (mState.equals(State.REMOTE))
+                int id = (NASApp.MODE_SMB.equals(mMode))
                         ? LoaderID.SMB_NEW_FOLDER
                         : LoaderID.LOCAL_NEW_FOLDER;
                 StringBuilder builder = new StringBuilder(mPath);
@@ -376,7 +377,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
      *
      */
     private void updateScreen() {
-        mDropdownAdapter.updateList(mPath);
+        mDropdownAdapter.updateList(mPath, mMode);
         mDropdownAdapter.notifyDataSetChanged();
         mRecyclerAdapter.updateList(mFileList);
         mRecyclerAdapter.notifyDataSetChanged();
@@ -399,10 +400,10 @@ public class FileActionLocateActivity extends AppCompatActivity implements
     }
 
     private int getHintResId() {
-        return FileAction.COPY.equals(mType) ? R.string.msg_paste_to
-                : FileAction.MOVE.equals(mType) ? R.string.msg_paste_to
-                : FileAction.UPLOAD.equals(mType) ? R.string.msg_upload_to
-                : FileAction.DOWNLOAD.equals(mType) ? R.string.msg_download_to
+        return NASApp.ACT_COPY.equals(mType) ? R.string.msg_paste_to
+                : NASApp.ACT_MOVE.equals(mType) ? R.string.msg_paste_to
+                : NASApp.ACT_UPLOAD.equals(mType) ? R.string.msg_upload_to
+                : NASApp.ACT_DOWNLOAD.equals(mType) ? R.string.msg_download_to
                 : R.string.msg_direct_to;
     }
 
@@ -418,19 +419,35 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         bnPos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                backToFileManageActivity();
+                backToMainActivity();
             }
         });
     }
 
-    private void backToFileManageActivity() {
+    private void startViewerActivity(String path) {
+        ArrayList<String> list = new ArrayList<String>();
+        for (FileInfo info : mFileList) {
+            if (FileInfo.TYPE.PHOTO.equals(info.type))
+                list.add(info.path);
+        }
+        Bundle args = new Bundle();
+        args.putString("mode", mMode);
+        args.putString("path", path);
+        args.putStringArrayList("list", list);
+        Intent intent = new Intent();
+        intent.setClass(FileActionLocateActivity.this, ViewerActivity.class);
+        intent.putExtras(args);
+        startActivity(intent);
+    }
+
+    private void backToMainActivity() {
         Bundle bundle = new Bundle();
+        bundle.putString("mode", mMode);
         bundle.putString("path", mPath);
         bundle.putString("type", mType);
         Intent intent = new Intent();
-        intent.setClass(FileActionLocateActivity.this, FileManageActivity.class);
         intent.putExtras(bundle);
-        startActivity(intent);
+        setResult(RESULT_OK, intent);
         finish();
     }
 

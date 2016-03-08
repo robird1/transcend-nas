@@ -3,8 +3,6 @@ package com.transcend.nas.connection;
 import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
-import android.media.Image;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -18,7 +16,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -51,36 +48,6 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
         initRecyclerView();
         initProgressView();
         reloadNASListIfNotFound();
-    }
-
-    private void initData() {
-        mNASList = (ArrayList<HashMap<String, String>>)getIntent().getSerializableExtra("NASList");
-        if (mNASList == null) mNASList = new ArrayList<HashMap<String, String>>();
-    }
-
-    private void initToolbar() {
-        mToolbar = (Toolbar)findViewById(R.id.nas_finder_toolbar);
-        mToolbar.setTitle("");
-        setSupportActionBar(mToolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-    }
-
-    private void initRecyclerView() {
-        mRecyclerView = (RecyclerView)findViewById(R.id.nas_finder_recycler_view);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mRecyclerView.setAdapter(mAdapter = new RecyclerViewAdapter());
-        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
-    }
-
-    private void initProgressView() {
-        mProgressView = (RelativeLayout)findViewById(R.id.nas_finder_progress_view);
-    }
-
-    private void reloadNASListIfNotFound() {
-        if (mNASList.size() == 0)
-            startNASListLoader();
     }
 
     @Override
@@ -118,6 +85,48 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
         }
     }
 
+
+    /**
+     *
+     * INITIALIZATION
+     *
+     */
+    private void initData() {
+        mNASList = (ArrayList<HashMap<String, String>>)getIntent().getSerializableExtra("NASList");
+        if (mNASList == null) mNASList = new ArrayList<HashMap<String, String>>();
+    }
+
+    private void initToolbar() {
+        mToolbar = (Toolbar)findViewById(R.id.nas_finder_toolbar);
+        mToolbar.setTitle("");
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+    }
+
+    private void initRecyclerView() {
+        mRecyclerView = (RecyclerView)findViewById(R.id.nas_finder_recycler_view);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.setAdapter(mAdapter = new RecyclerViewAdapter());
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
+    }
+
+    private void initProgressView() {
+        mProgressView = (RelativeLayout)findViewById(R.id.nas_finder_progress_view);
+    }
+
+    private void reloadNASListIfNotFound() {
+        if (mNASList.size() == 0)
+            startNASListLoader();
+    }
+
+
+    /**
+     *
+     * ACTIVITY LAUNCHER
+     *
+     */
     private void startSignInActivity() {
         Intent intent = new Intent();
         intent.setClass(NASFinderActivity.this, SignInActivity.class);
@@ -140,6 +149,12 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
         getLoaderManager().restartLoader(LoaderID.LOGIN, args, this).forceLoad();
     }
 
+
+    /**
+     *
+     * LOADER CONTROL
+     *
+     */
     @Override
     public Loader<Boolean> onCreateLoader(int id, Bundle args) {
         switch (id) {
@@ -180,6 +195,12 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
         Log.w(TAG, "onLoaderReset: " + loader.getClass().getSimpleName());
     }
 
+
+    /**
+     *
+     * RECYCLER VIEW ADAPTER
+     *
+     */
     private class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
         @Override
