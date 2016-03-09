@@ -8,6 +8,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.NASApp;
 import com.transcend.nas.R;
 
 import java.util.ArrayList;
@@ -65,10 +69,9 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
             FileInfo fileInfo = mList.get(position);
             String name = fileInfo.name;
             String time = fileInfo.time;
+            String path = fileInfo.path;
             int resId = R.drawable.ic_file_gray_24dp;
-            if (fileInfo.checked)
-                resId = R.drawable.ic_check_circle_gray_24dp;
-            else if (fileInfo.type.equals(FileInfo.TYPE.DIR))
+            if (fileInfo.type.equals(FileInfo.TYPE.DIR))
                 resId = R.drawable.ic_folder_gray_24dp;
             else if (fileInfo.type.equals(FileInfo.TYPE.PHOTO))
                 resId = R.drawable.ic_image_gray_24dp;
@@ -82,7 +85,12 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
                 holder.subtitle.setText(time);
             if (holder.icon != null)
                 holder.icon.setImageResource(resId);
+            if (fileInfo.type.equals(FileInfo.TYPE.PHOTO))
+                ImageLoader.getInstance().displayImage(toPhotoURL(path), holder.icon);
+
             holder.itemView.setSelected(fileInfo.checked);
+            holder.mark.setVisibility(fileInfo.checked ? View.VISIBLE : View.INVISIBLE);
+
         }
         if (holder.viewType == ITEM_VIEW_TYPE_FOOTER) {
             // do nothing
@@ -109,11 +117,27 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
         return mList.size() > 0;
     }
 
+    private String toPhotoURL(String path) {
+        String url;
+        if (path.startsWith(NASApp.ROOT_STG)) {
+            url = "file://" + path;
+        }
+        else {
+            Server server = ServerManager.INSTANCE.getCurrentServer();
+            String hostname = server.getHostname();
+            String filepath = path.replaceFirst(Server.HOME, "/");
+            String hash = server.getHash();
+            url = "http://" + hostname + "/dav/home/" + filepath + "?session=" + hash + "&thumbnail";
+        }
+        return url;
+    }
+
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
         int viewType;
 
         View itemView;
+        ImageView mark;
         ImageView icon;
         TextView title;
         TextView subtitle;
@@ -124,13 +148,15 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
             this.itemView = itemView;
             if (viewType == ITEM_VIEW_TYPE_CONTENT) {
                 if (itemView.getId() == R.id.listitem_file_manage) {
+                    mark = (ImageView)itemView.findViewById(R.id.listitem_file_manage_mark);
                     icon = (ImageView)itemView.findViewById(R.id.listitem_file_manage_icon);
                     title = (TextView)itemView.findViewById(R.id.listitem_file_manage_title);
                     subtitle = (TextView)itemView.findViewById(R.id.listitem_file_manage_subtitle);
                 }
                 if (itemView.getId() == R.id.griditem_file_manage) {
-                    title = (TextView)itemView.findViewById(R.id.griditem_file_manage_title);
+                    mark = (ImageView)itemView.findViewById(R.id.griditem_file_manage_mark);
                     icon = (ImageView)itemView.findViewById(R.id.griditem_file_manage_icon);
+                    title = (TextView)itemView.findViewById(R.id.griditem_file_manage_title);
                 }
                 itemView.setOnClickListener(this);
                 itemView.setOnLongClickListener(this);

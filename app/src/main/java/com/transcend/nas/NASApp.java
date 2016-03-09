@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Environment;
 
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.realtek.nasfun.api.ServerManager;
@@ -57,7 +58,14 @@ public class NASApp extends Application {
     }
 
     private void initImageLoader() {
-        ImageLoaderConfiguration config = ImageLoaderConfiguration.createDefault(this);
+        DisplayImageOptions options = new DisplayImageOptions.Builder()
+                .cacheInMemory(true)
+                .cacheOnDisk(true)
+                .build();
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getApplicationContext())
+                .defaultDisplayImageOptions(options)
+                //.diskCacheSize(104857600)
+                .build();
         ImageLoader.getInstance().init(config);
     }
 

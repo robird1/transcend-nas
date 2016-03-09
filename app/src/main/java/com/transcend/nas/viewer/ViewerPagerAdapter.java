@@ -7,8 +7,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.NASApp;
 
 import java.util.ArrayList;
 
@@ -26,15 +28,6 @@ public class ViewerPagerAdapter extends PagerAdapter {
     private ArrayList<String> mList;
 
     private OnPhotoTapListener mOnPhotoTapListener;
-
-    private static DisplayImageOptions mOptions;
-    static {
-        mOptions = new DisplayImageOptions.Builder()
-                //.showImageOnLoading(R.drawable.ic_image_gray_24dp)
-                .cacheInMemory(true)
-                .cacheOnDisk(true)
-                .build();
-    }
 
     public ViewerPagerAdapter(Context context) {
         mContext = context;
@@ -65,7 +58,7 @@ public class ViewerPagerAdapter extends PagerAdapter {
         PhotoView pv = new PhotoView(mContext);
         pv.setDrawingCacheEnabled(false);
         pv.setOnPhotoTapListener(mOnPhotoTapListener);
-        ImageLoader.getInstance().displayImage(path, pv, mOptions);
+        ImageLoader.getInstance().displayImage(toPhotoURL(path), pv);
         container.addView(pv);
         Log.w(TAG, "instantiateItem [" + position + "]: " + path);
         return pv;
@@ -79,6 +72,21 @@ public class ViewerPagerAdapter extends PagerAdapter {
             container.removeView(iv);
             Log.w(TAG, "destroyItem [" + position + "]: " + mList.get(position));
         }
+    }
+
+    private String toPhotoURL(String path) {
+        String url;
+        if (path.startsWith(NASApp.ROOT_STG)) {
+            url = "file://" + path;
+        }
+        else {
+            Server server = ServerManager.INSTANCE.getCurrentServer();
+            String hostname = server.getHostname();
+            String filepath = path.replaceFirst(Server.HOME, "/");
+            String hash = server.getHash();
+            url = "http://" + hostname + "/dav/home/" + filepath + "?session=" + hash + "&webview";
+        }
+        return url;
     }
 
 }

@@ -9,9 +9,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.realtek.nasfun.api.Server;
-import com.realtek.nasfun.api.ServerManager;
-import com.transcend.nas.NASApp;
 import com.transcend.nas.R;
 
 import java.util.ArrayList;
@@ -33,10 +30,8 @@ public class ViewerActivity extends AppCompatActivity implements
     private ViewerPager mPager;
     private ViewerPagerAdapter mPagerAdapter;
 
-    private String mMode;
     private String mPath;
     private ArrayList<String> mList;
-    private ArrayList<String> mUrls;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,12 +79,7 @@ public class ViewerActivity extends AppCompatActivity implements
     private void initData() {
         Bundle args = getIntent().getExtras();
         mPath = args.getString("path");
-        mMode = args.getString("mode");
         mList = args.getStringArrayList("list");
-        mUrls = new ArrayList<String>();
-        for (String path : mList) {
-            mUrls.add(parseImageURL(path));
-        }
     }
 
     private void initHeaderBar() {
@@ -108,26 +98,11 @@ public class ViewerActivity extends AppCompatActivity implements
 
     private void initPager() {
         mPagerAdapter = new ViewerPagerAdapter(this);
-        mPagerAdapter.setContent(mUrls);
+        mPagerAdapter.setContent(mList);
         mPagerAdapter.setOnPhotoTapListener(this);
         mPager = (ViewerPager) findViewById(R.id.viewer_pager);
         mPager.setAdapter(mPagerAdapter);
         mPager.setCurrentItem(mList.indexOf(mPath));
-    }
-
-    private String parseImageURL(String path) {
-        String url = null;
-        if (NASApp.MODE_STG.equals(mMode)) {
-            url = "file://" + path;
-        }
-        else {
-            Server server = ServerManager.INSTANCE.getCurrentServer();
-            String hostname = server.getHostname();
-            String filepath = path.replaceFirst(Server.HOME, "/");
-            String hash = server.getHash();
-            url = "http://" + hostname + "/dav/home/" + filepath + "?session=" + hash + "&webview";
-        }
-        return url;
     }
 
 

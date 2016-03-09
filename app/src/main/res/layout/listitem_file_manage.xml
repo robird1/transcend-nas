@@ -14,6 +14,14 @@
         <ImageView
             android:id="@+id/listitem_file_manage_icon"
             android:src="@drawable/ic_file_gray_24dp"
+            android:scaleType="centerCrop"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <ImageView
+            android:id="@+id/listitem_file_manage_mark"
+            android:src="@drawable/ic_check_circle_gray_24dp"
+            android:visibility="invisible"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
