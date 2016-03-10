@@ -1,15 +1,17 @@
 package com.transcend.nas.viewer;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 
 import com.transcend.nas.R;
+import com.transcend.nas.management.FileInfo;
+import com.transcend.nas.management.FileInfoActivity;
 
 import java.util.ArrayList;
 
@@ -31,7 +33,7 @@ public class ViewerActivity extends AppCompatActivity implements
     private ViewerPagerAdapter mPagerAdapter;
 
     private String mPath;
-    private ArrayList<String> mList;
+    private ArrayList<FileInfo> mList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +81,7 @@ public class ViewerActivity extends AppCompatActivity implements
     private void initData() {
         Bundle args = getIntent().getExtras();
         mPath = args.getString("path");
-        mList = args.getStringArrayList("list");
+        mList = (ArrayList<FileInfo>) args.getSerializable("list");
     }
 
     private void initHeaderBar() {
@@ -97,12 +99,14 @@ public class ViewerActivity extends AppCompatActivity implements
     }
 
     private void initPager() {
+        ArrayList<String> list = new ArrayList<String>();
+        for (FileInfo info : mList) list.add(info.path);
         mPagerAdapter = new ViewerPagerAdapter(this);
-        mPagerAdapter.setContent(mList);
+        mPagerAdapter.setContent(list);
         mPagerAdapter.setOnPhotoTapListener(this);
         mPager = (ViewerPager) findViewById(R.id.viewer_pager);
         mPager.setAdapter(mPagerAdapter);
-        mPager.setCurrentItem(mList.indexOf(mPath));
+        mPager.setCurrentItem(list.indexOf(mPath));
     }
 
 
@@ -112,8 +116,9 @@ public class ViewerActivity extends AppCompatActivity implements
      *
      */
     private void doInfo() {
-        Log.w(TAG, "doInfo");
-        // TODO: show info
+        int position = mPager.getCurrentItem();
+        FileInfo info = mList.get(position);
+        startFileInfoActivity(info);
     }
 
 
@@ -133,5 +138,13 @@ public class ViewerActivity extends AppCompatActivity implements
         }
     }
 
+    private void startFileInfoActivity(FileInfo info) {
+        Bundle args = new Bundle();
+        args.putSerializable("info", info);
+        Intent intent = new Intent();
+        intent.setClass(ViewerActivity.this, FileInfoActivity.class);
+        intent.putExtras(args);
+        startActivity(intent);
+    }
 
 }

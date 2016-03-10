@@ -31,6 +31,7 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
     public interface OnRecyclerItemCallbackListener {
         void onRecyclerItemClick(int position);
         void onRecyclerItemLongClick(int position);
+        void onRecyclerItemInfoClick(int position);
     }
 
     public FileManageRecyclerAdapter(ArrayList<FileInfo> list) {
@@ -139,6 +140,7 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
         View itemView;
         ImageView mark;
         ImageView icon;
+        ImageView info;
         TextView title;
         TextView subtitle;
 
@@ -150,8 +152,10 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
                 if (itemView.getId() == R.id.listitem_file_manage) {
                     mark = (ImageView)itemView.findViewById(R.id.listitem_file_manage_mark);
                     icon = (ImageView)itemView.findViewById(R.id.listitem_file_manage_icon);
+                    info = (ImageView)itemView.findViewById(R.id.listitem_file_manage_info);
                     title = (TextView)itemView.findViewById(R.id.listitem_file_manage_title);
                     subtitle = (TextView)itemView.findViewById(R.id.listitem_file_manage_subtitle);
+                    setOnItemInfoClickListener();
                 }
                 if (itemView.getId() == R.id.griditem_file_manage) {
                     mark = (ImageView)itemView.findViewById(R.id.griditem_file_manage_mark);
@@ -182,6 +186,18 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
             }
             return true;
         }
+
+        private void setOnItemInfoClickListener() {
+            info.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mCallback == null) return;
+                    int position = getAdapterPosition();
+                    mCallback.onRecyclerItemInfoClick(position);
+                }
+            });
+        }
+
     }
 
 }

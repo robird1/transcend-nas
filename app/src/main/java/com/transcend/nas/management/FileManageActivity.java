@@ -325,7 +325,7 @@ public class FileManageActivity extends AppCompatActivity implements
             if (FileInfo.TYPE.MUSIC.equals(fileInfo.type)) {
                 MediaManager.open(this, fileInfo.path);
             } else {
-                toast(R.string.unsupported_format);
+                toast(R.string.unknown_format);
             }
         }
         else {
@@ -347,6 +347,11 @@ public class FileManageActivity extends AppCompatActivity implements
             closeEditorMode();
         }
         //*/
+    }
+
+    @Override
+    public void onRecyclerItemInfoClick(int position) {
+        startFileInfoActivity(mFileList.get(position));
     }
 
 
@@ -1088,17 +1093,25 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void startViewerActivity(String path) {
-        ArrayList<String> list = new ArrayList<String>();
+        ArrayList<FileInfo> list = new ArrayList<FileInfo>();
         for (FileInfo info : mFileList) {
             if (FileInfo.TYPE.PHOTO.equals(info.type))
-                list.add(info.path);
+                list.add(info);
         }
         Bundle args = new Bundle();
-        args.putString("mode", mMode);
         args.putString("path", path);
-        args.putStringArrayList("list", list);
+        args.putSerializable("list", list);
         Intent intent = new Intent();
         intent.setClass(FileManageActivity.this, ViewerActivity.class);
+        intent.putExtras(args);
+        startActivity(intent);
+    }
+
+    private void startFileInfoActivity(FileInfo info) {
+        Bundle args = new Bundle();
+        args.putSerializable("info", info);
+        Intent intent = new Intent();
+        intent.setClass(FileManageActivity.this, FileInfoActivity.class);
         intent.putExtras(args);
         startActivity(intent);
     }

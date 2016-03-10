@@ -48,8 +48,8 @@ public class SettingsActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         initToolbar();
+        initFragment();
         initProgressView();
-        initSettingsFragment();
         createBackupsFolder();
     }
 
@@ -66,6 +66,17 @@ public class SettingsActivity extends AppCompatActivity implements
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mProgressView.isShown()) {
+            getLoaderManager().destroyLoader(mLoaderID);
+            mProgressView.setVisibility(View.INVISIBLE);
+        }
+        else {
+            finish();
+        }
     }
 
     @Override
@@ -89,13 +100,6 @@ public class SettingsActivity extends AppCompatActivity implements
 
     }
 
-    @Override
-    public void onBackPressed() {
-        if (mProgressView.isShown()) {
-            getLoaderManager().destroyLoader(mLoaderID);
-            mProgressView.setVisibility(View.INVISIBLE);
-        }
-    }
 
     /**
      *
@@ -110,15 +114,14 @@ public class SettingsActivity extends AppCompatActivity implements
         getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
 
-    private void initProgressView() {
-        mProgressView = (RelativeLayout) findViewById(R.id.settings_progress_view);
-    }
-
-
-    private void initSettingsFragment() {
+    private void initFragment() {
         int id = R.id.settings_frame;
         Fragment f = new SettingsFragment();
         getFragmentManager().beginTransaction().replace(id, f).commit();
+    }
+
+    private void initProgressView() {
+        mProgressView = (RelativeLayout) findViewById(R.id.settings_progress_view);
     }
 
     private void createBackupsFolder() {
@@ -126,6 +129,7 @@ public class SettingsActivity extends AppCompatActivity implements
         args.putString("path", NASPref.getBackupLocation(this));
         getLoaderManager().restartLoader(LoaderID.SMB_NEW_FOLDER, args, this).forceLoad();
     }
+
 
     /**
      *

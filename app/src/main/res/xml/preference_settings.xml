@@ -2,10 +2,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout="@layout/preference_item">
 
-    <PreferenceCategory>
-        <!-- header -->
-    </PreferenceCategory>
-
     <PreferenceCategory
         android:layout="@layout/preference_category_widget"
         android:title="@string/camera_backup">

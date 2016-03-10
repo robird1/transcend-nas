@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory>
+        <!-- header -->
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/preference_category_widget"
+        android:title="@string/location">
+
+        <Preference
+            android:key="@string/pref_info_path"
+            android:selectable="false"
+            android:summary=" - " />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/preference_category_widget"
+        android:title="@string/name">
+
+        <Preference
+            android:key="@string/pref_info_name"
+            android:selectable="false"
+            android:summary=" - " />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/preference_category_widget"
+        android:title="@string/type">
+
+        <Preference
+            android:key="@string/pref_info_type"
+            android:selectable="false"
+            android:summary=" - " />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/preference_category_widget"
+        android:title="@string/last_modified">
+
+        <Preference
+            android:key="@string/pref_info_time"
+            android:selectable="false"
+            android:summary=" - " />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory>
+        <!-- footer -->
+    </PreferenceCategory>
+
+</PreferenceScreen>
