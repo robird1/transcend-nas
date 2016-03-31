@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout="@layout/preference_item">
+
+    <Preference
+        android:key="@string/pref_about"
+        android:layout="@layout/preference_item"
+        android:title="@string/about" />
+
+    <Preference
+        android:key="@string/pref_about_legal"
+        android:layout="@layout/preference_item"
+        android:title="@string/legal" />
+
+    <Preference
+        android:key="@string/pref_about_term_of_use"
+        android:layout="@layout/preference_item"
+        android:title="@string/term_of_use" />
+
+    <Preference
+        android:key="@string/pref_about_license"
+        android:layout="@layout/preference_item"
+        android:title="@string/licenses" />
+
+    <Preference
+        android:key="@string/pref_about_contact"
+        android:layout="@layout/preference_item"
+        android:title="@string/contact_us" />
+
+</PreferenceScreen>

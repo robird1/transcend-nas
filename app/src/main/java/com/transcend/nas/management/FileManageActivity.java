@@ -1,6 +1,8 @@
 package com.transcend.nas.management;
 
+import android.app.ActivityManager;
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.res.Configuration;
@@ -36,6 +38,8 @@ import android.widget.Toast;
 
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.service.AutoBackupService;
+import com.transcend.nas.settings.AboutActivity;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
@@ -104,6 +108,7 @@ public class FileManageActivity extends AppCompatActivity implements
         Log.w(TAG, "onCreate");
         setContentView(R.layout.activity_file_manage);
         init();
+        initAutoBackUpService();
         initToolbar();
         initDropdown();
         initRecyclerView();
@@ -189,6 +194,28 @@ public class FileManageActivity extends AppCompatActivity implements
         mServer = ServerManager.INSTANCE.getCurrentServer();
         // TODO: P2P case
         //P2PService.getInstance().P2PListenerAdd(this);
+    }
+
+    private void initAutoBackUpService(){
+        boolean checked = NASPref.getBackupSetting(this);
+        Intent intent = new Intent(this, AutoBackupService.class);
+        boolean isRunning = isMyServiceRunning(AutoBackupService.class);
+        if(checked) {
+            if(!isRunning)
+                startService(intent);
+        }
+        else
+            stopService(intent);
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void initToolbar() {
@@ -1124,6 +1151,9 @@ public class FileManageActivity extends AppCompatActivity implements
 
     private void startAboutActivity() {
         //TODO: implement about page
+        Intent intent = new Intent();
+        intent.setClass(FileManageActivity.this, AboutActivity.class);
+        startActivity(intent);
     }
 
 

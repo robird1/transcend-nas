@@ -7,11 +7,13 @@ import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
@@ -28,6 +30,7 @@ import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.management.FileActionLocateActivity;
 import com.transcend.nas.management.SmbFolderCreateLoader;
+import com.transcend.nas.service.AutoBackupService;
 
 import java.util.Arrays;
 
@@ -43,9 +46,12 @@ public class SettingsActivity extends AppCompatActivity implements
 
     private int mLoaderID;
 
+    private static Context mContext;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mContext = this;
         setContentView(R.layout.activity_settings);
         initToolbar();
         initFragment();
@@ -125,9 +131,13 @@ public class SettingsActivity extends AppCompatActivity implements
     }
 
     private void createBackupsFolder() {
-        Bundle args = new Bundle();
-        args.putString("path", NASPref.getBackupLocation(this));
-        getLoaderManager().restartLoader(LoaderID.SMB_NEW_FOLDER, args, this).forceLoad();
+        boolean checked = NASPref.getBackupSetting(this);
+        if(checked) {
+            //create the auto backup basic folder : /home/username/
+            Bundle args = new Bundle();
+            args.putString("path", NASPref.getBackupLocation(this));
+            getLoaderManager().restartLoader(LoaderID.SMB_NEW_FOLDER, args, this).forceLoad();
+        }
     }
 
 
@@ -147,6 +157,7 @@ public class SettingsActivity extends AppCompatActivity implements
             addPreferencesFromResource(R.xml.preference_settings);
             getPreferenceManager().setSharedPreferencesName(getString(R.string.pref_name));
             getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
+            refreshColumnBackupSetting(false);
             refreshColumnBackupScenario();
             refreshColumnBackupLocation();
             refreshColumnDownloadLocation();
@@ -195,23 +206,17 @@ public class SettingsActivity extends AppCompatActivity implements
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             if (key.equals(getString(R.string.pref_auto_backup))) {
-                boolean checked = sharedPreferences.getBoolean(key, true);
-                // TODO: enable/disable auto backup
-
-            } else
-            if (key.equals(getString(R.string.pref_backup_scenario))) {
+                refreshColumnBackupSetting(true);
+            } else if (key.equals(getString(R.string.pref_backup_scenario))) {
                 refreshColumnBackupScenario();
                 // TODO: stop backup and change backup scenario
-            } else
-            if (key.equals(getString(R.string.pref_backup_location))) {
+            } else if (key.equals(getString(R.string.pref_backup_location))) {
                 refreshColumnBackupLocation();
                 // TODO: stop backup and change backup location
 
-            } else
-            if (key.equals(getString(R.string.pref_download_location))) {
+            } else if (key.equals(getString(R.string.pref_download_location))) {
                 refreshColumnDownloadLocation();
-            } else
-            if (key.equals(getString(R.string.pref_cache_size))) {
+            } else if (key.equals(getString(R.string.pref_cache_size))) {
                 refreshColumnCacheSize();
                 // TODO: reset cache size
             }
@@ -247,6 +252,30 @@ public class SettingsActivity extends AppCompatActivity implements
             startActivityForResult(intent, FileActionLocateActivity.REQUEST_CODE);
         }
 
+        private void refreshColumnBackupSetting(boolean changeService){
+            String key = getString(R.string.pref_auto_backup);
+            boolean checked = NASPref.getBackupSetting(getActivity());
+            CheckBoxPreference pref = (CheckBoxPreference) findPreference(key);
+            pref.setChecked(checked);
+
+            if(changeService) {
+                Intent intent = new Intent(mContext, AutoBackupService.class);
+                if (checked) {
+                    mContext.startService(intent);
+
+                }
+                else
+                    mContext.stopService(intent);
+            }
+
+            ListPreference pref_backup_scenario = (ListPreference) findPreference(getString(R.string.pref_backup_scenario));
+            pref_backup_scenario.setEnabled(checked);
+            pref_backup_scenario.setSelectable(checked);
+            Preference pref_backup_location = findPreference(getString(R.string.pref_backup_location));
+            pref_backup_location.setEnabled(checked);
+            pref_backup_location.setSelectable(checked);
+        }
+
         private void refreshColumnBackupScenario() {
             String scenario = NASPref.getBackupScenario(getActivity());
             String[] scenarios =  getActivity().getResources().getStringArray(R.array.backup_scenario_values);
@@ -256,6 +285,7 @@ public class SettingsActivity extends AppCompatActivity implements
             ListPreference pref = (ListPreference) findPreference(key);
             pref.setValue(scenario);
             pref.setTitle(title);
+            pref.setEnabled(NASPref.getBackupSetting(getActivity()));
         }
 
         private void refreshColumnBackupLocation() {
@@ -263,6 +293,7 @@ public class SettingsActivity extends AppCompatActivity implements
             String key = getString(R.string.pref_backup_location);
             Preference pref = findPreference(key);
             pref.setSummary(location);
+            pref.setEnabled(NASPref.getBackupSetting(getActivity()));
         }
 
         private void refreshColumnDownloadLocation() {

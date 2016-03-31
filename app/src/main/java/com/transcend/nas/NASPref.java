@@ -83,13 +83,25 @@ public class NASPref {
 
     /**
      *
+     * Backup setting
+     *
+     */
+    public static Boolean getBackupSetting(Context context) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_auto_backup);
+        boolean def = false;
+        return PrefUtil.read(context, name, key, def);
+    }
+
+    /**
+     *
      * Backup scenario
      *
      */
     public static String getBackupScenario(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
         String key = context.getResources().getString(R.string.pref_backup_scenario);
-        String def = context.getResources().getStringArray(R.array.backup_scenario_values)[0];
+        String def = context.getResources().getStringArray(R.array.backup_scenario_values)[1];
         return PrefUtil.read(context, name, key, def);
     }
 
@@ -101,7 +113,7 @@ public class NASPref {
     public static String getBackupLocation(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
         String key = context.getResources().getString(R.string.pref_backup_location);
-        String def = "/homes/Backups/";
+        String def = "/homes/" + getUsername(context) + " android phone/";
         return PrefUtil.read(context, name, key, def);
     }
 

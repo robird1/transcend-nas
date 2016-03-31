@@ -59,9 +59,17 @@
         </activity>
 
         <activity
+            android:name=".settings.AboutActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
+
+        <activity
             android:name=".viewer.ViewerActivity"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
+
+        <service android:name=".service.AutoBackupService">
+        </service>
 
     </application>
 

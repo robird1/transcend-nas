@@ -2,12 +2,15 @@ package com.transcend.nas;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Environment;
+import android.util.Log;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.service.AutoBackupService;
 
 import java.io.File;
 
@@ -68,7 +71,6 @@ public class NASApp extends Application {
                 .build();
         ImageLoader.getInstance().init(config);
     }
-
 
     private void initServerManager() {
         ServerManager.INSTANCE.setPreference(getSharedPreferences(TAG, Context.MODE_PRIVATE));

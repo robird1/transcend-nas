@@ -92,6 +92,10 @@
     <string name="video">Video</string>
     <string name="view">View</string>
     <string name="wifi_only">Wi-Fi only</string>
+    <string name="legal">Legal \u0026 Privacy</string>
+    <string name="term_of_use">Terms of use</string>
+    <string name="licenses">Licenses</string>
+    <string name="contact_us">Contact us</string>
 
     <string name="conj_selected">%1$d selected</string>
     <string name="conj_used">%1$s used</string>
@@ -134,6 +138,11 @@
 
     <string name="pref_file_sort_type">FILE SORT TYPE</string>
 
+    <string name="pref_about">ABOUT</string>
+    <string name="pref_about_legal">ABOUT LEGAL</string>
+    <string name="pref_about_term_of_use">ABOUT TERMS OF USE</string>
+    <string name="pref_about_license">ABOUT LICENSE</string>
+    <string name="pref_about_contact">ABOUT CONTACT OF US</string>
 
     <!-- information -->
 
