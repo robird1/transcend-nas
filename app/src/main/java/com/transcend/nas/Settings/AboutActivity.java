@@ -1,5 +1,6 @@
 package com.transcend.nas.settings;
 
+import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -138,6 +139,7 @@ public class AboutActivity extends AppCompatActivity {
 
         }
 
+        @SuppressLint("ValidFragment")
         public InfoFragment(int id){
             this.id = id;
         }

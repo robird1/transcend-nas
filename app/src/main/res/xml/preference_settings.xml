@@ -4,44 +4,56 @@
 
     <PreferenceCategory
         android:layout="@layout/preference_category_widget"
-        android:title="@string/camera_backup">
-
-        <CheckBoxPreference
-            android:key="@string/pref_auto_backup"
-            android:layout="@layout/preference_item"
-            android:title="@string/auto_backup"
-            android:summary="@string/msg_auto_backup"
-            android:widgetLayout="@layout/switch_button"/>
-
-        <ListPreference
-            android:key="@string/pref_backup_scenario"
-            android:layout="@layout/preference_item"
-            android:title="@string/always"
-            android:summary="@string/msg_backup_scenario"
-            android:dialogTitle="@string/choose_a_scenario"
-            android:entries="@array/backup_scenario_entries"
-            android:entryValues="@array/backup_scenario_values"
-            />
-
-        <Preference
-            android:key="@string/pref_backup_location"
-            android:layout="@layout/preference_item"
-            android:title="@string/location"
-            android:summary="/" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:layout="@layout/preference_category_widget"
         android:title="@string/downloads">
 
         <Preference
             android:key="@string/pref_download_location"
             android:layout="@layout/preference_item"
-            android:title="@string/location"
-            android:summary="/" />
+            android:summary="/"
+            android:title="@string/location" />
 
     </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/preference_category_widget"
+        android:title="@string/remote_access">
+
+        <Preference
+            android:key="@string/pref_remote_access"
+            android:layout="@layout/preference_item"
+            android:summary="@string/remote_access_inactive"
+            android:title="@string/email" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/preference_category_widget"
+        android:title="@string/camera_backup">
+
+        <CheckBoxPreference
+            android:key="@string/pref_auto_backup"
+            android:layout="@layout/preference_item"
+            android:summary="@string/msg_auto_backup"
+            android:title="@string/auto_backup"
+            android:widgetLayout="@layout/switch_button" />
+
+        <ListPreference
+            android:dialogTitle="@string/choose_a_scenario"
+            android:entries="@array/backup_scenario_entries"
+            android:entryValues="@array/backup_scenario_values"
+            android:key="@string/pref_backup_scenario"
+            android:layout="@layout/preference_item"
+            android:summary="@string/msg_backup_scenario"
+            android:title="@string/always" />
+
+        <Preference
+            android:key="@string/pref_backup_location"
+            android:layout="@layout/preference_item"
+            android:summary="/"
+            android:title="@string/location" />
+
+    </PreferenceCategory>
+
 
     <PreferenceCategory
         android:layout="@layout/preference_category_widget"

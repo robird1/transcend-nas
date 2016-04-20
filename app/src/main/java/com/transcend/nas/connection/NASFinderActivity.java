@@ -18,12 +18,20 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.common.DividerItemDecoration;
 import com.transcend.nas.common.LoaderID;
+import com.transcend.nas.common.TutkCodeID;
 import com.transcend.nas.management.FileManageActivity;
+import com.transcend.nas.management.TutkDeleteNasLoader;
+import com.transcend.nas.management.TutkGetNasLoader;
+import com.transcend.nas.management.TutkLinkNasLoader;
+import com.tutk.IOTC.P2PService;
 
+import java.nio.BufferUnderflowException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -36,6 +44,8 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
     private RecyclerViewAdapter mAdapter;
     private RelativeLayout mProgressView;
     private LoginDialog mLoginDialog;
+    private boolean isRemoteAccess = false;
+    private int mLoaderID;
 
     private ArrayList<HashMap<String, String>> mNASList;
 
@@ -72,32 +82,31 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
     @Override
     public void onBackPressed() {
         if (mLoginDialog != null) {
-            getLoaderManager().destroyLoader(LoaderID.LOGIN);
+            getLoaderManager().destroyLoader(mLoaderID);
             mLoginDialog.dismiss();
             mLoginDialog = null;
-        } else
-        if (mProgressView.isShown()) {
+        } else if (mProgressView.isShown()) {
             mProgressView.setVisibility(View.INVISIBLE);
-            getLoaderManager().destroyLoader(LoaderID.NAS_LIST);
-        }
-        else {
+            getLoaderManager().destroyLoader(mLoaderID);
+        } else {
             startSignInActivity();
         }
     }
 
 
     /**
-     *
      * INITIALIZATION
-     *
      */
     private void initData() {
-        mNASList = (ArrayList<HashMap<String, String>>)getIntent().getSerializableExtra("NASList");
-        if (mNASList == null) mNASList = new ArrayList<HashMap<String, String>>();
+        Intent intent = getIntent();
+        isRemoteAccess = (boolean) intent.getBooleanExtra("RemoteAccess", false);
+        mNASList = (ArrayList<HashMap<String, String>>) intent.getSerializableExtra("NASList");
+        if (mNASList == null)
+            mNASList = new ArrayList<HashMap<String, String>>();
     }
 
     private void initToolbar() {
-        mToolbar = (Toolbar)findViewById(R.id.nas_finder_toolbar);
+        mToolbar = (Toolbar) findViewById(R.id.nas_finder_toolbar);
         mToolbar.setTitle("");
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -105,7 +114,7 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
     }
 
     private void initRecyclerView() {
-        mRecyclerView = (RecyclerView)findViewById(R.id.nas_finder_recycler_view);
+        mRecyclerView = (RecyclerView) findViewById(R.id.nas_finder_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setAdapter(mAdapter = new RecyclerViewAdapter());
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -113,19 +122,18 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
     }
 
     private void initProgressView() {
-        mProgressView = (RelativeLayout)findViewById(R.id.nas_finder_progress_view);
+        mProgressView = (RelativeLayout) findViewById(R.id.nas_finder_progress_view);
     }
 
     private void reloadNASListIfNotFound() {
-        if (mNASList.size() == 0)
+        if (mNASList.size() == 0) {
             startNASListLoader();
+        }
     }
 
 
     /**
-     *
      * ACTIVITY LAUNCHER
-     *
      */
     private void startSignInActivity() {
         Intent intent = new Intent();
@@ -142,27 +150,53 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
     }
 
     private void startNASListLoader() {
-        getLoaderManager().restartLoader(LoaderID.NAS_LIST, null, this).forceLoad();
+        if (isRemoteAccess) {
+            Bundle args = new Bundle();
+            args.putString("server", NASPref.getCloudServer(this));
+            args.putString("token", NASPref.getCloudAuthToken(this));
+            getLoaderManager().restartLoader(LoaderID.TUTK_NAS_GET, args, this).forceLoad();
+        }
+        else
+            getLoaderManager().restartLoader(LoaderID.NAS_LIST, null, this).forceLoad();
+    }
+
+    private void startRemoteAccessDeleteLoader(Bundle args) {
+        getLoaderManager().restartLoader(LoaderID.TUTK_NAS_DELETE, args, this).forceLoad();
     }
 
     private void startLoginLoader(Bundle args) {
-        getLoaderManager().restartLoader(LoaderID.LOGIN, args, this).forceLoad();
+        if(isRemoteAccess){
+            getLoaderManager().restartLoader(LoaderID.TUTK_NAS_LINK, args, this).forceLoad();
+        }
+        else
+            getLoaderManager().restartLoader(LoaderID.LOGIN, args, this).forceLoad();
     }
 
 
     /**
-     *
      * LOADER CONTROL
-     *
      */
     @Override
     public Loader<Boolean> onCreateLoader(int id, Bundle args) {
-        switch (id) {
+        String server,token, nasId;
+        switch (mLoaderID = id) {
             case LoaderID.NAS_LIST:
                 mProgressView.setVisibility(View.VISIBLE);
                 return new NASListLoader(this);
             case LoaderID.LOGIN:
                 return new LoginLoader(this, args);
+            case LoaderID.TUTK_NAS_LINK:
+                return new TutkLinkNasLoader(this, args);
+            case LoaderID.TUTK_NAS_GET:
+                mProgressView.setVisibility(View.VISIBLE);
+                server = args.getString("server");
+                token = args.getString("token");
+                return new TutkGetNasLoader(this, server, token);
+            case LoaderID.TUTK_NAS_DELETE:
+                server = args.getString("server");
+                token = args.getString("token");
+                nasId = args.getString("nasId");
+                return new TutkDeleteNasLoader(this, server, token, nasId);
         }
         return null;
     }
@@ -171,23 +205,84 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
         if (loader instanceof NASListLoader) {
             mProgressView.setVisibility(View.INVISIBLE);
-            mNASList = ((NASListLoader)loader).getList();
-            /*
-            HashMap<String, String> hashMap = new HashMap<String, String>();
-            hashMap.put("name", "MyNAS");
-            hashMap.put("addr", "0.0.0.0");
-            ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
-            list.add(hashMap);
-            mNASList = list;
-            */
+            mNASList = ((NASListLoader) loader).getList();
             mAdapter.notifyDataSetChanged();
-        }
-        if (loader instanceof LoginLoader) {
+        } else if (loader instanceof LoginLoader) {
             if (mLoginDialog != null)
                 mLoginDialog.hideProgress();
             if (success)
                 startFileManageActivity();
+        } else if(loader instanceof TutkGetNasLoader){
+            mProgressView.setVisibility(View.INVISIBLE);
+            if(!success){
+                Toast.makeText(this, getString(R.string.network_error),Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            TutkGetNasLoader listLoader = (TutkGetNasLoader) loader;
+            String code = listLoader.getCode();
+            String status = listLoader.getStatus();
+
+            if (code.equals("")) {
+                mNASList = listLoader.getNasArrayList();
+                mAdapter.notifyDataSetChanged();
+            } else {
+                Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
+                if(code.equals(TutkCodeID.AUTH_FAIL)){
+                    startSignInActivity();
+                }
+            }
+        } else if(loader instanceof TutkDeleteNasLoader){
+            if(!success){
+                if (mLoginDialog != null)
+                    mLoginDialog.hideProgress();
+                Toast.makeText(this, getString(R.string.network_error),Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            TutkDeleteNasLoader deleteLoader = (TutkDeleteNasLoader) loader;
+            String code = deleteLoader.getCode();
+            String status = deleteLoader.getStatus();
+            if (mLoginDialog != null) {
+                mLoginDialog.dismiss();
+                mLoginDialog = null;
+            }
+
+            if (code.equals(TutkCodeID.SUCCESS)) {
+                String id = deleteLoader.getNasID();
+                for(HashMap<String, String> nas : mNASList){
+                    if(id.equals(nas.get("nasId"))){
+                        mNASList.remove(nas);
+                        break;
+                    }
+                }
+                mAdapter.notifyDataSetChanged();
+                Toast.makeText(this, status, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
+                if(code.equals(TutkCodeID.AUTH_FAIL)){
+                    startSignInActivity();
+                }
+            }
+        } else if(loader instanceof  TutkLinkNasLoader){
+            TutkLinkNasLoader linkLoader = (TutkLinkNasLoader) loader;
+            String code = linkLoader.getCode();
+            String status = linkLoader.getStatus();
+
+            if(!success){
+                Toast.makeText(this, linkLoader.getError(), Toast.LENGTH_SHORT).show();
+                if (mLoginDialog != null)
+                    mLoginDialog.hideProgress();
+                return;
+            }
+
+            Bundle args = linkLoader.getBundleArgs();
+            String ip = P2PService.getInstance().getP2PIP();
+            int port = P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
+            args.putString("hostname",ip+":"+port);
+            getLoaderManager().restartLoader(LoaderID.LOGIN, args, this).forceLoad();
         }
+
     }
 
     @Override
@@ -197,9 +292,7 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
 
 
     /**
-     *
      * RECYCLER VIEW ADAPTER
-     *
      */
     private class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
@@ -232,29 +325,36 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
 
             public ViewHolder(View itemView) {
                 super(itemView);
-                icon = (ImageView)itemView.findViewById(R.id.listitem_nas_finder_icon);
-                title = (TextView)itemView.findViewById(R.id.listitem_nas_finder_title);
-                subtitle = (TextView)itemView.findViewById(R.id.listitem_nas_finder_subtitle);
+                icon = (ImageView) itemView.findViewById(R.id.listitem_nas_finder_icon);
+                title = (TextView) itemView.findViewById(R.id.listitem_nas_finder_title);
+                subtitle = (TextView) itemView.findViewById(R.id.listitem_nas_finder_subtitle);
                 itemView.setOnClickListener(this);
             }
 
             @Override
             public void onClick(View v) {
                 int pos = getAdapterPosition();
-                HashMap<String, String > nas = mNASList.get(pos);
+                HashMap<String, String> nas = mNASList.get(pos);
                 Bundle args = new Bundle();
+                args.putString("nasId", nas.get("nasId"));
                 args.putString("nickname", nas.get("nickname"));
                 args.putString("hostname", nas.get("hostname"));
                 args.putString("username", "admin");
                 args.putString("password", "Realtek");
-                mLoginDialog = new LoginDialog(NASFinderActivity.this, args) {
+                mLoginDialog = new LoginDialog(NASFinderActivity.this, args, isRemoteAccess) {
                     @Override
                     public void onConfirm(Bundle args) {
                         startLoginLoader(args);
                     }
+
+                    @Override
+                    public void onDelete(Bundle args){
+                        startRemoteAccessDeleteLoader(args);
+                    }
+
                     @Override
                     public void onCancel() {
-                        getLoaderManager().destroyLoader(LoaderID.LOGIN);
+                        getLoaderManager().destroyLoader(mLoaderID);
                         mLoginDialog.dismiss();
                         mLoginDialog = null;
                     }

@@ -44,6 +44,7 @@ public class SmbFileListLoader extends SmbAbstractLoader {
     public Boolean loadInBackground() {
         Log.w(TAG, "loadInBackground");
         try {
+            super.loadInBackground();
             return updateFileList();
         } catch (Exception e) {
             e.printStackTrace();

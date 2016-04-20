@@ -10,6 +10,12 @@ public class P2PTunnelAPIs {
 	/** The function is performed successfully. */
 	public static final int	TUNNEL_ER_NoERROR				=0;
 
+	/** The function is performed fail. */
+	public static final int TUNNEL_ER_CONNECT = -90;
+
+	/** P2PTunnel module is not initialized yet. Due to error UUID or port. */
+	public static final int TUNNEL_ER_INITIALIZED = -1;
+
 	/** P2PTunnel module is not initialized yet. Please use P2PTunnelServerInitialize() or
 	* P2PTunnelAgentInitialize() for initialization. */
 	public static final int	TUNNEL_ER_NOT_INITIALIZED		=-30000;

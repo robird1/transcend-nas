@@ -19,10 +19,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 
+import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
+import com.transcend.nas.common.NotificationDialog;
 import com.transcend.nas.management.FileManageActivity;
 import com.tutk.IOTC.P2PService;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Created by silverhsu on 16/1/4.
@@ -32,12 +36,16 @@ public abstract class LoginDialog implements View.OnClickListener {
     private static final String TAG = LoginDialog.class.getSimpleName();
 
     public abstract void onConfirm(Bundle args);
+
     public abstract void onCancel();
+
+    public abstract void onDelete(Bundle args);
 
     private AppCompatActivity mActivity;
     private AlertDialog mDialog;
     private Button mDlgBtnPos;
     private Button mDlgBtnNeg;
+    private Button mDlgBtnNeu;
     private RelativeLayout mProgressView;
     private AppCompatEditText etHostname;
     private AppCompatAutoCompleteTextView tvUsername;
@@ -47,9 +55,13 @@ public abstract class LoginDialog implements View.OnClickListener {
     private String mHostname;
     private String mUsername;
     private String mPassword;
+    private String mNasId;
+    private boolean isRemoeteAccess;
 
-    public LoginDialog(Context context, Bundle args) {
-        mActivity = (AppCompatActivity)context;
+    public LoginDialog(Context context, Bundle args, boolean isRemoteAccess) {
+        mActivity = (AppCompatActivity) context;
+        this.isRemoeteAccess = isRemoteAccess;
+        mNasId = args.getString("nasId");
         mNickname = args.getString("nickname");
         mHostname = args.getString("hostname");
         mUsername = args.getString("username");
@@ -68,31 +80,35 @@ public abstract class LoginDialog implements View.OnClickListener {
         builder.setCancelable(true);
         builder.setNegativeButton(R.string.cancel, null);
         builder.setPositiveButton(R.string.login, null);
+        if (isRemoeteAccess)
+            builder.setNeutralButton(R.string.delete, null);
         mDialog = builder.show();
         mDlgBtnPos = mDialog.getButton(DialogInterface.BUTTON_POSITIVE);
         mDlgBtnNeg = mDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+        mDlgBtnNeu = mDialog.getButton(DialogInterface.BUTTON_NEUTRAL);
         mDlgBtnPos.setOnClickListener(this);
         mDlgBtnNeg.setOnClickListener(this);
+        mDlgBtnNeu.setOnClickListener(this);
     }
 
     private void initFieldIP() {
-        etHostname = (AppCompatEditText)mDialog.findViewById(R.id.dialog_login_ip);
+        etHostname = (AppCompatEditText) mDialog.findViewById(R.id.dialog_login_ip);
         etHostname.setText(mHostname);
         //etIP.setKeyListener(null);
     }
 
     private void initFieldAccount() {
-        tvUsername = (AppCompatAutoCompleteTextView)mDialog.findViewById(R.id.dialog_login_account);
+        tvUsername = (AppCompatAutoCompleteTextView) mDialog.findViewById(R.id.dialog_login_account);
         tvUsername.setText(mUsername);
     }
 
     private void initFieldPassword() {
-        etPassword = (AppCompatEditText)mDialog.findViewById(R.id.dialog_login_password);
+        etPassword = (AppCompatEditText) mDialog.findViewById(R.id.dialog_login_password);
         etPassword.setText(mPassword);
     }
 
     private void initProgressView() {
-        mProgressView = (RelativeLayout)mDialog.findViewById(R.id.dialog_login_progress_view);
+        mProgressView = (RelativeLayout) mDialog.findViewById(R.id.dialog_login_progress_view);
     }
 
     @Override
@@ -107,12 +123,39 @@ public abstract class LoginDialog implements View.OnClickListener {
             Log.w(TAG, "username: " + args.get("username"));
             Log.w(TAG, "password: " + args.get("password"));
             onConfirm(args);
-        }
-        if (v.equals(mDlgBtnNeg)) {
+        } else if (v.equals(mDlgBtnNeg)) {
             hideProgress();
             mDialog.dismiss();
             onCancel();
+        } else if (v.equals(mDlgBtnNeu)) {
+            showNotificationDialog();
         }
+    }
+
+    private void showNotificationDialog() {
+        Bundle value = new Bundle();
+        value.putString("title", mActivity.getString(R.string.remote_access_delete_warning));
+        NotificationDialog mNotificationDialog = new NotificationDialog(mActivity, value) {
+            @Override
+            public void onConfirm() {
+                showProgress();
+                doDelete();
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+        };
+    }
+
+    private void doDelete() {
+        showProgress();
+        Bundle args = new Bundle();
+        args.putString("server", NASPref.getCloudServer(mActivity));
+        args.putString("token", NASPref.getCloudAuthToken(mActivity));
+        args.putString("nasId", mNasId);
+        onDelete(args);
     }
 
     public void showProgress() {

@@ -61,6 +61,7 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
     @Override
     public Boolean loadInBackground() {
         try {
+            super.loadInBackground();
             return upload();
         } catch (Exception e) {
             e.printStackTrace();

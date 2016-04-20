@@ -2,10 +2,13 @@ package com.transcend.nas.management;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.content.SyncAdapterType;
+import android.util.Log;
 
 import com.realtek.nasfun.api.SambaStatus;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
+import com.tutk.IOTC.P2PService;
 
 /**
  * Created by silverhsu on 16/1/20.
@@ -20,13 +23,24 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
     public SmbAbstractLoader(Context context) {
         super(context);
         //System.setProperty("jcifs.smb.client.dfs.disabled", "true");
+        System.setProperty("jcifs.smb.client.soTimeout", "5000");
+        System.setProperty("jcifs.smb.client.responseTimeout", "5000");
         mServer = ServerManager.INSTANCE.getCurrentServer();
+        mHostname = mServer.getHostname();
         mUsername = mServer.getUsername();
         mPassword = mServer.getPassword();
-        mHostname = mServer.getHostname();
-        // TODO: P2P case
-        //if (P2PService.getInstance().isConnected())
-        //    mHostname = P2PService.getInstance().P2PGetSmbIP();
+        String p2pIP = P2PService.getInstance().getP2PIP();
+        if (mHostname.contains(p2pIP))
+            mHostname = p2pIP + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.SMB);
+    }
+
+    @Override
+    public Boolean loadInBackground() {
+        // Restructure Remote Access
+        //String p2pIP = P2PService.getInstance().getP2PIP();
+        //if (mHostname.contains(p2pIP))
+        //    P2PService.getInstance().reStartP2PConnect();
+        return true;
     }
 
     protected boolean checkSambaService() {

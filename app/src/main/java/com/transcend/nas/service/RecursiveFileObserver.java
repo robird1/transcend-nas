@@ -15,7 +15,7 @@ import java.util.Stack;
 public class RecursiveFileObserver extends FileObserver {
 
     /** Only modification events */
-    public static int DEFALUT_EVENTS = CLOSE_WRITE;
+    public static int DEFALUT_EVENTS = FileObserver.CLOSE_WRITE;
 
     private List mObservers;
     private String mPath;

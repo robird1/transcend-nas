@@ -65,6 +65,7 @@
     <string name="loading">Loading</string>
     <string name="location">Location</string>
     <string name="login">Login</string>
+    <string name="logout">Logout</string>
     <string name="more">More</string>
     <string name="move">Move</string>
     <string name="music">Music</string>
@@ -74,6 +75,10 @@
     <string name="ok">OK</string>
     <string name="on_top">On top</string>
     <string name="password">Password</string>
+    <string name="password_confirm">Confirm Password</string>
+    <string name="submit">Submit</string>
+    <string name="resend">Resend</string>
+    <string name="register">Register</string>
     <string name="photo">Photo</string>
     <string name="refresh">Refresh</string>
     <string name="rename">Rename</string>
@@ -96,6 +101,34 @@
     <string name="term_of_use">Terms of use</string>
     <string name="licenses">Licenses</string>
     <string name="contact_us">Contact us</string>
+    <string name="forget_password">forget password?</string>
+    <string name="send">Send</string>
+    <string name="remote_access">Remote Access</string>
+    <string name="remote_access_active">Active</string>
+    <string name="remote_access_inactive">Inactive</string>
+
+    <string name="try_auto_connect">Try auto connection</string>
+    <string name="try_search_device">Try searching device</string>
+    <string name="try_remote_access">Try remote access</string>
+
+    <string name="empty_email">Empty Email</string>
+    <string name="empty_password">Empty Password</string>
+    <string name="forget_password_title">Enter your email to send the reset password email</string>
+    <string name="forget_password_warning">Current password will be deprecated. Are you sure to send the email?</string>
+    <string name="forget_password_send">The password mail is sent. Please check your mail.</string>
+    <string name="confirm_password_error">Please confirm your password</string>
+    <string name="network_error">Please check your network, or try again later</string>
+    <string name="remote_access_register">Create new remote access account, and we will automatically bind your NAS later</string>
+    <string name="remote_access_welcome">Please input your email and password, and we will automatically bind your NAS later</string>
+    <string name="remote_access_send_activate_info">Please check your email to activate it</string>
+    <string name="remote_access_send_activate_warning">Are your sure to resend activate email?</string>
+    <string name="remote_access_logout">Are you sure to logout?</string>
+    <string name="remote_access_no_login">At first, you need to register or login</string>
+    <string name="remote_access_delete_warning">Are you sure to delete the bind nas?</string>
+    <string name="remote_access_verification_expired">Your account\'s verification is expired. Please register it again.</string>
+    <string name="error_format">Error format</string>
+    <string name="bind_nas_list">Bind NAS list:</string>
+    <string name="current_device">Current Device</string>
 
     <string name="conj_selected">%1$d selected</string>
     <string name="conj_used">%1$s used</string>
@@ -120,6 +153,7 @@
 
     <string name="pref_name">NAS PREFERENCE</string>
 
+    <string name="pref_remote_access">REMOTE ACCESS</string>
     <string name="pref_auto_backup">AUTO BACKUP</string>
     <string name="pref_backup_scenario">BACKUP SCENARIO</string>
     <string name="pref_backup_location">BACKUP LOCATION</string>
@@ -135,6 +169,10 @@
 
     <string name="pref_cloud_username">CLOUD USERNAME</string>
     <string name="pref_cloud_password">CLOUD PASSWORD</string>
+    <string name="pref_cloud_status">CLOUD STATUS</string>
+    <string name="pref_cloud_ip">CLOUD IP</string>
+    <string name="pref_cloud_token">CLOUD AUTHTOKEN</string>
+    <string name="pref_cloud_mode">CLOUD MODE</string>
 
     <string name="pref_file_sort_type">FILE SORT TYPE</string>
 

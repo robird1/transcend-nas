@@ -48,6 +48,7 @@ public class SmbFileMoveLoader extends SmbAbstractLoader {
     @Override
     public Boolean loadInBackground() {
         try {
+            super.loadInBackground();
             return move();
         } catch (Exception e) {
             e.printStackTrace();

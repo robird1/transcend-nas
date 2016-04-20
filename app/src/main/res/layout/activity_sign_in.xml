@@ -55,6 +55,15 @@
             android:text="@string/sign_in"
             android:textColor="@color/colorPrimary"/>
 
+        <TextView
+            android:id="@+id/activity_sing_in_forget"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:text="@string/forget_password"
+            android:textColor="@color/colorAccentDialog"/>
+
     </LinearLayout>
 
     <TextView
@@ -66,6 +75,20 @@
         android:layout_marginBottom="24dp"
         android:text="Find my NAS"
         android:textColor="@color/colorAccentDialog"/>
+
+    <RelativeLayout
+        android:id="@+id/activity_sign_in_progress_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible"
+        android:clickable="true">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true" />
+
+    </RelativeLayout>
 
 </RelativeLayout>
 

@@ -2,8 +2,11 @@ package com.transcend.nas;
 
 import android.app.Activity;
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
@@ -14,6 +17,7 @@ import com.transcend.nas.connection.NASFinderActivity;
 import com.transcend.nas.connection.NASListLoader;
 import com.transcend.nas.connection.SignInActivity;
 import com.transcend.nas.management.FileManageActivity;
+import com.transcend.nas.management.TutkGetNasLoader;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,19 +32,41 @@ public class WelcomeActivity extends Activity implements LoaderManager.LoaderCal
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
-        mTextView = (TextView)findViewById(R.id.welcome_text);
-        getLoaderManager().initLoader(LoaderID.AUTO_LINK, null, this).forceLoad();
+        mTextView = (TextView) findViewById(R.id.welcome_text);
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        //check network status
+        NetworkInfo info = connectivityManager.getActiveNetworkInfo();
+        if (info != null && info.isAvailable()) {
+            int type = info.getType();
+            switch (type) {
+                case ConnectivityManager.TYPE_WIFI:
+                    getLoaderManager().initLoader(LoaderID.AUTO_LINK, null, this).forceLoad();
+                    break;
+                default:
+                    startRemoteAccessListLoader();
+                    break;
+            }
+        }
+        else
+            startRemoteAccessListLoader();
     }
 
     @Override
     public Loader onCreateLoader(int id, Bundle args) {
         switch (id) {
+            //TODO : add remote access auto login
             case LoaderID.AUTO_LINK:
-                mTextView.setText("嘗試自動連線");
+                mTextView.setText(getString(R.string.try_auto_connect));
                 return new AutoLinkLoader(this);
             case LoaderID.NAS_LIST:
-                mTextView.setText("正在尋找裝置");
+                mTextView.setText(getString(R.string.try_search_device));
                 return new NASListLoader(this);
+            case LoaderID.TUTK_NAS_GET:
+                mTextView.setText(getString(R.string.try_remote_access));
+                String server = args.getString("server");
+                String token = args.getString("token");
+                return new TutkGetNasLoader(this, server, token);
         }
         return null;
     }
@@ -56,7 +82,17 @@ public class WelcomeActivity extends Activity implements LoaderManager.LoaderCal
         }
         if (loader instanceof NASListLoader) {
             if (success)
-                startNASFinderActivity(((NASListLoader)loader).getList());
+                startNASFinderActivity(((NASListLoader) loader).getList(), false);
+            else
+                startRemoteAccessListLoader();
+        }
+        if (loader instanceof TutkGetNasLoader) {
+            TutkGetNasLoader listLoader = (TutkGetNasLoader) loader;
+            String code = listLoader.getCode();
+            String status = listLoader.getStatus();
+
+            if (success && code.equals(""))
+                startNASFinderActivity(listLoader.getNasArrayList(), true);
             else
                 startSignInActivity();
         }
@@ -74,14 +110,28 @@ public class WelcomeActivity extends Activity implements LoaderManager.LoaderCal
         finish();
     }
 
+    private void startRemoteAccessListLoader() {
+        String server = NASPref.getCloudServer(this);
+        String token = NASPref.getCloudAuthToken(this);
+        if (!token.equals("")) {
+            Bundle args = new Bundle();
+            args.putString("server", server);
+            args.putString("token", token);
+            getLoaderManager().restartLoader(LoaderID.TUTK_NAS_GET, args, this).forceLoad();
+        }
+        else
+            startSignInActivity();
+    }
+
     private void startNASListLoader() {
         getLoaderManager().restartLoader(LoaderID.NAS_LIST, null, this).forceLoad();
     }
 
-    private void startNASFinderActivity(ArrayList<HashMap<String, String>> list) {
+    private void startNASFinderActivity(ArrayList<HashMap<String, String>> list, boolean isRemoteAccess) {
         Intent intent = new Intent();
         intent.setClass(WelcomeActivity.this, NASFinderActivity.class);
         intent.putExtra("NASList", list);
+        intent.putExtra("RemoteAccess", isRemoteAccess);
         startActivity(intent);
         finish();
     }

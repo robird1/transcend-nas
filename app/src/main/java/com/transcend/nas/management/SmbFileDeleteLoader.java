@@ -28,6 +28,7 @@ public class SmbFileDeleteLoader extends SmbAbstractLoader {
     public Boolean loadInBackground() {
         Log.w(TAG, "loadInBackground");
         try {
+            super.loadInBackground();
             return delete();
         } catch (Exception e) {
             e.printStackTrace();

@@ -65,6 +65,7 @@ public class SmbFileDownloadLoader extends SmbAbstractLoader {
     @Override
     public Boolean loadInBackground() {
         try {
+            super.loadInBackground();
             return download();
         } catch (Exception e) {
             e.printStackTrace();

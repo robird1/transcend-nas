@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.os.Handler;
@@ -22,6 +23,7 @@ import com.transcend.nas.management.FileInfo;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import jcifs.smb.SmbException;
@@ -38,6 +40,7 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
     private NetworkInfo info;
     private RecursiveFileObserver mLocalFileObserver;
     private Handler mHandler;
+    private HashSet<String> jbCache = new HashSet();
 
     @Override
     public void onCreate() {
@@ -167,13 +170,17 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
 
     @Override
     public void onRecursiveFileChanged(int event, String path) {
-        if (path.contains(".probe")) {
+        String[] detail = path.split("/");
+        int length = detail.length;
+        if (length > 0 && detail[length-1].startsWith(".")) {
+            Log.d(TAG, "tmp file : " + path);
             return;
         }
 
         switch (event) {
             case FileObserver.CLOSE_WRITE:
-                if(canAddTaskToQueue()) {
+                File pictureFile = new File(path);
+                if(pictureFile.exists() && canAddTaskToQueue()) {
                     ArrayList<String> paths = new ArrayList<String>();
                     paths.add(path);
                     addBackupTaskToQueue(paths, 1);
@@ -191,7 +198,7 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
         showProgressNotification(value, NOTIFICATION_ID, total, progress);
 
         //add the finished backup task to database
-        String path = task.getFilePaths().get(progress-1);
+        String path = task.getFilePaths().get(progress - 1);
         addBackupTaskToDatabase(path);
     }
 

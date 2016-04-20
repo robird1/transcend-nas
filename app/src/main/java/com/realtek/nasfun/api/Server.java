@@ -99,6 +99,7 @@ public class Server {
 	private final static String NAS_CHANGE_PASSWORD_PATH = "/nas/edit/user";
 	private final static String NAS_GET_APLIST_PATH = "/nas/get/aplist";
 	private final static String NAS_GET_INFO = "/nas/get/info";
+	private final static String NAS_GET_USERS = "/nas/get/users";
 
 	//NAS property default value
 	public final static String DEFAULT_HOSTNAME = "192.168.59.254";
@@ -153,6 +154,7 @@ public class Server {
 	String hostname = null;
 	String username = null;
 	String password = null;
+	String tutkUUID = null;
 	//Server always hold its password. However, users can get password only if isPasswordSaved is true.
 	boolean isPasswordSaved = false;
 	String hash;
@@ -941,6 +943,10 @@ public class Server {
 	public void setPassword(String password) {
 		this.password = password;
 	}
+
+	public String getTutkUUID(){ return tutkUUID; }
+
+	public void setTutkUUID(String tutkUUID) { this.tutkUUID = tutkUUID; }
 
 	public void enablePasswordSaved(boolean enable) {
 		this.isPasswordSaved = enable;

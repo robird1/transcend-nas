@@ -16,6 +16,7 @@ public class P2PService implements IP2PTunnelCallback {
 	private String mLocalHost = "127.0.0.1";
 	private List<IP2PTunnelCallback> mListener;
 	private List<P2PProtocal> mProtocal;
+	private String mUUID = "";
 
 	private static P2PService mP2PService;
 	private static final Object mMute = new Object();
@@ -56,14 +57,13 @@ public class P2PService implements IP2PTunnelCallback {
 		}
 	}
 
-	public boolean startP2PConnect(){
-		String strUID;
-		strUID="CZYU8X7MYT3CBM6GY1W1";
+	public int startP2PConnect(String strUID){
 		if(strUID.length()<20){
 			Log.d(TAG,"P2P UID is short < 20");
-			return false;				
-		}	
+			return P2PTunnelAPIs.TUNNEL_ER_INITIALIZED;
+		}
 
+		mUUID = strUID;
 		if(nStart<0){
 			m_commApis=new P2PTunnelAPIs(this);
 			m_nInit=m_commApis.P2PTunnelAgentInitialize(4);
@@ -84,11 +84,10 @@ public class P2PService implements IP2PTunnelCallback {
 			byte[] baAuthData = (username+password).getBytes();
 			int[] pnErrFromDeviceCB = new int[1];
 
-			int start=m_commApis.P2PTunnelAgent_Connect(strUID,baAuthData,baAuthData.length,pnErrFromDeviceCB);
-			Log.d(TAG,"P2PTunnelAgent_Connect(.)="+start);
+			nStart=m_commApis.P2PTunnelAgent_Connect(strUID,baAuthData,baAuthData.length,pnErrFromDeviceCB);
+			Log.d(TAG,"P2PTunnelAgent_Connect(.)="+nStart);
 			Log.d(TAG,"P2PTunnelAgent_Connect(.) Error Message="+pnErrFromDeviceCB[0]);
-			if(start>=0){
-				nStart = start;
+			if(nStart>=0){
 				int ret = m_commApis.P2PTunnel_SetBufSize(nStart, mBufferSize);
 				//Log.d(TAG,"P2PTunnel_SetBufSize SID[" + nStart + "], result=>" + ret);			
 
@@ -99,7 +98,7 @@ public class P2PService implements IP2PTunnelCallback {
 					for(int j = 0;j< retry;j++){
 						if(j == retry-1){
 							stopP2PConnect();
-							return false;
+							return P2PTunnelAPIs.TUNNEL_ER_INITIALIZED;
 						}
 						
 						int port = localPort + j;
@@ -119,7 +118,17 @@ public class P2PService implements IP2PTunnelCallback {
 			Log.d(TAG,"P2PTunnel Already Connect");
 		}
 
-		return (nStart>=0);
+		return nStart;
+	}
+
+	public int reStartP2PConnect(){
+		Log.d(TAG, "P2PTunnel start reConnect");
+		stopP2PConnect();
+		return startP2PConnect(mUUID);
+	}
+
+	public String getTUTKUUID(){
+		return mUUID;
 	}
 
 	public boolean isConnected(){

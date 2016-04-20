@@ -13,7 +13,7 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 
 public class HttpClientManager {
-	static DefaultHttpClient getClient() {
+	public static DefaultHttpClient getClient() {
 		//AndroidHttpClient httpClient = AndroidHttpClient.newInstance("Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.114 Safari/537.36");
         DefaultHttpClient ret = null;
  

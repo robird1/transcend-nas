@@ -136,7 +136,7 @@ public class AutoBackupHelper {
 
         File files[] = dir.listFiles();
         for (File file : files) {
-            if (file.isHidden())
+            if (file.isHidden() || file.getPath().contains("100MEDIA"))
                 continue;
             FileInfo fileInfo = new FileInfo();
             fileInfo.path = file.getPath();

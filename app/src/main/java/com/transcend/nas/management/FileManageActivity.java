@@ -4,9 +4,11 @@ import android.app.ActivityManager;
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.Loader;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -38,7 +40,9 @@ import android.widget.Toast;
 
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.connection.SignInActivity;
 import com.transcend.nas.service.AutoBackupService;
+import com.transcend.nas.service.RemoteAccessService;
 import com.transcend.nas.settings.AboutActivity;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
@@ -46,6 +50,7 @@ import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.settings.SettingsActivity;
 import com.transcend.nas.viewer.ViewerActivity;
+import com.tutk.IOTC.P2PService;
 import com.tutk.IOTC.P2PTunnelAPIs;
 import com.tutk.IOTC.sP2PTunnelSessionInfo;
 
@@ -65,7 +70,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
     private static final String TAG = FileManageActivity.class.getSimpleName();
 
-    private static final int GRID_PORTRAIT  = 3;
+    private static final int GRID_PORTRAIT = 3;
     private static final int GRID_LANDSCAPE = 5;
 
     private Toolbar mToolbar;
@@ -93,13 +98,17 @@ public class FileManageActivity extends AppCompatActivity implements
     private RelativeLayout mEditorModeView;
     private TextView mEditorModeTitle;
     private Toast mToast;
-    
+
     private String mMode;
     private String mRoot;
     private String mPath;
     private ArrayList<FileInfo> mFileList;
     private Server mServer;
     private int mLoaderID;
+    private int mPreviousLoaderID = -1;
+    private Bundle mPreviousLoaderArgs = null;
+
+    //private RemoteAccessService remoteAccessReceiver;
 
 
     @Override
@@ -152,10 +161,14 @@ public class FileManageActivity extends AppCompatActivity implements
 
     @Override
     protected void onDestroy() {
+        P2PService.getInstance().removeP2PListener(this);
+        //if(remoteAccessReceiver != null) {
+        //    unregisterReceiver(remoteAccessReceiver);
+        //    remoteAccessReceiver = null;
+        //}
         super.onDestroy();
         Log.w(TAG, "onDestroy");
-        // TODO: P2P case
-        //P2PService.getInstance().P2PListenerRemove();
+
     }
 
     @Override
@@ -183,28 +196,31 @@ public class FileManageActivity extends AppCompatActivity implements
 
 
     /**
-     *
      * INITIALIZATION
-     *
      */
     private void init() {
         mMode = NASApp.MODE_SMB;
         mPath = mRoot = NASApp.ROOT_SMB;
         mFileList = new ArrayList<FileInfo>();
         mServer = ServerManager.INSTANCE.getCurrentServer();
-        // TODO: P2P case
-        //P2PService.getInstance().P2PListenerAdd(this);
+        P2PService.getInstance().addP2PListener(this);
+        //if(isRemoteAccess()) {
+        //    IntentFilter mFilter = new IntentFilter();
+        //    mFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        //    if (remoteAccessReceiver == null)
+        //        remoteAccessReceiver = new RemoteAccessService();
+        //    registerReceiver(remoteAccessReceiver, mFilter);
+        //}
     }
 
-    private void initAutoBackUpService(){
+    private void initAutoBackUpService() {
         boolean checked = NASPref.getBackupSetting(this);
         Intent intent = new Intent(this, AutoBackupService.class);
         boolean isRunning = isMyServiceRunning(AutoBackupService.class);
-        if(checked) {
-            if(!isRunning)
+        if (checked) {
+            if (!isRunning)
                 startService(intent);
-        }
-        else
+        } else
             stopService(intent);
     }
 
@@ -219,7 +235,7 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void initToolbar() {
-        mToolbar = (Toolbar)findViewById(R.id.main_toolbar);
+        mToolbar = (Toolbar) findViewById(R.id.main_toolbar);
         mToolbar.setTitle("");
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -229,14 +245,15 @@ public class FileManageActivity extends AppCompatActivity implements
     private void initDropdown() {
         mDropdownAdapter = new FileManageDropdownAdapter();
         mDropdownAdapter.setOnDropdownItemSelectedListener(this);
-        mDropdown = (AppCompatSpinner)findViewById(R.id.main_dropdown);
+        mDropdown = (AppCompatSpinner) findViewById(R.id.main_dropdown);
         mDropdown.setAdapter(mDropdownAdapter);
+        mDropdown.setDropDownVerticalOffset(10);
     }
 
     private void initRecyclerView() {
         mRecyclerAdapter = new FileManageRecyclerAdapter(mFileList);
         mRecyclerAdapter.setOnRecyclerItemCallbackListener(this);
-        mRecyclerView = (RecyclerView)findViewById(R.id.main_recycler_view);
+        mRecyclerView = (RecyclerView) findViewById(R.id.main_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setAdapter(mRecyclerAdapter);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -257,7 +274,7 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void initProgressView() {
-        mProgressView = (RelativeLayout)findViewById(R.id.main_progress_view);
+        mProgressView = (RelativeLayout) findViewById(R.id.main_progress_view);
     }
 
     private void initDrawer() {
@@ -278,15 +295,19 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void initActionModeView() {
-        mEditorModeView = (RelativeLayout)LayoutInflater.from(this).inflate(R.layout.action_mode_custom, null);
+        mEditorModeView = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.action_mode_custom, null);
         mEditorModeTitle = (TextView) mEditorModeView.findViewById(R.id.action_mode_custom_title);
+    }
+
+    private boolean isRemoteAccess() {
+        String hostname = ServerManager.INSTANCE.getCurrentServer().getHostname();
+        String p2pIP = P2PService.getInstance().getP2PIP();
+        return hostname.contains(p2pIP);
     }
 
 
     /**
-     *
      * DROPDOWN ITEM CONTROL
-     *
      */
     @Override
     public void onDropdownItemSelected(int position) {
@@ -299,9 +320,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
 
     /**
-     *
      * MENU CONTROL
-     *
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -331,9 +350,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
 
     /**
-     *
      * RECYCLER ITEM CONTROL
-     *
      */
     @Override
     public void onRecyclerItemClick(int position) {
@@ -342,20 +359,16 @@ public class FileManageActivity extends AppCompatActivity implements
             FileInfo fileInfo = mFileList.get(position);
             if (FileInfo.TYPE.DIR.equals(fileInfo.type)) {
                 doLoad(fileInfo.path);
-            } else
-            if (FileInfo.TYPE.PHOTO.equals(fileInfo.type)) {
+            } else if (FileInfo.TYPE.PHOTO.equals(fileInfo.type)) {
                 startViewerActivity(fileInfo.path);
-            } else
-            if (FileInfo.TYPE.VIDEO.equals(fileInfo.type)) {
+            } else if (FileInfo.TYPE.VIDEO.equals(fileInfo.type)) {
                 MediaManager.open(this, fileInfo.path);
-            } else
-            if (FileInfo.TYPE.MUSIC.equals(fileInfo.type)) {
+            } else if (FileInfo.TYPE.MUSIC.equals(fileInfo.type)) {
                 MediaManager.open(this, fileInfo.path);
             } else {
                 toast(R.string.unknown_format);
             }
-        }
-        else {
+        } else {
             // editor
             selectAtPosition(position);
         }
@@ -383,9 +396,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
 
     /**
-     *
      * DRAWER CONTROL
-     *
      */
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -413,15 +424,18 @@ public class FileManageActivity extends AppCompatActivity implements
             case R.id.nav_about:
                 startAboutActivity();
                 break;
+            case R.id.nav_logout:
+                Bundle args = new Bundle();
+                args.putBoolean("clean", true);
+                getLoaderManager().restartLoader(LoaderID.TUTK_LOGOUT, args, this).forceLoad();
+                break;
         }
         return true;
     }
 
 
     /**
-     *
      * ACTION MODE CONTROL
-     *
      */
     @Override
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -435,7 +449,7 @@ public class FileManageActivity extends AppCompatActivity implements
         toggleFabSelectAll(false);
         //*/
         toast(R.string.edit_mode);
-        return true ;
+        return true;
     }
 
     private void initView(ActionMode mode) {
@@ -506,9 +520,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
 
     /**
-     *
      * VIEW CLICK CONTROL
-     *
      */
     @Override
     public void onClick(View v) {
@@ -546,9 +558,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
 
     /**
-     *
      * SOFT KEY BACK CONTROL
-     *
      */
     @Override
     public void onBackPressed() {
@@ -565,8 +575,7 @@ public class FileManageActivity extends AppCompatActivity implements
         if (!isOnTop()) {
             String parent = new File(mPath).getParent();
             doLoad(parent);
-        }
-        else {
+        } else {
             mDrawer.openDrawer(GravityCompat.START);
         }
     }
@@ -574,8 +583,7 @@ public class FileManageActivity extends AppCompatActivity implements
     private boolean isOnTop() {
         if (NASApp.MODE_SMB.equals(mMode)) {
             return mPath.equals(mRoot);
-        }
-        else {
+        } else {
             File root = new File(mRoot);
             File file = new File(mPath);
             return file.equals(root);
@@ -603,28 +611,31 @@ public class FileManageActivity extends AppCompatActivity implements
 
 
     /**
-     *
      * P2P CONTROL
-     *
      */
     @Override
     public void onTunnelStatusChanged(int nErrCode, int nSID) {
-
+        Log.d("ike", "TEST " + nErrCode + "," + nSID);
     }
 
     @Override
     public void onTunnelSessionInfoChanged(sP2PTunnelSessionInfo object) {
-
+        Log.d("ike", "TEST CHANGE ");
     }
 
+    private void setRecordLoader(int id, Bundle args) {
+        mPreviousLoaderID = id;
+        mPreviousLoaderArgs = args;
+    }
 
     /**
-     *
      * LOADER CONTROL
-     *
      */
     @Override
     public Loader<Boolean> onCreateLoader(int id, Bundle args) {
+        if (LoaderID.SMB_MIN_COMMAND <= id && id <= LoaderID.SMB_MAX_COMMAND)
+            setRecordLoader(id, args);
+
         ArrayList<String> paths = args.getStringArrayList("paths");
         String path = args.getString("path");
         String name = args.getString("name");
@@ -665,6 +676,11 @@ public class FileManageActivity extends AppCompatActivity implements
                 return new SmbFileDownloadLoader(this, paths, path);
             case LoaderID.LOCAL_FILE_UPLOAD:
                 return new LocalFileUploadLoader(this, paths, path);
+            case LoaderID.TUTK_NAS_LINK:
+                return new TutkLinkNasLoader(this, args);
+            case LoaderID.TUTK_LOGOUT:
+                mProgressView.setVisibility(View.VISIBLE);
+                return new TutkLogoutLoader(this);
         }
         return null;
     }
@@ -689,8 +705,7 @@ public class FileManageActivity extends AppCompatActivity implements
                 //*/
                 updateScreen();
             }
-        } else
-        if (loader instanceof LocalFileListLoader) {
+        } else if (loader instanceof LocalFileListLoader) {
             if (success) {
                 mMode = NASApp.MODE_STG;
                 mRoot = NASApp.ROOT_STG;
@@ -705,15 +720,45 @@ public class FileManageActivity extends AppCompatActivity implements
                 //*/
                 updateScreen();
             }
+        } else if (loader instanceof TutkLinkNasLoader) {
+            TutkLinkNasLoader linkLoader = (TutkLinkNasLoader) loader;
+            if (!success) {
+                Log.w(TAG, "Remote Access connect fail: " + linkLoader.getError() + ", start logout");
+                Toast.makeText(this, linkLoader.getError(), Toast.LENGTH_SHORT).show();
+            } else {
+                Log.w(TAG, "Remote Access connect success, start execute previous loader");
+                if (mPreviousLoaderArgs != null && mPreviousLoaderID >= 0) {
+                    mPreviousLoaderArgs.putBoolean("retry", true);
+                    getLoaderManager().restartLoader(mPreviousLoaderID, mPreviousLoaderArgs, this).forceLoad();
+                    mPreviousLoaderID = -1;
+                    mPreviousLoaderArgs = null;
+                    return;
+                }
+            }
+        } else if(loader instanceof TutkLogoutLoader){
+            startSignInActivity(true);
         }
         else {
             if (success) {
                 doRefresh();
             }
         }
+
+        if (!success && isRemoteAccess() && LoaderID.SMB_MIN_COMMAND <= mLoaderID && mLoaderID <= LoaderID.SMB_MAX_COMMAND) {
+            if (mPreviousLoaderArgs != null && !mPreviousLoaderArgs.getBoolean("retry")) {
+                Log.w(TAG, "Remote Access connect fail, try reConnect");
+                Bundle args = new Bundle();
+                args.putString("hostname", P2PService.getInstance().getTUTKUUID());
+                getLoaderManager().restartLoader(LoaderID.TUTK_NAS_LINK, args, this).forceLoad();
+                return;
+            } else {
+                Log.w(TAG, "Remote Access connect fail again, start logout");
+                Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+            }
+        }
+
         toggleDrawerCheckedItem();
         mProgressView.setVisibility(View.INVISIBLE);
-        Log.w(TAG, loader.getClass().getSimpleName() + " " + success);
     }
 
     @Override
@@ -723,9 +768,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
 
     /**
-     *
      * FILE BROWSER
-     *
      */
     private void doLoad(String path) {
         int id = path.startsWith(NASApp.ROOT_STG)
@@ -761,9 +804,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
 
     /**
-     *
      * FILE EDITOR
-     *
      */
     private int getSelectedCount() {
         int count = 0;
@@ -907,9 +948,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
 
     /**
-     *
      * UX CONTROL
-     *
      */
     private void updateScreen() {
         mDropdownAdapter.updateList(mPath, mMode);
@@ -939,7 +978,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
     private void resizeToolbar() {
         TypedValue typedValue = new TypedValue();
-        int[] attr = new int[]{ R.attr.actionBarSize };
+        int[] attr = new int[]{R.attr.actionBarSize};
         TypedArray array = obtainStyledAttributes(typedValue.resourceId, attr);
         mToolbar.getLayoutParams().height = array.getDimensionPixelSize(0, 0);
         array.recycle();
@@ -988,7 +1027,7 @@ public class FileManageActivity extends AppCompatActivity implements
         mFab.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
     }
 
-    private void toggleFabSelectAll (boolean selectAll) {
+    private void toggleFabSelectAll(boolean selectAll) {
         int resId = selectAll
                 ? R.drawable.ic_clear_all_white_24dp
                 : R.drawable.ic_done_all_white_24dp;
@@ -1007,8 +1046,7 @@ public class FileManageActivity extends AppCompatActivity implements
                 }
             });
             mSnackbar.show();
-        }
-        else {
+        } else {
             mSnackbar.dismiss();
             mSnackbar = null;
         }
@@ -1156,11 +1194,34 @@ public class FileManageActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
+    private void startSignInActivity(boolean clear) {
+        boolean isRunning = false;
+
+        //stop auto backup service
+        isRunning = isMyServiceRunning(AutoBackupService.class);
+        if (isRunning) {
+            Intent intent = new Intent(FileManageActivity.this, AutoBackupService.class);
+            stopService(intent);
+        }
+
+        //clean hostname, account, password, token
+        if (clear) {
+            NASPref.setHostname(this, "");
+            NASPref.setUsername(this, "");
+            NASPref.setPassword(this, "");
+            NASPref.setCloudAuthToken(this, "");
+        }
+
+        //show SignIn activity
+        Intent intent = new Intent();
+        intent.setClass(FileManageActivity.this, SignInActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
 
     /**
-     *
      * GRID LAYOUT MANAGER SPAN SIZE LOOKUP
-     *
      */
     private class SpanSizeLookup extends GridLayoutManager.SpanSizeLookup {
 

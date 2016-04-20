@@ -30,6 +30,7 @@ public class SmbFolderCreateLoader extends SmbAbstractLoader {
     public Boolean loadInBackground() {
         Log.w(TAG, "loadInBackground");
         try {
+            super.loadInBackground();
             return createNewFolder();
         } catch (Exception e) {
             e.printStackTrace();

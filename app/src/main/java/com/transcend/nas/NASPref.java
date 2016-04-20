@@ -75,10 +75,57 @@ public class NASPref {
         return PrefUtil.read(context, name, key, def);
     }
 
-    public static void setCloudPassword(Context context, String username) {
+    public static void setCloudUsername(Context context, String username) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_cloud_username);
+        String def = "";
+        PrefUtil.write(context, name, key, username);
+    }
+
+    public static String getCloudPassword(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
         String key = context.getResources().getString(R.string.pref_cloud_password);
-        PrefUtil.write(context, name, key, username);
+        String def = "";
+        return PrefUtil.read(context, name, key, def);
+    }
+
+    public static void setCloudPassword(Context context, String password) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_cloud_password);
+        PrefUtil.write(context, name, key, password);
+    }
+
+    public static String getCloudAuthToken(Context context){
+        String name = context.getString(R.string.pref_name);
+        String key = context.getString(R.string.pref_cloud_token);
+        String def = "";
+        return PrefUtil.read(context, name, key, def);
+    }
+
+    public static void setCloudAuthToken(Context context, String token){
+        String name = context.getString(R.string.pref_name);
+        String key = context.getString(R.string.pref_cloud_token);
+        PrefUtil.write(context, name, key, token);
+    }
+
+    public static boolean getCloudMode(Context context){
+        String name = context.getString(R.string.pref_name);
+        String key = context.getString(R.string.pref_cloud_mode);
+        boolean def = false;
+        return PrefUtil.read(context, name, key, def);
+    }
+
+    public static void setCloudMode(Context context, boolean enable){
+        String name = context.getString(R.string.pref_name);
+        String key = context.getString(R.string.pref_cloud_mode);
+        PrefUtil.write(context, name, key, enable);
+    }
+
+    public static String getCloudServer(Context context){
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_cloud_ip);
+        String def = "http://54.179.182.60:3000/1";
+        return PrefUtil.read(context, name, key, def);
     }
 
     /**

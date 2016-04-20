@@ -33,7 +33,6 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
         return success;
     }
 
-
     private void updateServerManager() {
         ServerManager.INSTANCE.saveServer(mServer);
         ServerManager.INSTANCE.setCurrentServer(mServer);

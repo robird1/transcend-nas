@@ -49,6 +49,7 @@ public class SmbFileCopyLoader extends SmbAbstractLoader {
     public Boolean loadInBackground()  {
         Log.w(TAG, "loadInBackground");
         try {
+            super.loadInBackground();
             return copy();
         } catch (Exception e) {
             e.printStackTrace();

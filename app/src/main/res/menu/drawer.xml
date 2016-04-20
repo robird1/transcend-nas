@@ -29,6 +29,10 @@
             android:icon="@drawable/ic_help_outline_black_24dp"
             android:title="@string/about" />
 
+        <item
+            android:id="@+id/nav_logout"
+            android:icon="@drawable/ic_navigation_arrow_back"
+            android:title="@string/logout" />
     </group>
 
 </menu>

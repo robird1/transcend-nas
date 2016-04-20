@@ -1,5 +1,6 @@
 package com.transcend.nas.management;
 
+import android.graphics.Color;
 import android.os.Environment;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -7,6 +8,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -122,6 +126,13 @@ public class FileManageDropdownAdapter extends BaseAdapter {
         convertView.setOnTouchListener(new OnDropdownItemTouchListener(position));
         TextView tv = ViewHolder.get(convertView, R.id.dropdown_text);
         tv.setText(mList.get(position));
+        tv.setTextColor(position == 0 ? Color.RED : Color.GRAY);
+        if(position > 0) {
+            ImageView iv = ViewHolder.get(convertView, R.id.dropdown_icon);
+            RelativeLayout.LayoutParams margins = new RelativeLayout.LayoutParams(iv.getLayoutParams());
+            margins.leftMargin = Math.min(8*position,32);
+            iv.setLayoutParams(margins);
+        }
         return convertView;
     }
 

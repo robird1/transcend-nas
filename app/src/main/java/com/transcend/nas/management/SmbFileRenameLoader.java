@@ -31,6 +31,7 @@ public class SmbFileRenameLoader extends SmbAbstractLoader {
     public Boolean loadInBackground() {
         Log.w(TAG, "loadInBackground");
         try {
+            super.loadInBackground();
             return rename();
         } catch (Exception e) {
             e.printStackTrace();
