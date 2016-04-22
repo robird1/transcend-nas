@@ -7,6 +7,7 @@ import android.os.Bundle;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
+import com.tutk.IOTC.P2PService;
 
 /**
  * Created by silverhsu on 16/1/5.
@@ -39,6 +40,12 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
     }
 
     private void updateLoginPreference() {
+        String p2pIp = P2PService.getInstance().getP2PIP();
+        if(mServer.getHostname().contains(p2pIp))
+            NASPref.setCloudUUID(getContext(), P2PService.getInstance().getTUTKUUID());
+        else
+            NASPref.setLocalHostname(getContext(), mServer.getHostname());
+
         NASPref.setHostname(getContext(), mServer.getHostname());
         NASPref.setUsername(getContext(), mServer.getUsername());
         NASPref.setPassword(getContext(), mServer.getPassword());

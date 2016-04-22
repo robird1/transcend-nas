@@ -82,9 +82,13 @@ public class ViewerPagerAdapter extends PagerAdapter {
         else {
             Server server = ServerManager.INSTANCE.getCurrentServer();
             String hostname = server.getHostname();
-            String filepath = path.replaceFirst(Server.HOME, "/");
             String hash = server.getHash();
-            url = "http://" + hostname + "/dav/home/" + filepath + "?session=" + hash + "&webview";
+            String filepath;
+            if(path.startsWith(Server.HOME))
+                filepath = Server.ADMIN_DAV_HOME + path.replaceFirst(Server.HOME, "/");
+            else
+                filepath = Server.ADMIN_DAV_HOME + path;
+            url = "http://" + hostname + filepath + "?session=" + hash + "&webview";
         }
         return url;
     }

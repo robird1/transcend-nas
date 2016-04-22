@@ -5,6 +5,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 
+import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.tutk.IOTC.P2PService;
 import com.tutk.IOTC.P2PTunnelAPIs;

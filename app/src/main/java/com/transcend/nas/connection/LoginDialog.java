@@ -18,6 +18,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
@@ -94,7 +95,7 @@ public abstract class LoginDialog implements View.OnClickListener {
     private void initFieldIP() {
         etHostname = (AppCompatEditText) mDialog.findViewById(R.id.dialog_login_ip);
         etHostname.setText(mHostname);
-        //etIP.setKeyListener(null);
+        etHostname.setHint(mActivity.getString(isRemoeteAccess ? R.string.uuid : R.string.ip));
     }
 
     private void initFieldAccount() {
@@ -114,11 +115,24 @@ public abstract class LoginDialog implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         if (v.equals(mDlgBtnPos)) {
+            String hostname = etHostname.getText().toString();
+            String username = tvUsername.getText().toString();
+            String password = etPassword.getText().toString();
+            if(username.equals("")){
+                Toast.makeText(mActivity, mActivity.getString(R.string.empty_account),Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if(password.equals("")){
+                Toast.makeText(mActivity, mActivity.getString(R.string.empty_password),Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             showProgress();
             Bundle args = new Bundle();
-            args.putString("hostname", etHostname.getText().toString());
-            args.putString("username", tvUsername.getText().toString());
-            args.putString("password", etPassword.getText().toString());
+            args.putString("hostname", hostname);
+            args.putString("username", username);
+            args.putString("password", password);
             Log.w(TAG, "hostname: " + args.get("hostname"));
             Log.w(TAG, "username: " + args.get("username"));
             Log.w(TAG, "password: " + args.get("password"));

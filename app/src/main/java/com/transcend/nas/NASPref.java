@@ -37,6 +37,19 @@ public class NASPref {
         PrefUtil.write(context, name, key, hostname);
     }
 
+    public static String getLocalHostname(Context context) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_local_hostname);
+        String def = "";
+        return PrefUtil.read(context, name, key, def);
+    }
+
+    public static void setLocalHostname(Context context, String localHostname) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_local_hostname);
+        PrefUtil.write(context, name, key, localHostname);
+    }
+
     public static String getUsername(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
         String key = context.getResources().getString(R.string.pref_username);
@@ -119,6 +132,19 @@ public class NASPref {
         String name = context.getString(R.string.pref_name);
         String key = context.getString(R.string.pref_cloud_mode);
         PrefUtil.write(context, name, key, enable);
+    }
+
+    public static String getCloudUUID(Context context){
+        String name = context.getString(R.string.pref_name);
+        String key = context.getString(R.string.pref_cloud_uuid);
+        String def = "";
+        return PrefUtil.read(context, name, key, def);
+    }
+
+    public static void setCloudUUID(Context context, String UUID){
+        String name = context.getString(R.string.pref_name);
+        String key = context.getString(R.string.pref_cloud_uuid);
+        PrefUtil.write(context, name, key, UUID);
     }
 
     public static String getCloudServer(Context context){

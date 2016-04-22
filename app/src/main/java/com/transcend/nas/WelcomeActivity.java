@@ -33,29 +33,12 @@ public class WelcomeActivity extends Activity implements LoaderManager.LoaderCal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
         mTextView = (TextView) findViewById(R.id.welcome_text);
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        //check network status
-        NetworkInfo info = connectivityManager.getActiveNetworkInfo();
-        if (info != null && info.isAvailable()) {
-            int type = info.getType();
-            switch (type) {
-                case ConnectivityManager.TYPE_WIFI:
-                    getLoaderManager().initLoader(LoaderID.AUTO_LINK, null, this).forceLoad();
-                    break;
-                default:
-                    startRemoteAccessListLoader();
-                    break;
-            }
-        }
-        else
-            startRemoteAccessListLoader();
+        getLoaderManager().initLoader(LoaderID.AUTO_LINK, null, this).forceLoad();
     }
 
     @Override
     public Loader onCreateLoader(int id, Bundle args) {
         switch (id) {
-            //TODO : add remote access auto login
             case LoaderID.AUTO_LINK:
                 mTextView.setText(getString(R.string.try_auto_connect));
                 return new AutoLinkLoader(this);

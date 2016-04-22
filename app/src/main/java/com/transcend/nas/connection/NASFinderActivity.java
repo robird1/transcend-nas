@@ -20,6 +20,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.common.DividerItemDecoration;
@@ -210,8 +212,9 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
         } else if (loader instanceof LoginLoader) {
             if (mLoginDialog != null)
                 mLoginDialog.hideProgress();
-            if (success)
+            if (success) {
                 startFileManageActivity();
+            }
         } else if(loader instanceof TutkGetNasLoader){
             mProgressView.setVisibility(View.INVISIBLE);
             if(!success){
@@ -339,8 +342,10 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
                 args.putString("nasId", nas.get("nasId"));
                 args.putString("nickname", nas.get("nickname"));
                 args.putString("hostname", nas.get("hostname"));
-                args.putString("username", "admin");
-                args.putString("password", "Realtek");
+                //args.putString("username", "admin");
+                //args.putString("password", "Realtek");
+                args.putString("username", NASPref.getUsername(NASFinderActivity.this));
+                args.putString("password", NASPref.getPassword(NASFinderActivity.this));
                 mLoginDialog = new LoginDialog(NASFinderActivity.this, args, isRemoteAccess) {
                     @Override
                     public void onConfirm(Bundle args) {

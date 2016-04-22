@@ -61,6 +61,7 @@
     <string name="information">Information</string>
     <string name="invalid_name">Invalid name</string>
     <string name="ip">IP</string>
+    <string name="uuid">UUID</string>
     <string name="last_modified">Last modified</string>
     <string name="loading">Loading</string>
     <string name="location">Location</string>
@@ -111,6 +112,7 @@
     <string name="try_search_device">Try searching device</string>
     <string name="try_remote_access">Try remote access</string>
 
+    <string name="empty_account">Empty Account</string>
     <string name="empty_email">Empty Email</string>
     <string name="empty_password">Empty Password</string>
     <string name="forget_password_title">Enter your email to send the reset password email</string>
@@ -167,12 +169,15 @@
     <string name="pref_username">USERNAME</string>
     <string name="pref_password">PASSWORD</string>
 
+    <string name="pref_local_hostname">LOCAL HOSTNAME</string>
+
     <string name="pref_cloud_username">CLOUD USERNAME</string>
     <string name="pref_cloud_password">CLOUD PASSWORD</string>
     <string name="pref_cloud_status">CLOUD STATUS</string>
     <string name="pref_cloud_ip">CLOUD IP</string>
     <string name="pref_cloud_token">CLOUD AUTHTOKEN</string>
     <string name="pref_cloud_mode">CLOUD MODE</string>
+    <string name="pref_cloud_uuid">CLOUD UUID</string>
 
     <string name="pref_file_sort_type">FILE SORT TYPE</string>
 

@@ -108,8 +108,6 @@ public class FileManageActivity extends AppCompatActivity implements
     private int mPreviousLoaderID = -1;
     private Bundle mPreviousLoaderArgs = null;
 
-    //private RemoteAccessService remoteAccessReceiver;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -162,10 +160,6 @@ public class FileManageActivity extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
         P2PService.getInstance().removeP2PListener(this);
-        //if(remoteAccessReceiver != null) {
-        //    unregisterReceiver(remoteAccessReceiver);
-        //    remoteAccessReceiver = null;
-        //}
         super.onDestroy();
         Log.w(TAG, "onDestroy");
 
@@ -204,13 +198,6 @@ public class FileManageActivity extends AppCompatActivity implements
         mFileList = new ArrayList<FileInfo>();
         mServer = ServerManager.INSTANCE.getCurrentServer();
         P2PService.getInstance().addP2PListener(this);
-        //if(isRemoteAccess()) {
-        //    IntentFilter mFilter = new IntentFilter();
-        //    mFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        //    if (remoteAccessReceiver == null)
-        //        remoteAccessReceiver = new RemoteAccessService();
-        //    registerReceiver(remoteAccessReceiver, mFilter);
-        //}
     }
 
     private void initAutoBackUpService() {
@@ -717,13 +704,12 @@ public class FileManageActivity extends AppCompatActivity implements
                 resetActionFabs();
                 /*/
                 enableFabEdit(true);
-                //*/
                 updateScreen();
             }
         } else if (loader instanceof TutkLinkNasLoader) {
             TutkLinkNasLoader linkLoader = (TutkLinkNasLoader) loader;
             if (!success) {
-                Log.w(TAG, "Remote Access connect fail: " + linkLoader.getError() + ", start logout");
+                Log.w(TAG, "Remote Access connect fail: " + linkLoader.getError());
                 Toast.makeText(this, linkLoader.getError(), Toast.LENGTH_SHORT).show();
             } else {
                 Log.w(TAG, "Remote Access connect success, start execute previous loader");
@@ -744,15 +730,14 @@ public class FileManageActivity extends AppCompatActivity implements
             }
         }
 
-        if (!success && isRemoteAccess() && LoaderID.SMB_MIN_COMMAND <= mLoaderID && mLoaderID <= LoaderID.SMB_MAX_COMMAND) {
-            if (mPreviousLoaderArgs != null && !mPreviousLoaderArgs.getBoolean("retry")) {
+        if (!success && LoaderID.SMB_MIN_COMMAND <= mLoaderID && mLoaderID <= LoaderID.SMB_MAX_COMMAND) {
+            if (isRemoteAccess() && mPreviousLoaderArgs != null && !mPreviousLoaderArgs.getBoolean("retry")) {
                 Log.w(TAG, "Remote Access connect fail, try reConnect");
                 Bundle args = new Bundle();
                 args.putString("hostname", P2PService.getInstance().getTUTKUUID());
                 getLoaderManager().restartLoader(LoaderID.TUTK_NAS_LINK, args, this).forceLoad();
                 return;
             } else {
-                Log.w(TAG, "Remote Access connect fail again, start logout");
                 Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
             }
         }
@@ -1210,6 +1195,7 @@ public class FileManageActivity extends AppCompatActivity implements
             NASPref.setUsername(this, "");
             NASPref.setPassword(this, "");
             NASPref.setCloudAuthToken(this, "");
+            NASPref.setCloudUUID(this,"");
         }
 
         //show SignIn activity
