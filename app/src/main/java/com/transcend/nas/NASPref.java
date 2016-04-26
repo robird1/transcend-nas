@@ -1,6 +1,7 @@
 package com.transcend.nas;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Environment;
 import android.os.storage.StorageManager;
 
@@ -186,7 +187,7 @@ public class NASPref {
     public static String getBackupLocation(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
         String key = context.getResources().getString(R.string.pref_backup_location);
-        String def = "/homes/" + getUsername(context) + " android phone/";
+        String def = "/homes/" + Build.MODEL + "/";
         return PrefUtil.read(context, name, key, def);
     }
 

@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
+import com.tutk.IOTC.P2PService;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -54,14 +55,22 @@ public class AutoBackupTask extends AsyncTask<String, String, Boolean>
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
+    }
+
+    public void updateServerInfo(){
         mServer = ServerManager.INSTANCE.getCurrentServer();
         mUsername = mServer.getUsername();
         mPassword = mServer.getPassword();
         mHostname = mServer.getHostname();
+        String p2pIP = P2PService.getInstance().getP2PIP();
+        if(mHostname.contains(p2pIP)){
+            mHostname = p2pIP + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.SMB);
+        }
     }
 
     @Override
     protected Boolean doInBackground(String... params) {
+        updateServerInfo();
         Boolean result = true;
         try {
             return upload();

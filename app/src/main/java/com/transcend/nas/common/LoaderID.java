@@ -33,5 +33,6 @@ public class LoaderID {
     public static final int TUTK_NAS_RESEND_ACTIVATE = 23;
     public static final int TUTK_NAS_DELETE = 24;
     public static final int TUTK_NAS_LINK = 25;
+    public static final int AUTO_BACKUP = 26;
 
 }

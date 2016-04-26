@@ -18,7 +18,6 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
@@ -28,11 +27,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
@@ -41,7 +36,6 @@ import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.realtek.nasfun.api.Server;
-import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
@@ -49,6 +43,7 @@ import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.common.NotificationDialog;
 import com.transcend.nas.common.TutkCodeID;
+import com.transcend.nas.management.AutoBackupLoader;
 import com.transcend.nas.management.FileActionLocateActivity;
 import com.transcend.nas.management.SmbFolderCreateLoader;
 import com.transcend.nas.management.TutkCreateNasLoader;
@@ -58,13 +53,10 @@ import com.transcend.nas.management.TutkRegisterLoader;
 import com.transcend.nas.management.TutkResendActivateLoader;
 import com.transcend.nas.service.AutoBackupService;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by silverhsu on 16/3/2.
@@ -94,7 +86,6 @@ public class SettingsActivity extends AppCompatActivity implements
         initToolbar();
         showSettingFragment();
         initProgressView();
-        createBackupsFolder();
     }
 
     @Override
@@ -179,6 +170,8 @@ public class SettingsActivity extends AppCompatActivity implements
                 server = args.getString("server");
                 email = args.getString("email");
                 return new TutkResendActivateLoader(this, server, email);
+            case LoaderID.AUTO_BACKUP:
+                return new AutoBackupLoader(this);
         }
         return null;
     }
@@ -201,6 +194,8 @@ public class SettingsActivity extends AppCompatActivity implements
             checkGetNASResult((TutkGetNasLoader) loader);
         } else if (loader instanceof TutkResendActivateLoader) {
             checkResendActivateResult((TutkResendActivateLoader) loader);
+        } else if(loader instanceof AutoBackupLoader){
+            mProgressView.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -246,10 +241,10 @@ public class SettingsActivity extends AppCompatActivity implements
             arg.putString("server", loader.getServer());
             arg.putString("token", loader.getAuthToke());
             //TODO : get current nas uuid
-            ServerInfo info = ServerManager.INSTANCE.getCurrentServer().getServerInfo();
-            arg.putString("nasName", info.hostName);
+            Server mServer = ServerManager.INSTANCE.getCurrentServer();
+            arg.putString("nasName", mServer.getServerInfo().hostName);
             arg.putString("nasUUID", "CHKABX6WVL7C9HPGUHZJ");
-            getLoaderManager().restartLoader(LoaderID.TUTK_NAS_CREATE, arg, SettingsActivity.this).forceLoad();
+            getLoaderManager().restartLoader(LoaderID.TUTK_NAS_CREATE, arg, this).forceLoad();
         } else {
             mProgressView.setVisibility(View.INVISIBLE);
             if (code.equals(TutkCodeID.NOT_VERIFIED)) {
@@ -379,20 +374,10 @@ public class SettingsActivity extends AppCompatActivity implements
         mProgressView = (RelativeLayout) findViewById(R.id.settings_progress_view);
     }
 
-    private void createBackupsFolder() {
-        boolean checked = NASPref.getBackupSetting(this);
-        if (checked) {
-            //create the auto backup basic folder : /home/username/
-            Bundle args = new Bundle();
-            args.putString("path", NASPref.getBackupLocation(this));
-            getLoaderManager().restartLoader(LoaderID.SMB_NEW_FOLDER, args, this).forceLoad();
-        }
-    }
-
-
     /**
      * SETTINGS FRAGMENT
      */
+    @SuppressLint("ValidFragment")
     public class SettingsFragment extends PreferenceFragment implements
             SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -540,8 +525,8 @@ public class SettingsActivity extends AppCompatActivity implements
             if (changeService) {
                 Intent intent = new Intent(mContext, AutoBackupService.class);
                 if (checked) {
-                    mContext.startService(intent);
-
+                    Bundle arg = new Bundle();
+                    getLoaderManager().restartLoader(LoaderID.AUTO_BACKUP, arg, SettingsActivity.this).forceLoad();
                 } else
                     mContext.stopService(intent);
             }
@@ -602,6 +587,7 @@ public class SettingsActivity extends AppCompatActivity implements
     /**
      * RemoteAccess FRAGMENT
      */
+    @SuppressLint("ValidFragment")
     public class RemoteAccessFragment extends Fragment implements View.OnClickListener {
         TextInputLayout tlEmail;
         TextInputLayout tlPwd;

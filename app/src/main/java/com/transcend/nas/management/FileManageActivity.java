@@ -35,6 +35,7 @@ import android.view.MenuItem;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,7 +43,6 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.connection.SignInActivity;
 import com.transcend.nas.service.AutoBackupService;
-import com.transcend.nas.service.RemoteAccessService;
 import com.transcend.nas.settings.AboutActivity;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
@@ -107,7 +107,7 @@ public class FileManageActivity extends AppCompatActivity implements
     private int mLoaderID;
     private int mPreviousLoaderID = -1;
     private Bundle mPreviousLoaderArgs = null;
-
+    private boolean isAutoBackupServiceInit = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,7 +115,6 @@ public class FileManageActivity extends AppCompatActivity implements
         Log.w(TAG, "onCreate");
         setContentView(R.layout.activity_file_manage);
         init();
-        initAutoBackUpService();
         initToolbar();
         initDropdown();
         initRecyclerView();
@@ -201,12 +200,15 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void initAutoBackUpService() {
+        isAutoBackupServiceInit = true;
         boolean checked = NASPref.getBackupSetting(this);
         Intent intent = new Intent(this, AutoBackupService.class);
         boolean isRunning = isMyServiceRunning(AutoBackupService.class);
         if (checked) {
-            if (!isRunning)
-                startService(intent);
+            if (!isRunning) {
+                Bundle args = new Bundle();
+                getLoaderManager().restartLoader(LoaderID.AUTO_BACKUP, args, this).forceLoad();
+            }
         } else
             stopService(intent);
     }
@@ -668,6 +670,8 @@ public class FileManageActivity extends AppCompatActivity implements
             case LoaderID.TUTK_LOGOUT:
                 mProgressView.setVisibility(View.VISIBLE);
                 return new TutkLogoutLoader(this);
+            case LoaderID.AUTO_BACKUP:
+                return new AutoBackupLoader(this);
         }
         return null;
     }
@@ -679,7 +683,7 @@ public class FileManageActivity extends AppCompatActivity implements
                 mMode = NASApp.MODE_SMB;
                 mRoot = NASApp.ROOT_SMB;
                 mPath = ((SmbFileListLoader) loader).getPath();
-                mFileList = ((SmbFileListLoader) loader).getFileList();
+                mFileList = doHomeFilter(((SmbFileListLoader) loader).getFileList());
                 Collections.sort(mFileList, FileInfoSort.comparator(this));
                 closeEditorMode();
                 /*// expanded fabs
@@ -723,6 +727,8 @@ public class FileManageActivity extends AppCompatActivity implements
             }
         } else if(loader instanceof TutkLogoutLoader){
             startSignInActivity(true);
+        } else if(loader instanceof AutoBackupLoader){
+            //do nothing
         }
         else {
             if (success) {
@@ -743,7 +749,11 @@ public class FileManageActivity extends AppCompatActivity implements
         }
 
         toggleDrawerCheckedItem();
-        mProgressView.setVisibility(View.INVISIBLE);
+
+        if(!isAutoBackupServiceInit)
+            initAutoBackUpService();
+        else
+            mProgressView.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -929,6 +939,18 @@ public class FileManageActivity extends AppCompatActivity implements
                 Log.w(TAG, "doNewFolder: " + path);
             }
         };
+    }
+
+    private ArrayList<FileInfo> doHomeFilter( ArrayList<FileInfo> fileList){
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        String name = server.getUsername();
+        for(FileInfo file : fileList){
+            if(file.name.equals(name)){
+                fileList.remove(file);
+                break;
+            }
+        }
+        return fileList;
     }
 
 

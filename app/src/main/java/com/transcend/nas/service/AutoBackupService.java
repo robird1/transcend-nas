@@ -19,6 +19,7 @@ import android.util.Log;
 
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
+import com.transcend.nas.management.AutoBackupLoader;
 import com.transcend.nas.management.FileInfo;
 
 import java.io.File;
@@ -76,6 +77,8 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
         mLocalFileObserver.removeListener();
         mLocalFileObserver.stopWatching();
         mLocalFileObserver = null;
+        if(AutoBackupQueue.getInstance().getUploadQueueSize() > 0)
+            showOnceNotification("Backup Stop", "backup service is stop", NOTIFICATION_ID);
         AutoBackupQueue.getInstance().onDestroy();
         Log.d(TAG, "onDestroy() executed");
     }

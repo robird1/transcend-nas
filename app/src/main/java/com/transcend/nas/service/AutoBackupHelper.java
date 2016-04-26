@@ -11,6 +11,7 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.management.FileInfo;
+import com.tutk.IOTC.P2PService;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -41,11 +42,7 @@ public class AutoBackupHelper {
         mPath = path;
         dbHelper = new MyDBHelper(context);
         db = dbHelper.getWritableDatabase();
-
-        mServer = ServerManager.INSTANCE.getCurrentServer();
-        mUsername = mServer.getUsername();
-        mPassword = mServer.getPassword();
-        mHostname = mServer.getHostname();
+        updateServerInfo();
     }
 
     public void init() {
@@ -60,6 +57,17 @@ public class AutoBackupHelper {
 
     public void onDestroy(){
         db.close();
+    }
+
+    public void updateServerInfo(){
+        mServer = ServerManager.INSTANCE.getCurrentServer();
+        mUsername = mServer.getUsername();
+        mPassword = mServer.getPassword();
+        mHostname = mServer.getHostname();
+        String p2pIP = P2PService.getInstance().getP2PIP();
+        if(mHostname.contains(p2pIP)){
+            mHostname = p2pIP + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.SMB);
+        }
     }
 
     public ArrayList<String> getNeedUploadImageList(boolean filter) {
@@ -136,7 +144,7 @@ public class AutoBackupHelper {
 
         File files[] = dir.listFiles();
         for (File file : files) {
-            if (file.isHidden() || file.getPath().contains("100MEDIA"))
+            if (file.isHidden())
                 continue;
             FileInfo fileInfo = new FileInfo();
             fileInfo.path = file.getPath();

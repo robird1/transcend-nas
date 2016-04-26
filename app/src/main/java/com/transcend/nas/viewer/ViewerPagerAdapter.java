@@ -85,7 +85,7 @@ public class ViewerPagerAdapter extends PagerAdapter {
             String hash = server.getHash();
             String filepath;
             if(path.startsWith(Server.HOME))
-                filepath = Server.ADMIN_DAV_HOME + path.replaceFirst(Server.HOME, "/");
+                filepath = Server.USER_DAV_HOME + path.replaceFirst(Server.HOME, "/");
             else
                 filepath = Server.ADMIN_DAV_HOME + path;
             url = "http://" + hostname + filepath + "?session=" + hash + "&webview";
