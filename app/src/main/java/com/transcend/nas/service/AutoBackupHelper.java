@@ -36,6 +36,7 @@ public class AutoBackupHelper {
     private String mUsername;
     private String mPassword;
     private String mHostname;
+    private String mTutkuuid;
 
     public AutoBackupHelper(Context context, String path) {
         mContext = context;
@@ -61,6 +62,7 @@ public class AutoBackupHelper {
 
     public void updateServerInfo(){
         mServer = ServerManager.INSTANCE.getCurrentServer();
+        mTutkuuid = mServer.getTutkUUID();
         mUsername = mServer.getUsername();
         mPassword = mServer.getPassword();
         mHostname = mServer.getHostname();
@@ -184,7 +186,13 @@ public class AutoBackupHelper {
 
     public boolean existTask(String key, String value){
         boolean exist = false;
-        Cursor c = db.rawQuery("select * from " + MyDBHelper.TABLE_NAME + " WHERE " + key + "='" + value + "'",null);
+        String url;
+        if(mTutkuuid == null)
+            url = "select * from " + MyDBHelper.TABLE_NAME + " WHERE " + key + "='" + value + "'";
+        else
+            url = "select * from " + MyDBHelper.TABLE_NAME + " WHERE " + key + "='" + value + "' AND " + MyDBHelper.DESTINATION + "='" + mTutkuuid + "'";
+
+        Cursor c = db.rawQuery(url, null);
         exist = c.getCount() > 0;
         c.close();
         return exist;

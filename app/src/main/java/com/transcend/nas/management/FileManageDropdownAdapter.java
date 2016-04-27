@@ -2,6 +2,7 @@ package com.transcend.nas.management;
 
 import android.graphics.Color;
 import android.os.Environment;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -85,6 +86,9 @@ public class FileManageDropdownAdapter extends BaseAdapter {
             File storage = Environment.getExternalStorageDirectory();
             String root = storage.getAbsolutePath();
             path = path.replaceFirst(PREFIX_LOCAL, root);
+            if(path.endsWith("/")){
+                path = path.substring(0, path.length()-1);
+            }
         }
         return path;
     }

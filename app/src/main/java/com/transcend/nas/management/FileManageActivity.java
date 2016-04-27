@@ -39,6 +39,7 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.connection.SignInActivity;
@@ -199,7 +200,7 @@ public class FileManageActivity extends AppCompatActivity implements
         P2PService.getInstance().addP2PListener(this);
     }
 
-    private void initAutoBackUpService() {
+    private boolean initAutoBackUpService() {
         isAutoBackupServiceInit = true;
         boolean checked = NASPref.getBackupSetting(this);
         Intent intent = new Intent(this, AutoBackupService.class);
@@ -208,9 +209,11 @@ public class FileManageActivity extends AppCompatActivity implements
             if (!isRunning) {
                 Bundle args = new Bundle();
                 getLoaderManager().restartLoader(LoaderID.AUTO_BACKUP, args, this).forceLoad();
+                return true;
             }
         } else
             stopService(intent);
+        return false;
     }
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {
@@ -604,12 +607,12 @@ public class FileManageActivity extends AppCompatActivity implements
      */
     @Override
     public void onTunnelStatusChanged(int nErrCode, int nSID) {
-        Log.d("ike", "TEST " + nErrCode + "," + nSID);
+        //Log.d("ike", "TEST " + nErrCode + "," + nSID);
     }
 
     @Override
     public void onTunnelSessionInfoChanged(sP2PTunnelSessionInfo object) {
-        Log.d("ike", "TEST CHANGE ");
+        //Log.d("ike", "TEST CHANGE ");
     }
 
     private void setRecordLoader(int id, Bundle args) {
@@ -680,6 +683,9 @@ public class FileManageActivity extends AppCompatActivity implements
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
         if (loader instanceof SmbFileListLoader) {
             if (success) {
+                //file list change, stop previous image loader
+                ImageLoader.getInstance().stop();
+
                 mMode = NASApp.MODE_SMB;
                 mRoot = NASApp.ROOT_SMB;
                 mPath = ((SmbFileListLoader) loader).getPath();
@@ -698,6 +704,9 @@ public class FileManageActivity extends AppCompatActivity implements
             }
         } else if (loader instanceof LocalFileListLoader) {
             if (success) {
+                //file list change, stop previous image loader
+                ImageLoader.getInstance().stop();
+
                 mMode = NASApp.MODE_STG;
                 mRoot = NASApp.ROOT_STG;
                 mPath = ((LocalFileListLoader) loader).getPath();
@@ -749,11 +758,10 @@ public class FileManageActivity extends AppCompatActivity implements
         }
 
         toggleDrawerCheckedItem();
-
-        if(!isAutoBackupServiceInit)
-            initAutoBackUpService();
-        else
-            mProgressView.setVisibility(View.INVISIBLE);
+        if(!isAutoBackupServiceInit && initAutoBackUpService()){
+            return;
+        }
+        mProgressView.setVisibility(View.INVISIBLE);
     }
 
     @Override

@@ -95,6 +95,7 @@ public class Server {
 	private final static String NAS_GEN_HASH_PATH = "/nas/gen/hash";
 	private final static String CGI_PATH = "/cgi-bin/IpodCGI.cgi";
 	private final static String NAS_GET_MNAS_PATH= "/nas/get/mnas";
+	private final static String NAS_GET_TUTK_PATH= "/nas/get/tutk";
 	private final static String NAS_VERSION_PATH = "/movie-api/tver.xml";
 	private final static String NAS_CHANGE_PASSWORD_PATH = "/nas/edit/user";
 	private final static String NAS_GET_APLIST_PATH = "/nas/get/aplist";
@@ -488,7 +489,84 @@ public class Server {
 
 		return isMediaNas;
 	}
-	
+
+	/**<nas>
+	 * 	<enable>yes</enable>
+	 * </nas>
+	 * @return Is this a media nas? (true/false)
+	 */
+	public boolean checkTutkuid(){
+		boolean isTutkNas = false;
+
+		try {
+			String commandURL = "http://"+hostname+NAS_GET_TUTK_PATH+"?session="+hash;
+			Log.d(TAG, "Get "+commandURL);
+			DefaultHttpClient httpClient = HttpClientManager.getClient();
+			HttpGet httpGet = new HttpGet(commandURL);
+			HttpResponse httpResponse;
+			httpResponse = httpClient.execute(httpGet);
+			HttpEntity httpEntity = httpResponse.getEntity();
+			InputStream inputStream = httpEntity.getContent();
+			String inputEncoding = EntityUtils.getContentCharSet(httpEntity);
+			if (inputEncoding == null) {
+				inputEncoding = HTTP.DEFAULT_CONTENT_CHARSET;
+			}
+
+			try{
+				XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+				factory.setNamespaceAware(true);
+				XmlPullParser xpp = factory.newPullParser();
+				xpp.setInput(inputStream, inputEncoding);
+				int eventType = xpp.getEventType();
+				String curTagName = null;
+				String text = null;
+
+				do {
+					String tagName = xpp.getName();
+					if(eventType == XmlPullParser.START_TAG) {
+						curTagName = tagName;
+					}
+					else if(eventType == XmlPullParser.TEXT) {
+						if(curTagName != null){
+							text = xpp.getText();
+							if(curTagName.equals("tutkuid")){
+								String enable = text;
+
+								if(enable != null){
+									if(enable.equals(""))
+										isTutkNas = false;
+									else
+										setTutkUUID(enable);
+									Log.d(TAG,"tutkuid = "+enable);
+									break;
+								}else{
+									Log.d(TAG, "Can't get tutkuid");
+								}
+							}
+						}
+					}
+
+					eventType = xpp.next();
+
+				} while (eventType != XmlPullParser.END_DOCUMENT);
+			} catch (XmlPullParserException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+		} catch (ClientProtocolException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch(IllegalArgumentException e){
+			e.printStackTrace();
+		}
+
+		return isTutkNas;
+	}
+
+
 	public MusicManager getMusicManager(){
 		if(musicManager == null) {
 			switch(firmwareType){
@@ -1393,6 +1471,8 @@ public class Server {
 				}
 				// use ServerInfo to set firmware
 				isSuccess = setFirmwareType();
+				// to get tutk uid
+				checkTutkuid();
 				getServerProfile();
 			} catch (ClientProtocolException e) {
 				e.printStackTrace();

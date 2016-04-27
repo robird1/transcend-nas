@@ -237,14 +237,21 @@ public class SettingsActivity extends AppCompatActivity implements
             NASPref.setCloudUsername(mContext, email);
             NASPref.setCloudPassword(mContext, pwd);
             NASPref.setCloudAuthToken(mContext, loader.getAuthToke());
-            Bundle arg = new Bundle();
-            arg.putString("server", loader.getServer());
-            arg.putString("token", loader.getAuthToke());
-            //TODO : get current nas uuid
+
             Server mServer = ServerManager.INSTANCE.getCurrentServer();
-            arg.putString("nasName", mServer.getServerInfo().hostName);
-            arg.putString("nasUUID", "CHKABX6WVL7C9HPGUHZJ");
-            getLoaderManager().restartLoader(LoaderID.TUTK_NAS_CREATE, arg, this).forceLoad();
+            String uuid = mServer.getTutkUUID();
+            if(uuid != null && !uuid.equals("")) {
+                Bundle arg = new Bundle();
+                arg.putString("server", loader.getServer());
+                arg.putString("token", loader.getAuthToke());
+                arg.putString("nasName", mServer.getServerInfo().hostName);
+                arg.putString("nasUUID", uuid);
+                getLoaderManager().restartLoader(LoaderID.TUTK_NAS_CREATE, arg, this).forceLoad();
+            }
+            else{
+                mProgressView.setVisibility(View.INVISIBLE);
+                Toast.makeText(this,getString(R.string.empty_uuid),Toast.LENGTH_SHORT).show();
+            }
         } else {
             mProgressView.setVisibility(View.INVISIBLE);
             if (code.equals(TutkCodeID.NOT_VERIFIED)) {
@@ -630,19 +637,20 @@ public class SettingsActivity extends AppCompatActivity implements
                     tvListTitle.setVisibility(View.VISIBLE);
 
                     if (naslist != null) {
-                        //TODO: get cuurrent nas uuid
-                        //Server mServer = ServerManager.INSTANCE.getCurrentServer();
-                        //String uuid = mServer.getTutkUUID();
-                        String uuid = "";
-
+                        Server mServer = ServerManager.INSTANCE.getCurrentServer();
+                        String uuid = mServer.getTutkUUID();
+                        Log.d(TAG,"Current UUID: " + uuid);
                         String ID_TITLE = "TITLE", ID_SUBTITLE = "SUBTITLE";
                         ArrayList<HashMap<String, String>> myListData = new ArrayList<HashMap<String, String>>();
 
                         for (TutkGetNasLoader.TutkNasNode node : naslist) {
                             HashMap<String, String> item = new HashMap<String, String>();
-                            item.put(ID_TITLE, node.nasName + (node.nasUUID.equals(uuid) ? " <- " + getString(R.string.current_device) : ""));
-                            item.put(ID_SUBTITLE, "UUID: " + node.nasUUID);
-                            myListData.add(item);
+                            item.put(ID_TITLE, node.nasName);
+                            item.put(ID_SUBTITLE, node.nasUUID);
+                            if(node.nasUUID.equals(uuid))
+                                myListData.add(0,item);
+                            else
+                                myListData.add(item);
                         }
 
                         lvList.setAdapter(new SimpleAdapter(mContext,

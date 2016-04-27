@@ -17,6 +17,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.management.AutoBackupLoader;
@@ -126,18 +128,24 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
     };
 
     private void initBackup(){
-        mHelper.init();
-        ArrayList<String> list = mHelper.getNeedUploadImageList(true);
-        if(list != null && list.size() > 0) {
-            Log.d(TAG, "Clean upload task due to init backup");
-            AutoBackupQueue.getInstance().cleanUploadTask();
-            if (canAddTaskToQueue())
-                addBackupTaskToQueue(list, 1);
-            else
-                showOnceNotification("Backup Fail", "can't connect to NAS", NOTIFICATION_ID);
-        } else {
-            //showOnceNotification("Backup Success", "Already backup all images", NOTIFICATION_ID);
-        }
+        Thread thread = new Thread(){
+            public void run(){
+                mHelper.init();
+                ArrayList<String> list = mHelper.getNeedUploadImageList(true);
+                if(list != null && list.size() > 0) {
+                    Log.d(TAG, "Clean upload task due to init backup");
+                    AutoBackupQueue.getInstance().cleanUploadTask();
+                    if (canAddTaskToQueue())
+                        addBackupTaskToQueue(list, 1);
+                    else
+                        showOnceNotification("Backup Fail", "can't connect to NAS", NOTIFICATION_ID);
+                } else {
+                    //showOnceNotification("Backup Success", "Already backup all images", NOTIFICATION_ID);
+                }
+
+            }
+        };
+        thread.start();
     }
 
     private void showProgressNotification(String title, int id, int TotalItem, int FinishItem) {
@@ -222,7 +230,12 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
         }
 
         AutoBackupQueue.getInstance().removeUploadTask(task);
-        mHandler.postDelayed(runnable, 200);
+        Thread thread = new Thread(){
+            public void run(){
+                mHandler.postDelayed(runnable, 200);
+            }
+        };
+        thread.start();
     }
 
     @Override
@@ -288,11 +301,19 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
         task.addListener(this);
         task.setRetryCount(retry);
         AutoBackupQueue.getInstance().addUploadTask(task);
-        mHandler.postDelayed(runnable, 200);
+        Thread thread = new Thread(){
+            public void run(){
+                mHandler.postDelayed(runnable, 200);
+            }
+        };
+        thread.start();
     }
 
     private void addBackupTaskToDatabase(String path){
-        String hostname = NASPref.getHostname(getApplicationContext());
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        String hostname = server.getTutkUUID();
+        if(hostname == null)
+            hostname = "";
         File file = new File(path);
         mHelper.insertTask(file.getName(), file.getPath(), Long.toString(file.lastModified()), hostname);
     }
