@@ -73,8 +73,10 @@ public class SettingsActivity extends AppCompatActivity implements
     private boolean isSubFragment = false;
     private boolean isRemoteAccessRegister = false;
     private boolean isRemoteAccessActive = false;
+    private boolean isRemoteAccessCheck = false;
     private TextView mTitle = null;
     private List<TutkGetNasLoader.TutkNasNode> naslist;
+    private SettingsFragment mSettingsFragment;
 
     private Context mContext;
 
@@ -86,11 +88,18 @@ public class SettingsActivity extends AppCompatActivity implements
         initToolbar();
         showSettingFragment();
         initProgressView();
+        boolean checked = NASPref.getBackupSetting(mContext);
+        String path = NASPref.getBackupLocation(mContext);
+        if(checked && path != null && !path.equals("")){
+            Bundle arg = new Bundle();
+            arg.putString("path", path);
+            getLoaderManager().restartLoader(LoaderID.SMB_NEW_FOLDER, arg, this).forceLoad();
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if(isSubFragment)
+        if (isSubFragment)
             getMenuInflater().inflate(R.menu.nas_finder, menu);
         return true;
     }
@@ -115,9 +124,9 @@ public class SettingsActivity extends AppCompatActivity implements
                     arg.putString("email", email);
                     arg.putString("password", pwd);
                     getLoaderManager().restartLoader(LoaderID.TUTK_LOGIN, arg, SettingsActivity.this).forceLoad();
-                }
-                else{
-                    Toast.makeText(this,getString(R.string.remote_access_no_login),Toast.LENGTH_SHORT).show();;
+                } else {
+                    Toast.makeText(this, getString(R.string.remote_access_no_login), Toast.LENGTH_SHORT).show();
+                    ;
                 }
                 break;
         }
@@ -178,6 +187,11 @@ public class SettingsActivity extends AppCompatActivity implements
 
     @Override
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
+        if(loader instanceof SmbFolderCreateLoader){
+            mProgressView.setVisibility(View.INVISIBLE);
+            return;
+        }
+
         if (!success) {
             mProgressView.setVisibility(View.INVISIBLE);
             Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
@@ -194,7 +208,7 @@ public class SettingsActivity extends AppCompatActivity implements
             checkGetNASResult((TutkGetNasLoader) loader);
         } else if (loader instanceof TutkResendActivateLoader) {
             checkResendActivateResult((TutkResendActivateLoader) loader);
-        } else if(loader instanceof AutoBackupLoader){
+        } else if (loader instanceof AutoBackupLoader) {
             mProgressView.setVisibility(View.INVISIBLE);
         }
     }
@@ -240,19 +254,26 @@ public class SettingsActivity extends AppCompatActivity implements
 
             Server mServer = ServerManager.INSTANCE.getCurrentServer();
             String uuid = mServer.getTutkUUID();
-            if(uuid != null && !uuid.equals("")) {
+            if (uuid != null && !uuid.equals("")) {
                 Bundle arg = new Bundle();
                 arg.putString("server", loader.getServer());
                 arg.putString("token", loader.getAuthToke());
                 arg.putString("nasName", mServer.getServerInfo().hostName);
                 arg.putString("nasUUID", uuid);
                 getLoaderManager().restartLoader(LoaderID.TUTK_NAS_CREATE, arg, this).forceLoad();
-            }
-            else{
+                if (isRemoteAccessCheck)
+                    return;
+            } else {
                 mProgressView.setVisibility(View.INVISIBLE);
-                Toast.makeText(this,getString(R.string.empty_uuid),Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.empty_uuid), Toast.LENGTH_SHORT).show();
+
+                if (isRemoteAccessCheck) {
+                    setAutoBackupToWifi();
+                    return;
+                }
             }
         } else {
+            setAutoBackupToWifi();
             mProgressView.setVisibility(View.INVISIBLE);
             if (code.equals(TutkCodeID.NOT_VERIFIED)) {
                 //account not verified
@@ -269,7 +290,7 @@ public class SettingsActivity extends AppCompatActivity implements
                 else
                     Toast.makeText(this, getString(R.string.error_format), Toast.LENGTH_SHORT).show();
 
-                if(isSubFragment)
+                if (isSubFragment)
                     return;
             }
 
@@ -287,6 +308,7 @@ public class SettingsActivity extends AppCompatActivity implements
             arg.putString("token", loader.getAuthToken());
             getLoaderManager().restartLoader(LoaderID.TUTK_NAS_GET, arg, SettingsActivity.this).forceLoad();
         } else {
+            setAutoBackupToWifi();
             mProgressView.setVisibility(View.INVISIBLE);
             Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
         }
@@ -298,8 +320,16 @@ public class SettingsActivity extends AppCompatActivity implements
 
         if (code.equals("")) {
             naslist = loader.getNasList();
-            showRemoteAccessFragment(getString(R.string.remote_access));
+            if (isRemoteAccessCheck)
+                if(mSettingsFragment == null)
+                    showSettingFragment();
+                else
+                    mSettingsFragment.refreshColumnBackupScenario(false,false);
+            else
+                showRemoteAccessFragment(getString(R.string.remote_access));
+            isRemoteAccessCheck = false;
         } else {
+            setAutoBackupToWifi();
             Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
         }
         mProgressView.setVisibility(View.INVISIBLE);
@@ -310,14 +340,19 @@ public class SettingsActivity extends AppCompatActivity implements
         String code = loader.getCode();
         if (code.equals(TutkCodeID.SUCCESS))
             Toast.makeText(this, status, Toast.LENGTH_SHORT).show();
-        else if(code.equals(TutkCodeID.VERIFICATIONEXPIRED)){
+        else if (code.equals(TutkCodeID.VERIFICATIONEXPIRED)) {
             isRemoteAccessRegister = false;
             isRemoteAccessActive = false;
             showRemoteAccessFragment(getString(R.string.remote_access));
-        }
-        else
+        } else
             Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
         mProgressView.setVisibility(View.INVISIBLE);
+    }
+
+    private void setAutoBackupToWifi() {
+        isRemoteAccessCheck = false;
+        String[] scenarios = mContext.getResources().getStringArray(R.array.backup_scenario_values);
+        NASPref.setBackupScenario(mContext, scenarios[1]);
     }
 
     private void showNotificationDialog(String title, final int loaderID, final Bundle args) {
@@ -330,6 +365,8 @@ public class SettingsActivity extends AppCompatActivity implements
                     NASPref.setCloudUsername(mContext, "");
                     NASPref.setCloudPassword(mContext, "");
                     NASPref.setCloudAuthToken(mContext, "");
+                    String[] scenarios = mContext.getResources().getStringArray(R.array.backup_scenario_values);
+                    NASPref.setBackupScenario(mContext, scenarios[1]);
                     showSettingFragment();
                 } else
                     getLoaderManager().restartLoader(loaderID, args, SettingsActivity.this).forceLoad();
@@ -356,14 +393,21 @@ public class SettingsActivity extends AppCompatActivity implements
     }
 
     private void showSettingFragment() {
-        mTitle.setText(getString(R.string.settings));
-        isSubFragment = false;
-        Fragment f = new SettingsFragment();
-        getFragmentManager().beginTransaction().replace(R.id.settings_frame, f).commit();
-        invalidateOptionsMenu();
+        Handler handler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                mTitle.setText(getString(R.string.settings));
+                isSubFragment = false;
+                if(mSettingsFragment == null)
+                    mSettingsFragment = new SettingsFragment();
+                getFragmentManager().beginTransaction().replace(R.id.settings_frame, mSettingsFragment).commit();
+                invalidateOptionsMenu();
+            }
+        };
+        handler.sendEmptyMessage(0);
     }
 
-    private void showRemoteAccessFragment(final String title){
+    private void showRemoteAccessFragment(final String title) {
         Handler handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
@@ -390,7 +434,7 @@ public class SettingsActivity extends AppCompatActivity implements
 
         private Toast mToast;
 
-        public SettingsFragment(){
+        public SettingsFragment() {
 
         }
 
@@ -402,8 +446,8 @@ public class SettingsActivity extends AppCompatActivity implements
             getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
             refreshColumnRemoteAccessSetting();
             refreshColumnBackupSetting(false);
-            refreshColumnBackupScenario();
-            refreshColumnBackupLocation();
+            refreshColumnBackupScenario(true, false);
+            refreshColumnBackupLocation(true);
             refreshColumnDownloadLocation();
             getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
         }
@@ -437,13 +481,14 @@ public class SettingsActivity extends AppCompatActivity implements
 
         @Override
         public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
-            if (preference.getKey().equals(getString(R.string.pref_backup_location))) {
+            String key = preference.getKey();
+            if (key.equals(getString(R.string.pref_backup_location))) {
                 startBackupLocateActivity();
-            } else if (preference.getKey().equals(getString(R.string.pref_download_location))) {
+            } else if (key.equals(getString(R.string.pref_download_location))) {
                 startDownloadLocateActivity();
-            } else if (preference.getKey().equals(getString(R.string.pref_cache_clean))) {
+            } else if (key.equals(getString(R.string.pref_cache_clean))) {
                 cleanCache();
-            } else if (preference.getKey().equals(getString(R.string.pref_remote_access))) {
+            } else if (key.equals(getString(R.string.pref_remote_access))) {
                 startRemoteAccessFragment();
             }
             return super.onPreferenceTreeClick(preferenceScreen, preference);
@@ -454,17 +499,13 @@ public class SettingsActivity extends AppCompatActivity implements
             if (key.equals(getString(R.string.pref_auto_backup))) {
                 refreshColumnBackupSetting(true);
             } else if (key.equals(getString(R.string.pref_backup_scenario))) {
-                refreshColumnBackupScenario();
-                // TODO: stop backup and change backup scenario
+                refreshColumnBackupScenario(false, true);
             } else if (key.equals(getString(R.string.pref_backup_location))) {
-                refreshColumnBackupLocation();
-                // TODO: stop backup and change backup location
-
+                refreshColumnBackupLocation(false);
             } else if (key.equals(getString(R.string.pref_download_location))) {
                 refreshColumnDownloadLocation();
             } else if (key.equals(getString(R.string.pref_cache_size))) {
                 refreshColumnCacheSize();
-                // TODO: reset cache size
             }
         }
 
@@ -481,6 +522,12 @@ public class SettingsActivity extends AppCompatActivity implements
                 isRemoteAccessRegister = false;
                 isRemoteAccessActive = false;
                 showRemoteAccessFragment(getString(R.string.register));
+                if (isRemoteAccessCheck) {
+                    isRemoteAccessCheck = false;
+                    String[] scenarios = mContext.getResources().getStringArray(R.array.backup_scenario_values);
+                    NASPref.setBackupScenario(mContext, scenarios[1]);
+                    Toast.makeText(mContext, getString(R.string.remote_access_always_warning), Toast.LENGTH_LONG).show();
+                }
             } else {
                 isRemoteAccessRegister = true;
                 isRemoteAccessActive = false;
@@ -516,11 +563,27 @@ public class SettingsActivity extends AppCompatActivity implements
             startActivityForResult(intent, FileActionLocateActivity.REQUEST_CODE);
         }
 
+        private void restartService(){
+            boolean checked = NASPref.getBackupSetting(getActivity());
+            Log.d(TAG, "check need to restart service : " + checked);
+            if(checked) {
+                //restart service
+                Intent intent = new Intent(mContext, AutoBackupService.class);
+                mContext.stopService(intent);
+                Bundle arg = new Bundle();
+                getLoaderManager().restartLoader(LoaderID.AUTO_BACKUP, arg, SettingsActivity.this).forceLoad();
+            }
+        }
+
         private void refreshColumnRemoteAccessSetting() {
             String key = getString(R.string.pref_remote_access);
             String email = NASPref.getCloudUsername(mContext);
             Preference pref = findPreference(key);
             pref.setSummary(email.equals("") ? getString(R.string.remote_access_inactive) : email);
+        }
+
+        private void checkRemoteAccess() {
+
         }
 
         private void refreshColumnBackupSetting(boolean changeService) {
@@ -546,24 +609,35 @@ public class SettingsActivity extends AppCompatActivity implements
             pref_backup_location.setSelectable(checked);
         }
 
-        private void refreshColumnBackupScenario() {
+        public void refreshColumnBackupScenario(boolean init, boolean check) {
             String scenario = NASPref.getBackupScenario(getActivity());
             String[] scenarios = getActivity().getResources().getStringArray(R.array.backup_scenario_values);
             int idx = Arrays.asList(scenarios).indexOf(scenario);
+            if (check && idx == 0) {
+                //"Always" Auto Backup, we need to check remote access set or not
+                isRemoteAccessCheck = true;
+                startRemoteAccessFragment();
+                return;
+            }
+
             String title = getActivity().getResources().getStringArray(R.array.backup_scenario_entries)[idx];
             String key = getString(R.string.pref_backup_scenario);
             ListPreference pref = (ListPreference) findPreference(key);
-            pref.setValue(scenario);
+            pref.setValue(scenarios[idx]);
             pref.setTitle(title);
             pref.setEnabled(NASPref.getBackupSetting(getActivity()));
+            if(!init)
+                restartService();
         }
 
-        private void refreshColumnBackupLocation() {
+        private void refreshColumnBackupLocation(boolean init) {
             String location = NASPref.getBackupLocation(getActivity());
             String key = getString(R.string.pref_backup_location);
             Preference pref = findPreference(key);
             pref.setSummary(location);
             pref.setEnabled(NASPref.getBackupSetting(getActivity()));
+            if(!init)
+                restartService();
         }
 
         private void refreshColumnDownloadLocation() {
@@ -605,11 +679,11 @@ public class SettingsActivity extends AppCompatActivity implements
         TextView tvInfo;
         boolean isLogin = true;
 
-        public RemoteAccessFragment(){
+        public RemoteAccessFragment() {
             isLogin = true;
         }
 
-        public RemoteAccessFragment(boolean login){
+        public RemoteAccessFragment(boolean login) {
             isLogin = login;
         }
 
@@ -639,7 +713,7 @@ public class SettingsActivity extends AppCompatActivity implements
                     if (naslist != null) {
                         Server mServer = ServerManager.INSTANCE.getCurrentServer();
                         String uuid = mServer.getTutkUUID();
-                        Log.d(TAG,"Current UUID: " + uuid);
+                        Log.d(TAG, "Current UUID: " + uuid);
                         String ID_TITLE = "TITLE", ID_SUBTITLE = "SUBTITLE";
                         ArrayList<HashMap<String, String>> myListData = new ArrayList<HashMap<String, String>>();
 
@@ -647,8 +721,8 @@ public class SettingsActivity extends AppCompatActivity implements
                             HashMap<String, String> item = new HashMap<String, String>();
                             item.put(ID_TITLE, node.nasName);
                             item.put(ID_SUBTITLE, node.nasUUID);
-                            if(node.nasUUID.equals(uuid))
-                                myListData.add(0,item);
+                            if (node.nasUUID.equals(uuid))
+                                myListData.add(0, item);
                             else
                                 myListData.add(item);
                         }
@@ -682,7 +756,7 @@ public class SettingsActivity extends AppCompatActivity implements
                 tvRegister.setOnClickListener(this);
                 tvInfo = (TextView) v.findViewById(R.id.register_info);
                 initRegisterContent();
-                if(!isLogin) {
+                if (!isLogin) {
                     tvInfo.setText(getString(R.string.remote_access_verification_expired));
                 }
             }
@@ -690,7 +764,7 @@ public class SettingsActivity extends AppCompatActivity implements
             return v;
         }
 
-        private void initRegisterContent(){
+        private void initRegisterContent() {
             tlPwd.getEditText().setText(null);
             tlPwdConfirm.getEditText().setText(null);
             if (isLogin) {

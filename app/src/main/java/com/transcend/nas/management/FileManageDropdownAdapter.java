@@ -130,7 +130,6 @@ public class FileManageDropdownAdapter extends BaseAdapter {
         convertView.setOnTouchListener(new OnDropdownItemTouchListener(position));
         TextView tv = ViewHolder.get(convertView, R.id.dropdown_text);
         tv.setText(mList.get(position));
-        tv.setTextColor(position == 0 ? Color.RED : Color.GRAY);
         if(position > 0) {
             ImageView iv = ViewHolder.get(convertView, R.id.dropdown_icon);
             RelativeLayout.LayoutParams margins = new RelativeLayout.LayoutParams(iv.getLayoutParams());

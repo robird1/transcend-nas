@@ -16,13 +16,11 @@
     <string-array name="backup_scenario_entries">
         <item>@string/always</item>
         <item>@string/wifi_only</item>
-        <item>@string/charge_only</item>
     </string-array>
 
     <string-array name="backup_scenario_values">
         <item>ALWAYS</item>
         <item>WIFI_ONLY</item>
-        <item>CHARGE_ONLY</item>
     </string-array>
 
     <string-array name="cache_size_entries">
@@ -112,6 +110,7 @@
     <string name="try_search_device">Try searching device</string>
     <string name="try_remote_access">Try remote access</string>
 
+    <string name="search_result_empty">No match file</string>
     <string name="empty_account">Empty Account</string>
     <string name="empty_email">Empty Email</string>
     <string name="empty_password">Empty Password</string>
@@ -121,6 +120,7 @@
     <string name="forget_password_send">The password mail is sent. Please check your mail.</string>
     <string name="confirm_password_error">Please confirm your password</string>
     <string name="network_error">Please check your network, or try again later</string>
+    <string name="remote_access_always_warning">For \"Always\", you need to set remote access at first</string>
     <string name="remote_access_register">Create new remote access account, and we will automatically bind your NAS later</string>
     <string name="remote_access_welcome">Please input your email and password, and we will automatically bind your NAS later</string>
     <string name="remote_access_send_activate_info">Please check your email to activate it</string>

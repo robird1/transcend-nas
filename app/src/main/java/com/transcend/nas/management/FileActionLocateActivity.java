@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.Loader;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
@@ -26,6 +27,7 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
@@ -301,6 +303,8 @@ public class FileActionLocateActivity extends AppCompatActivity implements
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
         if (loader instanceof SmbFileListLoader) {
             if (success) {
+                //file list change, stop previous image loader
+                ImageLoader.getInstance().stop();
                 mPath = ((SmbFileListLoader) loader).getPath();
                 mFileList = ((SmbFileListLoader) loader).getFileList();
                 Collections.sort(mFileList, FileInfoSort.comparator(this));
@@ -311,6 +315,8 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         } else
         if (loader instanceof LocalFileListLoader) {
             if (success) {
+                //file list change, stop previous image loader
+                ImageLoader.getInstance().stop();
                 mPath = ((LocalFileListLoader) loader).getPath();
                 mFileList = ((LocalFileListLoader) loader).getFileList();
                 Collections.sort(mFileList, FileInfoSort.comparator(this));

@@ -172,6 +172,12 @@ public class NASPref {
      * Backup scenario
      *
      */
+    public static void setBackupScenario(Context context, String scenario){
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_backup_scenario);
+        PrefUtil.write(context, name, key, scenario);
+    }
+
     public static String getBackupScenario(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
         String key = context.getResources().getString(R.string.pref_backup_scenario);

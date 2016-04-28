@@ -42,6 +42,7 @@ import android.widget.Toast;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.connection.LoginDialog;
 import com.transcend.nas.connection.SignInActivity;
 import com.transcend.nas.service.AutoBackupService;
 import com.transcend.nas.settings.AboutActivity;
@@ -334,7 +335,7 @@ public class FileManageActivity extends AppCompatActivity implements
                 doSort();
                 break;
             case R.id.file_manage_viewer_action_search:
-                toast(R.string.search);
+                doSearch();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -689,7 +690,8 @@ public class FileManageActivity extends AppCompatActivity implements
                 mMode = NASApp.MODE_SMB;
                 mRoot = NASApp.ROOT_SMB;
                 mPath = ((SmbFileListLoader) loader).getPath();
-                mFileList = doHomeFilter(((SmbFileListLoader) loader).getFileList());
+                //mFileList = doHomeFilter(((SmbFileListLoader) loader).getFileList());
+                mFileList = ((SmbFileListLoader) loader).getFileList();
                 Collections.sort(mFileList, FileInfoSort.comparator(this));
                 closeEditorMode();
                 /*// expanded fabs
@@ -801,6 +803,32 @@ public class FileManageActivity extends AppCompatActivity implements
                 Collections.sort(mFileList, FileInfoSort.comparator(FileManageActivity.this));
                 mRecyclerAdapter.updateList(mFileList);
                 mRecyclerAdapter.notifyDataSetChanged();
+            }
+        };
+    }
+
+    private void doSearch() {
+        new FileActionSearchDialog(this) {
+            @Override
+            public void onConfirm(String keyword) {
+                keyword = keyword.toLowerCase();
+                ArrayList<FileInfo> fileInfo = new ArrayList<FileInfo>();
+                for(FileInfo file : mFileList){
+                    if(file.name.toLowerCase().contains(keyword)) {
+                        fileInfo.add(file);
+                    }
+                }
+
+                if(fileInfo.size() > 0) {
+                    mFileList.clear();
+                    mFileList = fileInfo;
+                    mRecyclerAdapter.updateList(mFileList);
+                    mRecyclerAdapter.notifyDataSetChanged();
+                }
+                else {
+                    Toast.makeText(FileManageActivity.this, getString(R.string.search_result_empty), Toast.LENGTH_SHORT).show();
+                }
+                dismiss();
             }
         };
     }
