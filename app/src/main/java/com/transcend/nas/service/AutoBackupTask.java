@@ -47,9 +47,10 @@ public class AutoBackupTask extends AsyncTask<String, String, Boolean>
     private String mHostname;
     private AutoBackupTaskCallback mListener;
 
-    public AutoBackupTask(Context context, List<String> srcs, String dest) {
+    public AutoBackupTask(Context context, List<String> srcs, String dest, boolean isRemoteAccess) {
         mSrcs = srcs;
         mDest = dest;
+        updateServerInfo(isRemoteAccess);
     }
 
     @Override
@@ -57,20 +58,18 @@ public class AutoBackupTask extends AsyncTask<String, String, Boolean>
         super.onPreExecute();
     }
 
-    public void updateServerInfo(){
+    public void updateServerInfo(boolean isRemoteAccess){
         mServer = ServerManager.INSTANCE.getCurrentServer();
         mUsername = mServer.getUsername();
         mPassword = mServer.getPassword();
-        mHostname = mServer.getHostname();
-        String p2pIP = P2PService.getInstance().getP2PIP();
-        if(mHostname.contains(p2pIP)){
-            mHostname = p2pIP + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.SMB);
-        }
+        if(isRemoteAccess)
+            mHostname = P2PService.getInstance().getP2PIP() + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.SMB);
+        else
+            mHostname = mServer.getHostname();
     }
 
     @Override
     protected Boolean doInBackground(String... params) {
-        updateServerInfo();
         Boolean result = true;
         try {
             return upload();
@@ -128,6 +127,8 @@ public class AutoBackupTask extends AsyncTask<String, String, Boolean>
         builder.append(mHostname);
         if (isValid(path))
             builder.append(path);
+
+        Log.d(TAG, "Auto backup task url : " + builder.toString());
         return builder.toString();
     }
 

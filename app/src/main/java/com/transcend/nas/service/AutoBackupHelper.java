@@ -187,14 +187,23 @@ public class AutoBackupHelper {
     public boolean existTask(String key, String value){
         boolean exist = false;
         String url;
+        Cursor c = null;
         if(mTutkuuid == null)
             url = "select * from " + MyDBHelper.TABLE_NAME + " WHERE " + key + "='" + value + "'";
         else
             url = "select * from " + MyDBHelper.TABLE_NAME + " WHERE " + key + "='" + value + "' AND " + MyDBHelper.DESTINATION + "='" + mTutkuuid + "'";
-
-        Cursor c = db.rawQuery(url, null);
-        exist = c.getCount() > 0;
-        c.close();
+        try {
+            c = db.rawQuery(url, null);
+            exist = c.getCount() > 0;
+            c.close();
+            c = null;
+        } catch (IllegalStateException e){
+            dbHelper = new MyDBHelper(mContext);
+            db = dbHelper.getWritableDatabase();
+        } finally {
+            if(c != null)
+                c.close();
+        }
         return exist;
     }
 }

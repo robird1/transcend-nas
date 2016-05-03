@@ -160,6 +160,12 @@ public class NASPref {
      * Backup setting
      *
      */
+    public static void setBackupSetting(Context context, boolean backup) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_auto_backup);
+        PrefUtil.write(context, name, key, backup);
+    }
+
     public static Boolean getBackupSetting(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
         String key = context.getResources().getString(R.string.pref_auto_backup);

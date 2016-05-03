@@ -74,6 +74,8 @@ public class SettingsActivity extends AppCompatActivity implements
     private boolean isRemoteAccessRegister = false;
     private boolean isRemoteAccessActive = false;
     private boolean isRemoteAccessCheck = false;
+    private int scenerioType = -1;
+    private boolean isStartService = false;
     private TextView mTitle = null;
     private List<TutkGetNasLoader.TutkNasNode> naslist;
     private SettingsFragment mSettingsFragment;
@@ -188,7 +190,13 @@ public class SettingsActivity extends AppCompatActivity implements
     @Override
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
         if(loader instanceof SmbFolderCreateLoader){
-            mProgressView.setVisibility(View.INVISIBLE);
+            if(isStartService){
+                Bundle arg = new Bundle();
+                getLoaderManager().restartLoader(LoaderID.AUTO_BACKUP, arg, this).forceLoad();
+            }
+            else
+                mProgressView.setVisibility(View.INVISIBLE);
+            isStartService = false;
             return;
         }
 
@@ -320,6 +328,15 @@ public class SettingsActivity extends AppCompatActivity implements
 
         if (code.equals("")) {
             naslist = loader.getNasList();
+            //check nas uuid and record it
+            Server mServer = ServerManager.INSTANCE.getCurrentServer();
+            String uuid = mServer.getTutkUUID();
+            for(TutkGetNasLoader.TutkNasNode nas : naslist){
+                if(nas.nasUUID.equals(uuid)){
+                    NASPref.setCloudUUID(mContext, uuid);
+                    break;
+                }
+            }
             if (isRemoteAccessCheck)
                 if(mSettingsFragment == null)
                     showSettingFragment();
@@ -327,7 +344,6 @@ public class SettingsActivity extends AppCompatActivity implements
                     mSettingsFragment.refreshColumnBackupScenario(false,false);
             else
                 showRemoteAccessFragment(getString(R.string.remote_access));
-            isRemoteAccessCheck = false;
         } else {
             setAutoBackupToWifi();
             Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
@@ -350,7 +366,6 @@ public class SettingsActivity extends AppCompatActivity implements
     }
 
     private void setAutoBackupToWifi() {
-        isRemoteAccessCheck = false;
         String[] scenarios = mContext.getResources().getStringArray(R.array.backup_scenario_values);
         NASPref.setBackupScenario(mContext, scenarios[1]);
     }
@@ -441,6 +456,10 @@ public class SettingsActivity extends AppCompatActivity implements
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+            String scenario = NASPref.getBackupScenario(getActivity());
+            String[] scenarios = getActivity().getResources().getStringArray(R.array.backup_scenario_values);
+            scenerioType = Arrays.asList(scenarios).indexOf(scenario);
+
             addPreferencesFromResource(R.xml.preference_settings);
             getPreferenceManager().setSharedPreferencesName(getString(R.string.pref_name));
             getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
@@ -490,6 +509,10 @@ public class SettingsActivity extends AppCompatActivity implements
                 cleanCache();
             } else if (key.equals(getString(R.string.pref_remote_access))) {
                 startRemoteAccessFragment();
+            } else if(key.equals(getString(R.string.pref_auto_backup))){
+                String scenario = NASPref.getBackupScenario(getActivity());
+                String[] scenarios = getActivity().getResources().getStringArray(R.array.backup_scenario_values);
+                scenerioType = Arrays.asList(scenarios).indexOf(scenario);
             }
             return super.onPreferenceTreeClick(preferenceScreen, preference);
         }
@@ -523,9 +546,7 @@ public class SettingsActivity extends AppCompatActivity implements
                 isRemoteAccessActive = false;
                 showRemoteAccessFragment(getString(R.string.register));
                 if (isRemoteAccessCheck) {
-                    isRemoteAccessCheck = false;
-                    String[] scenarios = mContext.getResources().getStringArray(R.array.backup_scenario_values);
-                    NASPref.setBackupScenario(mContext, scenarios[1]);
+                    setAutoBackupToWifi();
                     Toast.makeText(mContext, getString(R.string.remote_access_always_warning), Toast.LENGTH_LONG).show();
                 }
             } else {
@@ -563,15 +584,23 @@ public class SettingsActivity extends AppCompatActivity implements
             startActivityForResult(intent, FileActionLocateActivity.REQUEST_CODE);
         }
 
-        private void restartService(){
+        private void restartService(boolean createFolder){
             boolean checked = NASPref.getBackupSetting(getActivity());
             Log.d(TAG, "check need to restart service : " + checked);
             if(checked) {
                 //restart service
                 Intent intent = new Intent(mContext, AutoBackupService.class);
                 mContext.stopService(intent);
+
                 Bundle arg = new Bundle();
-                getLoaderManager().restartLoader(LoaderID.AUTO_BACKUP, arg, SettingsActivity.this).forceLoad();
+                if(createFolder){
+                    isStartService = true;
+                    arg.putString("path",NASPref.getBackupLocation(mContext));
+                    getLoaderManager().restartLoader(LoaderID.SMB_NEW_FOLDER, arg, SettingsActivity.this).forceLoad();
+                }
+                else {
+                    getLoaderManager().restartLoader(LoaderID.AUTO_BACKUP, arg, SettingsActivity.this).forceLoad();
+                }
             }
         }
 
@@ -595,8 +624,10 @@ public class SettingsActivity extends AppCompatActivity implements
             if (changeService) {
                 Intent intent = new Intent(mContext, AutoBackupService.class);
                 if (checked) {
+                    isStartService = true;
                     Bundle arg = new Bundle();
-                    getLoaderManager().restartLoader(LoaderID.AUTO_BACKUP, arg, SettingsActivity.this).forceLoad();
+                    arg.putString("path", NASPref.getBackupLocation(mContext));
+                    getLoaderManager().restartLoader(LoaderID.SMB_NEW_FOLDER, arg, SettingsActivity.this).forceLoad();
                 } else
                     mContext.stopService(intent);
             }
@@ -626,8 +657,11 @@ public class SettingsActivity extends AppCompatActivity implements
             pref.setValue(scenarios[idx]);
             pref.setTitle(title);
             pref.setEnabled(NASPref.getBackupSetting(getActivity()));
-            if(!init)
-                restartService();
+            if(!init && scenerioType != idx)
+                restartService(false);
+
+            scenerioType = idx;
+            isRemoteAccessCheck = false;
         }
 
         private void refreshColumnBackupLocation(boolean init) {
@@ -637,7 +671,7 @@ public class SettingsActivity extends AppCompatActivity implements
             pref.setSummary(location);
             pref.setEnabled(NASPref.getBackupSetting(getActivity()));
             if(!init)
-                restartService();
+                restartService(false);
         }
 
         private void refreshColumnDownloadLocation() {
