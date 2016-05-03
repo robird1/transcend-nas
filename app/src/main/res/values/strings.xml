@@ -120,6 +120,7 @@
     <string name="forget_password_send">The password mail is sent. Please check your mail.</string>
     <string name="confirm_password_error">Please confirm your password</string>
     <string name="network_error">Please check your network, or try again later</string>
+    <string name="login_error">Invalid account or password</string>
     <string name="remote_access_always_warning">For \"Always\", you need to set remote access at first</string>
     <string name="remote_access_register">Create new remote access account, and we will automatically bind your NAS later</string>
     <string name="remote_access_welcome">Please input your email and password, and we will automatically bind your NAS later</string>

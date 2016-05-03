@@ -24,6 +24,7 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
+import com.transcend.nas.WizardActivity;
 import com.transcend.nas.common.DividerItemDecoration;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.common.TutkCodeID;
@@ -85,8 +86,7 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
     public void onBackPressed() {
         if (mLoginDialog != null) {
             getLoaderManager().destroyLoader(mLoaderID);
-            mLoginDialog.dismiss();
-            mLoginDialog = null;
+            hideLoginDialog(true);
         } else if (mProgressView.isShown()) {
             mProgressView.setVisibility(View.INVISIBLE);
             getLoaderManager().destroyLoader(mLoaderID);
@@ -144,6 +144,13 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
         finish();
     }
 
+    private void startWizardActivity() {
+        Intent intent = new Intent();
+        intent.setClass(NASFinderActivity.this, WizardActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
     private void startFileManageActivity() {
         Intent intent = new Intent();
         intent.setClass(NASFinderActivity.this, FileManageActivity.class);
@@ -167,11 +174,7 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
     }
 
     private void startLoginLoader(Bundle args) {
-        if(isRemoteAccess){
-            getLoaderManager().restartLoader(LoaderID.TUTK_NAS_LINK, args, this).forceLoad();
-        }
-        else
-            getLoaderManager().restartLoader(LoaderID.LOGIN, args, this).forceLoad();
+        getLoaderManager().restartLoader(isRemoteAccess ? LoaderID.TUTK_NAS_LINK : LoaderID.LOGIN, args, this).forceLoad();
     }
 
 
@@ -199,6 +202,9 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
                 token = args.getString("token");
                 nasId = args.getString("nasId");
                 return new TutkDeleteNasLoader(this, server, token, nasId);
+            case LoaderID.WIZARD:
+                mProgressView.setVisibility(View.VISIBLE);
+                return new WizardLoader(this, args, isRemoteAccess);
         }
         return null;
     }
@@ -206,86 +212,18 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
     @Override
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
         if (loader instanceof NASListLoader) {
-            mProgressView.setVisibility(View.INVISIBLE);
-            mNASList = ((NASListLoader) loader).getList();
-            mAdapter.notifyDataSetChanged();
+            checkNasListLoader(success, (NASListLoader) loader);
+        } else if (loader instanceof  WizardLoader){
+            checkWizardLoader(success, (WizardLoader) loader);
         } else if (loader instanceof LoginLoader) {
-            if (mLoginDialog != null)
-                mLoginDialog.hideProgress();
-            if (success) {
-                startFileManageActivity();
-            }
+            checkLoginLoader(success, (LoginLoader) loader);
         } else if(loader instanceof TutkGetNasLoader){
-            mProgressView.setVisibility(View.INVISIBLE);
-            if(!success){
-                Toast.makeText(this, getString(R.string.network_error),Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            TutkGetNasLoader listLoader = (TutkGetNasLoader) loader;
-            String code = listLoader.getCode();
-            String status = listLoader.getStatus();
-
-            if (code.equals("")) {
-                mNASList = listLoader.getNasArrayList();
-                mAdapter.notifyDataSetChanged();
-            } else {
-                Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
-                if(code.equals(TutkCodeID.AUTH_FAIL)){
-                    startSignInActivity();
-                }
-            }
+            checkTutkGetNasLoader(success, (TutkGetNasLoader) loader);
         } else if(loader instanceof TutkDeleteNasLoader){
-            if(!success){
-                if (mLoginDialog != null)
-                    mLoginDialog.hideProgress();
-                Toast.makeText(this, getString(R.string.network_error),Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            TutkDeleteNasLoader deleteLoader = (TutkDeleteNasLoader) loader;
-            String code = deleteLoader.getCode();
-            String status = deleteLoader.getStatus();
-            if (mLoginDialog != null) {
-                mLoginDialog.dismiss();
-                mLoginDialog = null;
-            }
-
-            if (code.equals(TutkCodeID.SUCCESS)) {
-                String id = deleteLoader.getNasID();
-                for(HashMap<String, String> nas : mNASList){
-                    if(id.equals(nas.get("nasId"))){
-                        mNASList.remove(nas);
-                        break;
-                    }
-                }
-                mAdapter.notifyDataSetChanged();
-                Toast.makeText(this, status, Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
-                if(code.equals(TutkCodeID.AUTH_FAIL)){
-                    startSignInActivity();
-                }
-            }
+            checkTutkDeleteNasLoader(success, (TutkDeleteNasLoader) loader);
         } else if(loader instanceof  TutkLinkNasLoader){
-            TutkLinkNasLoader linkLoader = (TutkLinkNasLoader) loader;
-            String code = linkLoader.getCode();
-            String status = linkLoader.getStatus();
-
-            if(!success){
-                Toast.makeText(this, linkLoader.getError(), Toast.LENGTH_SHORT).show();
-                if (mLoginDialog != null)
-                    mLoginDialog.hideProgress();
-                return;
-            }
-
-            Bundle args = linkLoader.getBundleArgs();
-            String ip = P2PService.getInstance().getP2PIP();
-            int port = P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
-            args.putString("hostname",ip+":"+port);
-            getLoaderManager().restartLoader(LoaderID.LOGIN, args, this).forceLoad();
+            checkTutkLinkNasLoader(success, (TutkLinkNasLoader) loader);
         }
-
     }
 
     @Override
@@ -293,6 +231,133 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
         Log.w(TAG, "onLoaderReset: " + loader.getClass().getSimpleName());
     }
 
+    private void checkNasListLoader(boolean success, NASListLoader loader){
+        mProgressView.setVisibility(View.INVISIBLE);
+        mNASList = loader.getList();
+        mAdapter.notifyDataSetChanged();
+    }
+
+    private void checkWizardLoader(boolean success, WizardLoader loader){
+        mProgressView.setVisibility(View.INVISIBLE);
+        if(!success){
+            Toast.makeText(this,getString(R.string.network_error),Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if(loader.isWizard()) {
+            Bundle args = loader.getBundleArgs();
+            showLoginDialog(args);
+        }
+        else{
+            startWizardActivity();
+        }
+    }
+
+    private void checkLoginLoader(boolean success, LoginLoader loader){
+        if(!success){
+            hideLoginDialog(false);
+            Toast.makeText(this,getString(R.string.login_error),Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        hideLoginDialog(true);
+        startFileManageActivity();
+    }
+
+    private void checkTutkGetNasLoader(boolean success , TutkGetNasLoader loader){
+        mProgressView.setVisibility(View.INVISIBLE);
+        if(!success){
+            Toast.makeText(this, getString(R.string.network_error),Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String code = loader.getCode();
+        String status = loader.getStatus();
+
+        if (code.equals("")) {
+            mNASList = loader.getNasArrayList();
+            mAdapter.notifyDataSetChanged();
+        } else {
+            Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
+            if(code.equals(TutkCodeID.AUTH_FAIL)){
+                startSignInActivity();
+            }
+        }
+    }
+
+    private void checkTutkDeleteNasLoader(boolean success, TutkDeleteNasLoader loader){
+        if(!success){
+            hideLoginDialog(false);
+            Toast.makeText(this, getString(R.string.network_error),Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        hideLoginDialog(true);
+        String code = loader.getCode();
+        String status = loader.getStatus();
+
+        if (code.equals(TutkCodeID.SUCCESS)) {
+            String id = loader.getNasID();
+            for(HashMap<String, String> nas : mNASList){
+                if(id.equals(nas.get("nasId"))){
+                    mNASList.remove(nas);
+                    break;
+                }
+            }
+            mAdapter.notifyDataSetChanged();
+            Toast.makeText(this, status, Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
+            if(code.equals(TutkCodeID.AUTH_FAIL)){
+                startSignInActivity();
+            }
+        }
+    }
+
+    private void checkTutkLinkNasLoader(boolean success, TutkLinkNasLoader loader){
+        if(!success){
+            hideLoginDialog(false);
+            Toast.makeText(this, loader.getError(), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Bundle args = loader.getBundleArgs();
+        String ip = P2PService.getInstance().getP2PIP();
+        int port = P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
+        args.putString("hostname",ip+":"+port);
+        getLoaderManager().restartLoader(LoaderID.LOGIN, args, this).forceLoad();
+    }
+
+    private void hideLoginDialog(boolean dismiss) {
+        if (mLoginDialog != null){
+            if (dismiss) {
+                mLoginDialog.dismiss();
+                mLoginDialog = null;
+            } else
+                mLoginDialog.hideProgress();
+        }
+    }
+
+    private void showLoginDialog(Bundle args){
+        mLoginDialog = new LoginDialog(NASFinderActivity.this, args, isRemoteAccess) {
+            @Override
+            public void onConfirm(Bundle args) {
+                startLoginLoader(args);
+            }
+
+            @Override
+            public void onDelete(Bundle args){
+                startRemoteAccessDeleteLoader(args);
+            }
+
+            @Override
+            public void onCancel() {
+                getLoaderManager().destroyLoader(mLoaderID);
+                mLoginDialog.dismiss();
+                mLoginDialog = null;
+            }
+        };
+    }
 
     /**
      * RECYCLER VIEW ADAPTER
@@ -342,28 +407,9 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
                 args.putString("nasId", nas.get("nasId"));
                 args.putString("nickname", nas.get("nickname"));
                 args.putString("hostname", nas.get("hostname"));
-                //args.putString("username", "admin");
-                //args.putString("password", "Realtek");
                 args.putString("username", NASPref.getUsername(NASFinderActivity.this));
                 args.putString("password", NASPref.getPassword(NASFinderActivity.this));
-                mLoginDialog = new LoginDialog(NASFinderActivity.this, args, isRemoteAccess) {
-                    @Override
-                    public void onConfirm(Bundle args) {
-                        startLoginLoader(args);
-                    }
-
-                    @Override
-                    public void onDelete(Bundle args){
-                        startRemoteAccessDeleteLoader(args);
-                    }
-
-                    @Override
-                    public void onCancel() {
-                        getLoaderManager().destroyLoader(mLoaderID);
-                        mLoginDialog.dismiss();
-                        mLoginDialog = null;
-                    }
-                };
+                getLoaderManager().restartLoader(LoaderID.WIZARD, args, NASFinderActivity.this).forceLoad();
             }
         }
     }

@@ -5,33 +5,41 @@
     android:layout_height="match_parent"
     android:background="@drawable/selector">
 
-    <ImageView
-        android:id="@+id/griditem_file_manage_icon"
-        android:src="@drawable/ic_file_gray_24dp"
-        android:scaleType="centerCrop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true" />
-
-    <ImageView
-        android:id="@+id/griditem_file_manage_mark"
-        android:src="@drawable/ic_check_circle_gray_24dp"
-        android:visibility="invisible"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true" />
-
     <TextView
         android:id="@+id/griditem_file_manage_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="#80FFFFFF"
-        android:gravity="center"
-        android:textSize="12sp"
-        android:textColor="@color/textColorPrimary"
-        android:singleLine="true"
         android:ellipsize="marquee"
-        android:marqueeRepeatLimit="marquee_forever" />
+        android:gravity="center"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:singleLine="true"
+        android:textColor="@color/textColorPrimary"
+        android:textSize="12sp" />
+
+    <ImageView
+        android:id="@+id/griditem_file_manage_icon"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/griditem_file_manage_title"
+        android:layout_centerInParent="true"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginTop="4dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_file_gray_24dp" />
+
+    <ImageView
+        android:id="@+id/griditem_file_manage_mark"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/griditem_file_manage_title"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="8dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:src="@drawable/ic_check_circle_gray_24dp"
+        android:visibility="invisible" />
 
 </com.transcend.nas.common.SquareRelativeLayout>

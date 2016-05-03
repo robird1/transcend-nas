@@ -57,8 +57,13 @@ public class WelcomeActivity extends Activity implements LoaderManager.LoaderCal
     @Override
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
         if (loader instanceof AutoLinkLoader) {
-            if (success)
-                startFileManageActivity();
+            if (success) {
+                boolean isWizard = ((AutoLinkLoader) loader).isWizard();
+                if(isWizard)
+                    startFileManageActivity();
+                else
+                    startWizardActivity();
+            }
             else
                 startNASListLoader();
             Log.w(TAG, "AutoLink " + success);
@@ -89,6 +94,13 @@ public class WelcomeActivity extends Activity implements LoaderManager.LoaderCal
     private void startFileManageActivity() {
         Intent intent = new Intent();
         intent.setClass(WelcomeActivity.this, FileManageActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    private void startWizardActivity() {
+        Intent intent = new Intent();
+        intent.setClass(WelcomeActivity.this, WizardActivity.class);
         startActivity(intent);
         finish();
     }

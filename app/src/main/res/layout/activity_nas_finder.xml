@@ -48,7 +48,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/nas_finder_toolbar_shadow"
-        android:background="@android:color/white"
+        android:background="@android:color/transparent"
         android:visibility="invisible"
         android:clickable="true">
 
