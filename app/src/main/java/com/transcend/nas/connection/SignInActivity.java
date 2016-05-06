@@ -183,6 +183,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
         String pwd = loader.getPassword();
         if (!token.equals("")) {
             //token not null mean login success
+            NASPref.setCloudAccountStatus(this, NASPref.Status.Active.ordinal());
             NASPref.setCloudUsername(this, email);
             NASPref.setCloudPassword(this, pwd);
             NASPref.setCloudAuthToken(this, token);
@@ -195,6 +196,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
             mProgressView.setVisibility(View.INVISIBLE);
             if (code.equals(TutkCodeID.NOT_VERIFIED)) {
                 //account not verified
+                NASPref.setCloudAccountStatus(this, NASPref.Status.Padding.ordinal());
                 NASPref.setCloudUsername(this, email);
                 NASPref.setCloudPassword(this, pwd);
                 Toast.makeText(this, status, Toast.LENGTH_SHORT).show();

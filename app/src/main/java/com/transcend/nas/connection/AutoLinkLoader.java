@@ -37,7 +37,6 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
 
     private ConnectivityManager mConnMgr;
     private Server mServer;
-    private String mUrl = null;
     private boolean isWizard = false;
     private LinkType mLinkType = LinkType.NO_LINK;
 
@@ -53,7 +52,7 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
     @Override
     public Boolean loadInBackground() {
         if (checkNetworkAvailable()) {
-            if(doWizardCheck(true)){
+            if(doWizardCheck(true)) {
                 Log.d(TAG, "Intranet Wizard : " + isWizard);
                 if(isWizard){
                     if (loginThroughIntranet()) {
@@ -100,26 +99,28 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
     private boolean doWizardCheck(boolean isIntranet) {
         isWizard = false;
         boolean success = false;
+        String commandURL = null;
         if (isIntranet) {
+            Log.d(TAG, "Wizard check : Intranet");
             String local = NASPref.getLocalHostname(getContext());
             if (local != null && !local.equals(""))
-                mUrl = "http://" + local + "/nas/get/register";
+                commandURL = "http://" + local + "/nas/get/register";
         } else {
+            Log.d(TAG, "Wizard check : Internet");
             String uuid = NASPref.getCloudUUID(getContext());
             if (!uuid.equals("")) {
                 P2PService.getInstance().stopP2PConnect();
                 int result = P2PService.getInstance().startP2PConnect(uuid);
                 if (result >= 0) {
-                    mUrl = "http://" + P2PService.getInstance().getP2PIP() + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP) + "/nas/get/register";
+                    commandURL = "http://" + P2PService.getInstance().getP2PIP() + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP) + "/nas/get/register";
                 } else {
                     P2PService.getInstance().stopP2PConnect();
                 }
             }
         }
 
-        if (mUrl != null) {
+        if (commandURL != null) {
             try {
-                String commandURL = mUrl;
                 DefaultHttpClient httpClient = HttpClientManager.getClient();
                 HttpGet httpGet = new HttpGet(commandURL);
                 HttpResponse httpResponse;
@@ -176,7 +177,7 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
             }
         }
 
-        Log.d(TAG, "isWizard: " + isWizard);
+        Log.d(TAG, "Wizard check : " + success +  ", isWizard : " + isWizard);
         return success;
     }
 

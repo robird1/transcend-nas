@@ -284,7 +284,11 @@ public class FileManageActivity extends AppCompatActivity implements
         mNavHeaderSubtitle = (TextView) mNavHeader.findViewById(R.id.drawer_header_subtitle);
         mNavHeaderIcon = (ImageView) mNavHeader.findViewById(R.id.drawer_header_icon);
         mNavHeaderTitle.setText(mServer.getUsername());
-        mNavHeaderSubtitle.setText(String.format("%s@%s", mServer.getUsername(), mServer.getHostname()));
+        String email = NASPref.getCloudUsername(this);
+        if(isRemoteAccess() && !email.equals(""))
+            mNavHeaderSubtitle.setText(String.format("%s", email));
+        else
+            mNavHeaderSubtitle.setText(String.format("%s@%s", mServer.getUsername(), mServer.getHostname()));
     }
 
     private void initActionModeView() {
@@ -1250,8 +1254,8 @@ public class FileManageActivity extends AppCompatActivity implements
         //clean hostname, account, password, token
         if (clear) {
             NASPref.setHostname(this, "");
-            NASPref.setUsername(this, "");
             NASPref.setPassword(this, "");
+            NASPref.setUUID(this, "");
             NASPref.setCloudAuthToken(this, "");
             NASPref.setCloudUUID(this, "");
             String[] scenarios = getResources().getStringArray(R.array.backup_scenario_values);

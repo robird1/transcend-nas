@@ -105,6 +105,7 @@
     <string name="remote_access">Remote Access</string>
     <string name="remote_access_active">Active</string>
     <string name="remote_access_inactive">Inactive</string>
+    <string name="remote_access_padding">Padding</string>
 
     <string name="try_auto_connect">Try auto connection</string>
     <string name="try_search_device">Try searching device</string>
@@ -137,6 +138,13 @@
     <string name="conj_selected">%1$d selected</string>
     <string name="conj_used">%1$s used</string>
 
+    <string name="backup_file">Backup file</string>
+    <string name="backup_success">Backup success</string>
+    <string name="backup_fail">Backup fail</string>
+    <string name="backup_fail_no_space">No enough disk space</string>
+    <string name="backup_fail_network_unstable">network is not stable</string>
+    <string name="backup_fail_network_unreachable">network unreachable</string>
+
 
     <!-- msg -->
 
@@ -161,6 +169,7 @@
     <string name="pref_auto_backup">AUTO BACKUP</string>
     <string name="pref_backup_scenario">BACKUP SCENARIO</string>
     <string name="pref_backup_location">BACKUP LOCATION</string>
+    <string name="pref_backup_error_task">BACKUP ERROR TASK</string>
 
     <string name="pref_download_location">DOWNLOAD LOCATION</string>
 
@@ -170,6 +179,7 @@
     <string name="pref_hostname">HOSTNAME</string>
     <string name="pref_username">USERNAME</string>
     <string name="pref_password">PASSWORD</string>
+    <string name="pref_uuid">UUID</string>
 
     <string name="pref_local_hostname">LOCAL HOSTNAME</string>
 
@@ -180,6 +190,7 @@
     <string name="pref_cloud_token">CLOUD AUTHTOKEN</string>
     <string name="pref_cloud_mode">CLOUD MODE</string>
     <string name="pref_cloud_uuid">CLOUD UUID</string>
+    <string name="pref_cloud_account_status">CLOUD ACCOUNT STATUS</string>
 
     <string name="pref_file_sort_type">FILE SORT TYPE</string>
 

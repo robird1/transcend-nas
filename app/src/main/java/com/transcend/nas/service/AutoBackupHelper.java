@@ -26,6 +26,7 @@ import jcifs.smb.SmbFile;
  * Created by ike_lee on 2016/3/25.
  */
 public class AutoBackupHelper {
+    private static final String TAG = "AutoBackupService";
     private Context mContext;
     private String mPath;
 
@@ -62,10 +63,13 @@ public class AutoBackupHelper {
 
     public void updateServerInfo(){
         mServer = ServerManager.INSTANCE.getCurrentServer();
-        mTutkuuid = mServer.getTutkUUID();
         mUsername = mServer.getUsername();
         mPassword = mServer.getPassword();
         mHostname = mServer.getHostname();
+        mTutkuuid = mServer.getTutkUUID();
+        if(mTutkuuid == null){
+            mTutkuuid = NASPref.getUUID(mContext);
+        }
         String p2pIP = P2PService.getInstance().getP2PIP();
         if(mHostname.contains(p2pIP)){
             mHostname = p2pIP + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.SMB);
@@ -188,10 +192,7 @@ public class AutoBackupHelper {
         boolean exist = false;
         String url;
         Cursor c = null;
-        if(mTutkuuid == null)
-            url = "select * from " + MyDBHelper.TABLE_NAME + " WHERE " + key + "='" + value + "'";
-        else
-            url = "select * from " + MyDBHelper.TABLE_NAME + " WHERE " + key + "='" + value + "' AND " + MyDBHelper.DESTINATION + "='" + mTutkuuid + "'";
+        url = "select * from " + MyDBHelper.TABLE_NAME + " WHERE " + key + "='" + value + "' AND " + MyDBHelper.DESTINATION + "='" + mTutkuuid + "'";
         try {
             c = db.rawQuery(url, null);
             exist = c.getCount() > 0;

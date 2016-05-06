@@ -4,6 +4,7 @@ import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.Network;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
@@ -60,10 +61,20 @@ public class NASListLoader extends AsyncTaskLoader<Boolean> {
     @Override
     public Boolean loadInBackground() {
         Log.w(TAG, "loadInBackground");
-        createJmDNS();
-        loadNASList();
-        //closeJmDNS();
-        return mNASList.size() > 0;
+        ConnectivityManager connectivityManager = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = connectivityManager.getActiveNetworkInfo();
+        if (info != null && info.isAvailable()) {
+            int type = info.getType();
+            switch (type) {
+                case ConnectivityManager.TYPE_WIFI:
+                    createJmDNS();
+                    loadNASList();
+                    //closeJmDNS();
+                    return mNASList.size() > 0;
+            }
+        }
+
+        return false;
     }
 
     @Override

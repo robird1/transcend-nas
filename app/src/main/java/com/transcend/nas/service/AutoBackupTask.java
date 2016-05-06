@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.NASPref;
 import com.tutk.IOTC.P2PService;
 
 import org.apache.commons.io.FilenameUtils;
@@ -34,8 +35,11 @@ public class AutoBackupTask extends AsyncTask<String, String, Boolean>
     private static final int BUFFER_SIZE = 4 * 1024;
 
     private int retryCount = 0;
+    private int mProgress = 0;
     private List<String> mSrcs;
     private String mDest;
+    private String mErrorPath;
+    private Context mContext;
     private String uniqureName = "";
 
     private OutputStream mOS;
@@ -47,9 +51,11 @@ public class AutoBackupTask extends AsyncTask<String, String, Boolean>
     private String mHostname;
     private AutoBackupTaskCallback mListener;
 
-    public AutoBackupTask(Context context, List<String> srcs, String dest, boolean isRemoteAccess) {
+    public AutoBackupTask(Context context, List<String> srcs, String dest, boolean isRemoteAccess, String errorPath) {
+        mContext = context;
         mSrcs = srcs;
         mDest = dest;
+        mErrorPath = errorPath;
         updateServerInfo(isRemoteAccess);
     }
 
@@ -141,8 +147,10 @@ public class AutoBackupTask extends AsyncTask<String, String, Boolean>
                 uploadDirectory(source, getSmbUrl(mDest));
             else {
                 uploadFile(source, getSmbUrl(mDest));
-                if(mListener != null)
-                    mListener.onAutoBackupTaskPerFinished(this,size,i+1);
+                if(mListener != null) {
+                    mProgress = i;
+                    mListener.onAutoBackupTaskPerFinished(this, size, i + 1);
+                }
             }
         }
         return true;
@@ -165,6 +173,17 @@ public class AutoBackupTask extends AsyncTask<String, String, Boolean>
     private void uploadFile(File source, String destination) throws IOException {
         int total = (int)source.length();
         int count = 0;
+        String path = source.getName();
+        if(!mErrorPath.equals("") && mErrorPath.equals(path)){
+            SmbFile target = new SmbFile(destination, path);
+            if(target.exists())
+                target.delete();
+
+            mErrorPath = "";
+            NASPref.setBackupErrorTask(mContext,"");
+            Log.d(TAG, "Error task remove : " + path);
+        }
+
         String name = createUniqueName(source, destination);
         SmbFile target = new SmbFile(destination, name);
         mOS = new BufferedOutputStream(target.getOutputStream());
@@ -223,6 +242,10 @@ public class AutoBackupTask extends AsyncTask<String, String, Boolean>
 
     public ArrayList<String> getFilePaths(){
         return (ArrayList<String>) mSrcs;
+    }
+
+    public int getFileListProgress(){
+        return mProgress;
     }
 
     public interface AutoBackupTaskCallback{

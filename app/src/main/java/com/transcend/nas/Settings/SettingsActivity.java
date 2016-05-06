@@ -118,7 +118,7 @@ public class SettingsActivity extends AppCompatActivity implements
             case R.id.action_refresh_nas_finder:
                 String email = NASPref.getCloudUsername(mContext);
                 String pwd = NASPref.getCloudPassword(mContext);
-                if (isRemoteAccessRegister && !email.equals("")) {
+                if (isRemoteAccessRegister && !email.equals("") && !pwd.equals("")) {
                     isRemoteAccessRegister = true;
                     isRemoteAccessActive = false;
                     Bundle arg = new Bundle();
@@ -256,6 +256,7 @@ public class SettingsActivity extends AppCompatActivity implements
             //token not null mean login success
             isRemoteAccessRegister = true;
             isRemoteAccessActive = true;
+            NASPref.setCloudAccountStatus(mContext, NASPref.Status.Active.ordinal());
             NASPref.setCloudUsername(mContext, email);
             NASPref.setCloudPassword(mContext, pwd);
             NASPref.setCloudAuthToken(mContext, loader.getAuthToke());
@@ -287,6 +288,7 @@ public class SettingsActivity extends AppCompatActivity implements
                 //account not verified
                 isRemoteAccessRegister = true;
                 isRemoteAccessActive = false;
+                NASPref.setCloudAccountStatus(mContext, NASPref.Status.Padding.ordinal());
                 NASPref.setCloudUsername(mContext, email);
                 NASPref.setCloudPassword(mContext, pwd);
                 Toast.makeText(this, getString(R.string.remote_access_send_activate_info), Toast.LENGTH_SHORT).show();
@@ -377,7 +379,7 @@ public class SettingsActivity extends AppCompatActivity implements
             @Override
             public void onConfirm() {
                 if (loaderID == LoaderID.TUTK_LOGOUT) {
-                    NASPref.setCloudUsername(mContext, "");
+                    NASPref.setCloudAccountStatus(mContext, NASPref.Status.Inactive.ordinal());
                     NASPref.setCloudPassword(mContext, "");
                     NASPref.setCloudAuthToken(mContext, "");
                     String[] scenarios = mContext.getResources().getStringArray(R.array.backup_scenario_values);
@@ -541,15 +543,7 @@ public class SettingsActivity extends AppCompatActivity implements
         private void startRemoteAccessFragment() {
             String email = NASPref.getCloudUsername(mContext);
             String pwd = NASPref.getCloudPassword(mContext);
-            if (email.equals("")) {
-                isRemoteAccessRegister = false;
-                isRemoteAccessActive = false;
-                showRemoteAccessFragment(getString(R.string.register));
-                if (isRemoteAccessCheck) {
-                    setAutoBackupToWifi();
-                    Toast.makeText(mContext, getString(R.string.remote_access_always_warning), Toast.LENGTH_LONG).show();
-                }
-            } else {
+            if (!email.equals("") && !pwd.equals("")) {
                 isRemoteAccessRegister = true;
                 isRemoteAccessActive = false;
                 Bundle arg = new Bundle();
@@ -557,6 +551,14 @@ public class SettingsActivity extends AppCompatActivity implements
                 arg.putString("email", email);
                 arg.putString("password", pwd);
                 getLoaderManager().restartLoader(LoaderID.TUTK_LOGIN, arg, SettingsActivity.this).forceLoad();
+            } else {
+                isRemoteAccessRegister = false;
+                isRemoteAccessActive = false;
+                showRemoteAccessFragment(getString(R.string.register));
+                if (isRemoteAccessCheck) {
+                    setAutoBackupToWifi();
+                    Toast.makeText(mContext, getString(R.string.remote_access_always_warning), Toast.LENGTH_LONG).show();
+                }
             }
         }
 
@@ -606,9 +608,14 @@ public class SettingsActivity extends AppCompatActivity implements
 
         private void refreshColumnRemoteAccessSetting() {
             String key = getString(R.string.pref_remote_access);
-            String email = NASPref.getCloudUsername(mContext);
             Preference pref = findPreference(key);
-            pref.setSummary(email.equals("") ? getString(R.string.remote_access_inactive) : email);
+            int status = NASPref.getCloudAccountStatus(mContext);
+            if(status == NASPref.Status.Padding.ordinal())
+                pref.setSummary(getString(R.string.remote_access_padding));
+            else if(status == NASPref.Status.Active.ordinal())
+                pref.setSummary(NASPref.getCloudUsername(mContext));
+            else
+                pref.setSummary(getString(R.string.remote_access_inactive));
         }
 
         private void checkRemoteAccess() {
@@ -729,6 +736,7 @@ public class SettingsActivity extends AppCompatActivity implements
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View v;
+            String email = NASPref.getCloudUsername(mContext);
             if (isRemoteAccessRegister) {
                 v = inflater.inflate(R.layout.fragment_remote_access_normal, container, false);
                 TextView tvEmail = (TextView) v.findViewById(R.id.remote_access_email);
@@ -737,7 +745,7 @@ public class SettingsActivity extends AppCompatActivity implements
                 Button btDelete = (Button) v.findViewById(R.id.remote_access_delete_button);
                 TextView tvListTitle = (TextView) v.findViewById(R.id.remote_access_list_title);
                 ListView lvList = (ListView) v.findViewById(R.id.remote_access_list);
-                tvEmail.setText(NASPref.getCloudUsername(mContext));
+                tvEmail.setText(email);
 
                 if (isRemoteAccessActive) {
                     tvStatus.setText(getString(R.string.remote_access_active));
@@ -779,7 +787,7 @@ public class SettingsActivity extends AppCompatActivity implements
             } else {
                 v = inflater.inflate(R.layout.fragment_remote_access_register, container, false);
                 tlEmail = (TextInputLayout) v.findViewById(R.id.register_email);
-                tlEmail.getEditText().setText(NASPref.getCloudUsername(mContext));
+                tlEmail.getEditText().setText(email);
                 tlPwd = (TextInputLayout) v.findViewById(R.id.register_password);
                 tlPwdConfirm = (TextInputLayout) v.findViewById(R.id.register_password_confirm);
                 btLogin = (Button) v.findViewById(R.id.register_login);

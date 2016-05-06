@@ -27,6 +27,7 @@ import com.tutk.IOTC.P2PService;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
@@ -75,7 +76,7 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
     public void onDestroy() {
         super.onDestroy();
         unregisterReceiver(mReceiver);
-        if(mThread!= null)
+        if (mThread != null)
             mThread.interrupt();
         mThread = null;
         if (mHelper != null)
@@ -88,7 +89,7 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
             NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.cancel(NOTIFICATION_ID);
         }
-        AutoBackupQueue.getInstance().onDestroy();
+        AutoBackupQueue.getInstance().onDestroy(getApplicationContext());
         Log.d(TAG, "onDestroy() executed");
     }
 
@@ -103,7 +104,7 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-                boolean wifi_only = NASPref.getBackupScenario(getApplicationContext()).equals("WIFI_ONLY");
+                boolean wifi_only = isWifiOnly();
                 connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
                 info = connectivityManager.getActiveNetworkInfo();
                 if (info != null && info.isAvailable()) {
@@ -118,7 +119,7 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
                         case ConnectivityManager.TYPE_MOBILE:
                             if (wifi_only) {
                                 Log.d(TAG, "Clean upload task due to wifi only network");
-                                AutoBackupQueue.getInstance().cleanUploadTask();
+                                AutoBackupQueue.getInstance().cleanUploadTask(getApplicationContext());
                                 NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                                 notificationManager.cancel(NOTIFICATION_ID);
                             } else {
@@ -130,13 +131,19 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
                     }
                 } else {
                     Log.d(TAG, "Clean upload task due to no network");
-                    AutoBackupQueue.getInstance().cleanUploadTask();
+                    AutoBackupQueue.getInstance().cleanUploadTask(getApplicationContext());
                     NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                     notificationManager.cancel(NOTIFICATION_ID);
                 }
             }
         }
     };
+
+    private boolean isWifiOnly() {
+        String scenario = NASPref.getBackupScenario(getApplicationContext());
+        String[] scenarios = getApplicationContext().getResources().getStringArray(R.array.backup_scenario_values);
+        return Arrays.asList(scenarios).indexOf(scenario) == 1;
+    }
 
     private void initBackup() {
         mThread = new Thread() {
@@ -146,11 +153,11 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
                 ArrayList<String> list = mHelper.getNeedUploadImageList(true);
                 if (list != null && list.size() > 0) {
                     Log.d(TAG, "Clean upload task due to init backup");
-                    AutoBackupQueue.getInstance().cleanUploadTask();
+                    AutoBackupQueue.getInstance().cleanUploadTask(getApplicationContext());
                     if (canAddTaskToQueue())
                         addBackupTaskToQueue(list, 1);
                 } else {
-                    //showOnceNotification("Backup Success", "Already backup all images", NOTIFICATION_ID);
+                    //showOnceNotification(getString(R.string.backup_success), "Already backup all images", NOTIFICATION_ID);
                 }
             }
         };
@@ -214,7 +221,7 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
     @Override
     public void onAutoBackupTaskPerFinished(AutoBackupTask task, int total, int progress) {
         //show backup success notification
-        String value = "Backup File " + Integer.toString(progress) + "/" + Integer.toString(total);
+        String value = getString(R.string.backup_file) + " " + Integer.toString(progress) + "/" + Integer.toString(total);
         showProgressNotification(value, NOTIFICATION_ID, total, progress);
 
         //add the finished backup task to database
@@ -226,14 +233,14 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
     public void onAutoBackupTaskFinished(AutoBackupTask task) {
         int size = task.getFilePaths().size();
         if (size > 1) {
-            showOnceNotification("Backup success", "Success backup " + size + " Images", NOTIFICATION_ID);
+            showOnceNotification(getString(R.string.backup_success), getString(R.string.backup_file) + " " + size, NOTIFICATION_ID);
         } else if (size == 1) {
-            showOnceNotification("Backup success", task.getFileUniqueName(), NOTIFICATION_ID);
+            showOnceNotification(getString(R.string.backup_success), task.getFileUniqueName(), NOTIFICATION_ID);
             String path = task.getFilePaths().get(0);
             addBackupTaskToDatabase(path);
         } else {
             //TODO : check why path size is 0
-            showOnceNotification("Backup success!", task.getFileUniqueName(), NOTIFICATION_ID);
+            showOnceNotification(getString(R.string.backup_success), task.getFileUniqueName(), NOTIFICATION_ID);
         }
 
         AutoBackupQueue.getInstance().removeUploadTask(task);
@@ -250,8 +257,8 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
         if (e instanceof SmbException) {
             String message = ((SmbException) e).getMessage();
             if (message.equals("0xC000007F")) {
-                showOnceNotification("Backup Fail", "No enough disk space", NOTIFICATION_ID);
-                AutoBackupQueue.getInstance().cleanUploadTask();
+                showOnceNotification(getString(R.string.backup_fail), getString(R.string.backup_fail_no_space), NOTIFICATION_ID);
+                AutoBackupQueue.getInstance().cleanUploadTask(getApplicationContext());
                 return;
             }
         }
@@ -276,17 +283,17 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
                 }
             } else {
                 String name = task.getFileUniqueName();
-                showOnceNotification("Backup Fail", name.equals("") ? "network is not stable" : name, NOTIFICATION_ID);
+                showOnceNotification(getString(R.string.backup_fail), name.equals("") ? getString(R.string.backup_fail_network_unstable) : name, NOTIFICATION_ID);
             }
         } else {
-            showOnceNotification("Backup Fail", "network unreachable", NOTIFICATION_ID);
-            AutoBackupQueue.getInstance().cleanUploadTask();
+            showOnceNotification(getString(R.string.backup_fail), getString(R.string.backup_fail_network_unreachable), NOTIFICATION_ID);
+            AutoBackupQueue.getInstance().cleanUploadTask(getApplicationContext());
         }
     }
 
     private boolean doRemoteAccessLink(int type) {
         boolean success = false;
-        boolean wifi_only = NASPref.getBackupScenario(getApplicationContext()).equals("WIFI_ONLY");
+        boolean wifi_only = isWifiOnly();
         if (type == ConnectivityManager.TYPE_MOBILE && wifi_only) {
             return false;
         }
@@ -308,7 +315,7 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
 
     private boolean canAddTaskToQueue() {
         boolean need = true;
-        boolean wifi_only = NASPref.getBackupScenario(getApplicationContext()).equals("WIFI_ONLY");
+        boolean wifi_only = isWifiOnly();
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         info = connectivityManager.getActiveNetworkInfo();
         if (info != null && info.isAvailable()) {
@@ -327,8 +334,9 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
     }
 
     private void addBackupTaskToQueue(ArrayList<String> paths, int retry) {
+        String errorPath = NASPref.getBackupErrorTask(getApplicationContext());
         String des = NASPref.getBackupLocation(getApplicationContext());
-        AutoBackupTask task = new AutoBackupTask(getApplicationContext(), paths, des, P2PService.getInstance().isConnected());
+        AutoBackupTask task = new AutoBackupTask(getApplicationContext(), paths, des, P2PService.getInstance().isConnected(), errorPath);
         task.addListener(this);
         task.setRetryCount(retry);
         AutoBackupQueue.getInstance().addUploadTask(task);
@@ -343,8 +351,10 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
     private void addBackupTaskToDatabase(String path) {
         Server server = ServerManager.INSTANCE.getCurrentServer();
         String hostname = server.getTutkUUID();
-        if (hostname == null)
-            hostname = "";
+        if (hostname == null) {
+            hostname = NASPref.getUUID(getApplicationContext());
+        }
+
         File file = new File(path);
         if (mHelper == null)
             mHelper = new AutoBackupHelper(getApplicationContext(), Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());

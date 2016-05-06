@@ -1,5 +1,10 @@
 package com.transcend.nas.service;
 
+import android.content.Context;
+import android.util.Log;
+
+import com.transcend.nas.NASPref;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,29 +81,28 @@ public class AutoBackupQueue {
         }
     }
 
-    public void cancelUploadTask() {
+    public void cancelUploadTask(Context context) {
         if (mUploadQueue != null){
             if(isRunning && mUploadQueue.size() > 0) {
                 AutoBackupTask task = mUploadQueue.get(0);
+                NASPref.setBackupErrorTask(context, task.getFileUniqueName());
+                Log.d(TAG, "Error task add : " + task.getFileUniqueName());
                 task.cancel(true);
             }
         }
         isRunning = false;
     }
 
-    public void  cleanUploadTask() {
+    public void  cleanUploadTask(Context context) {
         if (mUploadQueue != null) {
-            cancelUploadTask();
+            cancelUploadTask(context);
             mUploadQueue.clear();
         }
     }
 
-    public void onDestroy() {
-        if (mUploadQueue != null) {
-            cancelUploadTask();
-            mUploadQueue.clear();
-            mUploadQueue = null;
-        }
+    public void onDestroy(Context context) {
+        cleanUploadTask(context);
+        mUploadQueue = null;
         mAutoBackupQueue = null;
     }
 }

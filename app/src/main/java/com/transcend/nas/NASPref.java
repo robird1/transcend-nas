@@ -20,6 +20,12 @@ public class NASPref {
         NAME
     }
 
+    public enum Status {
+        Inactive,
+        Padding,
+        Active
+    }
+
     /**
      *
      * Login
@@ -77,11 +83,38 @@ public class NASPref {
         PrefUtil.write(context, name, key, username);
     }
 
+    public static String getUUID(Context context) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_uuid);
+        String def = "";
+        return PrefUtil.read(context, name, key, def);
+    }
+
+    public static void setUUID(Context context, String uuid) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_uuid);
+        PrefUtil.write(context, name, key, uuid);
+    }
+
     /**
      *
      * Sign In
      *
      */
+    public static int getCloudAccountStatus(Context context){
+        String name = context.getString(R.string.pref_name);
+        String key = context.getString(R.string.pref_cloud_account_status);
+        int def = Status.Inactive.ordinal();
+        return PrefUtil.read(context, name, key, def);
+    }
+
+    public static void setCloudAccountStatus(Context context, int type){
+        String name = context.getString(R.string.pref_name);
+        String key = context.getString(R.string.pref_cloud_account_status);
+        PrefUtil.write(context, name, key, type);
+    }
+
+
     public static String getCloudUsername(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
         String key = context.getResources().getString(R.string.pref_cloud_username);
@@ -207,6 +240,24 @@ public class NASPref {
         String name = context.getResources().getString(R.string.pref_name);
         String key = context.getResources().getString(R.string.pref_backup_location);
         PrefUtil.write(context, name, key, path);
+    }
+
+    /**
+     *
+     * Backup Error Task
+     *
+     */
+    public static void setBackupErrorTask(Context context, String errorTask) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_backup_error_task);
+        PrefUtil.write(context, name, key, errorTask);
+    }
+
+    public static String getBackupErrorTask(Context context) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_backup_error_task);
+        String def = "";
+        return PrefUtil.read(context, name, key, def);
     }
 
     /**

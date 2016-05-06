@@ -48,11 +48,12 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
         else {
             NASPref.setLocalHostname(getContext(), mServer.getHostname());
             NASPref.setCloudMode(getContext(), false);
-            String token = NASPref.getCloudAuthToken(getContext());
         }
 
         NASPref.setHostname(getContext(), mServer.getHostname());
         NASPref.setUsername(getContext(), mServer.getUsername());
         NASPref.setPassword(getContext(), mServer.getPassword());
+        NASPref.setUUID(getContext(), mServer.getTutkUUID());
+
     }
 }

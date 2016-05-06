@@ -95,7 +95,6 @@ public abstract class LoginDialog implements View.OnClickListener {
     private void initFieldIP() {
         etHostname = (AppCompatEditText) mDialog.findViewById(R.id.dialog_login_ip);
         etHostname.setText(mHostname);
-        etHostname.setHint(mActivity.getString(isRemoeteAccess ? R.string.uuid : R.string.ip));
     }
 
     private void initFieldAccount() {
