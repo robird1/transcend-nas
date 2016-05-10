@@ -533,10 +533,13 @@ public class Server {
 								String enable = text;
 
 								if(enable != null){
-									if(enable.equals(""))
+									if(enable.equals("")) {
 										isTutkNas = false;
-									else
+									}
+									else {
+										isTutkNas = true;
 										setTutkUUID(enable);
+									}
 									Log.d(TAG,"tutkuid = "+enable);
 									break;
 								}else{
@@ -1472,7 +1475,9 @@ public class Server {
 				// use ServerInfo to set firmware
 				isSuccess = setFirmwareType();
 				// to get tutk uid
-				checkTutkuid();
+				if(!checkTutkuid()){
+					setTutkUUID(null);
+				}
 				getServerProfile();
 			} catch (ClientProtocolException e) {
 				e.printStackTrace();

@@ -32,6 +32,9 @@
 
     <!-- string -->
 
+    <string name="start">Start</string>
+    <string name="wizard_info">Let\'s set up StoreJet Cloud.\nSetup the administrator password</string>
+    <string name="success_wizard">Success Wizard</string>
     <string name="about">About</string>
     <string name="account">Account</string>
     <string name="always">Always</string>
@@ -77,6 +80,9 @@
     <string name="password_confirm">Confirm Password</string>
     <string name="submit">Submit</string>
     <string name="resend">Resend</string>
+    <string name="find_nas">Find my NAS</string>
+    <string name="new_user">New User</string>
+    <string name="back">Back</string>
     <string name="register">Register</string>
     <string name="photo">Photo</string>
     <string name="refresh">Refresh</string>

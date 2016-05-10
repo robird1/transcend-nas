@@ -35,5 +35,6 @@ public class LoaderID {
     public static final int TUTK_NAS_LINK = 25;
     public static final int AUTO_BACKUP = 26;
     public static final int WIZARD = 27;
+    public static final int WIZARD_INIT = 28;
 
 }

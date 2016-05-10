@@ -20,8 +20,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.realtek.nasfun.api.Server;
-import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.WizardActivity;
@@ -34,7 +32,6 @@ import com.transcend.nas.management.TutkGetNasLoader;
 import com.transcend.nas.management.TutkLinkNasLoader;
 import com.tutk.IOTC.P2PService;
 
-import java.nio.BufferUnderflowException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -49,6 +46,7 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
     private LoginDialog mLoginDialog;
     private boolean isRemoteAccess = false;
     private int mLoaderID;
+    private int resultNum = 0;
 
     private ArrayList<HashMap<String, String>> mNASList;
 
@@ -144,11 +142,12 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
         finish();
     }
 
-    private void startWizardActivity() {
+    private void startWizardActivity(Bundle args) {
         Intent intent = new Intent();
         intent.setClass(NASFinderActivity.this, WizardActivity.class);
-        startActivity(intent);
-        finish();
+        intent.putExtra("Hostname", args.getString("hostname"));
+        intent.putExtra("RemoteAccess", isRemoteAccess);
+        startActivityForResult(intent, resultNum);
     }
 
     private void startFileManageActivity() {
@@ -175,6 +174,17 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
 
     private void startLoginLoader(Bundle args) {
         getLoaderManager().restartLoader(isRemoteAccess ? LoaderID.TUTK_NAS_LINK : LoaderID.LOGIN, args, this).forceLoad();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == RESULT_OK){
+            if(requestCode == resultNum){
+                Bundle args = data.getExtras();
+                showLoginDialog(args);
+            }
+        }
     }
 
 
@@ -204,7 +214,7 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
                 return new TutkDeleteNasLoader(this, server, token, nasId);
             case LoaderID.WIZARD:
                 mProgressView.setVisibility(View.VISIBLE);
-                return new WizardLoader(this, args, isRemoteAccess);
+                return new WizardCheckLoader(this, args, isRemoteAccess);
         }
         return null;
     }
@@ -213,8 +223,8 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
         if (loader instanceof NASListLoader) {
             checkNasListLoader(success, (NASListLoader) loader);
-        } else if (loader instanceof  WizardLoader){
-            checkWizardLoader(success, (WizardLoader) loader);
+        } else if (loader instanceof WizardCheckLoader){
+            checkWizardLoader(success, (WizardCheckLoader) loader);
         } else if (loader instanceof LoginLoader) {
             checkLoginLoader(success, (LoginLoader) loader);
         } else if(loader instanceof TutkGetNasLoader){
@@ -237,19 +247,19 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
         mAdapter.notifyDataSetChanged();
     }
 
-    private void checkWizardLoader(boolean success, WizardLoader loader){
+    private void checkWizardLoader(boolean success, WizardCheckLoader loader){
         mProgressView.setVisibility(View.INVISIBLE);
         if(!success){
             Toast.makeText(this,getString(R.string.network_error),Toast.LENGTH_SHORT).show();
             return;
         }
 
+        Bundle args = loader.getBundleArgs();
         if(loader.isWizard()) {
-            Bundle args = loader.getBundleArgs();
             showLoginDialog(args);
         }
         else{
-            startWizardActivity();
+            startWizardActivity(args);
         }
     }
 

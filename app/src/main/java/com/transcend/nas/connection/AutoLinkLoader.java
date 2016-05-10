@@ -51,32 +51,44 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
 
     @Override
     public Boolean loadInBackground() {
+        String username = NASPref.getUsername(getContext());
+        String password = NASPref.getPassword(getContext());
+        String hostname = "";
+
         if (checkNetworkAvailable()) {
-            if(doWizardCheck(true)) {
-                Log.d(TAG, "Intranet Wizard : " + isWizard);
-                if(isWizard){
-                    if (loginThroughIntranet()) {
+            hostname = NASPref.getLocalHostname(getContext());
+            if (hostname.isEmpty() || username.isEmpty() || password.isEmpty()) {
+                Log.d(TAG, "Intranet fail, due to : " + hostname + ", " + username + "," + password);
+            } else {
+                if (doWizardCheck(true)) {
+                    Log.d(TAG, "Intranet Wizard : " + isWizard);
+                    if (isWizard) {
+                        if (loginThroughIntranet(hostname, username, password)) {
+                            mLinkType = LinkType.INTRANET;
+                            return true;
+                        }
+                    } else {
                         mLinkType = LinkType.INTRANET;
                         return true;
                     }
                 }
-                else{
-                    mLinkType = LinkType.NO_LINK;
-                    return true;
-                }
             }
 
-            if(doWizardCheck(false)) {
-                Log.d(TAG, "Internet Wizard : " + isWizard);
-                if(isWizard){
-                    if (signInThroughInternet()) {
+            hostname = NASPref.getHostname(getContext());
+            if (hostname.isEmpty() || username.isEmpty() || password.isEmpty()) {
+                Log.d(TAG, "Internet fail, due to : " + hostname + ", " + username + "," + password);
+            } else {
+                if (doWizardCheck(false)) {
+                    Log.d(TAG, "Internet Wizard : " + isWizard);
+                    if (isWizard) {
+                        if (signInThroughInternet(hostname, username, password)) {
+                            mLinkType = LinkType.INTERNET;
+                            return true;
+                        }
+                    } else {
                         mLinkType = LinkType.INTERNET;
                         return true;
                     }
-                }
-                else{
-                    mLinkType = LinkType.NO_LINK;
-                    return true;
                 }
             }
         }
@@ -177,20 +189,12 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
             }
         }
 
-        Log.d(TAG, "Wizard check : " + success +  ", isWizard : " + isWizard);
+        Log.d(TAG, "Wizard check : " + success + ", isWizard : " + isWizard);
         return success;
     }
 
-    private boolean signInThroughInternet() {
+    private boolean signInThroughInternet(String hostname, String username, String password) {
         Log.d(TAG, "Internet: start");
-        String hostname = NASPref.getHostname(getContext());
-        String username = NASPref.getUsername(getContext());
-        String password = NASPref.getPassword(getContext());
-        if (hostname.isEmpty() || username.isEmpty() || password.isEmpty()) {
-            Log.d(TAG, "Internet fail, due to : " + hostname + ", " + username + "," + password);
-            return false;
-        }
-
         String uuid = NASPref.getCloudUUID(getContext());
         if (!uuid.equals("")) {
             P2PService.getInstance().stopP2PConnect();
@@ -218,15 +222,9 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
         return false;
     }
 
-    private boolean loginThroughIntranet() {
+    private boolean loginThroughIntranet(String hostname, String username, String password) {
         Log.d(TAG, "Intranet: start");
-        String hostname = NASPref.getLocalHostname(getContext());
-        String username = NASPref.getUsername(getContext());
-        String password = NASPref.getPassword(getContext());
-        if (hostname.isEmpty() || username.isEmpty() || password.isEmpty()) {
-            Log.d(TAG, "Intranet fail, due to : " + hostname + ", " + username + "," + password);
-            return false;
-        }
+
         mServer = new Server(hostname, username, password);
         boolean isConnected = mServer.connect();
         if (isConnected) {

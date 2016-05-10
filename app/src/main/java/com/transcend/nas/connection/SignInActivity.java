@@ -165,6 +165,13 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
                 mForgetDialog.dismiss();
                 mForgetDialog = null;
             }
+
+            NASPref.setCloudAccountStatus(this, NASPref.Status.Inactive.ordinal());
+            NASPref.setCloudPassword(this, "");
+            NASPref.setCloudAuthToken(this, "");
+            NASPref.setCloudUUID(this, "");
+            String[] scenarios = getResources().getStringArray(R.array.backup_scenario_values);
+            NASPref.setBackupScenario(this, scenarios[1]);
             Toast.makeText(this, getString(R.string.forget_password_send), Toast.LENGTH_SHORT).show();
         } else {
             if (!code.equals(""))
@@ -243,7 +250,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
     private void showForgetPwdDialog() {
         Bundle args = new Bundle();
         args.putString("title", getString(R.string.forget_password_title));
-        args.putString("email", "");
+        args.putString("email", NASPref.getCloudUsername(this));
         mForgetDialog = new ForgetPwdDialog(SignInActivity.this, args) {
             @Override
             public void onConfirm(Bundle args) {

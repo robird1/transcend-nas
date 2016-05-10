@@ -61,8 +61,11 @@ public class WelcomeActivity extends Activity implements LoaderManager.LoaderCal
                 boolean isWizard = ((AutoLinkLoader) loader).isWizard();
                 if(isWizard)
                     startFileManageActivity();
-                else
-                    startWizardActivity();
+                else {
+                    startNASListLoader();
+                    //AutoLinkLoader.LinkType type = ((AutoLinkLoader) loader).getLinkType();
+                    //startWizardActivity(type == AutoLinkLoader.LinkType.INTERNET);
+                }
             }
             else
                 startNASListLoader();
@@ -98,12 +101,20 @@ public class WelcomeActivity extends Activity implements LoaderManager.LoaderCal
         finish();
     }
 
-    private void startWizardActivity() {
+    /*private void startWizardActivity(boolean isRemoteAccess) {
         Intent intent = new Intent();
         intent.setClass(WelcomeActivity.this, WizardActivity.class);
-        startActivity(intent);
-        finish();
-    }
+        String hostname = isRemoteAccess ? NASPref.getCloudUUID(this) : NASPref.getHostname(this);
+        if(hostname != null && !hostname.equals("")) {
+            intent.putExtra("Hostname", hostname);
+            intent.putExtra("RemoteAccess", isRemoteAccess);
+            startActivity(intent);
+            finish();
+        }
+        else{
+            startNASListLoader();
+        }
+    }*/
 
     private void startRemoteAccessListLoader() {
         String server = NASPref.getCloudServer(this);

@@ -1256,8 +1256,6 @@ public class FileManageActivity extends AppCompatActivity implements
             NASPref.setHostname(this, "");
             NASPref.setPassword(this, "");
             NASPref.setUUID(this, "");
-            NASPref.setCloudAuthToken(this, "");
-            NASPref.setCloudUUID(this, "");
             String[] scenarios = getResources().getStringArray(R.array.backup_scenario_values);
             NASPref.setBackupScenario(this, scenarios[1]);
             NASPref.setBackupSetting(this, false);

@@ -43,10 +43,12 @@ import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.common.NotificationDialog;
 import com.transcend.nas.common.TutkCodeID;
+import com.transcend.nas.connection.ForgetPwdDialog;
 import com.transcend.nas.management.AutoBackupLoader;
 import com.transcend.nas.management.FileActionLocateActivity;
 import com.transcend.nas.management.SmbFolderCreateLoader;
 import com.transcend.nas.management.TutkCreateNasLoader;
+import com.transcend.nas.management.TutkForgetPasswordLoader;
 import com.transcend.nas.management.TutkGetNasLoader;
 import com.transcend.nas.management.TutkLoginLoader;
 import com.transcend.nas.management.TutkRegisterLoader;
@@ -79,6 +81,7 @@ public class SettingsActivity extends AppCompatActivity implements
     private TextView mTitle = null;
     private List<TutkGetNasLoader.TutkNasNode> naslist;
     private SettingsFragment mSettingsFragment;
+    private ForgetPwdDialog mForgetDialog;
 
     private Context mContext;
 
@@ -137,6 +140,12 @@ public class SettingsActivity extends AppCompatActivity implements
 
     @Override
     public void onBackPressed() {
+        if (mForgetDialog != null) {
+            getLoaderManager().destroyLoader(LoaderID.TUTK_FORGET_PASSWORD);
+            mForgetDialog.dismiss();
+            mForgetDialog = null;
+        }
+
         if (mProgressView.isShown()) {
             getLoaderManager().destroyLoader(mLoaderID);
             mProgressView.setVisibility(View.INVISIBLE);
@@ -181,6 +190,10 @@ public class SettingsActivity extends AppCompatActivity implements
                 server = args.getString("server");
                 email = args.getString("email");
                 return new TutkResendActivateLoader(this, server, email);
+            case LoaderID.TUTK_FORGET_PASSWORD:
+                server = NASPref.getCloudServer(this);
+                email = args.getString("email");
+                return new TutkForgetPasswordLoader(this, server, email);
             case LoaderID.AUTO_BACKUP:
                 return new AutoBackupLoader(this);
         }
@@ -206,7 +219,9 @@ public class SettingsActivity extends AppCompatActivity implements
             return;
         }
 
-        if (loader instanceof TutkRegisterLoader) {
+        if (loader instanceof TutkForgetPasswordLoader) {
+            checkForgetPasswordResult((TutkForgetPasswordLoader) loader);
+        } else if (loader instanceof TutkRegisterLoader) {
             checkRegisterNASResult((TutkRegisterLoader) loader);
         } else if (loader instanceof TutkLoginLoader) {
             checkLoginNASResult((TutkLoginLoader) loader);
@@ -224,6 +239,35 @@ public class SettingsActivity extends AppCompatActivity implements
     @Override
     public void onLoaderReset(Loader<Boolean> loader) {
 
+    }
+
+    private void checkForgetPasswordResult(TutkForgetPasswordLoader loader) {
+        mProgressView.setVisibility(View.INVISIBLE);
+        String code = loader.getCode();
+        String status = loader.getStatus();
+
+        if (mForgetDialog != null)
+            mForgetDialog.hideProgress();
+
+        if (code.equals(TutkCodeID.SUCCESS)) {
+            if (mForgetDialog != null) {
+                mForgetDialog.dismiss();
+                mForgetDialog = null;
+            }
+
+            NASPref.setCloudAccountStatus(this, NASPref.Status.Inactive.ordinal());
+            NASPref.setCloudPassword(this, "");
+            NASPref.setCloudAuthToken(this, "");
+            NASPref.setCloudUUID(this, "");
+            String[] scenarios = getResources().getStringArray(R.array.backup_scenario_values);
+            NASPref.setBackupScenario(this, scenarios[1]);
+            Toast.makeText(this, getString(R.string.forget_password_send), Toast.LENGTH_SHORT).show();
+        } else {
+            if (!code.equals(""))
+                Toast.makeText(this, status, Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(this, getString(R.string.error_format), Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void checkRegisterNASResult(TutkRegisterLoader loader) {
@@ -263,6 +307,9 @@ public class SettingsActivity extends AppCompatActivity implements
 
             Server mServer = ServerManager.INSTANCE.getCurrentServer();
             String uuid = mServer.getTutkUUID();
+            if(uuid == null)
+                uuid = NASPref.getUUID(this);
+
             if (uuid != null && !uuid.equals("")) {
                 Bundle arg = new Bundle();
                 arg.putString("server", loader.getServer());
@@ -382,6 +429,7 @@ public class SettingsActivity extends AppCompatActivity implements
                     NASPref.setCloudAccountStatus(mContext, NASPref.Status.Inactive.ordinal());
                     NASPref.setCloudPassword(mContext, "");
                     NASPref.setCloudAuthToken(mContext, "");
+                    NASPref.setCloudUUID(mContext, "");
                     String[] scenarios = mContext.getResources().getStringArray(R.array.backup_scenario_values);
                     NASPref.setBackupScenario(mContext, scenarios[1]);
                     showSettingFragment();
@@ -554,7 +602,7 @@ public class SettingsActivity extends AppCompatActivity implements
             } else {
                 isRemoteAccessRegister = false;
                 isRemoteAccessActive = false;
-                showRemoteAccessFragment(getString(R.string.register));
+                showRemoteAccessFragment(getString(R.string.login));
                 if (isRemoteAccessCheck) {
                     setAutoBackupToWifi();
                     Toast.makeText(mContext, getString(R.string.remote_access_always_warning), Toast.LENGTH_LONG).show();
@@ -716,6 +764,7 @@ public class SettingsActivity extends AppCompatActivity implements
         TextInputLayout tlPwdConfirm;
         Button btLogin;
         Button btSubmit;
+        TextView tvForget;
         TextView tvRegister;
         TextView tvInfo;
         boolean isLogin = true;
@@ -794,6 +843,8 @@ public class SettingsActivity extends AppCompatActivity implements
                 btLogin.setOnClickListener(this);
                 btSubmit = (Button) v.findViewById(R.id.register_submit);
                 btSubmit.setOnClickListener(this);
+                tvForget = (TextView) v.findViewById(R.id.register_forget);
+                tvForget.setOnClickListener(this);
                 tvRegister = (TextView) v.findViewById(R.id.register_button);
                 tvRegister.setOnClickListener(this);
                 tvInfo = (TextView) v.findViewById(R.id.register_info);
@@ -810,14 +861,18 @@ public class SettingsActivity extends AppCompatActivity implements
             tlPwd.getEditText().setText(null);
             tlPwdConfirm.getEditText().setText(null);
             if (isLogin) {
+                mTitle.setText(getString(R.string.login));
                 tvInfo.setText(getString(R.string.remote_access_welcome));
-                tvRegister.setText(getString(R.string.register));
+                tvForget.setVisibility(View.VISIBLE);
+                tvRegister.setText(getString(R.string.new_user));
                 btLogin.setVisibility(View.VISIBLE);
                 btSubmit.setVisibility(View.GONE);
                 tlPwdConfirm.setVisibility(View.GONE);
             } else {
+                mTitle.setText(getString(R.string.register));
                 tvInfo.setText(getString(R.string.remote_access_register));
-                tvRegister.setText(getString(R.string.login));
+                tvForget.setVisibility(View.GONE);
+                tvRegister.setText(getString(R.string.back));
                 btLogin.setVisibility(View.GONE);
                 btSubmit.setVisibility(View.VISIBLE);
                 tlPwdConfirm.setVisibility(View.VISIBLE);
@@ -893,6 +948,23 @@ public class SettingsActivity extends AppCompatActivity implements
                     arg.putString("password", pwd);
                     getLoaderManager().restartLoader(LoaderID.TUTK_REGISTER, arg, SettingsActivity.this).forceLoad();
                     break;
+                case R.id.register_forget:
+                    Bundle args = new Bundle();
+                    args.putString("title", getString(R.string.forget_password_title));
+                    args.putString("email", NASPref.getCloudUsername(mContext));
+                    mForgetDialog = new ForgetPwdDialog(mContext, args) {
+                        @Override
+                        public void onConfirm(Bundle args) {
+                            getLoaderManager().restartLoader(LoaderID.TUTK_FORGET_PASSWORD, args, SettingsActivity.this).forceLoad();
+                        }
+
+                        @Override
+                        public void onCancel() {
+                            getLoaderManager().destroyLoader(LoaderID.TUTK_FORGET_PASSWORD);
+                            mForgetDialog.dismiss();
+                            mForgetDialog = null;
+                        }
+                    };
                 default:
                     break;
             }

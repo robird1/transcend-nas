@@ -73,7 +73,7 @@
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="24dp"
-        android:text="Find my NAS"
+        android:text="@string/find_nas"
         android:textColor="@color/colorAccentDialog"/>
 
     <RelativeLayout

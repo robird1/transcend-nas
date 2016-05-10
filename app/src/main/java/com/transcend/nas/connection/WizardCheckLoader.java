@@ -28,14 +28,14 @@ import java.io.InputStream;
 /**
  * Created by silverhsu on 16/1/5.
  */
-public class WizardLoader extends AsyncTaskLoader<Boolean> {
+public class WizardCheckLoader extends AsyncTaskLoader<Boolean> {
 
     private String mUrl;
     private Bundle mArgs;
     private boolean mRemoteAccess = false;
     private boolean isWizard = false;
 
-    public WizardLoader(Context context, Bundle args, boolean isRemoteAccess) {
+    public WizardCheckLoader(Context context, Bundle args, boolean isRemoteAccess) {
         super(context);
         mRemoteAccess = isRemoteAccess;
         mArgs = args;

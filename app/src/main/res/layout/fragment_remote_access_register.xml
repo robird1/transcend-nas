@@ -14,9 +14,9 @@
             android:layout_width="300dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
+            android:layout_marginTop="50dp"
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
-            android:layout_marginTop="50dp"
             android:text="@string/remote_access_welcome"
             android:textColor="@android:color/black" />
 
@@ -86,16 +86,27 @@
             android:visibility="gone" />
 
         <TextView
-            android:id="@+id/register_button"
+            android:id="@+id/register_forget"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:paddingRight="8dp"
             android:layout_marginTop="16dp"
             android:gravity="right"
-            android:text="@string/register"
+            android:paddingRight="8dp"
+            android:text="@string/forget_password"
             android:textColor="@color/colorAccentDialog" />
 
+
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/register_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="24dp"
+        android:text="@string/new_user"
+        android:textColor="@color/colorAccentDialog" />
 
 </RelativeLayout>
