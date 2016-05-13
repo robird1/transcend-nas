@@ -108,11 +108,12 @@ public class FileActionLocateActivity extends AppCompatActivity implements
     }
 
     private void initDropdown() {
-        mDropdownAdapter = new FileManageDropdownAdapter();
+        mDropdownAdapter = new FileManageDropdownAdapter(true);
         mDropdownAdapter.setOnDropdownItemSelectedListener(this);
         mDropdownAdapter.updateList(mPath, mMode);
         mDropdown = (AppCompatSpinner)findViewById(R.id.locate_dropdown);
         mDropdown.setAdapter(mDropdownAdapter);
+        mDropdown.setDropDownVerticalOffset(10);
     }
 
     private void initRecyclerView() {
@@ -128,7 +129,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         mFabControl = (FloatingActionButton) findViewById(R.id.locate_fab_control);
         mFabControl.setOnClickListener(this);
         if (NASApp.ACT_COPY.equals(mType) || NASApp.ACT_MOVE.equals(mType))
-            mFabControl.setImageResource(R.drawable.ic_content_paste_white_24dp);
+            mFabControl.setImageResource(R.drawable.ic_content_copy_white_24dp);
         if (NASApp.ACT_UPLOAD.equals(mType))
             mFabControl.setImageResource(R.drawable.ic_file_upload_white_24dp);
         if (NASApp.ACT_DOWNLOAD.equals(mType))

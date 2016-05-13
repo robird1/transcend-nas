@@ -24,8 +24,7 @@
                     android:id="@+id/dialog_search_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text"
-                    android:hint="@string/search" />
+                    android:inputType="text" />
 
             </android.support.design.widget.TextInputLayout>
         </LinearLayout>

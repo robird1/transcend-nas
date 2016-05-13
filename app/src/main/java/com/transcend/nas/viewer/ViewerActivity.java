@@ -87,6 +87,7 @@ public class ViewerActivity extends AppCompatActivity implements
     private void initHeaderBar() {
         mHeaderBar = (Toolbar) findViewById(R.id.viewer_header_bar);
         mHeaderBar.setTitle("");
+        mHeaderBar.setNavigationIcon(R.drawable.ic_navigation_arrow_white_24dp);
         setSupportActionBar(mHeaderBar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);

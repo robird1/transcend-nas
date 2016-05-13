@@ -1,6 +1,7 @@
 package com.transcend.nas.management;
 
 import android.graphics.Color;
+import android.net.ConnectivityManager;
 import android.os.Environment;
 import android.util.Log;
 import android.util.SparseArray;
@@ -39,6 +40,7 @@ public class FileManageDropdownAdapter extends BaseAdapter {
 
     private Spinner mDropdown;
     private List<String> mList;
+    private boolean isActionLocate = false;
 
     private OnDropdownItemSelectedListener mCallback;
 
@@ -46,7 +48,8 @@ public class FileManageDropdownAdapter extends BaseAdapter {
         void onDropdownItemSelected(int position);
     }
 
-    public FileManageDropdownAdapter() {
+    public FileManageDropdownAdapter(boolean actionLocate) {
+        isActionLocate = actionLocate;
         mList = new ArrayList<String>();
     }
 
@@ -130,12 +133,19 @@ public class FileManageDropdownAdapter extends BaseAdapter {
         convertView.setOnTouchListener(new OnDropdownItemTouchListener(position));
         TextView tv = ViewHolder.get(convertView, R.id.dropdown_text);
         tv.setText(mList.get(position));
-        if(position > 0) {
-            ImageView iv = ViewHolder.get(convertView, R.id.dropdown_icon);
-            RelativeLayout.LayoutParams margins = new RelativeLayout.LayoutParams(iv.getLayoutParams());
-            margins.leftMargin = Math.min(8*position,32);
-            iv.setLayoutParams(margins);
+        if(position > 0){
+            tv.setTextColor(isActionLocate ? Color.WHITE : Color.GRAY);
         }
+        else{
+            tv.setTextColor(isActionLocate ? Color.BLACK : Color.RED);
+        }
+
+        ImageView iv = ViewHolder.get(convertView, R.id.dropdown_icon);
+        iv.setImageResource(isActionLocate ? R.drawable.ic_folder_white_24dp : R.drawable.ic_folder_gray_24dp);
+        RelativeLayout.LayoutParams margins = new RelativeLayout.LayoutParams(iv.getLayoutParams());
+        margins.leftMargin = Math.min(8*position,32);
+        iv.setLayoutParams(margins);
+
         return convertView;
     }
 

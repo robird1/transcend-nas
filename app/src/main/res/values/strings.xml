@@ -33,6 +33,7 @@
     <!-- string -->
 
     <string name="start">Start</string>
+    <string name="wizard">Wizard</string>
     <string name="wizard_info">Let\'s set up StoreJet Cloud.\nSetup the administrator password</string>
     <string name="success_wizard">Success Wizard</string>
     <string name="about">About</string>
@@ -80,7 +81,7 @@
     <string name="password_confirm">Confirm Password</string>
     <string name="submit">Submit</string>
     <string name="resend">Resend</string>
-    <string name="find_nas">Find my NAS</string>
+    <string name="find_nas">Find StoreJet Cloud</string>
     <string name="new_user">New User</string>
     <string name="back">Back</string>
     <string name="register">Register</string>
@@ -129,16 +130,17 @@
     <string name="network_error">Please check your network, or try again later</string>
     <string name="login_error">Invalid account or password</string>
     <string name="remote_access_always_warning">For \"Always\", you need to set remote access at first</string>
-    <string name="remote_access_register">Create new remote access account, and we will automatically bind your NAS later</string>
-    <string name="remote_access_welcome">Please input your email and password, and we will automatically bind your NAS later</string>
+    <string name="remote_access_register">Create new remote access account, and we will automatically bind your StoreJet Cloud later</string>
+    <string name="remote_access_welcome">Please input your email and password, and we will automatically bind your StoreJet Cloud later</string>
     <string name="remote_access_send_activate_info">Please check your email to activate it</string>
     <string name="remote_access_send_activate_warning">Are your sure to resend activate email?</string>
     <string name="remote_access_logout">Are you sure to logout?</string>
     <string name="remote_access_no_login">At first, you need to register or login</string>
-    <string name="remote_access_delete_warning">Are you sure to delete the bind nas?</string>
+    <string name="remote_access_delete_warning">Are you sure to delete the bind StoreJet Cloud?</string>
     <string name="remote_access_verification_expired">Your account\'s verification is expired. Please register it again.</string>
     <string name="error_format">Error format</string>
-    <string name="bind_nas_list">Bind NAS list:</string>
+    <string name="nas_list">StoreJet Cloud List</string>
+    <string name="bind_nas_list">Bind StoreJet Cloud:</string>
     <string name="current_device">Current Device</string>
 
     <string name="conj_selected">%1$d selected</string>

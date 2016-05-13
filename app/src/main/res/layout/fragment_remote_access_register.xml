@@ -5,27 +5,18 @@
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:id="@+id/register_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/register_info"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="50dp"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
-            android:text="@string/remote_access_welcome"
-            android:textColor="@android:color/black" />
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/register_email"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="30dp"
             android:hint="@string/email">
 
             <EditText
@@ -70,7 +61,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="16dp"
-            android:background="@color/colorAccentDialog"
+            android:background="@color/colorAccentDialogButton"
             android:text="@string/login"
             android:textColor="@color/colorPrimary" />
 
@@ -80,7 +71,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="16dp"
-            android:background="@color/colorAccentDialog"
+            android:background="@color/colorAccentDialogButton"
             android:text="@string/submit"
             android:textColor="@color/colorPrimary"
             android:visibility="gone" />
@@ -89,15 +80,28 @@
             android:id="@+id/register_forget"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
+            android:layout_gravity="center"
             android:layout_marginTop="16dp"
-            android:gravity="right"
-            android:paddingRight="8dp"
+            android:gravity="center"
             android:text="@string/forget_password"
             android:textColor="@color/colorAccentDialog" />
 
-
     </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/register_info"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@id/register_layout"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:layout_marginBottom="30dp"
+        android:maxHeight="100dp"
+        android:text="@string/remote_access_welcome"
+        android:textColor="@android:color/black" />
+
 
     <TextView
         android:id="@+id/register_button"

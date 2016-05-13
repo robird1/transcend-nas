@@ -70,6 +70,7 @@ public class AboutActivity extends AppCompatActivity {
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.about_toolbar);
         toolbar.setTitle("");
+        toolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_gray_24dp);
         mTitle =(TextView) toolbar.findViewById(R.id.about_title);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

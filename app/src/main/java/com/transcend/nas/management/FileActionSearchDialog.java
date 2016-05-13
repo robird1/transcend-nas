@@ -56,6 +56,8 @@ public abstract class FileActionSearchDialog implements View.OnClickListener {
     private void initDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
         builder.setView(R.layout.dialog_search);
+        builder.setTitle(mActivity.getResources().getString(R.string.search));
+        builder.setIcon(R.drawable.ic_search_gray_24dp);
         builder.setCancelable(true);
         builder.setNegativeButton(R.string.cancel, null);
         builder.setPositiveButton(R.string.search, null);

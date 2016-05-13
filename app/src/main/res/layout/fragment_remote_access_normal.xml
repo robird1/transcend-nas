@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="20dp"
-            android:background="@color/colorAccentDialog"
+            android:background="@color/colorAccentDialogButton"
             android:text="@string/resend"
             android:textColor="@color/colorPrimary" />
 

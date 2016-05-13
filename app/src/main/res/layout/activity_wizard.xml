@@ -5,6 +5,44 @@
     android:layout_height="match_parent"
     tools:context="com.transcend.nas.WizardActivity">
 
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/wizard_app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="0dp">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/wizard_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorActionBarBackground">
+
+            <TextView
+                android:id="@+id/wizard_toolbar_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/wizard"
+                android:textSize="20sp"
+                android:textColor="@color/textColorPrimary" />
+
+        </android.support.v7.widget.Toolbar>
+
+    </android.support.design.widget.AppBarLayout>
+
+    <View
+        android:id="@+id/nas_finder_toolbar_shadow"
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:layout_below="@+id/wizard_app_bar"
+        android:background="@drawable/toolbar_dropshadow" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/wizard_app_bar"
+        android:background="@drawable/bg_wizard" />
+
     <TextView
         android:id="@+id/wizard_center"
         android:layout_width="1dp"
@@ -46,7 +84,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@id/wizard_password"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="30dp"
+        android:layout_marginBottom="20dp"
         android:gravity="center_horizontal"
         android:text="@string/wizard_info" />
 
@@ -57,7 +95,7 @@
         android:layout_below="@id/wizard_password_confirm"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
-        android:background="@color/colorAccentDialog"
+        android:background="@color/colorAccentDialogButton"
         android:text="@string/start"
         android:textColor="@color/colorPrimary" />
 

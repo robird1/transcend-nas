@@ -14,14 +14,15 @@
         <android.support.v7.widget.Toolbar
             android:id="@+id/nas_finder_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize">
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorActionBarBackground">
 
             <TextView
                 android:id="@+id/nas_finder_toolbar_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="NAS列表"
+                android:text="@string/nas_list"
                 android:textSize="20sp"
                 android:textColor="@color/textColorPrimary" />
 

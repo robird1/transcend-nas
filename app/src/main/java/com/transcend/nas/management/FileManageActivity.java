@@ -230,13 +230,14 @@ public class FileManageActivity extends AppCompatActivity implements
     private void initToolbar() {
         mToolbar = (Toolbar) findViewById(R.id.main_toolbar);
         mToolbar.setTitle("");
+
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
 
     private void initDropdown() {
-        mDropdownAdapter = new FileManageDropdownAdapter();
+        mDropdownAdapter = new FileManageDropdownAdapter(false);
         mDropdownAdapter.setOnDropdownItemSelectedListener(this);
         mDropdown = (AppCompatSpinner) findViewById(R.id.main_dropdown);
         mDropdown.setAdapter(mDropdownAdapter);

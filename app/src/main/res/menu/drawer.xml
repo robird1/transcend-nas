@@ -7,11 +7,11 @@
 
         <item
             android:id="@+id/nav_storage"
-            android:icon="@drawable/ic_storage_black_24dp"
+            android:icon="@drawable/ic_storage_gray_24dp"
             android:title="@string/app_name" />
         <item
             android:id="@+id/nav_downloads"
-            android:icon="@drawable/ic_file_download_black_24dp"
+            android:icon="@drawable/ic_file_download_gray_24dp"
             android:title="@string/downloads" />
 
     </group>
@@ -22,16 +22,16 @@
 
         <item
             android:id="@+id/nav_settings"
-            android:icon="@drawable/ic_settings_black_24dp"
+            android:icon="@drawable/ic_settings_gray_24dp"
             android:title="@string/settings" />
         <item
             android:id="@+id/nav_about"
-            android:icon="@drawable/ic_help_outline_black_24dp"
+            android:icon="@drawable/ic_help_outline_gray_24dp"
             android:title="@string/about" />
 
         <item
             android:id="@+id/nav_logout"
-            android:icon="@drawable/ic_navigation_arrow_back"
+            android:icon="@drawable/ic_logout_gray_24dp"
             android:title="@string/logout" />
     </group>
 

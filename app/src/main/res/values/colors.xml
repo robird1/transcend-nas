@@ -8,4 +8,6 @@
     <color name="colorPressed">#EEEEEE</color>
     <color name="colorSelected">#EEEEEE</color>
     <color name="colorAccentDialog">#03A9F4</color>
+    <color name="colorAccentDialogButton">#58585B</color>
+    <color name="colorActionBarBackground">#D1D2D4</color>
 </resources>

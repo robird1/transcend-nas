@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,7 +47,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
     private TextInputLayout tlPwd;
     private Button bnSignIn;
     private TextView tvSignInForget;
-    private TextView tvFindDevice;
+    private LinearLayout tvFindDevice;
     private ForgetPwdDialog mForgetDialog;
     private RelativeLayout mProgressView;
     private int mLoaderID;
@@ -80,7 +81,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
     }
 
     private void initFindDeviceTextView() {
-        tvFindDevice = (TextView) findViewById(R.id.activity_sign_in_find_device);
+        tvFindDevice = (LinearLayout) findViewById(R.id.activity_sign_in_find_device_layout);
         tvFindDevice.setOnClickListener(this);
     }
 

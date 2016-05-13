@@ -55,6 +55,7 @@ public class FileInfoActivity extends AppCompatActivity {
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.info_toolbar);
         toolbar.setTitle("");
+        toolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_gray_24dp);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);

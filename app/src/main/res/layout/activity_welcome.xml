@@ -6,19 +6,35 @@
     tools:context="com.transcend.nas.WelcomeActivity">
 
     <ImageView
-        android:id="@+id/welcome_icon"
-        android:src="@drawable/ic_logo"
+        android:id="@+id/welcome_string"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"/>
+        android:src="@drawable/ic_storejet_cloud"
+        android:layout_centerInParent="true" />
+
+    <ImageView
+        android:id="@+id/welcome_icon"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@id/welcome_string"
+        android:src="@drawable/ic_cloud" />
 
     <TextView
         android:id="@+id/welcome_text"
-        android:textColor="@android:color/darker_gray"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_margin="@dimen/activity_vertical_margin"
-        android:layout_below="@+id/welcome_icon"/>
+        android:layout_below="@+id/welcome_string"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"
+        android:textColor="@android:color/darker_gray" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="24dp"
+        android:src="@drawable/ic_logo_2" />
 
 </RelativeLayout>

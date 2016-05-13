@@ -6,7 +6,10 @@ import android.content.Intent;
 import android.content.Loader;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
@@ -31,9 +34,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TimeZone;
 
-public class WizardActivity extends Activity implements LoaderManager.LoaderCallbacks<Boolean>, View.OnClickListener {
+public class WizardActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Boolean>, View.OnClickListener {
 
     private static final String TAG = WizardActivity.class.getSimpleName();
+    private Toolbar mToolbar;
     private TextInputLayout tlPassword;
     private TextInputLayout tlConfirmPassword;
     private Button bStart;
@@ -47,6 +51,12 @@ public class WizardActivity extends Activity implements LoaderManager.LoaderCall
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wizard);
+        mToolbar = (Toolbar) findViewById(R.id.wizard_toolbar);
+        mToolbar.setTitle("");
+        mToolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_gray_24dp);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         Intent intent = getIntent();
         mHostname = (String) intent.getExtras().getString("Hostname", null);
@@ -142,6 +152,17 @@ public class WizardActivity extends Activity implements LoaderManager.LoaderCall
                 break;
         }
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 
     @Override
     public void onBackPressed() {
