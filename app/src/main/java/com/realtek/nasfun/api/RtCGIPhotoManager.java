@@ -42,7 +42,7 @@ public class RtCGIPhotoManager extends PhotoManager {
 						+ Integer.toString(item.height);
 				//MediaItemPhoto mi = new MediaItemPhoto(R.drawable.icon_photo, fileName, resolution, false);
 				// modified by silver
-				MediaItemPhoto mi = new MediaItemPhoto(R.drawable.ic_logo, fileName, resolution, false);
+				MediaItemPhoto mi = new MediaItemPhoto(R.drawable.ic_logo_transcend, fileName, resolution, false);
 				id = Integer.toString(item.id);
 				path = getPathFromId(id);
 				if (path != null) {

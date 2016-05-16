@@ -114,7 +114,7 @@ public abstract class PhotoManager {
                         if("response".equals(xpp.getName()) && albumName != null){
                         	//MediaItemPhoto mi = new MediaItemPhoto(R.drawable.icon_list_photo_album, albumName, desc, false);
 							// modified by silver
-							MediaItemPhoto mi = new MediaItemPhoto(R.drawable.ic_logo, albumName, desc, false);
+							MediaItemPhoto mi = new MediaItemPhoto(R.drawable.ic_logo_transcend, albumName, desc, false);
 							if(cover!=null) {
 								cover = "http://"+server.hostname+ cover + "&login="+server.username; 
 								mi.setPath(cover);
@@ -217,7 +217,7 @@ public abstract class PhotoManager {
 						if("item".equals(tagName) && title != null){
 							//MediaItemPhoto mi = new MediaItemPhoto(R.drawable.icon_photo, title, null, false);
 							// modified by silver
-							MediaItemPhoto mi = new MediaItemPhoto(R.drawable.ic_logo, title, null, false);
+							MediaItemPhoto mi = new MediaItemPhoto(R.drawable.ic_logo_transcend, title, null, false);
 							link = "http://"+server.hostname+"/"+link + "&login="+server.username;
 							mi.setId(title);
 							mi.setPath(link);

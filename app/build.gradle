@@ -11,7 +11,7 @@ android {
         minSdkVersion 14
         targetSdkVersion 14
         versionCode 1
-        versionName "Alpha"
+        versionName "0.91"
     }
 
     buildTypes {

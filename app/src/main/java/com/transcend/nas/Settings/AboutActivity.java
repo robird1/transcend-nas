@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.transcend.nas.BuildConfig;
 import com.transcend.nas.R;
 
 /**
@@ -154,7 +155,14 @@ public class AboutActivity extends AppCompatActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View v = inflater.inflate(R.layout.fragment_about_info, container, false);
             TextView info = (TextView) v.findViewById(R.id.info);
-            info.setText(getString(id));
+            if(id == R.string.about){
+                int versionCode = BuildConfig.VERSION_CODE;
+                String versionName = BuildConfig.VERSION_NAME;
+                info.setText(versionName);
+            }
+            else {
+                info.setText(getString(id));
+            }
             return v;
         }
 

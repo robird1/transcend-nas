@@ -63,7 +63,7 @@ public class IpodCGIPhotoManager extends PhotoManager{
 						
 						//MediaItemPhoto mi = new MediaItemPhoto(R.drawable.icon_photo, fileName, resolution, false);
 						// modified by silver
-						MediaItemPhoto mi = new MediaItemPhoto(R.drawable.ic_logo, fileName, resolution, false);
+						MediaItemPhoto mi = new MediaItemPhoto(R.drawable.ic_logo_transcend, fileName, resolution, false);
 						mi.setPath(url);
 						list.add(mi);
 					}

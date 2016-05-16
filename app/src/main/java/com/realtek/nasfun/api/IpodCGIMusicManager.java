@@ -54,7 +54,7 @@ public class IpodCGIMusicManager extends MusicManager{
 						ext = strToken.nextToken();
 					//MediaItemSong mi = new MediaItemSong(R.drawable.icon_list_audio_singer, name, "1", false);
 					// modified by silver
-					MediaItemSong mi = new MediaItemSong(R.drawable.ic_logo, name, "1", false);
+					MediaItemSong mi = new MediaItemSong(R.drawable.ic_logo_transcend, name, "1", false);
 					if(ext != null && !"none".equals(ext)){
 						mi.setThumbnail(getThumbnailPath(name, ext));
 					}
@@ -89,7 +89,7 @@ public class IpodCGIMusicManager extends MusicManager{
 
 					//MediaItemSong mi = new MediaItemSong(R.drawable.icon_list_audio_album, name, null, false);
 					// modified by silver
-					MediaItemSong mi = new MediaItemSong(R.drawable.ic_logo, name, null, false);
+					MediaItemSong mi = new MediaItemSong(R.drawable.ic_logo_transcend, name, null, false);
 					if(ext != null && !"none".equals(ext)){
 						mi.setThumbnail(getThumbnailPath(name, ext));
 					}
@@ -178,7 +178,7 @@ public class IpodCGIMusicManager extends MusicManager{
 						ext = strToken.nextToken();
 					//MediaItemSong mi = new MediaItemSong(R.drawable.icon_list_audio_song, songName, album, false);
 					// modified by silver
-					MediaItemSong mi = new MediaItemSong(R.drawable.ic_logo, songName, album, false);
+					MediaItemSong mi = new MediaItemSong(R.drawable.ic_logo_transcend, songName, album, false);
 					String path = Util.getPathFromID(item.getId(), server.isUserAdmin());
 					path = getWebPath(path);
 					if(ext != null && !"none".equals(ext)){
@@ -222,7 +222,7 @@ public class IpodCGIMusicManager extends MusicManager{
 						ext = strToken.nextToken();
 					//MediaItemSong mi = new MediaItemSong(R.drawable.icon_list_audio_song, songName, album, false);
 					// modified by silver
-					MediaItemSong mi = new MediaItemSong(R.drawable.ic_logo, songName, album, false);
+					MediaItemSong mi = new MediaItemSong(R.drawable.ic_logo_transcend, songName, album, false);
 					String path = Util.getPathFromID(item.getId(), server.isUserAdmin());
 					path = getWebPath(path);
 					if(ext != null && !"none".equals(ext)){

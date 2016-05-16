@@ -70,12 +70,12 @@ public class VideoManager {
 	};
 	*/
 	// modified by silver
-	static final int[] icons = { R.drawable.ic_logo,
-			R.drawable.ic_logo,
-			R.drawable.ic_logo,
-			R.drawable.ic_logo,
-			R.drawable.ic_logo,
-			R.drawable.ic_logo
+	static final int[] icons = { R.drawable.ic_logo_transcend,
+			R.drawable.ic_logo_transcend,
+			R.drawable.ic_logo_transcend,
+			R.drawable.ic_logo_transcend,
+			R.drawable.ic_logo_transcend,
+			R.drawable.ic_logo_transcend
 	};
 
 	/**

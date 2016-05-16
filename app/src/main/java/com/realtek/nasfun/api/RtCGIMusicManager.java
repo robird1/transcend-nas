@@ -70,7 +70,7 @@ public class RtCGIMusicManager extends MusicManager{
 				artist = item.artist;
 				//MediaItemSong mi = new MediaItemSong(R.drawable.icon_list_audio_song, songName, album, false);
 				// modified by silver
-				MediaItemSong mi = new MediaItemSong(R.drawable.ic_logo, songName, album, false);
+				MediaItemSong mi = new MediaItemSong(R.drawable.ic_logo_transcend, songName, album, false);
 				thumbNailPath = getThumbnailPath(album);
 				Log.d(TAG,songName +"'s thumbNailPath = "+thumbNailPath);
 				mi.setName(songName);
@@ -104,7 +104,7 @@ public class RtCGIMusicManager extends MusicManager{
 				id = Integer.toString(item.id);
 				//MediaItemSong mi = new MediaItemSong(R.drawable.icon_list_audio_album, album, null, false);
 				// modified by silver
-				MediaItemSong mi = new MediaItemSong(R.drawable.ic_logo, album, null, false);
+				MediaItemSong mi = new MediaItemSong(R.drawable.ic_logo_transcend, album, null, false);
 				mi.setId(id);                     
 				mi.setThumbnail(getThumbnailPath(album));
 				list.add(mi);
@@ -127,7 +127,7 @@ public class RtCGIMusicManager extends MusicManager{
 				id = Integer.toString(item.id);
 				//MediaItemSong mi = new MediaItemSong(R.drawable.icon_list_audio_singer, artist, numOfAlbum, false);
 				// modified by silver
-				MediaItemSong mi = new MediaItemSong(R.drawable.ic_logo, artist, numOfAlbum, false);
+				MediaItemSong mi = new MediaItemSong(R.drawable.ic_logo_transcend, artist, numOfAlbum, false);
 				mi.setId(id);
 				mi.setThumbnail(getThumbnailPath(artist));
 				list.add(mi);
