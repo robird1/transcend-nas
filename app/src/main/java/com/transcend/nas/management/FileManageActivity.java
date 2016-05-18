@@ -10,6 +10,7 @@ import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.view.ActionMode;
@@ -39,6 +40,12 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.cast.ApplicationMetadata;
+import com.google.android.gms.cast.MediaInfo;
+import com.google.android.gms.cast.MediaMetadata;
+import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
+import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCastConsumer;
+import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCastConsumerImpl;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
@@ -51,6 +58,7 @@ import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.settings.SettingsActivity;
+import com.transcend.nas.utils.MimeUtil;
 import com.transcend.nas.viewer.ViewerActivity;
 import com.tutk.IOTC.P2PService;
 import com.tutk.IOTC.P2PTunnelAPIs;
@@ -111,6 +119,10 @@ public class FileManageActivity extends AppCompatActivity implements
     private Bundle mPreviousLoaderArgs = null;
     private boolean isAutoBackupServiceInit = false;
 
+    private VideoCastManager mCastManager;
+    private VideoCastConsumer mCastConsumer;
+    private MenuItem mMediaRouteMenuItem;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -142,12 +154,21 @@ public class FileManageActivity extends AppCompatActivity implements
 
     @Override
     protected void onResume() {
+        mCastManager = VideoCastManager.getInstance();
+        if (null != mCastManager) {
+            mCastManager.addVideoCastConsumer(mCastConsumer);
+            mCastManager.incrementUiCounter();
+        }
         super.onResume();
         Log.w(TAG, "onResume");
     }
 
     @Override
     protected void onPause() {
+        if(null != mCastManager) {
+            mCastManager.decrementUiCounter();
+            mCastManager.removeVideoCastConsumer(mCastConsumer);
+        }
         super.onPause();
         Log.w(TAG, "onPause");
     }
@@ -189,6 +210,11 @@ public class FileManageActivity extends AppCompatActivity implements
         }
     }
 
+    @Override
+    public boolean dispatchKeyEvent(@NonNull KeyEvent event) {
+        return mCastManager.onDispatchVolumeKeyEvent(event, 0.05) || super.dispatchKeyEvent(event);
+    }
+
 
     /**
      * INITIALIZATION
@@ -199,6 +225,35 @@ public class FileManageActivity extends AppCompatActivity implements
         mFileList = new ArrayList<FileInfo>();
         mServer = ServerManager.INSTANCE.getCurrentServer();
         P2PService.getInstance().addP2PListener(this);
+        mCastManager = VideoCastManager.getInstance();
+        mCastConsumer = new VideoCastConsumerImpl() {
+
+            @Override
+            public void onFailed(int resourceId, int statusCode) {
+                String reason = "Not Available";
+                if (resourceId > 0) {
+                    reason = getString(resourceId);
+                }
+                Log.e(TAG, "Action failed, reason:  " + reason + ", status code: " + statusCode);
+            }
+
+            @Override
+            public void onApplicationConnected(ApplicationMetadata appMetadata, String sessionId,
+                                               boolean wasLaunched) {
+                invalidateOptionsMenu();
+            }
+
+            @Override
+            public void onDisconnected() {
+                invalidateOptionsMenu();
+            }
+
+            @Override
+            public void onConnectionSuspended(int cause) {
+                Log.d(TAG, "onConnectionSuspended() was called with cause: " + cause);
+            }
+        };
+
     }
 
     private boolean initAutoBackUpService() {
@@ -323,6 +378,7 @@ public class FileManageActivity extends AppCompatActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.file_manage_viewer, menu);
+        mMediaRouteMenuItem = mCastManager.addMediaRouterButton(menu, R.id.media_route_menu_item);
         return true;
     }
 
@@ -360,9 +416,21 @@ public class FileManageActivity extends AppCompatActivity implements
             } else if (FileInfo.TYPE.PHOTO.equals(fileInfo.type)) {
                 startViewerActivity(fileInfo.path);
             } else if (FileInfo.TYPE.VIDEO.equals(fileInfo.type)) {
-                MediaManager.open(this, fileInfo.path);
+                if(!fileInfo.path.startsWith(NASApp.ROOT_STG) && mCastManager != null && mCastManager.isConnected()) {
+                    MediaInfo info = MediaManager.createMediaInfo(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK, fileInfo.path);
+                    mCastManager.startVideoCastControllerActivity(this, info, 0, true);
+                }
+                else{
+                    MediaManager.open(this, fileInfo.path);
+                }
             } else if (FileInfo.TYPE.MUSIC.equals(fileInfo.type)) {
-                MediaManager.open(this, fileInfo.path);
+                if(!fileInfo.path.startsWith(NASApp.ROOT_STG) && mCastManager != null && mCastManager.isConnected()) {
+                    MediaInfo info = MediaManager.createMediaInfo(MediaMetadata.MEDIA_TYPE_MOVIE, fileInfo.path);
+                    mCastManager.startVideoCastControllerActivity(this, info, 0, true);
+                }
+                else {
+                    MediaManager.open(this, fileInfo.path);
+                }
             } else {
                 toast(R.string.unknown_format);
             }

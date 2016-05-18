@@ -4,8 +4,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 
+import com.google.android.gms.cast.MediaInfo;
+import com.google.android.gms.cast.MediaMetadata;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.utils.MimeUtil;
 
@@ -25,11 +28,29 @@ public class MediaManager {
     private final static String PUBLIC = "PUBLIC";
 
     public static void open(Activity act, String path) {
-        if (path.startsWith(NASPref.getDownloadLocation(act))) {
+        Uri uri = createUri(path);
+        String type = MimeUtil.getMimeType(path);
+        openIn(act, uri, type);
+    }
+
+    public static MediaInfo createMediaInfo(int mediaType, String path){
+        String uri = createUri(path).toString();
+        String type = MimeUtil.getMimeType(path);
+        MediaMetadata metadata = new MediaMetadata(mediaType);
+
+        MediaInfo info = new MediaInfo.Builder(uri)
+                .setContentType(type)
+                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+                .setMetadata(metadata)
+                .build();
+        return info;
+    }
+
+    public static Uri createUri(String path){
+        Uri uri;
+        if (path.startsWith(NASApp.ROOT_STG)) {
             // local
-            Uri uri = Uri.fromFile(new File(path));
-            String type = MimeUtil.getMimeType(path);
-            openIn(act, uri, type);
+            uri = Uri.fromFile(new File(path));
         }
         else {
             // remote
@@ -40,10 +61,9 @@ public class MediaManager {
             String file = parseFile(path);
             String redirect = "1";
             String url = "http://" + hostname + "/streaming.cgi?folder=" + folder + "&file=" + file + "&id=" + hash + "&redirect=" + redirect;
-            Uri uri = Uri.parse(url);
-            String type = MimeUtil.getMimeType(path);
-            openIn(act, uri, type);
+            uri = Uri.parse(url);
         }
+        return uri;
     }
 
     private static String parseFolder(String path) {

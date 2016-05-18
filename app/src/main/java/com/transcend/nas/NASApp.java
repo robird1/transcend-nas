@@ -6,12 +6,16 @@ import android.content.Intent;
 import android.os.Environment;
 import android.util.Log;
 
+import com.google.android.gms.cast.CastMediaControlIntent;
+import com.google.android.libraries.cast.companionlibrary.cast.CastConfiguration;
+import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.realtek.nasfun.api.ServerManager;
 
 import java.io.File;
+import java.util.Locale;
 
 /**
  * Created by silverhsu on 16/1/6.
@@ -41,22 +45,12 @@ public class NASApp extends Application {
         initServerManager();
         initImageLoader();
         createDownloadsDirectory();
-
-        // TODO: P2P case
-        /*
-        P2PService.getInstance().P2PConnectStop();
-        boolean b = P2PService.getInstance().P2PConnectStart();
-        boolean c = P2PService.getInstance().isConnected();
-        */
-
+        initChromeCastManager();
     }
 
     @Override
     public void onTerminate() {
         super.onTerminate();
-
-        // TODO: P2P case
-        //P2PService.getInstance().P2PConnectStop();
     }
 
     private void initImageLoader() {
@@ -83,6 +77,28 @@ public class NASApp extends Application {
         File dir = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name));
         File downloads = new File(dir, getString(R.string.downloads_name));
         if (downloads.mkdirs()) NASPref.setDownloadLocation(this, downloads.getAbsolutePath());
+    }
+
+    private void initChromeCastManager(){
+        String applicationId = CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID;
+
+        // Build a CastConfiguration object and initialize VideoCastManager
+        CastConfiguration options = new CastConfiguration.Builder(applicationId)
+                .enableAutoReconnect()
+                .enableCaptionManagement()
+                .enableDebug()
+                .enableLockScreen()
+                .enableNotification()
+                .enableWifiReconnection()
+                .setCastControllerImmersive(true)
+                .setLaunchOptions(false, Locale.getDefault())
+                .setNextPrevVisibilityPolicy(CastConfiguration.NEXT_PREV_VISIBILITY_POLICY_DISABLED)
+                .addNotificationAction(CastConfiguration.NOTIFICATION_ACTION_REWIND, false)
+                .addNotificationAction(CastConfiguration.NOTIFICATION_ACTION_PLAY_PAUSE, true)
+                .addNotificationAction(CastConfiguration.NOTIFICATION_ACTION_DISCONNECT, true)
+                .setForwardStep(10)
+                .build();
+        VideoCastManager.initialize(this, options);
     }
 
     public static Context getContext() {
