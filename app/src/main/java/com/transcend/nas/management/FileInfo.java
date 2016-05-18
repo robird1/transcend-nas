@@ -21,11 +21,10 @@ public class FileInfo implements Serializable {
     }
 
     public String path;
-
     public String name;
     public String time;
     public TYPE type;
-
+    public Long size;
     public boolean checked;
 
     public FileInfo() {

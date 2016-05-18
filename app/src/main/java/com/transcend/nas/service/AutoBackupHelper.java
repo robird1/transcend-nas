@@ -157,6 +157,7 @@ public class AutoBackupHelper {
             fileInfo.name = file.getName();
             fileInfo.time = FileInfo.getTime(file.lastModified());
             fileInfo.type = file.isFile() ? FileInfo.getType(file.getPath()) : FileInfo.TYPE.DIR;
+            fileInfo.size = file.length();
             if (fileInfo.type == FileInfo.TYPE.DIR) {
                 List<String> list = searchAllImage(fileInfo.path);
                 for (String item : list) {

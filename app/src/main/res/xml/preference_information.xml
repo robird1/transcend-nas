@@ -49,6 +49,17 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:layout="@layout/preference_category_widget"
+        android:title="@string/size">
+
+        <Preference
+            android:key="@string/pref_info_size"
+            android:selectable="false"
+            android:summary=" - " />
+
+    </PreferenceCategory>
+
     <PreferenceCategory>
         <!-- footer -->
     </PreferenceCategory>

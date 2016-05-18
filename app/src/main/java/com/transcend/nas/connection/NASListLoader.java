@@ -145,6 +145,9 @@ public class NASListLoader extends AsyncTaskLoader<Boolean> {
 
                 if (isMyNAS) {
                     HashMap<String, String> nas = new HashMap<String, String>();
+                    if(info.getInet4Addresses().length == 0)
+                        continue;
+
                     nas.put("nasId", "-1");
                     nas.put("nickname", info.getServer());
                     nas.put("hostname", info.getInet4Addresses()[0].getHostAddress());

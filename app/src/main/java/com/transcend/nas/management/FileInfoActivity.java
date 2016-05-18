@@ -8,8 +8,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.NASApp;
 import com.transcend.nas.R;
+
+import java.io.File;
+import java.text.DecimalFormat;
 
 /**
  * Created by silverhsu on 16/3/9.
@@ -17,12 +25,16 @@ import com.transcend.nas.R;
 public class FileInfoActivity extends AppCompatActivity {
 
     public static final String TAG = FileInfoActivity.class.getSimpleName();
+    private ImageView ivImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_file_info);
+        Bundle args = getIntent().getExtras();
+        FileInfo fileInfo = (FileInfo) args.getSerializable("info");
         initToolbar();
+        initImagePreview(fileInfo);
         initFragment();
     }
 
@@ -61,10 +73,43 @@ public class FileInfoActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
 
+    private void initImagePreview(FileInfo fileInfo){
+        ivImage = (ImageView) findViewById(R.id.info_image);
+        if (fileInfo.type.equals(FileInfo.TYPE.DIR))
+            ivImage.setImageResource(R.drawable.ic_folder_gray_big);
+        else if (fileInfo.type.equals(FileInfo.TYPE.PHOTO))
+            ivImage.setImageResource(R.drawable.ic_image_gray_big);
+        else if (fileInfo.type.equals(FileInfo.TYPE.VIDEO))
+            ivImage.setImageResource(R.drawable.ic_movies_gray_big);
+        else if (fileInfo.type.equals(FileInfo.TYPE.MUSIC))
+            ivImage.setImageResource(R.drawable.ic_audiotrack_gray_big);
+        if (fileInfo.type.equals(FileInfo.TYPE.PHOTO))
+            ImageLoader.getInstance().displayImage(toPhotoURL(fileInfo.path), ivImage);
+    }
+
     private void initFragment() {
         int id = R.id.info_frame;
         Fragment f = new InformationFragment();
         getFragmentManager().beginTransaction().replace(id, f).commit();
+    }
+
+    private String toPhotoURL(String path) {
+        String url;
+        if (path.startsWith(NASApp.ROOT_STG)) {
+            url = "file://" + path;
+        }
+        else {
+            Server server = ServerManager.INSTANCE.getCurrentServer();
+            String hostname = server.getHostname();
+            String hash = server.getHash();
+            String filepath;
+            if(path.startsWith(Server.HOME))
+                filepath = Server.USER_DAV_HOME + path.replaceFirst(Server.HOME, "/");
+            else
+                filepath = Server.ADMIN_DAV_HOME + path;
+            url = "http://" + hostname + filepath + "?session=" + hash + "&thumbnail";
+        }
+        return url;
     }
 
 
@@ -86,6 +131,7 @@ public class FileInfoActivity extends AppCompatActivity {
             refreshColumnName();
             refreshColumnType();
             refreshColumnTime();
+            refreshColumnSize();
         }
 
         private void initData() {
@@ -120,6 +166,30 @@ public class FileInfoActivity extends AppCompatActivity {
             String key = getString(R.string.pref_info_time);
             Preference pref = findPreference(key);
             pref.setSummary(mFileInfo.time);
+        }
+
+        private void refreshColumnSize() {
+            String key = getString(R.string.pref_info_size);
+            Preference pref = findPreference(key);
+
+            //calculator the file size
+            String s = " MB";
+            double sizeMB = (double) mFileInfo.size / 1024 / 1024;
+            if(sizeMB < 1){
+                sizeMB = (double) mFileInfo.size / 1024;
+                s = " KB";
+            }
+            else if (sizeMB >= 1000) {
+                sizeMB = (double) sizeMB / 1024;
+                s = " GB";
+            }
+
+            //format the size
+            DecimalFormat df=new DecimalFormat("#.##");
+            String formatSize = df.format(sizeMB) + s;
+
+            if(!FileInfo.TYPE.DIR.equals(mFileInfo.type))
+                pref.setSummary(formatSize);
         }
 
     }

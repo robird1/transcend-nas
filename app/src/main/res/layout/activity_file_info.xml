@@ -25,11 +25,21 @@
         android:layout_below="@+id/info_toolbar"
         android:background="@drawable/toolbar_dropshadow" />
 
+    <ImageView
+        android:id="@+id/info_image"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:scaleType="centerCrop"
+        android:layout_below="@id/info_toolbar"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="36dp"
+        android:src="@drawable/ic_file_gray_big" />
+
     <FrameLayout
         android:id="@+id/info_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/info_toolbar">
+        android:layout_below="@+id/info_image">
 
     </FrameLayout>
 

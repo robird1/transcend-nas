@@ -48,6 +48,7 @@ public class LocalFileListLoader extends AsyncTaskLoader<Boolean> {
             fileInfo.name = file.getName();
             fileInfo.time = FileInfo.getTime(file.lastModified());
             fileInfo.type = file.isFile() ? FileInfo.getType(file.getPath()) : FileInfo.TYPE.DIR;
+            fileInfo.size = file.length();
             mFileList.add(fileInfo);
         }
         Collections.sort(mFileList, FileInfoSort.comparator(getContext()));

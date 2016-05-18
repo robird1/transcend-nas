@@ -4,7 +4,9 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
 import android.os.storage.StorageManager;
+import android.util.Log;
 
+import com.transcend.nas.management.FileManageRecyclerAdapter;
 import com.transcend.nas.utils.PrefUtil;
 
 /**
@@ -316,6 +318,24 @@ public class NASPref {
         String name = context.getResources().getString(R.string.pref_name);
         String key = context.getResources().getString(R.string.pref_file_sort_type);
         PrefUtil.write(context, name, key, sort.ordinal());
+    }
+
+    /**
+     *
+     * File View
+     *
+     */
+    public static FileManageRecyclerAdapter.LayoutType getFileViewType(Context context) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_file_view_type);
+        int def = FileManageRecyclerAdapter.LayoutType.LIST.ordinal();
+        return FileManageRecyclerAdapter.LayoutType.values()[PrefUtil.read(context, name, key, def)];
+    }
+
+    public static void setFileViewType(Context context, FileManageRecyclerAdapter.LayoutType type) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_file_view_type);
+        PrefUtil.write(context, name, key, type.ordinal());
     }
 
 }

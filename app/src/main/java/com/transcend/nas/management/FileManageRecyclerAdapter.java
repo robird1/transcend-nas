@@ -26,8 +26,13 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
     private static final int ITEM_VIEW_TYPE_FOOTER  = 1;
 
     private ArrayList<FileInfo> mList;
+    private LayoutType mLayoutType = LayoutType.LIST;
 
     private OnRecyclerItemCallbackListener mCallback;
+
+    public enum LayoutType{
+        LIST, GRID
+    }
 
     public interface OnRecyclerItemCallbackListener {
         void onRecyclerItemClick(int position);
@@ -51,8 +56,11 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
     public FileManageRecyclerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (viewType == ITEM_VIEW_TYPE_CONTENT) {
             int resource = R.layout.listitem_file_manage;
-            if (((RecyclerView) parent).getLayoutManager() instanceof GridLayoutManager)
+            mLayoutType = LayoutType.LIST;
+            if (((RecyclerView) parent).getLayoutManager() instanceof GridLayoutManager) {
                 resource = R.layout.griditem_file_manage;
+                mLayoutType = LayoutType.GRID;
+            }
             LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
             View view = layoutInflater.inflate(resource, parent, false);
             return new ViewHolder(view, viewType);
@@ -72,15 +80,7 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
             String name = fileInfo.name;
             String time = fileInfo.time;
             String path = fileInfo.path;
-            int resId = R.drawable.ic_file_gray_24dp;
-            if (fileInfo.type.equals(FileInfo.TYPE.DIR))
-                resId = R.drawable.ic_folder_gray_24dp;
-            else if (fileInfo.type.equals(FileInfo.TYPE.PHOTO))
-                resId = R.drawable.ic_image_gray_24dp;
-            else if (fileInfo.type.equals(FileInfo.TYPE.VIDEO))
-                resId = R.drawable.ic_movies_gray_24dp;
-            else if (fileInfo.type.equals(FileInfo.TYPE.MUSIC))
-                resId = R.drawable.ic_audiotrack_gray_24dp;
+            int resId = getPreviewResourceId(fileInfo.type);
             if (holder.title != null)
                 holder.title.setText(name);
             if (holder.subtitle != null)
@@ -117,6 +117,34 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
 
     public boolean hasFooter() {
         return mList.size() > 0;
+    }
+
+    private int getPreviewResourceId(FileInfo.TYPE type){
+        int resId = (mLayoutType == LayoutType.GRID) ? R.drawable.ic_file_gray_big : R.drawable.ic_file_gray_24dp;
+        switch(mLayoutType) {
+            case GRID:
+                if (type.equals(FileInfo.TYPE.DIR))
+                    resId = R.drawable.ic_folder_gray_big;
+                else if (type.equals(FileInfo.TYPE.PHOTO))
+                    resId = R.drawable.ic_image_gray_big;
+                else if (type.equals(FileInfo.TYPE.VIDEO))
+                    resId = R.drawable.ic_movies_gray_big;
+                else if (type.equals(FileInfo.TYPE.MUSIC))
+                    resId = R.drawable.ic_audiotrack_gray_big;
+                break;
+            default:
+                if (type.equals(FileInfo.TYPE.DIR))
+                    resId = R.drawable.ic_folder_gray_24dp;
+                else if (type.equals(FileInfo.TYPE.PHOTO))
+                    resId = R.drawable.ic_image_gray_24dp;
+                else if (type.equals(FileInfo.TYPE.VIDEO))
+                    resId = R.drawable.ic_movies_gray_24dp;
+                else if (type.equals(FileInfo.TYPE.MUSIC))
+                    resId = R.drawable.ic_audiotrack_gray_24dp;
+                    break;
+        }
+
+        return resId;
     }
 
     private String toPhotoURL(String path) {

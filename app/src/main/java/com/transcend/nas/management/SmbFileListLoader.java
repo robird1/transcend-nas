@@ -68,6 +68,7 @@ public class SmbFileListLoader extends SmbAbstractLoader {
             fileInfo.name = file.getName().replace("/", "");
             fileInfo.time = FileInfo.getTime(file.getLastModified());
             fileInfo.type = file.isFile() ? FileInfo.getType(file.getPath()) : FileInfo.TYPE.DIR;
+            fileInfo.size = file.length();
             mFileList.add(fileInfo);
         }
         Log.w(TAG, "mFileList size: " + mFileList.size());

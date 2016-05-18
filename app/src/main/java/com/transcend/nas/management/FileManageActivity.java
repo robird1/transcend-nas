@@ -165,7 +165,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
     @Override
     protected void onPause() {
-        if(null != mCastManager) {
+        if (null != mCastManager) {
             mCastManager.decrementUiCounter();
             mCastManager.removeVideoCastConsumer(mCastConsumer);
         }
@@ -285,7 +285,7 @@ public class FileManageActivity extends AppCompatActivity implements
     private void initToolbar() {
         mToolbar = (Toolbar) findViewById(R.id.main_toolbar);
         mToolbar.setTitle("");
-
+        mToolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_gray_24dp);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -300,10 +300,18 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void initRecyclerView() {
+        FileManageRecyclerAdapter.LayoutType type = NASPref.getFileViewType(this);
         mRecyclerAdapter = new FileManageRecyclerAdapter(mFileList);
         mRecyclerAdapter.setOnRecyclerItemCallbackListener(this);
         mRecyclerView = (RecyclerView) findViewById(R.id.main_recycler_view);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        switch (type) {
+            case GRID:
+                updateGridView(false);
+                break;
+            default:
+                updateListView(false);
+                break;
+        }
         mRecyclerView.setAdapter(mRecyclerAdapter);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
     }
@@ -341,7 +349,7 @@ public class FileManageActivity extends AppCompatActivity implements
         mNavHeaderIcon = (ImageView) mNavHeader.findViewById(R.id.drawer_header_icon);
         mNavHeaderTitle.setText(mServer.getUsername());
         String email = NASPref.getCloudUsername(this);
-        if(isRemoteAccess() && !email.equals(""))
+        if (isRemoteAccess() && !email.equals(""))
             mNavHeaderSubtitle.setText(String.format("%s", email));
         else
             mNavHeaderSubtitle.setText(String.format("%s@%s", mServer.getUsername(), mServer.getHostname()));
@@ -378,6 +386,15 @@ public class FileManageActivity extends AppCompatActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.file_manage_viewer, menu);
+        FileManageRecyclerAdapter.LayoutType type = NASPref.getFileViewType(this);
+        switch (type) {
+            case GRID:
+                menu.findItem(R.id.file_manage_viewer_action_view).setIcon(R.drawable.ic_view_list_gray_24dp);
+                break;
+            default:
+                menu.findItem(R.id.file_manage_viewer_action_view).setIcon(R.drawable.ic_view_module_gray_24dp);
+                break;
+        }
         mMediaRouteMenuItem = mCastManager.addMediaRouterButton(menu, R.id.media_route_menu_item);
         return true;
     }
@@ -416,19 +433,17 @@ public class FileManageActivity extends AppCompatActivity implements
             } else if (FileInfo.TYPE.PHOTO.equals(fileInfo.type)) {
                 startViewerActivity(fileInfo.path);
             } else if (FileInfo.TYPE.VIDEO.equals(fileInfo.type)) {
-                if(!fileInfo.path.startsWith(NASApp.ROOT_STG) && mCastManager != null && mCastManager.isConnected()) {
+                if (!fileInfo.path.startsWith(NASApp.ROOT_STG) && mCastManager != null && mCastManager.isConnected()) {
                     MediaInfo info = MediaManager.createMediaInfo(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK, fileInfo.path);
                     mCastManager.startVideoCastControllerActivity(this, info, 0, true);
-                }
-                else{
+                } else {
                     MediaManager.open(this, fileInfo.path);
                 }
             } else if (FileInfo.TYPE.MUSIC.equals(fileInfo.type)) {
-                if(!fileInfo.path.startsWith(NASApp.ROOT_STG) && mCastManager != null && mCastManager.isConnected()) {
+                if (!fileInfo.path.startsWith(NASApp.ROOT_STG) && mCastManager != null && mCastManager.isConnected()) {
                     MediaInfo info = MediaManager.createMediaInfo(MediaMetadata.MEDIA_TYPE_MOVIE, fileInfo.path);
                     mCastManager.startVideoCastControllerActivity(this, info, 0, true);
-                }
-                else {
+                } else {
                     MediaManager.open(this, fileInfo.path);
                 }
             } else {
@@ -671,7 +686,7 @@ public class FileManageActivity extends AppCompatActivity implements
         super.onConfigurationChanged(newConfig);
         Log.w(TAG, "onConfigurationChanged");
         if (mRecyclerView.getLayoutManager() instanceof GridLayoutManager)
-            updateGridView();
+            updateGridView(true);
         resizeToolbar();
     }
 
@@ -809,12 +824,11 @@ public class FileManageActivity extends AppCompatActivity implements
                     return;
                 }
             }
-        } else if(loader instanceof TutkLogoutLoader){
+        } else if (loader instanceof TutkLogoutLoader) {
             startSignInActivity(true);
-        } else if(loader instanceof AutoBackupLoader){
+        } else if (loader instanceof AutoBackupLoader) {
             //do nothing
-        }
-        else {
+        } else {
             if (success) {
                 doRefresh();
             }
@@ -833,7 +847,7 @@ public class FileManageActivity extends AppCompatActivity implements
         }
 
         toggleDrawerCheckedItem();
-        if(!isAutoBackupServiceInit && initAutoBackUpService()){
+        if (!isAutoBackupServiceInit && initAutoBackUpService()) {
             return;
         }
         mProgressView.setVisibility(View.INVISIBLE);
@@ -863,10 +877,14 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void doChangeView() {
-        if (mRecyclerView.getLayoutManager() instanceof GridLayoutManager)
-            updateListView();
-        else
-            updateGridView();
+        if (mRecyclerView.getLayoutManager() instanceof GridLayoutManager) {
+            updateListView(true);
+            NASPref.setFileViewType(this, FileManageRecyclerAdapter.LayoutType.LIST);
+        } else {
+            updateGridView(true);
+            NASPref.setFileViewType(this, FileManageRecyclerAdapter.LayoutType.GRID);
+        }
+        invalidateOptionsMenu();
     }
 
     private void doSort() {
@@ -886,19 +904,18 @@ public class FileManageActivity extends AppCompatActivity implements
             public void onConfirm(String keyword) {
                 keyword = keyword.toLowerCase();
                 ArrayList<FileInfo> fileInfo = new ArrayList<FileInfo>();
-                for(FileInfo file : mFileList){
-                    if(file.name.toLowerCase().contains(keyword)) {
+                for (FileInfo file : mFileList) {
+                    if (file.name.toLowerCase().contains(keyword)) {
                         fileInfo.add(file);
                     }
                 }
 
-                if(fileInfo.size() > 0) {
+                if (fileInfo.size() > 0) {
                     mFileList.clear();
                     mFileList = fileInfo;
                     mRecyclerAdapter.updateList(mFileList);
                     mRecyclerAdapter.notifyDataSetChanged();
-                }
-                else {
+                } else {
                     Toast.makeText(FileManageActivity.this, getString(R.string.search_result_empty), Toast.LENGTH_SHORT).show();
                 }
                 dismiss();
@@ -1050,11 +1067,11 @@ public class FileManageActivity extends AppCompatActivity implements
         };
     }
 
-    private ArrayList<FileInfo> doHomeFilter( ArrayList<FileInfo> fileList){
+    private ArrayList<FileInfo> doHomeFilter(ArrayList<FileInfo> fileList) {
         Server server = ServerManager.INSTANCE.getCurrentServer();
         String name = server.getUsername();
-        for(FileInfo file : fileList){
-            if(file.name.equals(name)){
+        for (FileInfo file : fileList) {
+            if (file.name.equals(name)) {
                 fileList.remove(file);
                 break;
             }
@@ -1074,22 +1091,26 @@ public class FileManageActivity extends AppCompatActivity implements
         mToggle.setDrawerIndicatorEnabled(mPath.equals(mRoot));
     }
 
-    private void updateListView() {
+    private void updateListView(boolean update) {
         LinearLayoutManager list = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(list);
-        mRecyclerView.getRecycledViewPool().clear();
-        mRecyclerAdapter.notifyDataSetChanged();
+        if(update) {
+            mRecyclerView.getRecycledViewPool().clear();
+            mRecyclerAdapter.notifyDataSetChanged();
+        }
     }
 
-    private void updateGridView() {
+    private void updateGridView(boolean update) {
         int orientation = getResources().getConfiguration().orientation;
         int spanCount = (orientation == Configuration.ORIENTATION_PORTRAIT)
                 ? GRID_PORTRAIT : GRID_LANDSCAPE;
         GridLayoutManager grid = new GridLayoutManager(this, spanCount);
         grid.setSpanSizeLookup(new SpanSizeLookup(grid.getSpanCount()));
         mRecyclerView.setLayoutManager(grid);
-        mRecyclerView.getRecycledViewPool().clear();
-        mRecyclerAdapter.notifyDataSetChanged();
+        if(update) {
+            mRecyclerView.getRecycledViewPool().clear();
+            mRecyclerAdapter.notifyDataSetChanged();
+        }
     }
 
     private void resizeToolbar() {
