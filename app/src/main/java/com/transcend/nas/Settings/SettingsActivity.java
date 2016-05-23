@@ -28,6 +28,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
@@ -338,7 +339,6 @@ public class SettingsActivity extends AppCompatActivity implements
                 NASPref.setCloudAccountStatus(mContext, NASPref.Status.Padding.ordinal());
                 NASPref.setCloudUsername(mContext, email);
                 NASPref.setCloudPassword(mContext, pwd);
-                Toast.makeText(this, getString(R.string.remote_access_send_activate_info), Toast.LENGTH_SHORT).show();
             } else {
                 isRemoteAccessRegister = false;
                 isRemoteAccessActive = false;
@@ -421,7 +421,7 @@ public class SettingsActivity extends AppCompatActivity implements
 
     private void showNotificationDialog(String title, final int loaderID, final Bundle args) {
         Bundle value = new Bundle();
-        value.putString("title", title);
+        value.putString(NotificationDialog.DIALOG_MESSAGE, title);
         NotificationDialog mNotificationDialog = new NotificationDialog(this, value) {
             @Override
             public void onConfirm() {
@@ -660,15 +660,11 @@ public class SettingsActivity extends AppCompatActivity implements
             Preference pref = findPreference(key);
             int status = NASPref.getCloudAccountStatus(mContext);
             if(status == NASPref.Status.Padding.ordinal())
-                pref.setSummary(getString(R.string.remote_access_padding));
+                pref.setTitle(getString(R.string.remote_access_padding));
             else if(status == NASPref.Status.Active.ordinal())
-                pref.setSummary(NASPref.getCloudUsername(mContext));
+                pref.setTitle(getString(R.string.remote_access_active));
             else
-                pref.setSummary(getString(R.string.remote_access_inactive));
-        }
-
-        private void checkRemoteAccess() {
-
+                pref.setTitle(getString(R.string.remote_access_inactive));
         }
 
         private void refreshColumnBackupSetting(boolean changeService) {
@@ -767,7 +763,7 @@ public class SettingsActivity extends AppCompatActivity implements
         Button btSubmit;
         TextView tvForget;
         TextView tvRegister;
-        TextView tvInfo;
+        //TextView tvInfo;
         boolean isLogin = true;
 
         public RemoteAccessFragment() {
@@ -798,9 +794,9 @@ public class SettingsActivity extends AppCompatActivity implements
                 tvEmail.setText(email);
 
                 if (isRemoteAccessActive) {
-                    tvStatus.setText(getString(R.string.remote_access_active));
+                    tvStatus.setVisibility(View.GONE);
                     btResend.setVisibility(View.GONE);
-                    tvListTitle.setVisibility(View.VISIBLE);
+                    //tvListTitle.setVisibility(View.VISIBLE);
 
                     if (naslist != null) {
                         Server mServer = ServerManager.INSTANCE.getCurrentServer();
@@ -827,9 +823,9 @@ public class SettingsActivity extends AppCompatActivity implements
                         );
                     }
                 } else {
-                    tvStatus.setText(getString(R.string.remote_access_inactive));
+                    tvStatus.setVisibility(View.VISIBLE);
                     btResend.setVisibility(View.VISIBLE);
-                    tvListTitle.setVisibility(View.INVISIBLE);
+                    //tvListTitle.setVisibility(View.INVISIBLE);
                 }
 
                 btResend.setOnClickListener(this);
@@ -848,10 +844,10 @@ public class SettingsActivity extends AppCompatActivity implements
                 tvForget.setOnClickListener(this);
                 tvRegister = (TextView) v.findViewById(R.id.register_button);
                 tvRegister.setOnClickListener(this);
-                tvInfo = (TextView) v.findViewById(R.id.register_info);
+                //tvInfo = (TextView) v.findViewById(R.id.register_info);
                 initRegisterContent();
                 if (!isLogin) {
-                    tvInfo.setText(getString(R.string.remote_access_verification_expired));
+                    //tvInfo.setText(getString(R.string.remote_access_verification_expired));
                 }
             }
 
@@ -863,7 +859,7 @@ public class SettingsActivity extends AppCompatActivity implements
             tlPwdConfirm.getEditText().setText(null);
             if (isLogin) {
                 mTitle.setText(getString(R.string.login));
-                tvInfo.setText(getString(R.string.remote_access_welcome));
+                //tvInfo.setText(getString(R.string.remote_access_welcome));
                 tvForget.setVisibility(View.VISIBLE);
                 tvRegister.setText(getString(R.string.new_user));
                 btLogin.setVisibility(View.VISIBLE);
@@ -871,7 +867,7 @@ public class SettingsActivity extends AppCompatActivity implements
                 tlPwdConfirm.setVisibility(View.GONE);
             } else {
                 mTitle.setText(getString(R.string.register));
-                tvInfo.setText(getString(R.string.remote_access_register));
+                //tvInfo.setText(getString(R.string.remote_access_register));
                 tvForget.setVisibility(View.GONE);
                 tvRegister.setText(getString(R.string.back));
                 btLogin.setVisibility(View.GONE);

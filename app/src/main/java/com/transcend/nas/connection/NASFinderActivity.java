@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,6 +42,7 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
 
     private Toolbar mToolbar;
     private RecyclerView mRecyclerView;
+    private LinearLayout mRecyclerEmtpyView;
     private RecyclerViewAdapter mAdapter;
     private RelativeLayout mProgressView;
     private LoginDialog mLoginDialog;
@@ -120,6 +122,7 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
         mRecyclerView.setAdapter(mAdapter = new RecyclerViewAdapter());
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
+        mRecyclerEmtpyView = (LinearLayout) findViewById(R.id.nas_finder_recycler_empty_view);
     }
 
     private void initProgressView() {
@@ -246,6 +249,7 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
         mProgressView.setVisibility(View.INVISIBLE);
         mNASList = loader.getList();
         mAdapter.notifyDataSetChanged();
+        mRecyclerEmtpyView.setVisibility(mNASList.size() == 0 ? View.VISIBLE : View.GONE);
     }
 
     private void checkWizardLoader(boolean success, WizardCheckLoader loader){

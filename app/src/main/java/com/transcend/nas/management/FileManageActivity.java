@@ -35,6 +35,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -87,6 +88,7 @@ public class FileManageActivity extends AppCompatActivity implements
     private AppCompatSpinner mDropdown;
     private FileManageDropdownAdapter mDropdownAdapter;
     private RecyclerView mRecyclerView;
+    private LinearLayout mRecyclerEmptyView;
     private FileManageRecyclerAdapter mRecyclerAdapter;
     /*// expanded fabs
     private FloatingActionButton mFabControl;
@@ -208,6 +210,15 @@ public class FileManageActivity extends AppCompatActivity implements
                 closeEditorMode();
             }
         }
+        else if(requestCode == ViewerActivity.REQUEST_CODE){
+            if (resultCode == RESULT_OK) {
+                Bundle bundle = data.getExtras();
+                if (bundle == null) return;
+                boolean delete = bundle.getBoolean("delete");
+                if(delete)
+                    doRefresh();
+            }
+        }
     }
 
     @Override
@@ -314,6 +325,7 @@ public class FileManageActivity extends AppCompatActivity implements
         }
         mRecyclerView.setAdapter(mRecyclerAdapter);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        mRecyclerEmptyView = (LinearLayout) findViewById(R.id.main_recycler_empty_view);
     }
 
     private void initFabs() {
@@ -431,7 +443,7 @@ public class FileManageActivity extends AppCompatActivity implements
             if (FileInfo.TYPE.DIR.equals(fileInfo.type)) {
                 doLoad(fileInfo.path);
             } else if (FileInfo.TYPE.PHOTO.equals(fileInfo.type)) {
-                startViewerActivity(fileInfo.path);
+                startViewerActivity(mMode, mRoot, fileInfo.path);
             } else if (FileInfo.TYPE.VIDEO.equals(fileInfo.type)) {
                 if (!fileInfo.path.startsWith(NASApp.ROOT_STG) && mCastManager != null && mCastManager.isConnected()) {
                     MediaInfo info = MediaManager.createMediaInfo(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK, fileInfo.path);
@@ -838,7 +850,18 @@ public class FileManageActivity extends AppCompatActivity implements
             if (isRemoteAccess() && mPreviousLoaderArgs != null && !mPreviousLoaderArgs.getBoolean("retry")) {
                 Log.w(TAG, "Remote Access connect fail, try reConnect");
                 Bundle args = new Bundle();
-                args.putString("hostname", P2PService.getInstance().getTUTKUUID());
+                String uuid = P2PService.getInstance().getTUTKUUID();
+                if(uuid == null || "".equals(uuid)) {
+                    uuid = NASPref.getUUID(this);
+                    if(uuid == null || "".equals(uuid)) {
+                        uuid = NASPref.getCloudUUID(this);
+                        if(uuid == null || "".equals(uuid)) {
+                            startSignInActivity(false);
+                            return;
+                        }
+                    }
+                }
+                args.putString("hostname", uuid);
                 getLoaderManager().restartLoader(LoaderID.TUTK_NAS_LINK, args, this).forceLoad();
                 return;
             } else {
@@ -1089,6 +1112,9 @@ public class FileManageActivity extends AppCompatActivity implements
         mRecyclerAdapter.updateList(mFileList);
         mRecyclerAdapter.notifyDataSetChanged();
         mToggle.setDrawerIndicatorEnabled(mPath.equals(mRoot));
+        if(mFileList != null){
+            mRecyclerEmptyView.setVisibility(mFileList.size() == 0 ? View.VISIBLE : View.GONE);
+        }
     }
 
     private void updateListView(boolean update) {
@@ -1294,7 +1320,7 @@ public class FileManageActivity extends AppCompatActivity implements
         startActivityForResult(intent, FileActionLocateActivity.REQUEST_CODE);
     }
 
-    private void startViewerActivity(String path) {
+    private void startViewerActivity(String mode, String root, String path) {
         ArrayList<FileInfo> list = new ArrayList<FileInfo>();
         for (FileInfo info : mFileList) {
             if (FileInfo.TYPE.PHOTO.equals(info.type))
@@ -1302,11 +1328,13 @@ public class FileManageActivity extends AppCompatActivity implements
         }
         Bundle args = new Bundle();
         args.putString("path", path);
+        args.putString("mode", mode);
+        args.putString("root", root);
         args.putSerializable("list", list);
         Intent intent = new Intent();
         intent.setClass(FileManageActivity.this, ViewerActivity.class);
         intent.putExtras(args);
-        startActivity(intent);
+        startActivityForResult(intent, ViewerActivity.REQUEST_CODE);
     }
 
     private void startFileInfoActivity(FileInfo info) {

@@ -93,7 +93,7 @@ public abstract class ForgetPwdDialog implements View.OnClickListener {
 
     private void showNotificationDialog() {
         Bundle value = new Bundle();
-        value.putString("title", mActivity.getString(R.string.forget_password_warning));
+        value.putString(NotificationDialog.DIALOG_MESSAGE, mActivity.getString(R.string.forget_password_warning));
         NotificationDialog mNotificationDialog = new NotificationDialog(mActivity, value) {
             @Override
             public void onConfirm() {

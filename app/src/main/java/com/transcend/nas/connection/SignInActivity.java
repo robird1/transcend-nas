@@ -43,8 +43,11 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
 
     private static final String TAG = SignInActivity.class.getSimpleName();
 
+    private LinearLayout layoutInit;
+    private LinearLayout layoutSignIn;
     private TextInputLayout tlEmail;
     private TextInputLayout tlPwd;
+    private Button bnRemote;
     private Button bnSignIn;
     private TextView tvSignInForget;
     private LinearLayout tvFindDevice;
@@ -57,17 +60,29 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
+        initLayout();
         initInputText();
+        initRemoteButton();
         initSignInButton();
         initSignInForgetButton();
         initFindDeviceTextView();
         initProgressView();
     }
 
+    private void initLayout(){
+        layoutInit = (LinearLayout) findViewById(R.id.activity_init_layout);
+        layoutSignIn = (LinearLayout) findViewById(R.id.activity_sign_in_layout);
+    }
+
     private void initInputText() {
         tlEmail = (TextInputLayout) findViewById(R.id.activity_sign_in_email);
         tlEmail.getEditText().setText(NASPref.getCloudUsername(this));
         tlPwd = (TextInputLayout) findViewById(R.id.activity_sign_in_password);
+    }
+
+    private void initRemoteButton() {
+        bnRemote = (Button) findViewById(R.id.activity_remote_access_button);
+        bnRemote.setOnClickListener(this);
     }
 
     private void initSignInButton() {
@@ -91,7 +106,11 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
 
     @Override
     public void onClick(View v) {
-        if (v.equals(bnSignIn)) {
+        if(v.equals(bnRemote)){
+            layoutSignIn.setVisibility(View.VISIBLE);
+            layoutInit.setVisibility(View.GONE);
+        }
+        else if (v.equals(bnSignIn)) {
             String email = tlEmail.getEditText().getText().toString();
             String pwd = tlPwd.getEditText().getText().toString();
             if (email.equals("")) {

@@ -32,8 +32,15 @@
         android:scaleType="centerCrop"
         android:layout_below="@id/info_toolbar"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="36dp"
+        android:layout_marginTop="26dp"
+        android:layout_marginBottom="20dp"
         android:src="@drawable/ic_file_gray_big" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:layout_below="@+id/info_image"
+        android:background="@drawable/toolbar_dropshadow" />
 
     <FrameLayout
         android:id="@+id/info_frame"

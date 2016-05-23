@@ -23,8 +23,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="@string/nas_list"
-                android:textSize="20sp"
-                android:textColor="@color/textColorPrimary" />
+                android:textColor="@color/textColorPrimary"
+                android:textSize="20sp" />
 
         </android.support.v7.widget.Toolbar>
 
@@ -39,10 +39,34 @@
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/nas_finder_recycler_view"
-        android:layout_height="match_parent"
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_below="@+id/nas_finder_toolbar_shadow"
         android:background="@color/colorPrimary" />
+
+    <LinearLayout
+        android:id="@+id/nas_finder_recycler_empty_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="300dp"
+            android:scaleType="fitCenter"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/image_nas_empty" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/empty" />
+
+    </LinearLayout>
+
 
     <RelativeLayout
         android:id="@+id/nas_finder_progress_view"
@@ -50,8 +74,8 @@
         android:layout_height="match_parent"
         android:layout_below="@+id/nas_finder_toolbar_shadow"
         android:background="@android:color/transparent"
-        android:visibility="invisible"
-        android:clickable="true">
+        android:clickable="true"
+        android:visibility="invisible">
 
         <ProgressBar
             android:layout_width="wrap_content"

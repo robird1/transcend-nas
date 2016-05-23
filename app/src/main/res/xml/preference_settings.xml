@@ -21,8 +21,8 @@
         <Preference
             android:key="@string/pref_remote_access"
             android:layout="@layout/preference_item"
-            android:summary="@string/remote_access_inactive"
-            android:title="@string/email" />
+            android:summary="@string/remote_access_info"
+            android:title="@string/remote_access_inactive" />
 
     </PreferenceCategory>
 

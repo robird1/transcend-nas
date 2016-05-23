@@ -1,6 +1,7 @@
 <resources>
 
     <string name="app_name">StoreJet Cloud</string>
+    <string name="app_version">StoreJet Cloud v0.92</string>
     <string name="storage_name">Storage</string>
     <string name="backups_name">Backups</string>
     <string name="downloads_name">Downloads</string>
@@ -40,6 +41,7 @@
     <string name="account">Account</string>
     <string name="always">Always</string>
     <string name="auto_backup">Auto backup</string>
+    <string name="remote_access_info">Help you to find your StoreJet Cloud in Internet</string>
     <string name="cache">Cache</string>
     <string name="camera_backup">Camera backup</string>
     <string name="cancel">Cancel</string>
@@ -119,6 +121,8 @@
     <string name="try_remote_access">Try remote access</string>
 
     <string name="search_result_empty">No match file</string>
+    <string name="empty">(Empty)</string>
+    <string name="empty_folder">(Empty Folder)</string>
     <string name="empty_account">Empty Account</string>
     <string name="empty_email">Empty Email</string>
     <string name="empty_password">Empty Password</string>
@@ -167,6 +171,9 @@
     <string name="msg_auto_backup">Auto upload your camera photos and video to StoreJet Cloud.</string>
     <string name="msg_backup_scenario">Choose a scenario to backup your camera photos and video.</string>
     <string name="msg_cache_cleared">Cache cleared</string>
+
+    <!-- about -->
+    <string name="rights_reserved">2016 Transcend Information Inc.\nAll rights reserved.</string>
 
 
     <!-- preference -->

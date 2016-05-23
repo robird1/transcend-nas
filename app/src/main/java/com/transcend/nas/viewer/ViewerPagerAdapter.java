@@ -70,7 +70,21 @@ public class ViewerPagerAdapter extends PagerAdapter {
             ImageView iv = (ImageView) object;
             ImageLoader.getInstance().cancelDisplayTask(iv);
             container.removeView(iv);
-            Log.w(TAG, "destroyItem [" + position + "]: " + mList.get(position));
+        }
+    }
+
+
+    public void removeView(int index) {
+        mList.remove(index);
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public int getItemPosition(Object object) {
+        if (mList.contains((View) object)) {
+            return mList.indexOf((View) object);
+        } else {
+            return POSITION_NONE;
         }
     }
 

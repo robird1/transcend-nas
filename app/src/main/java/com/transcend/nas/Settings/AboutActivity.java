@@ -2,6 +2,8 @@ package com.transcend.nas.settings;
 
 import android.annotation.SuppressLint;
 import android.app.Fragment;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
@@ -18,6 +20,7 @@ import android.widget.Toast;
 
 import com.transcend.nas.BuildConfig;
 import com.transcend.nas.R;
+import com.transcend.nas.common.NotificationDialog;
 
 /**
  * Created by ikeLee on 16/3/21.
@@ -104,7 +107,7 @@ public class AboutActivity extends AppCompatActivity {
         public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
             int id = -1;
             if (preference.getKey().equals(getString(R.string.pref_about))) {
-                id = R.string.about;
+                showNotificationDialog(R.string.app_version, R.layout.dialog_about);
             } else if (preference.getKey().equals(getString(R.string.pref_about_legal))) {
                 id = R.string.legal;
             } else if (preference.getKey().equals(getString(R.string.pref_about_term_of_use))) {
@@ -112,7 +115,7 @@ public class AboutActivity extends AppCompatActivity {
             } else if (preference.getKey().equals(getString(R.string.pref_about_license))) {
                 id = R.string.licenses;
             } else if (preference.getKey().equals(getString(R.string.pref_about_contact))) {
-                id = R.string.contact_us;
+                startSendMailActivity();
             }
 
             if(id > 0) {
@@ -130,6 +133,32 @@ public class AboutActivity extends AppCompatActivity {
             mToast = Toast.makeText(getActivity(), resId, Toast.LENGTH_SHORT);
             //mToast.setGravity(Gravity.CENTER, 0, 0);
             mToast.show();
+        }
+
+        private void showNotificationDialog(int titleId, int layoutId) {
+            Bundle value = new Bundle();
+            value.putString(NotificationDialog.DIALOG_TITLE, getActivity().getString(titleId));
+            value.putInt(NotificationDialog.DIALOG_LAYOUT, layoutId);
+            NotificationDialog mNotificationDialog = new NotificationDialog(getActivity(), value, true, false) {
+                @Override
+                public void onConfirm() {
+
+                }
+
+                @Override
+                public void onCancel() {
+
+                }
+            };
+        }
+
+        private void startSendMailActivity(){
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_SENDTO);
+            intent.setData(Uri.parse("mailto:service-tw@transcend-info.com"));
+            //intent.putExtra(Intent.EXTRA_SUBJECT, "這裡是主旨。");
+            //intent.putExtra(Intent.EXTRA_TEXT, "這是本文內容。");
+            startActivity(intent);
         }
 
     }
