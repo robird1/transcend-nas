@@ -148,8 +148,14 @@ public class NASListLoader extends AsyncTaskLoader<Boolean> {
                     if(info.getInet4Addresses().length == 0)
                         continue;
 
+                    String name = info.getServer();
+                    String end = ".local.";
+                    if(name.endsWith(".local.")){
+                        name = name.substring(0, name.length() - end.length());
+                    }
+
                     nas.put("nasId", "-1");
-                    nas.put("nickname", info.getServer());
+                    nas.put("nickname", name);
                     nas.put("hostname", info.getInet4Addresses()[0].getHostAddress());
                     Log.w(TAG, "nickname: " + nas.get("nickname"));
                     Log.w(TAG, "hostname: " + nas.get("hostname"));

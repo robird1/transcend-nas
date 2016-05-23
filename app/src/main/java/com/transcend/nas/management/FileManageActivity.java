@@ -50,6 +50,7 @@ import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCa
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.common.NotificationDialog;
 import com.transcend.nas.connection.LoginDialog;
 import com.transcend.nas.connection.SignInActivity;
 import com.transcend.nas.service.AutoBackupService;
@@ -494,8 +495,11 @@ public class FileManageActivity extends AppCompatActivity implements
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        mDrawer.closeDrawer(GravityCompat.START);
+
         int id = item.getItemId();
+        if(id != R.id.nav_logout)
+            mDrawer.closeDrawer(GravityCompat.START);
+
         switch (id) {
             case R.id.nav_storage:
                 /*/ expanded fabs
@@ -518,9 +522,7 @@ public class FileManageActivity extends AppCompatActivity implements
                 startAboutActivity();
                 break;
             case R.id.nav_logout:
-                Bundle args = new Bundle();
-                args.putBoolean("clean", true);
-                getLoaderManager().restartLoader(LoaderID.TUTK_LOGOUT, args, this).forceLoad();
+                showLogoutDialog();
                 break;
         }
         return true;
@@ -865,7 +867,11 @@ public class FileManageActivity extends AppCompatActivity implements
                 getLoaderManager().restartLoader(LoaderID.TUTK_NAS_LINK, args, this).forceLoad();
                 return;
             } else {
-                Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+                checkEmptyView();
+                if(loader instanceof SmbAbstractLoader)
+                    Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
+                else
+                    Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -1112,9 +1118,14 @@ public class FileManageActivity extends AppCompatActivity implements
         mRecyclerAdapter.updateList(mFileList);
         mRecyclerAdapter.notifyDataSetChanged();
         mToggle.setDrawerIndicatorEnabled(mPath.equals(mRoot));
-        if(mFileList != null){
+        checkEmptyView();
+    }
+
+    private void checkEmptyView(){
+        if(mFileList != null)
             mRecyclerEmptyView.setVisibility(mFileList.size() == 0 ? View.VISIBLE : View.GONE);
-        }
+        else
+            mRecyclerEmptyView.setVisibility(View.GONE);
     }
 
     private void updateListView(boolean update) {
@@ -1124,6 +1135,24 @@ public class FileManageActivity extends AppCompatActivity implements
             mRecyclerView.getRecycledViewPool().clear();
             mRecyclerAdapter.notifyDataSetChanged();
         }
+    }
+
+    private void showLogoutDialog() {
+        Bundle value = new Bundle();
+        value.putString(NotificationDialog.DIALOG_MESSAGE, getString(R.string.nas_logout));
+        NotificationDialog mNotificationDialog = new NotificationDialog(this, value) {
+            @Override
+            public void onConfirm() {
+                Bundle args = new Bundle();
+                args.putBoolean("clean", true);
+                getLoaderManager().restartLoader(LoaderID.TUTK_LOGOUT, args, FileManageActivity.this).forceLoad();
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+        };
     }
 
     private void updateGridView(boolean update) {

@@ -132,7 +132,6 @@ public class SettingsActivity extends AppCompatActivity implements
                     getLoaderManager().restartLoader(LoaderID.TUTK_LOGIN, arg, SettingsActivity.this).forceLoad();
                 } else {
                     Toast.makeText(this, getString(R.string.remote_access_no_login), Toast.LENGTH_SHORT).show();
-                    ;
                 }
                 break;
         }

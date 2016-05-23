@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -28,6 +29,7 @@ import com.transcend.nas.management.TutkGetNasLoader;
 import com.transcend.nas.management.TutkLinkNasLoader;
 import com.transcend.nas.management.TutkLoginLoader;
 import com.transcend.nas.management.TutkLogoutLoader;
+import com.transcend.nas.utils.StyleFactory;
 import com.tutk.IOTC.P2PService;
 
 import org.w3c.dom.Text;
@@ -49,8 +51,8 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
     private TextInputLayout tlPwd;
     private Button bnRemote;
     private Button bnSignIn;
+    private Button bnFind;
     private TextView tvSignInForget;
-    private LinearLayout tvFindDevice;
     private ForgetPwdDialog mForgetDialog;
     private RelativeLayout mProgressView;
     private int mLoaderID;
@@ -65,7 +67,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
         initRemoteButton();
         initSignInButton();
         initSignInForgetButton();
-        initFindDeviceTextView();
+        initFindButton();
         initProgressView();
     }
 
@@ -78,6 +80,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
         tlEmail = (TextInputLayout) findViewById(R.id.activity_sign_in_email);
         tlEmail.getEditText().setText(NASPref.getCloudUsername(this));
         tlPwd = (TextInputLayout) findViewById(R.id.activity_sign_in_password);
+        tlPwd.getEditText().setText(NASPref.getCloudPassword(this));
     }
 
     private void initRemoteButton() {
@@ -95,9 +98,10 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
         tvSignInForget.setOnClickListener(this);
     }
 
-    private void initFindDeviceTextView() {
-        tvFindDevice = (LinearLayout) findViewById(R.id.activity_sign_in_find_device_layout);
-        tvFindDevice.setOnClickListener(this);
+    private void initFindButton() {
+        bnFind = (Button) findViewById(R.id.activity_find_nas_button);
+        bnFind.setOnClickListener(this);
+        StyleFactory.set_button_Drawable_center(this, bnFind, R.drawable.ic_search_white_24dp, 40);
     }
 
     private void initProgressView() {
@@ -107,8 +111,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
     @Override
     public void onClick(View v) {
         if(v.equals(bnRemote)){
-            layoutSignIn.setVisibility(View.VISIBLE);
-            layoutInit.setVisibility(View.GONE);
+            changeView(false);
         }
         else if (v.equals(bnSignIn)) {
             String email = tlEmail.getEditText().getText().toString();
@@ -132,7 +135,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
             args.putString("email", email);
             args.putString("password", pwd);
             getLoaderManager().restartLoader(LoaderID.TUTK_LOGIN, args, this).forceLoad();
-        } else if (v.equals(tvFindDevice)) {
+        } else if (v.equals(bnFind)) {
             startNASFinderActivity(null, false);
         } else if (v.equals(tvSignInForget)) {
             showForgetPwdDialog();
@@ -153,8 +156,21 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
             intent.putExtra("NASList", list);
             intent.putExtra("RemoteAccess", isRemoteAccess);
         }
-        startActivity(intent);
-        finish();
+        //startActivity(intent);
+        //finish();
+
+        startActivityForResult(intent, NASFinderActivity.REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == RESULT_OK){
+            if(requestCode == NASFinderActivity.REQUEST_CODE){
+                startFileManageActivity();
+                finish();
+            }
+        }
     }
 
     private void checkErrorResult(Loader loader) {
@@ -251,8 +267,10 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
                 arg.putString("username", username);
                 arg.putString("password", password);
                 getLoaderManager().restartLoader(LoaderID.TUTK_NAS_LINK, arg, this).forceLoad();
-            } else
+            } else {
+                mProgressView.setVisibility(View.INVISIBLE);
                 startNASFinderActivity(mNASList, true);
+            }
         } else {
             mProgressView.setVisibility(View.INVISIBLE);
             Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
@@ -265,6 +283,11 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
         int port = P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
         args.putString("hostname", ip + ":" + port);
         getLoaderManager().restartLoader(LoaderID.LOGIN, args, this).forceLoad();
+    }
+
+    private void changeView(boolean init){
+        layoutInit.setVisibility(init ? View.VISIBLE : View.GONE);
+        layoutSignIn.setVisibility(init ? View.GONE : View.VISIBLE);
     }
 
     private void showForgetPwdDialog() {
@@ -355,7 +378,10 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
             getLoaderManager().destroyLoader(mLoaderID);
             mProgressView.setVisibility(View.INVISIBLE);
         } else {
-            super.onBackPressed();
+            if(layoutSignIn.getVisibility() == View.VISIBLE)
+                changeView(true);
+            else
+                super.onBackPressed();
         }
     }
 }

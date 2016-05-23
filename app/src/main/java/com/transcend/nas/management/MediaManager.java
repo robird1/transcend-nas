@@ -23,16 +23,11 @@ import java.net.URLEncoder;
  */
 public class MediaManager {
 
-    private final static String FOLDER_HOME   = "/homes/";
-    private final static String FOLDER_PUBLIC = "/Public/";
-
-    private final static String HOME   = "HOME";
-    private final static String PUBLIC = "PUBLIC";
-
     public static void open(Activity act, String path) {
         Uri uri = createUri(path);
+        String name = parseName(path);
         String type = MimeUtil.getMimeType(path);
-        openIn(act, uri, type);
+        openIn(act, uri, type, name);
     }
 
     public static MediaInfo createMediaInfo(int mediaType, String path){
@@ -67,7 +62,6 @@ public class MediaManager {
             String name = parseName(path);
             String redirect = "1";
             String url = "http://" + hostname + "/streaming.cgi?folder=" + folder + "&file=" + file + "&id=" + hash + "&redirect=" + redirect;
-            Log.d("ike", url);
             uri = Uri.parse(url);
         }
         return uri;
@@ -108,9 +102,10 @@ public class MediaManager {
         return name;
     }
 
-    private static void openIn(Activity act, Uri uri, String type) {
+    private static void openIn(Activity act, Uri uri, String type, String title) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(uri, type);
+        intent.putExtra("title", title);
         act.startActivityForResult(intent, 0);
     }
 

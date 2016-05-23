@@ -16,6 +16,7 @@
         android:marqueeRepeatLimit="marquee_forever"
         android:singleLine="true"
         android:textColor="@color/textColorPrimary"
+        android:layout_marginBottom="4dp"
         android:textSize="12sp" />
 
     <ImageView
@@ -24,10 +25,7 @@
         android:layout_height="match_parent"
         android:layout_above="@id/griditem_file_manage_title"
         android:layout_centerInParent="true"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp"
+        android:layout_margin="1dp"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_file_gray_big" />
 

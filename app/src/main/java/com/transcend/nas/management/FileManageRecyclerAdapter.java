@@ -81,8 +81,10 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
             String time = fileInfo.time;
             String path = fileInfo.path;
             int resId = getPreviewResourceId(fileInfo.type);
-            if (holder.title != null)
+            if (holder.title != null) {
                 holder.title.setText(name);
+                holder.title.setVisibility((fileInfo.type.equals(FileInfo.TYPE.PHOTO) && mLayoutType == LayoutType.GRID) ? View.GONE : View.VISIBLE);
+            }
             if (holder.subtitle != null)
                 holder.subtitle.setText(time);
             if (holder.icon != null)

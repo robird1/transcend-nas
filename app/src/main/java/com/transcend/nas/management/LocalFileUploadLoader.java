@@ -195,7 +195,7 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
 
         int icon = R.mipmap.ic_launcher;
         String name = getContext().getResources().getString(R.string.app_name);
-        String type = getContext().getResources().getString(R.string.download);
+        String type = getContext().getResources().getString(R.string.upload);
         String text = String.format("%s - %s", type, result);
 
         NotificationManager ntfMgr = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);

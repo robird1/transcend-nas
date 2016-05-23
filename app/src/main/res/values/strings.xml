@@ -116,9 +116,10 @@
     <string name="remote_access_inactive">Inactive</string>
     <string name="remote_access_padding">Padding</string>
 
-    <string name="try_auto_connect">Try auto connection</string>
-    <string name="try_search_device">Try searching device</string>
-    <string name="try_remote_access">Try remote access</string>
+    <string name="try_auto_connect">Auto connecting</string>
+    <string name="try_search_device">Searching device</string>
+    <string name="try_remote_access">Remote access</string>
+    <string name="nas_logout">Are you sure to logout StoreJet Cloud?</string>
 
     <string name="search_result_empty">No match file</string>
     <string name="empty">(Empty)</string>
@@ -132,6 +133,7 @@
     <string name="forget_password_send">The password mail is sent. Please check your mail.</string>
     <string name="confirm_password_error">Please confirm your password</string>
     <string name="network_error">Please check your network, or try again later</string>
+    <string name="access_error">Access deny</string>
     <string name="login_error">Invalid account or password</string>
     <string name="remote_access_always_warning">For \"Always\", you need to set remote access at first</string>
     <string name="remote_access_register">Create new remote access account, and we will automatically bind your StoreJet Cloud later</string>

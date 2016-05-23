@@ -9,6 +9,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 import com.transcend.nas.common.LoaderID;
@@ -27,6 +28,7 @@ public class WelcomeActivity extends Activity implements LoaderManager.LoaderCal
     private static final String TAG = WelcomeActivity.class.getSimpleName();
 
     private TextView mTextView;
+    private int mLoaderID = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +40,7 @@ public class WelcomeActivity extends Activity implements LoaderManager.LoaderCal
 
     @Override
     public Loader onCreateLoader(int id, Bundle args) {
-        switch (id) {
+        switch (mLoaderID = id) {
             case LoaderID.AUTO_LINK:
                 mTextView.setText(getString(R.string.try_auto_connect));
                 return new AutoLinkLoader(this);
@@ -147,6 +149,14 @@ public class WelcomeActivity extends Activity implements LoaderManager.LoaderCal
         intent.setClass(WelcomeActivity.this, SignInActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(mLoaderID >= 0){
+            getLoaderManager().destroyLoader(mLoaderID);
+        }
+        startSignInActivity();
     }
 
 }

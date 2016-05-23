@@ -3,9 +3,7 @@ package com.transcend.nas.viewer;
 import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -21,27 +19,14 @@ import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
-import com.transcend.nas.management.AutoBackupLoader;
 import com.transcend.nas.management.FileActionDeleteDialog;
 import com.transcend.nas.management.FileActionLocateActivity;
 import com.transcend.nas.management.FileInfo;
 import com.transcend.nas.management.FileInfoActivity;
-import com.transcend.nas.management.LocalFileCopyLoader;
 import com.transcend.nas.management.LocalFileDeleteLoader;
-import com.transcend.nas.management.LocalFileListLoader;
-import com.transcend.nas.management.LocalFileMoveLoader;
-import com.transcend.nas.management.LocalFileRenameLoader;
 import com.transcend.nas.management.LocalFileUploadLoader;
-import com.transcend.nas.management.LocalFolderCreateLoader;
-import com.transcend.nas.management.SmbFileCopyLoader;
 import com.transcend.nas.management.SmbFileDeleteLoader;
 import com.transcend.nas.management.SmbFileDownloadLoader;
-import com.transcend.nas.management.SmbFileListLoader;
-import com.transcend.nas.management.SmbFileMoveLoader;
-import com.transcend.nas.management.SmbFileRenameLoader;
-import com.transcend.nas.management.SmbFolderCreateLoader;
-import com.transcend.nas.management.TutkLinkNasLoader;
-import com.transcend.nas.management.TutkLogoutLoader;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -64,6 +49,8 @@ public class ViewerActivity extends AppCompatActivity implements
     private Toolbar mFooterBar;
     private ImageView mInfo;
     private ImageView mDelete;
+    private ImageView mUpload;
+    private ImageView mDownload;
     private ViewerPager mPager;
     private ViewerPagerAdapter mPagerAdapter;
 
@@ -86,8 +73,8 @@ public class ViewerActivity extends AppCompatActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.image_manage_editor, menu);
-        menu.removeItem(NASApp.MODE_SMB.equals(mMode) ? R.id.image_manage_editor_action_upload : R.id.image_manage_editor_action_download);
+        //getMenuInflater().inflate(R.menu.image_manage_editor, menu);
+        //menu.removeItem(NASApp.MODE_SMB.equals(mMode) ? R.id.image_manage_editor_action_upload : R.id.image_manage_editor_action_download);
         return true;
     }
 
@@ -113,6 +100,10 @@ public class ViewerActivity extends AppCompatActivity implements
             doInfo();
         } else if (v.equals(mDelete)) {
             doDelete();
+        } else if(v.equals(mDownload)){
+            startFileActionLocateActivity(NASApp.ACT_DOWNLOAD);
+        } else if(v.equals(mUpload)){
+            startFileActionLocateActivity(NASApp.ACT_UPLOAD);
         }
     }
 
@@ -160,6 +151,7 @@ public class ViewerActivity extends AppCompatActivity implements
                 return false;
             }
         });
+
         mDelete = (ImageView) findViewById(R.id.viewer_action_delete);
         mDelete.setOnClickListener(this);
         mDelete.setOnTouchListener(new View.OnTouchListener() {
@@ -171,6 +163,43 @@ public class ViewerActivity extends AppCompatActivity implements
                         break;
                     case MotionEvent.ACTION_UP:
                         mDelete.setImageResource(R.drawable.ic_delete_white_24dp);
+                        break;
+                }
+                return false;
+            }
+        });
+
+        mDownload = (ImageView) findViewById(R.id.viewer_action_download);
+        mDownload.setVisibility(NASApp.MODE_SMB.equals(mMode) ? View.VISIBLE : View.GONE);
+        mDownload.setOnClickListener(this);
+        mDownload.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        mDownload.setImageResource(R.drawable.ic_file_download_gray_24dp);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        mDownload.setImageResource(R.drawable.ic_file_download_white_24dp);
+                        break;
+                }
+                return false;
+            }
+        });
+
+
+        mUpload = (ImageView) findViewById(R.id.viewer_action_upload);
+        mUpload.setVisibility(NASApp.MODE_SMB.equals(mMode) ? View.GONE : View.VISIBLE);
+        mUpload.setOnClickListener(this);
+        mUpload.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        mUpload.setImageResource(R.drawable.ic_file_upload_gray_24dp);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        mUpload.setImageResource(R.drawable.ic_file_upload_white_24dp);
                         break;
                 }
                 return false;

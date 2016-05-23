@@ -8,6 +8,7 @@ import android.util.Log;
 import com.realtek.nasfun.api.SambaStatus;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.R;
 import com.tutk.IOTC.P2PService;
 
 /**
@@ -19,6 +20,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
     private String mUsername;
     private String mPassword;
     private String mHostname;
+    private Exception mException;
 
     public SmbAbstractLoader(Context context) {
         super(context);
@@ -75,6 +77,22 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         if (!path.endsWith("/"))
             builder.append("/");
         return builder.toString();
+    }
+
+    protected void setException(Exception e){
+        mException = e;
+    }
+
+    public String getExceptionMessage(){
+        String message = getContext().getString(R.string.network_error);
+        if(mException != null) {
+            if (mException instanceof jcifs.smb.SmbAuthException) {
+                message = getContext().getString(R.string.access_error);
+            } else if (mException instanceof jcifs.smb.SmbException) {
+                message = getContext().getString(R.string.network_error);
+            }
+        }
+        return message;
     }
 
 }

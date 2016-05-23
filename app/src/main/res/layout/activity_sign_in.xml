@@ -11,7 +11,8 @@
         android:layout_centerInParent="true"
         android:orientation="vertical"
         android:paddingLeft="30dp"
-        android:paddingRight="30dp">
+        android:paddingRight="30dp"
+        android:paddingBottom="30dp">
 
         <ImageView
             android:layout_width="wrap_content"
@@ -25,8 +26,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="16dp"
             android:background="@color/colorAccentDialogButton"
             android:text="@string/remote_access"
+            android:textColor="@color/colorPrimary" />
+
+
+        <Button
+            android:id="@+id/activity_find_nas_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:background="@color/colorAccentDialogButton"
+            android:text="@string/find_nas"
             android:textColor="@color/colorPrimary" />
 
     </LinearLayout>
@@ -94,31 +106,6 @@
             android:layout_marginTop="16dp"
             android:text="@string/forget_password"
             android:textColor="@color/colorAccentDialog" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/activity_sign_in_find_device_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="24dp"
-        android:orientation="horizontal">
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:src="@drawable/ic_search_gray_24dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:paddingLeft="4dp"
-            android:text="@string/find_nas"
-            android:textColor="@color/colorAccentDialog" />
-
     </LinearLayout>
 
     <RelativeLayout

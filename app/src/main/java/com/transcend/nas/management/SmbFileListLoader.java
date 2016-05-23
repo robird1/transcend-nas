@@ -8,6 +8,7 @@ import android.util.Log;
 import com.realtek.nasfun.api.SambaStatus;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.tutk.IOTC.P2PService;
 
@@ -48,6 +49,7 @@ public class SmbFileListLoader extends SmbAbstractLoader {
             return updateFileList();
         } catch (Exception e) {
             e.printStackTrace();
+            setException(e);
         }
         return false;
     }
@@ -80,6 +82,14 @@ public class SmbFileListLoader extends SmbAbstractLoader {
     }
 
     public ArrayList<FileInfo> getFileList() {
+        if(NASApp.ROOT_SMB.equals(mPath)){
+            for(FileInfo file : mFileList){
+                if(file.name.equals("homes")) {
+                    mFileList.remove(file);
+                    break;
+                }
+            }
+        }
         return mFileList;
     }
 

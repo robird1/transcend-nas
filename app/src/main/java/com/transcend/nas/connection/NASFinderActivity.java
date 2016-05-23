@@ -38,6 +38,7 @@ import java.util.HashMap;
 
 public class NASFinderActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Boolean> {
 
+    public static final int REQUEST_CODE = NASFinderActivity.class.hashCode() & 0xFFFF;
     private static final String TAG = NASFinderActivity.class.getSimpleName();
 
     private Toolbar mToolbar;
@@ -90,6 +91,9 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
         } else if (mProgressView.isShown()) {
             mProgressView.setVisibility(View.INVISIBLE);
             getLoaderManager().destroyLoader(mLoaderID);
+            if(mLoaderID == LoaderID.NAS_LIST || mLoaderID == LoaderID.TUTK_NAS_GET) {
+                mRecyclerEmtpyView.setVisibility((mNASList != null && mNASList.size() > 0) ? View.GONE : View.VISIBLE);
+            }
         } else {
             startSignInActivity();
         }
@@ -140,10 +144,17 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
      * ACTIVITY LAUNCHER
      */
     private void startSignInActivity() {
-        Intent intent = new Intent();
-        intent.setClass(NASFinderActivity.this, SignInActivity.class);
-        startActivity(intent);
-        finish();
+        if(getCallingActivity() == null) {
+            Intent intent = new Intent();
+            intent.setClass(NASFinderActivity.this, SignInActivity.class);
+            startActivity(intent);
+            finish();
+        }
+        else{
+            Intent intent = new Intent();
+            NASFinderActivity.this.setResult(RESULT_CANCELED, intent);
+            finish();
+        }
     }
 
     private void startWizardActivity(Bundle args) {
@@ -155,10 +166,17 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
     }
 
     private void startFileManageActivity() {
-        Intent intent = new Intent();
-        intent.setClass(NASFinderActivity.this, FileManageActivity.class);
-        startActivity(intent);
-        finish();
+        if(getCallingActivity() == null) {
+            Intent intent = new Intent();
+            intent.setClass(NASFinderActivity.this, FileManageActivity.class);
+            startActivity(intent);
+            finish();
+        }
+        else {
+            Intent intent = new Intent();
+            NASFinderActivity.this.setResult(RESULT_OK, intent);
+            finish();
+        }
     }
 
     private void startNASListLoader() {
