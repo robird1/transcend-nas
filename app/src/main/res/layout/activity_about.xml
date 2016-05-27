@@ -26,10 +26,43 @@
         android:layout_below="@+id/about_toolbar"
         android:background="@drawable/toolbar_dropshadow" />
 
+
+    <LinearLayout
+        android:id="@+id/about_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical"
+        android:paddingBottom="20dp">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="6dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/toolbar_upshadow" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/app_version"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:gravity="center"
+            android:text="@string/rights_reserved" />
+
+    </LinearLayout>
+
+
     <FrameLayout
         android:id="@+id/about_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@id/about_layout"
         android:layout_below="@+id/about_toolbar">
 
     </FrameLayout>
@@ -39,8 +72,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/about_toolbar"
-        android:visibility="invisible"
-        android:clickable="true">
+        android:clickable="true"
+        android:visibility="invisible">
 
         <ProgressBar
             android:layout_width="wrap_content"

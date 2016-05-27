@@ -19,8 +19,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
@@ -159,7 +162,10 @@ public class AutoBackupTask extends AsyncTask<String, String, Boolean>
     private void uploadDirectory(File source, String destination) throws IOException {
         String name = createUniqueName(source, destination);
         SmbFile target = new SmbFile(destination, name);
-        target.mkdirs();
+        if(!target.exists()) {
+            target.mkdirs();
+        }
+
         File[] files = source.listFiles();
         String path = target.getPath();
         for (File file : files) {
@@ -184,19 +190,35 @@ public class AutoBackupTask extends AsyncTask<String, String, Boolean>
             Log.d(TAG, "Error task remove : " + path);
         }
 
-        String name = createUniqueName(source, destination);
-        SmbFile target = new SmbFile(destination, name);
-        mOS = new BufferedOutputStream(target.getOutputStream());
-        mIS = new BufferedInputStream(new FileInputStream(source));
-        byte[] buffer = new byte[BUFFER_SIZE];
-        int length = 0;
-        while ((length = mIS.read(buffer)) != -1) {
-            mOS.write(buffer, 0, length);
-            count += length;
+        String subDestination = createTimeFolder(source, destination);
+        String name = createUniqueName(source, subDestination);
+        SmbFile target = new SmbFile(subDestination, name);
+        if(!target.exists()) {
+            mOS = new BufferedOutputStream(target.getOutputStream());
+            mIS = new BufferedInputStream(new FileInputStream(source));
+            byte[] buffer = new byte[BUFFER_SIZE];
+            int length = 0;
+            while ((length = mIS.read(buffer)) != -1) {
+                mOS.write(buffer, 0, length);
+                count += length;
+            }
+            mOS.close();
+            mIS.close();
+            target.setLastModified(source.lastModified());
         }
-        mOS.close();
-        mIS.close();
-        target.setLastModified(source.lastModified());
+    }
+
+    private String createTimeFolder(File source, String destination) throws MalformedURLException, SmbException {
+        Date d = new Date(source.lastModified());
+        SimpleDateFormat f = new SimpleDateFormat("yyyyMM");
+        f.setTimeZone(TimeZone.getTimeZone("GMT"));
+        String name = f.format(d);
+        SmbFile target = new SmbFile(destination, name);
+        if(!target.exists())
+            target.mkdirs();
+        String folder = destination + name + "/";
+        Log.w(TAG, "upload folder : " + folder);
+        return folder;
     }
 
     private String createUniqueName(File source, String destination) throws MalformedURLException, SmbException {
@@ -217,9 +239,16 @@ public class AutoBackupTask extends AsyncTask<String, String, Boolean>
         String suffix = isDirectory ? "/" : ext.isEmpty() ? "" : String.format(".%s", ext);
         int index = 2;
         while (names.contains(unique)) {
+            if(names.indexOf(unique) < files.length) {
+                SmbFile file = files[names.indexOf(unique)];
+                if (file.lastModified() == source.lastModified()) {
+                    break;
+                }
+            }
+
             unique = String.format(prefix + " (%d)" + suffix, index++);
         }
-        Log.w(TAG, "unique name: " + unique);
+        Log.w(TAG, "upload name: " + unique);
         uniqureName = unique;
         return unique;
     }

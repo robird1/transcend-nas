@@ -283,7 +283,7 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
                 }
             } else {
                 String name = task.getFileUniqueName();
-                showOnceNotification(getString(R.string.backup_fail), name.equals("") ? getString(R.string.backup_fail_network_unstable) : name, NOTIFICATION_ID);
+                showOnceNotification(getString(R.string.backup_fail), name.equals("") ? getString(R.string.backup_fail_network_unreachable) : name, NOTIFICATION_ID);
             }
         } else {
             showOnceNotification(getString(R.string.backup_fail), getString(R.string.backup_fail_network_unreachable), NOTIFICATION_ID);

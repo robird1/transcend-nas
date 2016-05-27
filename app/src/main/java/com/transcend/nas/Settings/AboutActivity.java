@@ -184,14 +184,7 @@ public class AboutActivity extends AppCompatActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View v = inflater.inflate(R.layout.fragment_about_info, container, false);
             TextView info = (TextView) v.findViewById(R.id.info);
-            if(id == R.string.about){
-                int versionCode = BuildConfig.VERSION_CODE;
-                String versionName = BuildConfig.VERSION_NAME;
-                info.setText(versionName);
-            }
-            else {
-                info.setText(getString(id));
-            }
+            info.setText(getString(id));
             return v;
         }
 

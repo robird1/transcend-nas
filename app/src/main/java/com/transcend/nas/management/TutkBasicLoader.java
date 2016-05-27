@@ -35,8 +35,17 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 /**
  * Created by ikelee on 06/4/16.
@@ -45,7 +54,7 @@ public abstract class TutkBasicLoader extends AsyncTaskLoader<Boolean> {
 
     public static final String TAG = TutkBasicLoader.class.getSimpleName();
     public Activity mActivity;
-    private String mServer = "http://54.179.182.60:3000/1/";
+    private String mServer = "https://www.storejetcloud.com/1";
     private String mCode = "";
     private String mStatus = "";
     private int TIMEOUT_IN_MILLIONS = 10000;
@@ -70,17 +79,20 @@ public abstract class TutkBasicLoader extends AsyncTaskLoader<Boolean> {
         return language;
     }
 
-    public String getDeviceID(){
-        String deviceID = android.os.Build.SERIAL;;
+    public String getDeviceID() {
+        String deviceID = android.os.Build.SERIAL;
+        ;
         return deviceID;
     }
 
     public String doGetRequest(String url, String token) {
-        HttpURLConnection conn = null;
+        HttpsURLConnection conn = null;
         String result = "";
         try {
             URL realUrl = new URL(url);
-            conn = (HttpURLConnection) realUrl.openConnection();
+            trustAllHosts();
+            conn = (HttpsURLConnection) realUrl.openConnection();
+            conn.setHostnameVerifier(DO_NOT_VERIFY);
             conn.setRequestProperty("x-transcend-header", "application/transcend.v1");
             conn.setRequestProperty("authorization", "Bearer " + token);
             conn.setReadTimeout(TIMEOUT_IN_MILLIONS);
@@ -93,10 +105,10 @@ public abstract class TutkBasicLoader extends AsyncTaskLoader<Boolean> {
             if (responseCode == 200 || responseCode == 201) {
                 InputStream is = conn.getInputStream();
                 result = getStringFromInputStream(is);
-            } else if (responseCode == 400 || responseCode == 401){
+            } else if (responseCode == 400 || responseCode == 401) {
                 InputStream is = conn.getErrorStream();
                 result = getStringFromInputStream(is);
-            } else{
+            } else {
                 Log.i(TAG, "访问失败 " + responseCode);
                 //InputStream is = conn.getInputStream();
                 //InputStream is = conn.getErrorStream();
@@ -116,11 +128,13 @@ public abstract class TutkBasicLoader extends AsyncTaskLoader<Boolean> {
     }
 
     public String doDeleteRequest(String url, String token) {
-        HttpURLConnection conn = null;
+        HttpsURLConnection conn = null;
         String result = "";
         try {
             URL realUrl = new URL(url);
-            conn = (HttpURLConnection) realUrl.openConnection();
+            trustAllHosts();
+            conn = (HttpsURLConnection) realUrl.openConnection();
+            conn.setHostnameVerifier(DO_NOT_VERIFY);
             conn.setRequestMethod("DELETE");
             conn.setRequestProperty("x-transcend-header", "application/transcend.v1");
             conn.setRequestProperty("authorization", "Bearer " + token);
@@ -133,10 +147,10 @@ public abstract class TutkBasicLoader extends AsyncTaskLoader<Boolean> {
             if (responseCode == 200 || responseCode == 201) {
                 InputStream is = conn.getInputStream();
                 result = getStringFromInputStream(is);
-            } else if (responseCode == 400 || responseCode == 401){
+            } else if (responseCode == 400 || responseCode == 401) {
                 InputStream is = conn.getErrorStream();
                 result = getStringFromInputStream(is);
-            } else{
+            } else {
                 Log.i(TAG, "访问失败 " + responseCode);
                 //InputStream is = conn.getInputStream();
                 //InputStream is = conn.getErrorStream();
@@ -160,15 +174,17 @@ public abstract class TutkBasicLoader extends AsyncTaskLoader<Boolean> {
     }
 
     public String doPostRequest(String url, String param, String token) {
-        HttpURLConnection conn = null;
+        HttpsURLConnection conn = null;
         String result = "";
         try {
             URL realUrl = new URL(url);
-            conn = (HttpURLConnection) realUrl.openConnection();
+            trustAllHosts();
+            conn = (HttpsURLConnection) realUrl.openConnection();
+            conn.setHostnameVerifier(DO_NOT_VERIFY);
             conn.setRequestMethod("POST");
             conn.setRequestProperty("x-transcend-header", "application/transcend.v1");
             conn.setRequestProperty("content-type", "application/x-www-form-urlencoded");
-            if(token != null){
+            if (token != null) {
                 conn.setRequestProperty("authorization", "Bearer " + token);
             }
             conn.setDoOutput(true);
@@ -188,10 +204,10 @@ public abstract class TutkBasicLoader extends AsyncTaskLoader<Boolean> {
             if (responseCode == 200 || responseCode == 201) {
                 InputStream is = conn.getInputStream();
                 result = getStringFromInputStream(is);
-            } else if (responseCode == 400 || responseCode == 401){
+            } else if (responseCode == 400 || responseCode == 401) {
                 InputStream is = conn.getErrorStream();
                 result = getStringFromInputStream(is);
-            } else{
+            } else {
                 Log.i(TAG, "访问失败 " + responseCode);
                 //InputStream is = conn.getInputStream();
                 //InputStream is = conn.getErrorStream();
@@ -264,7 +280,7 @@ public abstract class TutkBasicLoader extends AsyncTaskLoader<Boolean> {
         return state;
     }
 
-    protected boolean doErrorParser(String result){
+    protected boolean doErrorParser(String result) {
         Log.i(TAG, result);
         //JSON FORMAT { "code": xxx, "status": xxx"}
         if (result.equals(""))
@@ -275,8 +291,7 @@ public abstract class TutkBasicLoader extends AsyncTaskLoader<Boolean> {
             obj = new JSONObject(result);
             mCode = obj.optString("code");
             mStatus = obj.optString("status");
-        }
-        catch (JSONException e) {
+        } catch (JSONException e) {
             mCode = "";
             mStatus = "";
             //e.printStackTrace();
@@ -285,14 +300,49 @@ public abstract class TutkBasicLoader extends AsyncTaskLoader<Boolean> {
         return true;
     }
 
-    public String getCode(){
+    public static void trustAllHosts() {
+        // Create a trust manager that does not validate certificate chains
+        // Android use X509 cert
+        TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return new java.security.cert.X509Certificate[]{};
+            }
+
+            public void checkClientTrusted(X509Certificate[] chain,
+                                           String authType) throws CertificateException {
+            }
+
+            public void checkServerTrusted(X509Certificate[] chain,
+                                           String authType) throws CertificateException {
+            }
+        }};
+
+        // Install the all-trusting trust manager
+        try {
+            SSLContext sc = SSLContext.getInstance("TLS");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection
+                    .setDefaultSSLSocketFactory(sc.getSocketFactory());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public final static HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
+        public boolean verify(String hostname, SSLSession session) {
+            return true;
+        }
+    };
+
+    public String getCode() {
         return mCode;
     }
 
-    public String getStatus(){
+    public String getStatus() {
         return mStatus;
     }
 
     protected abstract boolean doParserResult(String result);
+
     protected abstract String doGenerateUrl();
 }

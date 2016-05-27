@@ -7,17 +7,6 @@
 
     <PreferenceCategory
         android:layout="@layout/preference_category_widget"
-        android:title="@string/location">
-
-        <Preference
-            android:key="@string/pref_info_path"
-            android:selectable="false"
-            android:summary=" - " />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:layout="@layout/preference_category_widget"
         android:title="@string/name">
 
         <Preference
@@ -40,10 +29,10 @@
 
     <PreferenceCategory
         android:layout="@layout/preference_category_widget"
-        android:title="@string/last_modified">
+        android:title="@string/size">
 
         <Preference
-            android:key="@string/pref_info_time"
+            android:key="@string/pref_info_size"
             android:selectable="false"
             android:summary=" - " />
 
@@ -51,10 +40,21 @@
 
     <PreferenceCategory
         android:layout="@layout/preference_category_widget"
-        android:title="@string/size">
+        android:title="@string/location">
 
         <Preference
-            android:key="@string/pref_info_size"
+            android:key="@string/pref_info_path"
+            android:selectable="false"
+            android:summary=" - " />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/preference_category_widget"
+        android:title="@string/last_modified">
+
+        <Preference
+            android:key="@string/pref_info_time"
             android:selectable="false"
             android:summary=" - " />
 

@@ -307,7 +307,15 @@ public class FileActionLocateActivity extends AppCompatActivity implements
                 //file list change, stop previous image loader
                 ImageLoader.getInstance().stop();
                 mPath = ((SmbFileListLoader) loader).getPath();
-                mFileList = ((SmbFileListLoader) loader).getFileList();
+                ArrayList<FileInfo> list = ((SmbFileListLoader) loader).getFileList();
+                if(mFileList == null)
+                    mFileList = new ArrayList<FileInfo>();
+                else
+                    mFileList.clear();
+                for (FileInfo info : list) {
+                    if (FileInfo.TYPE.DIR.equals(info.type))
+                        mFileList.add(info);
+                }
                 Collections.sort(mFileList, FileInfoSort.comparator(this));
                 updateScreen();
                 mNewFolder.setVisible(!mRoot.equals(mPath));
@@ -319,7 +327,15 @@ public class FileActionLocateActivity extends AppCompatActivity implements
                 //file list change, stop previous image loader
                 ImageLoader.getInstance().stop();
                 mPath = ((LocalFileListLoader) loader).getPath();
-                mFileList = ((LocalFileListLoader) loader).getFileList();
+                ArrayList<FileInfo> list = ((LocalFileListLoader) loader).getFileList();
+                if(mFileList == null)
+                    mFileList = new ArrayList<FileInfo>();
+                else
+                    mFileList.clear();
+                for (FileInfo info : list) {
+                    if (FileInfo.TYPE.DIR.equals(info.type))
+                        mFileList.add(info);
+                }
                 Collections.sort(mFileList, FileInfoSort.comparator(this));
                 updateScreen();
             }

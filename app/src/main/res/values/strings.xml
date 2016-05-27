@@ -1,7 +1,7 @@
 <resources>
 
     <string name="app_name">StoreJet Cloud</string>
-    <string name="app_version">StoreJet Cloud v0.92</string>
+    <string name="app_version">StoreJet Cloud v0.93</string>
     <string name="storage_name">Storage</string>
     <string name="backups_name">Backups</string>
     <string name="downloads_name">Downloads</string>
@@ -156,8 +156,7 @@
     <string name="backup_success">Backup success</string>
     <string name="backup_fail">Backup fail</string>
     <string name="backup_fail_no_space">No enough disk space</string>
-    <string name="backup_fail_network_unstable">network is not stable</string>
-    <string name="backup_fail_network_unreachable">network unreachable</string>
+    <string name="backup_fail_network_unreachable">StoreJet Cloud unreachable</string>
 
 
     <!-- msg -->
@@ -175,7 +174,26 @@
     <string name="msg_cache_cleared">Cache cleared</string>
 
     <!-- about -->
-    <string name="rights_reserved">2016 Transcend Information Inc.\nAll rights reserved.</string>
+    <string name="rights_reserved">\u00AE2016 Transcend Information Inc.\nAll rights reserved.</string>
+
+
+
+    <string name="enable_background_audio">Play in background</string>
+    <string name="audio">Audio</string>
+    <string name="text">Text</string>
+    <string name="logging">Logging</string>
+    <string name="logging_normal">Normal</string>
+    <string name="logging_verbose">Verbose</string>
+    <string name="retry">Retry</string>
+    <string name="off">[off]</string>
+    <string name="error_drm_not_supported">Protected content not supported on API levels below 18</string>
+    <string name="error_drm_unsupported_scheme">This device does not support the required DRM scheme</string>
+    <string name="error_drm_unknown">An unknown DRM error occurred</string>
+    <string name="error_no_decoder">This device does not provide a decoder</string>
+    <string name="error_no_secure_decoder">This device does not provide a secure decoder for</string>
+    <string name="error_querying_decoders">Unable to query device decoders</string>
+    <string name="error_instantiating_decoder">Unable to instantiate decoder</string>
+    <string name="storage_permission_denied">Permission to access storage was denied</string>
 
 
     <!-- preference -->

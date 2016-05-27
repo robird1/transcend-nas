@@ -36,5 +36,6 @@ public class LoaderID {
     public static final int AUTO_BACKUP = 26;
     public static final int WIZARD = 27;
     public static final int WIZARD_INIT = 28;
+    public static final int MEDIA_PLAYER = 29;
 
 }

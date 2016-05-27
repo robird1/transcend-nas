@@ -9,7 +9,9 @@ import android.content.Loader;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -450,14 +452,32 @@ public class FileManageActivity extends AppCompatActivity implements
                     MediaInfo info = MediaManager.createMediaInfo(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK, fileInfo.path);
                     mCastManager.startVideoCastControllerActivity(this, info, 0, true);
                 } else {
-                    MediaManager.open(this, fileInfo.path);
+                    if(!fileInfo.path.startsWith(NASApp.ROOT_STG)) {
+                        Bundle args = new Bundle();
+                        args.putString("path", MediaManager.createPath(fileInfo.path));
+                        args.putString("name", MediaManager.parseName(fileInfo.name));
+                        args.putString("type", MimeUtil.getMimeType(fileInfo.path));
+                        getLoaderManager().restartLoader(LoaderID.MEDIA_PLAYER, args, this).forceLoad();
+                    }
+                    else{
+                        MediaManager.open(this, fileInfo.path);
+                    }
                 }
             } else if (FileInfo.TYPE.MUSIC.equals(fileInfo.type)) {
                 if (!fileInfo.path.startsWith(NASApp.ROOT_STG) && mCastManager != null && mCastManager.isConnected()) {
                     MediaInfo info = MediaManager.createMediaInfo(MediaMetadata.MEDIA_TYPE_MOVIE, fileInfo.path);
                     mCastManager.startVideoCastControllerActivity(this, info, 0, true);
                 } else {
-                    MediaManager.open(this, fileInfo.path);
+                    if(!fileInfo.path.startsWith(NASApp.ROOT_STG)) {
+                        Bundle args = new Bundle();
+                        args.putString("path", MediaManager.createPath(fileInfo.path));
+                        args.putString("name", MediaManager.parseName(fileInfo.name));
+                        args.putString("type", MimeUtil.getMimeType(fileInfo.path));
+                        getLoaderManager().restartLoader(LoaderID.MEDIA_PLAYER, args, this).forceLoad();
+                    }
+                    else{
+                        MediaManager.open(this, fileInfo.path);
+                    }
                 }
             } else {
                 toast(R.string.unknown_format);
@@ -778,6 +798,9 @@ public class FileManageActivity extends AppCompatActivity implements
                 return new TutkLogoutLoader(this);
             case LoaderID.AUTO_BACKUP:
                 return new AutoBackupLoader(this);
+            case LoaderID.MEDIA_PLAYER:
+                mProgressView.setVisibility(View.VISIBLE);
+                return new MediaManagerLoader(this, args);
         }
         return null;
     }
@@ -842,6 +865,14 @@ public class FileManageActivity extends AppCompatActivity implements
             startSignInActivity(true);
         } else if (loader instanceof AutoBackupLoader) {
             //do nothing
+        } else if (loader instanceof MediaManagerLoader) {
+            if(!success){
+                Toast.makeText(this,getString(R.string.network_error),Toast.LENGTH_SHORT).show();
+            }
+            else {
+                Bundle args =  ((MediaManagerLoader) loader).getBundleArgs();
+                MediaManager.open(this, args);
+            }
         } else {
             if (success) {
                 doRefresh();

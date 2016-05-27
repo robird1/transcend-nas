@@ -3,11 +3,6 @@
     android:layout="@layout/preference_item">
 
     <Preference
-        android:key="@string/pref_about"
-        android:layout="@layout/preference_item"
-        android:title="@string/about" />
-
-    <Preference
         android:key="@string/pref_about_legal"
         android:layout="@layout/preference_item"
         android:title="@string/legal" />

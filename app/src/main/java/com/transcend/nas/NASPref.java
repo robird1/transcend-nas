@@ -186,7 +186,7 @@ public class NASPref {
     public static String getCloudServer(Context context){
         String name = context.getResources().getString(R.string.pref_name);
         String key = context.getResources().getString(R.string.pref_cloud_ip);
-        String def = "http://54.179.182.60:3000/1";
+        String def = "https://www.storejetcloud.com/1";
         return PrefUtil.read(context, name, key, def);
     }
 

@@ -11,7 +11,7 @@ android {
         minSdkVersion 14
         targetSdkVersion 14
         versionCode 1
-        versionName "0.91"
+        versionName "0.93"
     }
 
     buildTypes {
@@ -41,4 +41,5 @@ dependencies {
     compile 'com.github.chrisbanes.photoview:library:1.2.3'
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
     compile project(':CastCompanionLibrary')
+    compile 'com.google.android.exoplayer:exoplayer:r1.5.8'
 }
