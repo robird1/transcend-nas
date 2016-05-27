@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
+import android.media.Image;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -29,6 +30,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
@@ -74,6 +76,7 @@ public class SettingsActivity extends AppCompatActivity implements
     private int mLoaderID;
 
     private boolean isSubFragment = false;
+    private boolean isInitFragment = true;
     private boolean isRemoteAccessRegister = false;
     private boolean isRemoteAccessActive = false;
     private boolean isRemoteAccessCheck = false;
@@ -115,7 +118,14 @@ public class SettingsActivity extends AppCompatActivity implements
         switch (item.getItemId()) {
             case android.R.id.home:
                 if (isSubFragment)
-                    showSettingFragment();
+                    if(isRemoteAccessRegister)
+                        showSettingFragment();
+                    else{
+                        if(!isInitFragment)
+                            showRemoteAccessFragment(getString(R.string.remote_access));
+                        else
+                            showSettingFragment();
+                    }
                 else
                     finish();
                 break;
@@ -151,7 +161,14 @@ public class SettingsActivity extends AppCompatActivity implements
             mProgressView.setVisibility(View.INVISIBLE);
         } else {
             if (isSubFragment)
-                showSettingFragment();
+                if(isRemoteAccessRegister)
+                    showSettingFragment();
+                else{
+                    if(!isInitFragment)
+                        showRemoteAccessFragment(getString(R.string.remote_access));
+                    else
+                        showSettingFragment();
+                }
             else
                 finish();
         }
@@ -327,6 +344,9 @@ public class SettingsActivity extends AppCompatActivity implements
                     setAutoBackupToWifi();
                     return;
                 }
+                else{
+                    showRemoteAccessFragment(getString(R.string.remote_access));
+                }
             }
         } else {
             setAutoBackupToWifi();
@@ -431,7 +451,10 @@ public class SettingsActivity extends AppCompatActivity implements
                     NASPref.setCloudUUID(mContext, "");
                     String[] scenarios = mContext.getResources().getStringArray(R.array.backup_scenario_values);
                     NASPref.setBackupScenario(mContext, scenarios[1]);
-                    showSettingFragment();
+                    isRemoteAccessRegister = false;
+                    isRemoteAccessActive = false;
+                    //TODO: check show setting or remote access
+                    showRemoteAccessFragment(getString(R.string.remote_access));
                 } else
                     getLoaderManager().restartLoader(loaderID, args, SettingsActivity.this).forceLoad();
             }
@@ -755,22 +778,15 @@ public class SettingsActivity extends AppCompatActivity implements
      */
     @SuppressLint("ValidFragment")
     public class RemoteAccessFragment extends Fragment implements View.OnClickListener {
+        LinearLayout initLayout;
+        LinearLayout loginLayout;
+        LinearLayout registerLayout;
+
         TextInputLayout tlEmail;
         TextInputLayout tlPwd;
         TextInputLayout tlPwdConfirm;
-        Button btLogin;
-        Button btSubmit;
-        TextView tvForget;
-        TextView tvRegister;
-        //TextView tvInfo;
-        boolean isLogin = true;
 
         public RemoteAccessFragment() {
-            isLogin = true;
-        }
-
-        public RemoteAccessFragment(boolean login) {
-            isLogin = login;
         }
 
         @Override
@@ -781,8 +797,8 @@ public class SettingsActivity extends AppCompatActivity implements
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View v;
-            String email = NASPref.getCloudUsername(mContext);
             if (isRemoteAccessRegister) {
+                isInitFragment = false;
                 v = inflater.inflate(R.layout.fragment_remote_access_normal, container, false);
                 TextView tvEmail = (TextView) v.findViewById(R.id.remote_access_email);
                 TextView tvStatus = (TextView) v.findViewById(R.id.remote_access_status);
@@ -790,12 +806,11 @@ public class SettingsActivity extends AppCompatActivity implements
                 Button btDelete = (Button) v.findViewById(R.id.remote_access_delete_button);
                 TextView tvListTitle = (TextView) v.findViewById(R.id.remote_access_list_title);
                 ListView lvList = (ListView) v.findViewById(R.id.remote_access_list);
-                tvEmail.setText(email);
+                tvEmail.setText(NASPref.getCloudUsername(mContext));
 
                 if (isRemoteAccessActive) {
                     tvStatus.setVisibility(View.GONE);
                     btResend.setVisibility(View.GONE);
-                    //tvListTitle.setVisibility(View.VISIBLE);
 
                     if (naslist != null) {
                         Server mServer = ServerManager.INSTANCE.getCurrentServer();
@@ -824,66 +839,64 @@ public class SettingsActivity extends AppCompatActivity implements
                 } else {
                     tvStatus.setVisibility(View.VISIBLE);
                     btResend.setVisibility(View.VISIBLE);
-                    //tvListTitle.setVisibility(View.INVISIBLE);
                 }
 
                 btResend.setOnClickListener(this);
                 btDelete.setOnClickListener(this);
             } else {
+                isInitFragment = true;
                 v = inflater.inflate(R.layout.fragment_remote_access_register, container, false);
-                tlEmail = (TextInputLayout) v.findViewById(R.id.register_email);
-                tlEmail.getEditText().setText(email);
-                tlPwd = (TextInputLayout) v.findViewById(R.id.register_password);
-                tlPwdConfirm = (TextInputLayout) v.findViewById(R.id.register_password_confirm);
-                btLogin = (Button) v.findViewById(R.id.register_login);
+                initLayout = (LinearLayout) v.findViewById(R.id.remote_access_init_layout);
+                registerLayout = (LinearLayout) v.findViewById(R.id.remote_access_register_layout);
+                loginLayout = (LinearLayout) v.findViewById(R.id.remote_access_login_layout);
+                mTitle.setText(getString(R.string.remote_access));
+                Button btLogin = (Button) v.findViewById(R.id.remote_access_init_login);
                 btLogin.setOnClickListener(this);
-                btSubmit = (Button) v.findViewById(R.id.register_submit);
-                btSubmit.setOnClickListener(this);
-                tvForget = (TextView) v.findViewById(R.id.register_forget);
-                tvForget.setOnClickListener(this);
-                tvRegister = (TextView) v.findViewById(R.id.register_button);
-                tvRegister.setOnClickListener(this);
-                //tvInfo = (TextView) v.findViewById(R.id.register_info);
-                initRegisterContent();
-                if (!isLogin) {
-                    //tvInfo.setText(getString(R.string.remote_access_verification_expired));
-                }
+                Button btRegister = (Button) v.findViewById(R.id.remote_access_init_register);
+                btRegister.setOnClickListener(this);
             }
 
             return v;
-        }
-
-        private void initRegisterContent() {
-            tlPwd.getEditText().setText(null);
-            tlPwdConfirm.getEditText().setText(null);
-            if (isLogin) {
-                mTitle.setText(getString(R.string.login));
-                //tvInfo.setText(getString(R.string.remote_access_welcome));
-                tvForget.setVisibility(View.VISIBLE);
-                tvRegister.setText(getString(R.string.new_user));
-                btLogin.setVisibility(View.VISIBLE);
-                btSubmit.setVisibility(View.GONE);
-                tlPwdConfirm.setVisibility(View.GONE);
-            } else {
-                mTitle.setText(getString(R.string.register));
-                //tvInfo.setText(getString(R.string.remote_access_register));
-                tvForget.setVisibility(View.GONE);
-                tvRegister.setText(getString(R.string.back));
-                btLogin.setVisibility(View.GONE);
-                btSubmit.setVisibility(View.VISIBLE);
-                tlPwdConfirm.setVisibility(View.VISIBLE);
-            }
         }
 
         @Override
         public void onClick(View v) {
             InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-
             String email, pwd, pwdConfirm;
             Bundle arg;
 
             switch (v.getId()) {
+                case R.id.remote_access_init_login:
+                    mTitle.setText(getString(R.string.login));
+                    initLayout.setVisibility(View.GONE);
+                    loginLayout.setVisibility(View.VISIBLE);
+                    registerLayout.setVisibility(View.GONE);
+                    tlEmail = (TextInputLayout) findViewById(R.id.remote_access_login_email);
+                    tlEmail.getEditText().setText(NASPref.getCloudUsername(mContext));
+                    tlPwd = (TextInputLayout) findViewById(R.id.remote_access_login_password);
+                    tlPwd.getEditText().setText("");
+                    Button btLogin = (Button) findViewById(R.id.remote_access_login_login);
+                    btLogin.setOnClickListener(this);
+                    TextView tvForget = (TextView) findViewById(R.id.remote_access_login_forget);
+                    tvForget.setOnClickListener(this);
+                    isInitFragment = false;
+                    break;
+                case R.id.remote_access_init_register:
+                    mTitle.setText(getString(R.string.register));
+                    initLayout.setVisibility(View.GONE);
+                    loginLayout.setVisibility(View.GONE);
+                    registerLayout.setVisibility(View.VISIBLE);
+                    tlEmail = (TextInputLayout) findViewById(R.id.remote_access_register_email);
+                    tlEmail.getEditText().setText(NASPref.getCloudUsername(mContext));
+                    tlPwd = (TextInputLayout) findViewById(R.id.remote_access_register_password);
+                    tlPwd.getEditText().setText("");
+                    tlPwdConfirm = (TextInputLayout) findViewById(R.id.remote_access_register_password_confirm);
+                    tlPwdConfirm.getEditText().setText("");
+                    Button btSubmit = (Button) findViewById(R.id.remote_access_register_submit);
+                    btSubmit.setOnClickListener(this);
+                    isInitFragment = false;
+                    break;
                 case R.id.remote_access_resend_button:
                     arg = new Bundle();
                     arg.putString("server", NASPref.getCloudServer(mContext));
@@ -893,7 +906,7 @@ public class SettingsActivity extends AppCompatActivity implements
                 case R.id.remote_access_delete_button:
                     showNotificationDialog(getString(R.string.remote_access_logout), LoaderID.TUTK_LOGOUT, null);
                     break;
-                case R.id.register_login:
+                case R.id.remote_access_login_login:
                     email = tlEmail.getEditText().getText().toString();
                     pwd = tlPwd.getEditText().getText().toString();
 
@@ -913,11 +926,7 @@ public class SettingsActivity extends AppCompatActivity implements
                     arg.putString("password", pwd);
                     getLoaderManager().restartLoader(LoaderID.TUTK_LOGIN, arg, SettingsActivity.this).forceLoad();
                     break;
-                case R.id.register_button:
-                    isLogin = !isLogin;
-                    initRegisterContent();
-                    break;
-                case R.id.register_submit:
+                case R.id.remote_access_register_submit:
                     email = tlEmail.getEditText().getText().toString();
                     pwd = tlPwd.getEditText().getText().toString();
                     pwdConfirm = tlPwdConfirm.getEditText().getText().toString();
@@ -929,6 +938,9 @@ public class SettingsActivity extends AppCompatActivity implements
 
                     if (pwd.equals("")) {
                         Toast.makeText(mContext, getString(R.string.empty_password), Toast.LENGTH_SHORT).show();
+                        return;
+                    } else if(pwd.length() < 6  || pwd.length() > 20){
+                        Toast.makeText(mContext, getString(R.string.password_size), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -944,7 +956,7 @@ public class SettingsActivity extends AppCompatActivity implements
                     arg.putString("password", pwd);
                     getLoaderManager().restartLoader(LoaderID.TUTK_REGISTER, arg, SettingsActivity.this).forceLoad();
                     break;
-                case R.id.register_forget:
+                case R.id.remote_access_login_forget:
                     Bundle args = new Bundle();
                     args.putString("title", getString(R.string.forget_password_title));
                     args.putString("email", NASPref.getCloudUsername(mContext));

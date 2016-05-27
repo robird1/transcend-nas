@@ -1,7 +1,7 @@
 <resources>
 
     <string name="app_name">StoreJet Cloud</string>
-    <string name="app_version">StoreJet Cloud v0.93</string>
+    <string name="app_version">StoreJet Cloud v0.94</string>
     <string name="storage_name">Storage</string>
     <string name="backups_name">Backups</string>
     <string name="downloads_name">Downloads</string>
@@ -114,7 +114,7 @@
     <string name="remote_access">Remote Access</string>
     <string name="remote_access_active">Active</string>
     <string name="remote_access_inactive">Inactive</string>
-    <string name="remote_access_padding">Padding</string>
+    <string name="remote_access_padding">Pending</string>
 
     <string name="try_auto_connect">Auto connecting</string>
     <string name="try_search_device">Searching device</string>
@@ -127,7 +127,8 @@
     <string name="empty_account">Empty Account</string>
     <string name="empty_email">Empty Email</string>
     <string name="empty_password">Empty Password</string>
-    <string name="empty_uuid">Empty UUID, this model don\'t support remote access</string>
+    <string name="password_size">Password size : 6~20</string>
+    <string name="empty_uuid">Empty UUID, we can\'t bind this model</string>
     <string name="forget_password_title">Enter your email to send the reset password email</string>
     <string name="forget_password_warning">Current password will be deprecated. Are you sure to send the email?</string>
     <string name="forget_password_send">The password mail is sent. Please check your mail.</string>

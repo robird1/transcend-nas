@@ -448,37 +448,9 @@ public class FileManageActivity extends AppCompatActivity implements
             } else if (FileInfo.TYPE.PHOTO.equals(fileInfo.type)) {
                 startViewerActivity(mMode, mRoot, fileInfo.path);
             } else if (FileInfo.TYPE.VIDEO.equals(fileInfo.type)) {
-                if (!fileInfo.path.startsWith(NASApp.ROOT_STG) && mCastManager != null && mCastManager.isConnected()) {
-                    MediaInfo info = MediaManager.createMediaInfo(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK, fileInfo.path);
-                    mCastManager.startVideoCastControllerActivity(this, info, 0, true);
-                } else {
-                    if(!fileInfo.path.startsWith(NASApp.ROOT_STG)) {
-                        Bundle args = new Bundle();
-                        args.putString("path", MediaManager.createPath(fileInfo.path));
-                        args.putString("name", MediaManager.parseName(fileInfo.name));
-                        args.putString("type", MimeUtil.getMimeType(fileInfo.path));
-                        getLoaderManager().restartLoader(LoaderID.MEDIA_PLAYER, args, this).forceLoad();
-                    }
-                    else{
-                        MediaManager.open(this, fileInfo.path);
-                    }
-                }
+                startVideoActivity(fileInfo);
             } else if (FileInfo.TYPE.MUSIC.equals(fileInfo.type)) {
-                if (!fileInfo.path.startsWith(NASApp.ROOT_STG) && mCastManager != null && mCastManager.isConnected()) {
-                    MediaInfo info = MediaManager.createMediaInfo(MediaMetadata.MEDIA_TYPE_MOVIE, fileInfo.path);
-                    mCastManager.startVideoCastControllerActivity(this, info, 0, true);
-                } else {
-                    if(!fileInfo.path.startsWith(NASApp.ROOT_STG)) {
-                        Bundle args = new Bundle();
-                        args.putString("path", MediaManager.createPath(fileInfo.path));
-                        args.putString("name", MediaManager.parseName(fileInfo.name));
-                        args.putString("type", MimeUtil.getMimeType(fileInfo.path));
-                        getLoaderManager().restartLoader(LoaderID.MEDIA_PLAYER, args, this).forceLoad();
-                    }
-                    else{
-                        MediaManager.open(this, fileInfo.path);
-                    }
-                }
+                startVideoActivity(fileInfo);
             } else {
                 toast(R.string.unknown_format);
             }
@@ -1378,6 +1350,24 @@ public class FileManageActivity extends AppCompatActivity implements
         intent.setClass(FileManageActivity.this, FileActionLocateActivity.class);
         intent.putExtras(args);
         startActivityForResult(intent, FileActionLocateActivity.REQUEST_CODE);
+    }
+
+    private void startVideoActivity(FileInfo fileInfo){
+        if (!fileInfo.path.startsWith(NASApp.ROOT_STG) && mCastManager != null && mCastManager.isConnected()) {
+            MediaInfo info = MediaManager.createMediaInfo(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK, fileInfo.path);
+            mCastManager.startVideoCastControllerActivity(this, info, 0, true);
+        } else {
+            if(!fileInfo.path.startsWith(NASApp.ROOT_STG) && isRemoteAccess()) {
+                Bundle args = new Bundle();
+                args.putString("path", MediaManager.createPath(fileInfo.path));
+                args.putString("name", MediaManager.parseName(fileInfo.name));
+                args.putString("type", MimeUtil.getMimeType(fileInfo.path));
+                getLoaderManager().restartLoader(LoaderID.MEDIA_PLAYER, args, this).forceLoad();
+            }
+            else{
+                MediaManager.open(this, fileInfo.path);
+            }
+        }
     }
 
     private void startViewerActivity(String mode, String root, String path) {

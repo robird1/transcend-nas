@@ -4,10 +4,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ImageView
+        android:id="@+id/register_string"
+        android:layout_width="wrap_content"
+        android:layout_height="160dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="30dp"
+        android:src="@drawable/ic_logo_storejetcloud_big" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="50dp"
+        android:layout_below="@id/register_string"
         android:orientation="vertical"
         android:paddingLeft="30dp"
         android:paddingRight="30dp">
@@ -81,7 +90,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:visibility="gone" />
+            android:visibility="gone"/>
 
     </LinearLayout>
 

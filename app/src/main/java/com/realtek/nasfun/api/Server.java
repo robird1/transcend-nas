@@ -110,7 +110,7 @@ public class Server {
 	public final static String DEFAULT_GUEST_PAASWORD = "Realtek";
 	public final static String HOME = "/homes/";
 	//DAV home path
-	public final static String ADMIN_DAV_HOME = "/dav/device/homes";
+	public final static String ADMIN_DAV_HOME = "/dav";
 	public final static String USER_DAV_HOME = "/dav/home";
 
 	// audio/video streaming playback folder(HOME is mapped to user's home directory by session id)

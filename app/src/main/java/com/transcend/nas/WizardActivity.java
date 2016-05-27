@@ -176,6 +176,9 @@ public class WizardActivity extends AppCompatActivity implements LoaderManager.L
                 if(pwd.equals("")) {
                     Toast.makeText(this, getString(R.string.empty_password), Toast.LENGTH_SHORT).show();
                     return;
+                } else if(pwd.length() < 6  || pwd.length() > 20){
+                    Toast.makeText(this, getString(R.string.password_size), Toast.LENGTH_SHORT).show();
+                    return;
                 }
 
                 if(!pwd.equals(confirm)){
