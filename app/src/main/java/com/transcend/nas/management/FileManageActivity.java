@@ -4,14 +4,10 @@ import android.app.ActivityManager;
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.Loader;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
-import android.net.ConnectivityManager;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -39,7 +35,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,7 +48,6 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.common.NotificationDialog;
-import com.transcend.nas.connection.LoginDialog;
 import com.transcend.nas.connection.SignInActivity;
 import com.transcend.nas.service.AutoBackupService;
 import com.transcend.nas.settings.AboutActivity;
@@ -62,7 +56,8 @@ import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.settings.SettingsActivity;
-import com.transcend.nas.utils.MimeUtil;
+import com.transcend.nas.utils.FileFactory;
+import com.transcend.nas.utils.MediaFactory;
 import com.transcend.nas.viewer.ViewerActivity;
 import com.tutk.IOTC.P2PService;
 import com.tutk.IOTC.P2PTunnelAPIs;
@@ -787,18 +782,12 @@ public class FileManageActivity extends AppCompatActivity implements
                 mMode = NASApp.MODE_SMB;
                 mRoot = NASApp.ROOT_SMB;
                 mPath = ((SmbFileListLoader) loader).getPath();
-                //mFileList = doHomeFilter(((SmbFileListLoader) loader).getFileList());
                 mFileList = ((SmbFileListLoader) loader).getFileList();
                 Collections.sort(mFileList, FileInfoSort.comparator(this));
+                FileFactory.getInstance().addFolderFilterRule(mPath, mFileList);
+                FileFactory.getInstance().addFileTypeSortRule(mFileList);
                 closeEditorMode();
-                /*// expanded fabs
-                if (mPath.equals(mRoot))
-                    hideActionFabs();
-                else
-                    resetActionFabs();
-                /*/
                 enableFabEdit(!mPath.equals(mRoot));
-                //*/
                 updateScreen();
             }
         } else if (loader instanceof LocalFileListLoader) {
@@ -811,6 +800,7 @@ public class FileManageActivity extends AppCompatActivity implements
                 mPath = ((LocalFileListLoader) loader).getPath();
                 mFileList = ((LocalFileListLoader) loader).getFileList();
                 Collections.sort(mFileList, FileInfoSort.comparator(this));
+                FileFactory.getInstance().addFileTypeSortRule(mFileList);
                 closeEditorMode();
                 /*// expanded fabs
                 resetActionFabs();
@@ -843,7 +833,7 @@ public class FileManageActivity extends AppCompatActivity implements
             }
             else {
                 Bundle args =  ((MediaManagerLoader) loader).getBundleArgs();
-                MediaManager.open(this, args);
+                MediaFactory.open(this, args);
             }
         } else {
             if (success) {
@@ -924,6 +914,8 @@ public class FileManageActivity extends AppCompatActivity implements
             @Override
             public void onConfirm() {
                 Collections.sort(mFileList, FileInfoSort.comparator(FileManageActivity.this));
+                FileFactory.getInstance().addFolderFilterRule(mPath, mFileList);
+                FileFactory.getInstance().addFileTypeSortRule(mFileList);
                 mRecyclerAdapter.updateList(mFileList);
                 mRecyclerAdapter.notifyDataSetChanged();
             }
@@ -1098,19 +1090,6 @@ public class FileManageActivity extends AppCompatActivity implements
             }
         };
     }
-
-    private ArrayList<FileInfo> doHomeFilter(ArrayList<FileInfo> fileList) {
-        Server server = ServerManager.INSTANCE.getCurrentServer();
-        String name = server.getUsername();
-        for (FileInfo file : fileList) {
-            if (file.name.equals(name)) {
-                fileList.remove(file);
-                break;
-            }
-        }
-        return fileList;
-    }
-
 
     /**
      * UX CONTROL
@@ -1354,19 +1333,21 @@ public class FileManageActivity extends AppCompatActivity implements
 
     private void startVideoActivity(FileInfo fileInfo){
         if (!fileInfo.path.startsWith(NASApp.ROOT_STG) && mCastManager != null && mCastManager.isConnected()) {
-            MediaInfo info = MediaManager.createMediaInfo(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK, fileInfo.path);
+            MediaInfo info = MediaFactory.createMediaInfo(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK, fileInfo.path);
             mCastManager.startVideoCastControllerActivity(this, info, 0, true);
         } else {
+            MediaFactory.open(this, fileInfo.path);
+            /*Server server = ServerManager.INSTANCE.getCurrentServer();
             if(!fileInfo.path.startsWith(NASApp.ROOT_STG) && isRemoteAccess()) {
                 Bundle args = new Bundle();
-                args.putString("path", MediaManager.createPath(fileInfo.path));
-                args.putString("name", MediaManager.parseName(fileInfo.name));
+                args.putString("path", MediaFactory.createTranslatePath(fileInfo.path));
+                args.putString("name", MediaFactory.parseName(fileInfo.name));
                 args.putString("type", MimeUtil.getMimeType(fileInfo.path));
                 getLoaderManager().restartLoader(LoaderID.MEDIA_PLAYER, args, this).forceLoad();
             }
             else{
-                MediaManager.open(this, fileInfo.path);
-            }
+                MediaFactory.open(this, fileInfo.path);
+            }*/
         }
     }
 

@@ -13,16 +13,18 @@ import java.util.Comparator;
  */
 public class FileInfoSort {
 
-
     public static Comparator<FileInfo> comparator(Context context) {
         NASPref.Sort sort = NASPref.getFileSortType(context);
-        if (sort.equals(NASPref.Sort.DATE)) {
+        if (sort.equals(NASPref.Sort.DATE))
             return new FileInfoSort.byDate();
-        }
-        if (sort.equals(NASPref.Sort.NAME)) {
+        else if (sort.equals(NASPref.Sort.NAME))
             return new FileInfoSort.byName();
-        }
-        return new FileInfoSort.byType();
+        else if (sort.equals(NASPref.Sort.REVERSEDATE))
+            return new FileInfoSort.byReverseDate();
+        else if (sort.equals(NASPref.Sort.REVERSENAME))
+            return new FileInfoSort.byReverseName();
+        else
+            return new FileInfoSort.byType();
     }
 
     public static class byType implements Comparator<FileInfo> {
@@ -31,12 +33,11 @@ public class FileInfoSort {
         public int compare(FileInfo lhs, FileInfo rhs) {
             int result = 0;
             if (lhs.type.equals(rhs.type)) {
-                result = compareByExtension(lhs, rhs);
+                result = compareByName(lhs, rhs);
                 if (result == 0)
-                    result = compareByName(lhs, rhs);
-            }
-            else {
-                result =  compareByType(lhs, rhs);
+                    result = compareByExtension(lhs, rhs);
+            } else {
+                result = compareByType(lhs, rhs);
             }
             return result;
         }
@@ -50,9 +51,23 @@ public class FileInfoSort {
             int result = 0;
             if (lhs.time.equals(rhs.time)) {
                 result = compareByName(lhs, rhs);
-            }
-            else {
+            } else {
                 result = compareByDate(lhs, rhs);
+            }
+            return result;
+        }
+
+    }
+
+    public static class byReverseDate implements Comparator<FileInfo> {
+
+        @Override
+        public int compare(FileInfo lhs, FileInfo rhs) {
+            int result = 0;
+            if (lhs.time.equals(rhs.time)) {
+                result = compareByName(lhs, rhs);
+            } else {
+                result = -compareByDate(lhs, rhs);
             }
             return result;
         }
@@ -64,6 +79,15 @@ public class FileInfoSort {
         @Override
         public int compare(FileInfo lhs, FileInfo rhs) {
             return compareByName(lhs, rhs);
+        }
+
+    }
+
+    public static class byReverseName implements Comparator<FileInfo> {
+
+        @Override
+        public int compare(FileInfo lhs, FileInfo rhs) {
+            return -compareByName(lhs, rhs);
         }
 
     }

@@ -15,6 +15,7 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.R;
+import com.transcend.nas.utils.FileFactory;
 
 import java.io.File;
 import java.text.DecimalFormat;
@@ -84,7 +85,7 @@ public class FileInfoActivity extends AppCompatActivity {
         else if (fileInfo.type.equals(FileInfo.TYPE.MUSIC))
             ivImage.setImageResource(R.drawable.ic_audiotrack_gray_big);
         if (fileInfo.type.equals(FileInfo.TYPE.PHOTO))
-            ImageLoader.getInstance().displayImage(toPhotoURL(fileInfo.path), ivImage);
+            ImageLoader.getInstance().displayImage(FileFactory.getInstance().getPhotoPath(true, fileInfo.path), ivImage);
     }
 
     private void initFragment() {
@@ -92,37 +93,6 @@ public class FileInfoActivity extends AppCompatActivity {
         Fragment f = new InformationFragment();
         getFragmentManager().beginTransaction().replace(id, f).commit();
     }
-
-    private String toPhotoURL(String path) {
-        String url;
-        if (path.startsWith(NASApp.ROOT_STG)) {
-            url = "file://" + path;
-        }
-        else {
-            Server server = ServerManager.INSTANCE.getCurrentServer();
-            String hostname = server.getHostname();
-            String username = server.getUsername();
-            String hash = server.getHash();
-            String filepath;
-            if(path.startsWith(Server.HOME))
-                filepath = Server.USER_DAV_HOME + path.replaceFirst(Server.HOME, "/");
-            else if(path.startsWith("/"+username+"/"))
-                filepath = Server.USER_DAV_HOME + path.replaceFirst("/"+username+"/", "/");
-            else {
-                String[] paths = path.replaceFirst("/","").split("/");
-                filepath = Server.ADMIN_DAV_HOME;
-                for(int i=0 ;i < paths.length; i++){
-                    if(i == 0)
-                        filepath += "/"  + paths[i].toLowerCase();
-                    else
-                        filepath += "/"  + paths[i];
-                }
-            }
-            url = "http://" + hostname + filepath + "?session=" + hash + "&thumbnail";
-        }
-        return url;
-    }
-
 
     /**
      *

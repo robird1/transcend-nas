@@ -11,6 +11,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
+import com.transcend.nas.utils.FileFactory;
 
 import java.util.ArrayList;
 
@@ -58,7 +59,7 @@ public class ViewerPagerAdapter extends PagerAdapter {
         PhotoView pv = new PhotoView(mContext);
         pv.setDrawingCacheEnabled(false);
         pv.setOnPhotoTapListener(mOnPhotoTapListener);
-        ImageLoader.getInstance().displayImage(toPhotoURL(path), pv);
+        ImageLoader.getInstance().displayImage(FileFactory.getInstance().getPhotoPath(false,path), pv);
         container.addView(pv);
         Log.w(TAG, "instantiateItem [" + position + "]: " + path);
         return pv;
@@ -86,36 +87,6 @@ public class ViewerPagerAdapter extends PagerAdapter {
         } else {
             return POSITION_NONE;
         }
-    }
-
-    private String toPhotoURL(String path) {
-        String url;
-        if (path.startsWith(NASApp.ROOT_STG)) {
-            url = "file://" + path;
-        }
-        else {
-            Server server = ServerManager.INSTANCE.getCurrentServer();
-            String hostname = server.getHostname();
-            String username = server.getUsername();
-            String hash = server.getHash();
-            String filepath;
-            if(path.startsWith(Server.HOME))
-                filepath = Server.USER_DAV_HOME + path.replaceFirst(Server.HOME, "/");
-            else if(path.startsWith("/"+username+"/"))
-                filepath = Server.USER_DAV_HOME + path.replaceFirst("/"+username+"/", "/");
-            else {
-                String[] paths = path.replaceFirst("/","").split("/");
-                filepath = Server.ADMIN_DAV_HOME;
-                for(int i=0 ;i < paths.length; i++){
-                    if(i == 0)
-                        filepath += "/"  + paths[i].toLowerCase();
-                    else
-                        filepath += "/"  + paths[i];
-                }
-            }
-            url = "http://" + hostname + filepath + "?session=" + hash + "&webview";
-        }
-        return url;
     }
 
 }

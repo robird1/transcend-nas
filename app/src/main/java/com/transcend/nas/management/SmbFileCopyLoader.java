@@ -97,6 +97,7 @@ public class SmbFileCopyLoader extends SmbAbstractLoader {
     }
 
     private int getSize(SmbFile file) {
+        //TODO : empty loop here
         int total = 0;
         do {
             total = file.getContentLength();

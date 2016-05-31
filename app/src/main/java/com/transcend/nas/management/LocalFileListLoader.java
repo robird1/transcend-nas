@@ -51,7 +51,6 @@ public class LocalFileListLoader extends AsyncTaskLoader<Boolean> {
             fileInfo.size = file.length();
             mFileList.add(fileInfo);
         }
-        Collections.sort(mFileList, FileInfoSort.comparator(getContext()));
         Log.w(TAG, "mFileList size: " + mFileList.size());
         return true;
     }

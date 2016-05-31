@@ -1,4 +1,4 @@
-package com.transcend.nas.management;
+package com.transcend.nas.utils;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -24,7 +24,7 @@ import java.net.URLEncoder;
 /**
  * Created by silverhsu on 16/1/25.
  */
-public class MediaManager {
+public class MediaFactory {
 
     public static void open(Activity act, Bundle args) {
         String url = args.getString("path");
@@ -65,7 +65,7 @@ public class MediaManager {
     }
 
 
-    public static String createPath(String path){
+    public static String createTranslatePath(String path){
         String url = path;
         if (!path.startsWith(NASApp.ROOT_STG)) {
             // remote
@@ -88,25 +88,42 @@ public class MediaManager {
     public static Uri createUri(String path){
         Uri uri;
         if (path.startsWith(NASApp.ROOT_STG)) {
-            // local
             uri = Uri.fromFile(new File(path));
         }
         else {
-            // remote
             Server server = ServerManager.INSTANCE.getCurrentServer();
             String hostname = server.getHostname();
+            String username = server.getUsername();
+            String hash = server.getHash();
             String p2pIP = P2PService.getInstance().getP2PIP();
             if (P2PService.getInstance().isConnected() && hostname.contains(p2pIP)) {
                 hostname = p2pIP + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
             }
-            String hash = server.getHash();
-            String folder = parseFolder(path);
-            String file = parseFile(path);
-            String name = parseName(path);
-            String redirect = "1";
-            String url = "http://" + hostname + "/streaming.cgi?folder=" + folder + "&file=" + file + "&id=" + hash + "&redirect=" + redirect;
+
+            String url;
+            String filepath;
+            if(path.startsWith(Server.HOME)) {
+                filepath = Server.USER_DAV_HOME + path.replaceFirst(Server.HOME, "/");
+            }
+            else if(path.startsWith("/"+username+"/")) {
+                filepath = Server.USER_DAV_HOME + path.replaceFirst("/" + username + "/", "/");
+            }
+            else {
+                String[] paths = path.replaceFirst("/","").split("/");
+                filepath = Server.ADMIN_DAV_HOME;
+                for(int i=0 ;i < paths.length; i++){
+                    if(i == 0)
+                        filepath += "/"  + paths[i].toLowerCase();
+                    else
+                        filepath += "/"  + paths[i];
+                }
+            }
+
+            url = "http://" + hostname + filepath + "?session=" + hash;
+            url = url.replaceAll(" ", "%20");
             uri = Uri.parse(url);
         }
+
         return uri;
     }
 

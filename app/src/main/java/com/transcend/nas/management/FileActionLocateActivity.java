@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.Loader;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
-import android.media.Image;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
@@ -31,6 +30,8 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
+import com.transcend.nas.utils.FileFactory;
+import com.transcend.nas.utils.MediaFactory;
 import com.transcend.nas.viewer.ViewerActivity;
 
 import java.io.File;
@@ -176,10 +177,10 @@ public class FileActionLocateActivity extends AppCompatActivity implements
             startViewerActivity(fileInfo.path);
         } else
         if (fileInfo.type.equals(FileInfo.TYPE.VIDEO)) {
-            MediaManager.open(this, fileInfo.path);
+            MediaFactory.open(this, fileInfo.path);
         } else
         if (fileInfo.type.equals(FileInfo.TYPE.MUSIC)) {
-            MediaManager.open(this, fileInfo.path);
+            MediaFactory.open(this, fileInfo.path);
         } else {
             toast(R.string.unknown_format, Toast.LENGTH_SHORT);
         }
@@ -317,6 +318,8 @@ public class FileActionLocateActivity extends AppCompatActivity implements
                         mFileList.add(info);
                 }
                 Collections.sort(mFileList, FileInfoSort.comparator(this));
+                FileFactory.getInstance().addFolderFilterRule(mPath, mFileList);
+                FileFactory.getInstance().addFileTypeSortRule(mFileList);
                 updateScreen();
                 mNewFolder.setVisible(!mRoot.equals(mPath));
                 mFabControl.setVisibility(mRoot.equals(mPath) ? View.INVISIBLE : View.VISIBLE);
@@ -337,6 +340,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
                         mFileList.add(info);
                 }
                 Collections.sort(mFileList, FileInfoSort.comparator(this));
+                FileFactory.getInstance().addFileTypeSortRule(mFileList);
                 updateScreen();
             }
         }

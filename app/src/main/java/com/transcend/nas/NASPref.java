@@ -19,7 +19,9 @@ public class NASPref {
     public enum Sort {
         TYPE,
         DATE,
-        NAME
+        REVERSEDATE,
+        NAME,
+        REVERSENAME
     }
 
     public enum Status {

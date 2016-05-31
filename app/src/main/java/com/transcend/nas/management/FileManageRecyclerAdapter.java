@@ -3,6 +3,7 @@ package com.transcend.nas.management;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.R;
+import com.transcend.nas.utils.FileFactory;
 
 import java.util.ArrayList;
 
@@ -84,13 +86,19 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
             if (holder.title != null) {
                 holder.title.setText(name);
                 holder.title.setVisibility((fileInfo.type.equals(FileInfo.TYPE.PHOTO) && mLayoutType == LayoutType.GRID) ? View.GONE : View.VISIBLE);
+                if(mLayoutType == LayoutType.GRID)
+                    holder.title.setGravity(Gravity.CENTER);
+                else
+                    holder.title.setGravity((time == null || "".equals(time)) ? Gravity.CENTER_VERTICAL : Gravity.BOTTOM);
             }
-            if (holder.subtitle != null)
+            if (holder.subtitle != null) {
+                holder.subtitle.setVisibility((time == null || "".equals(time)) ? View.GONE : View.VISIBLE);
                 holder.subtitle.setText(time);
+            }
             if (holder.icon != null)
                 holder.icon.setImageResource(resId);
-            if (fileInfo.type.equals(FileInfo.TYPE.PHOTO))
-                ImageLoader.getInstance().displayImage(toPhotoURL(path), holder.icon);
+            if (fileInfo.type.equals(FileInfo.TYPE.PHOTO) || fileInfo.type.equals(FileInfo.TYPE.VIDEO) )
+                ImageLoader.getInstance().displayImage(FileFactory.getInstance().getPhotoPath(true,path), holder.icon);
 
             holder.itemView.setSelected(fileInfo.checked);
             holder.mark.setVisibility(fileInfo.checked ? View.VISIBLE : View.INVISIBLE);
@@ -147,36 +155,6 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
         }
 
         return resId;
-    }
-
-    private String toPhotoURL(String path) {
-        String url;
-        if (path.startsWith(NASApp.ROOT_STG)) {
-            url = "file://" + path;
-        }
-        else {
-            Server server = ServerManager.INSTANCE.getCurrentServer();
-            String hostname = server.getHostname();
-            String username = server.getUsername();
-            String hash = server.getHash();
-            String filepath;
-            if(path.startsWith(Server.HOME))
-                filepath = Server.USER_DAV_HOME + path.replaceFirst(Server.HOME, "/");
-            else if(path.startsWith("/"+username+"/"))
-                filepath = Server.USER_DAV_HOME + path.replaceFirst("/"+username+"/", "/");
-            else {
-                String[] paths = path.replaceFirst("/","").split("/");
-                filepath = Server.ADMIN_DAV_HOME;
-                for(int i=0 ;i < paths.length; i++){
-                    if(i == 0)
-                        filepath += "/"  + paths[i].toLowerCase();
-                    else
-                        filepath += "/"  + paths[i];
-                }
-            }
-            url = "http://" + hostname + filepath + "?session=" + hash + "&thumbnail";
-        }
-        return url;
     }
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {

@@ -1,7 +1,7 @@
 <resources>
 
     <string name="app_name">StoreJet Cloud</string>
-    <string name="app_version">StoreJet Cloud v0.94</string>
+    <string name="app_version">StoreJet Cloud v0.95</string>
     <string name="storage_name">Storage</string>
     <string name="backups_name">Backups</string>
     <string name="downloads_name">Downloads</string>
@@ -11,7 +11,9 @@
     <string-array name="sort_items">
         <item>@string/type</item>
         <item>@string/date</item>
+        <item>@string/reverse_date</item>
         <item>@string/name</item>
+        <item>@string/reverse_name</item>
     </string-array>
 
     <string-array name="backup_scenario_entries">
@@ -52,6 +54,7 @@
     <string name="copy">Copy</string>
     <string name="cut">Cut</string>
     <string name="date">Date</string>
+    <string name="reverse_date">Date (Reverse)</string>
     <string name="delete">Delete</string>
     <string name="download">Download</string>
     <string name="downloads">Downloads</string>
@@ -75,6 +78,7 @@
     <string name="move">Move</string>
     <string name="music">Music</string>
     <string name="name">Name</string>
+    <string name="reverse_name">Name (Reverse)</string>
     <string name="new_folder">New folder</string>
     <string name="no_item_selected">No items selected</string>
     <string name="ok">OK</string>

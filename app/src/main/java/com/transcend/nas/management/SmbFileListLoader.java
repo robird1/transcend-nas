@@ -82,14 +82,6 @@ public class SmbFileListLoader extends SmbAbstractLoader {
     }
 
     public ArrayList<FileInfo> getFileList() {
-        if(NASApp.ROOT_SMB.equals(mPath)){
-            for(FileInfo file : mFileList){
-                if(file.name.equals("homes")) {
-                    mFileList.remove(file);
-                    break;
-                }
-            }
-        }
         return mFileList;
     }
 
