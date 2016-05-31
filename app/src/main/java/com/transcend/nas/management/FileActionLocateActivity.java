@@ -321,7 +321,8 @@ public class FileActionLocateActivity extends AppCompatActivity implements
                 FileFactory.getInstance().addFolderFilterRule(mPath, mFileList);
                 FileFactory.getInstance().addFileTypeSortRule(mFileList);
                 updateScreen();
-                mNewFolder.setVisible(!mRoot.equals(mPath));
+                if(mNewFolder != null)
+                    mNewFolder.setVisible(!mRoot.equals(mPath));
                 mFabControl.setVisibility(mRoot.equals(mPath) ? View.INVISIBLE : View.VISIBLE);
             }
         } else

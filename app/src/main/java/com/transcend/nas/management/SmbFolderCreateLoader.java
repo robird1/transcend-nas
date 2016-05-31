@@ -16,9 +16,6 @@ import jcifs.smb.SmbFile;
  * Created by silverhsu on 16/1/20.
  */
 public class SmbFolderCreateLoader extends SmbAbstractLoader {
-
-    private static final String TAG = SmbFolderCreateLoader.class.getSimpleName();
-
     private String mPath;
 
     public SmbFolderCreateLoader(Context context, String path) {
@@ -28,7 +25,6 @@ public class SmbFolderCreateLoader extends SmbAbstractLoader {
 
     @Override
     public Boolean loadInBackground() {
-        Log.w(TAG, "loadInBackground");
         try {
             super.loadInBackground();
             return createNewFolder();

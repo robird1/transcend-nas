@@ -1022,10 +1022,17 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void doCopy(String dest) {
+        ArrayList<String> paths = getSelectedPaths();
+        for(String path : paths){
+            if(dest.startsWith(path)) {
+                Toast.makeText(this, getString(R.string.select_folder_error), Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
         int id = (NASApp.MODE_SMB.equals(mMode))
                 ? LoaderID.SMB_FILE_COPY
                 : LoaderID.LOCAL_FILE_COPY;
-        ArrayList<String> paths = getSelectedPaths();
         Bundle args = new Bundle();
         args.putStringArrayList("paths", paths);
         args.putString("path", dest);
@@ -1034,10 +1041,17 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void doMove(String dest) {
+        ArrayList<String> paths = getSelectedPaths();
+        for(String path : paths){
+            if(dest.startsWith(path)) {
+                Toast.makeText(this, getString(R.string.select_folder_error), Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
         int id = (NASApp.MODE_SMB.equals(mMode))
                 ? LoaderID.SMB_FILE_MOVE
                 : LoaderID.LOCAL_FILE_MOVE;
-        ArrayList<String> paths = getSelectedPaths();
         Bundle args = new Bundle();
         args.putStringArrayList("paths", paths);
         args.putString("path", dest);

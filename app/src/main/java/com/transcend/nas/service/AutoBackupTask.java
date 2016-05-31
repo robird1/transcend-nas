@@ -246,7 +246,7 @@ public class AutoBackupTask extends AsyncTask<String, String, Boolean>
                 }
             }
 
-            unique = String.format(prefix + " (%d)" + suffix, index++);
+            unique = String.format(prefix + "_%d" + suffix, index++);
         }
         Log.w(TAG, "upload name: " + unique);
         uniqureName = unique;

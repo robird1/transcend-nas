@@ -12,6 +12,7 @@ import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import com.transcend.nas.R;
+import com.transcend.nas.utils.FileFactory;
 import com.transcend.nas.utils.MathUtil;
 
 import org.apache.commons.io.FileUtils;
@@ -40,12 +41,14 @@ public class LocalFileMoveLoader extends AsyncTaskLoader<Boolean> {
 
     private List<String> mSrcs;
     private String mDest;
+    private int mNotificationID = 0;
 
     public LocalFileMoveLoader(Context context, List<String> srcs, String dest) {
         super(context);
         mActivity = (Activity) context;
         mSrcs = srcs;
         mDest = dest;
+        mNotificationID = FileFactory.getInstance().getNotificationID();
     }
 
     @Override
@@ -82,6 +85,9 @@ public class LocalFileMoveLoader extends AsyncTaskLoader<Boolean> {
         File[] files = source.listFiles();
         String path = target.getPath();
         for (File file : files) {
+            if(file.isHidden())
+                continue;
+
             if (file.isDirectory())
                 moveDirectory(file, path);
             else
@@ -118,7 +124,7 @@ public class LocalFileMoveLoader extends AsyncTaskLoader<Boolean> {
         String suffix = ext.isEmpty() ? "" : String.format(".%s", ext);
         int index = 2;
         while (names.contains(unique)) {
-            unique = String.format(prefix + " (%d)" + suffix, index++);
+            unique = String.format(prefix + "_%d" + suffix, index++);
         }
         return unique;
     }
@@ -176,7 +182,7 @@ public class LocalFileMoveLoader extends AsyncTaskLoader<Boolean> {
         builder.setProgress(max, progress, indeterminate);
         builder.setContentIntent(pendingIntent);
         builder.setAutoCancel(true);
-        ntfMgr.notify(0, builder.build());
+        ntfMgr.notify(mNotificationID, builder.build());
     }
 
     private void updateResult(String result) {
@@ -198,7 +204,8 @@ public class LocalFileMoveLoader extends AsyncTaskLoader<Boolean> {
         builder.setContentText(text);
         builder.setContentIntent(pendingIntent);
         builder.setAutoCancel(true);
-        ntfMgr.notify(0, builder.build());
+        ntfMgr.notify(mNotificationID, builder.build());
+        FileFactory.getInstance().releaseNotificationID(mNotificationID);
     }
 
 }

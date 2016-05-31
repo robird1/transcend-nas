@@ -9,6 +9,7 @@ import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import com.transcend.nas.R;
+import com.transcend.nas.utils.FileFactory;
 import com.transcend.nas.utils.MathUtil;
 
 import org.apache.commons.io.FilenameUtils;
@@ -41,7 +42,6 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
 
     private static final int BUFFER_SIZE = 4 * 1024;
 
-    private Activity mActivity;
     private boolean mForbidden;
     private Timer mTimer;
 
@@ -53,9 +53,10 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
 
     public LocalFileUploadLoader(Context context, List<String> srcs, String dest) {
         super(context);
-        mActivity = (Activity) context;
         mSrcs = srcs;
         mDest = dest;
+        mNotificationID = FileFactory.getInstance().getNotificationID();
+        mType = getContext().getString(R.string.upload);
     }
 
     @Override
@@ -65,7 +66,7 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
             return upload();
         } catch (Exception e) {
             e.printStackTrace();
-            updateResult("Error");
+            updateResult(mType, "Error");
         } finally {
             try {
                 if (mOS != null) mOS.close();
@@ -85,7 +86,7 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
             else
                 uploadFile(source, getSmbUrl(mDest));
         }
-        updateResult("Done");
+        updateResult(mType, "Done");
         return true;
     }
 
@@ -96,6 +97,9 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
         File[] files = source.listFiles();
         String path = target.getPath();
         for (File file : files) {
+            if(file.isHidden())
+                continue;
+
             if (file.isDirectory())
                 uploadDirectory(file, path);
             else
@@ -110,7 +114,7 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
         SmbFile target = new SmbFile(destination, name);
         mOS = new BufferedOutputStream(target.getOutputStream());
         mIS = new BufferedInputStream(new FileInputStream(source));
-        updateProgress(name, count, total);
+        updateProgress(mType, name, count, total);
         byte[] buffer = new byte[BUFFER_SIZE];
         int length = 0;
         while ((length = mIS.read(buffer)) != -1) {
@@ -141,7 +145,7 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
         String suffix = isDirectory ? "/" : ext.isEmpty() ? "" : String.format(".%s", ext);
         int index = 2;
         while (names.contains(unique)) {
-            unique = String.format(prefix + " (%d)" + suffix, index++);
+            unique = String.format(prefix + "_%d" + suffix, index++);
         }
         Log.w(TAG, "unique name: " + unique);
         return unique;
@@ -151,7 +155,7 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
         if (mForbidden)
             return;
         mForbidden = true;
-        updateProgress(name, count, total);
+        updateProgress(mType, name, count, total);
         mTimer = new Timer();
         mTimer.schedule(new TimerTask() {
             @Override
@@ -159,57 +163,6 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
                 mForbidden = false;
             }
         }, 1000);
-    }
-
-    private void updateProgress(String name, int count, int total) {
-        Log.w(TAG, "progress: " + count + "/" + total + ", " + name);
-
-        int max = (count == total) ? 0 : 100;
-        int progress = (total > 0) ? count / (total / 100) : 0;
-        boolean indeterminate = (total == 0);
-        int icon = R.mipmap.ic_launcher;
-
-        String type = getContext().getResources().getString(R.string.download);
-        String stat = String.format("%s / %s", MathUtil.getBytes(count), MathUtil.getBytes(total));
-        String text = String.format("%s - %s", type, stat);
-        String info = String.format("%d%%", progress);
-
-        NotificationManager ntfMgr = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        Intent intent = mActivity.getIntent();
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext());
-        builder.setSmallIcon(icon);
-        builder.setContentTitle(name);
-        builder.setContentText(text);
-        builder.setContentInfo(info);
-        builder.setProgress(max, progress, indeterminate);
-        builder.setContentIntent(pendingIntent);
-        builder.setAutoCancel(true);
-        ntfMgr.notify(0, builder.build());
-    }
-
-    private void updateResult(String result) {
-        Log.w(TAG, "result: " + result);
-
-        int icon = R.mipmap.ic_launcher;
-        String name = getContext().getResources().getString(R.string.app_name);
-        String type = getContext().getResources().getString(R.string.upload);
-        String text = String.format("%s - %s", type, result);
-
-        NotificationManager ntfMgr = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        Intent intent = mActivity.getIntent();
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext());
-        builder.setSmallIcon(icon);
-        builder.setContentTitle(name);
-        builder.setContentText(text);
-        builder.setContentIntent(pendingIntent);
-        builder.setAutoCancel(true);
-        ntfMgr.notify(0, builder.build());
     }
 
 }

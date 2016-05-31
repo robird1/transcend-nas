@@ -18,10 +18,10 @@ public class FileFactory {
     private static final String TAG = FileFactory.class.getSimpleName();
     private static FileFactory mFileFactory;
     private static final Object mMute = new Object();
-    private List<Integer> mNotificationList;
+    private List<String> mNotificationList;
 
     public FileFactory() {
-        mNotificationList = new ArrayList<Integer>();
+        mNotificationList = new ArrayList<String>();
     }
 
     public static FileFactory getInstance() {
@@ -83,6 +83,17 @@ public class FileFactory {
         }
     }
 
+    public void addSelfFilterRule(String path, ArrayList<FileInfo> fileList) {
+        if (NASApp.ROOT_SMB.equals(path)) {
+            for (FileInfo file : fileList) {
+                if (file.path.endsWith(path)) {
+                    fileList.remove(file);
+                    break;
+                }
+            }
+        }
+    }
+
     public String getPhotoPath(boolean thumbnail, String path) {
         String url;
         if (path.startsWith(NASApp.ROOT_STG)) {
@@ -106,7 +117,6 @@ public class FileFactory {
                 url = "http://" + hostname + filepath + "?session=" + hash + "&thumbnail";
             else
                 url = "http://" + hostname + filepath + "?session=" + hash + "&webview";
-            Log.d(TAG, url);
         }
         return url;
     }
@@ -114,12 +124,18 @@ public class FileFactory {
     public int getNotificationID() {
         int id = 1;
         if (mNotificationList.size() > 0) {
-            id = mNotificationList.get(mNotificationList.size() - 1) + 1;
+            String value = mNotificationList.get(mNotificationList.size() - 1);
+            id = Integer.parseInt(value) + 1;
+            mNotificationList.add(Integer.toString(id));
+        }
+        else{
+            mNotificationList.add(Integer.toString(id));
         }
         return id;
     }
 
     public void releaseNotificationID(int id) {
-        mNotificationList.remove(id);
+        String value = "" + id;
+        mNotificationList.remove(value);
     }
 }

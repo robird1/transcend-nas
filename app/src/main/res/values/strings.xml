@@ -137,6 +137,7 @@
     <string name="forget_password_warning">Current password will be deprecated. Are you sure to send the email?</string>
     <string name="forget_password_send">The password mail is sent. Please check your mail.</string>
     <string name="confirm_password_error">Please confirm your password</string>
+    <string name="select_folder_error">Destination can\'t in the selected list</string>
     <string name="network_error">Please check your network, or try again later</string>
     <string name="access_error">Access deny</string>
     <string name="login_error">Invalid account or password</string>
