@@ -37,11 +37,11 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
 
     private static final String TAG = SmbAbstractLoader.class.getSimpleName();
     protected Activity mActivity;
-    private Server mServer;
-    private String mUsername;
+    protected Server mServer;
+    protected String mUsername;
     private String mPassword;
     private String mHostname;
-    private Exception mException;
+    protected Exception mException;
     protected int mNotificationID = 0;
     protected String mType = "";
     protected HandlerThread mThread;

@@ -359,6 +359,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
         } else if (loader instanceof LoginLoader) {
             startFileManageActivity();
         } else if (loader instanceof TutkLogoutLoader) {
+            mProgressView.setVisibility(View.INVISIBLE);
             startNASFinderActivity(mNASList, true);
         }
     }

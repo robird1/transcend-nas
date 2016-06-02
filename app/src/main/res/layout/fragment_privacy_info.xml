@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="@dimen/activity_vertical_margin"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="Transcend Information, Inc."
+        android:gravity="center"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="10dp"
+        android:text="(“Transcend”) will collect, process and use certain non-identifying information from your experience of using the App (including, but not limited to, the type of your device, your device’s ID, IP address, your operating system, and the browser being used), through Google Analytics SDK, for the purpose of improving the quality of the App." />
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="10dp"
+        android:text="By using the App, you are deemed to have read, understood and agree to this privacy rule (the “Rule”).  If you have any questions or concerns about the Rule, please contact Transcend at service-tw@transcend-info.com." />
+
+</LinearLayout>

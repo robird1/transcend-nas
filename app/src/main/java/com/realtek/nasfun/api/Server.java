@@ -110,7 +110,7 @@ public class Server {
 	public final static String DEFAULT_GUEST_PAASWORD = "Realtek";
 	public final static String HOME = "/homes/";
 	//DAV home path
-	public final static String ADMIN_DAV_HOME = "/dav";
+	public final static String DEVICE_DAV_HOME = "/dav/device/homes";
 	public final static String USER_DAV_HOME = "/dav/home";
 
 	// audio/video streaming playback folder(HOME is mapped to user's home directory by session id)
@@ -156,6 +156,7 @@ public class Server {
 	String username = null;
 	String password = null;
 	String tutkUUID = null;
+	String loginError = null;
 	//Server always hold its password. However, users can get password only if isPasswordSaved is true.
 	boolean isPasswordSaved = false;
 	String hash;
@@ -1029,6 +1030,10 @@ public class Server {
 
 	public void setTutkUUID(String tutkUUID) { this.tutkUUID = tutkUUID; }
 
+	public String getLoginError(){
+		return loginError;
+	}
+
 	public void enablePasswordSaved(boolean enable) {
 		this.isPasswordSaved = enable;
 	}
@@ -1374,6 +1379,7 @@ public class Server {
 					if(loginInfo.isError) {
 						Log.d(TAG, "Login fail, username= "+username+", hash= "+hash+", encryptedPassword= "+encryptedPassword);
 						Log.d(TAG, "reason = "+loginInfo.reason);
+						loginError = loginInfo.reason;
 					} else {
 						isSuccess = true;
 					}
@@ -1540,7 +1546,7 @@ public class Server {
 	
 	public String getDavHome() {
 		if(isUserAdmin())
-			return ADMIN_DAV_HOME;
+			return DEVICE_DAV_HOME;
 		else
 			return USER_DAV_HOME;					
 	}

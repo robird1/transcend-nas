@@ -204,7 +204,7 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
         if(resultCode == RESULT_OK){
             if(requestCode == resultNum){
                 Bundle args = data.getExtras();
-                showLoginDialog(args);
+                showLoginDialog(args, false);
             }
         }
     }
@@ -272,14 +272,14 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
 
     private void checkWizardLoader(boolean success, WizardCheckLoader loader){
         mProgressView.setVisibility(View.INVISIBLE);
+        Bundle args = loader.getBundleArgs();
         if(!success){
             Toast.makeText(this,getString(R.string.network_error),Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Bundle args = loader.getBundleArgs();
         if(loader.isWizard()) {
-            showLoginDialog(args);
+            showLoginDialog(args, false);
         }
         else{
             startWizardActivity(args);
@@ -289,7 +289,7 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
     private void checkLoginLoader(boolean success, LoginLoader loader){
         if(!success){
             hideLoginDialog(false);
-            Toast.makeText(this,getString(R.string.login_error),Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, ((LoginLoader)loader).getLoginError(), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -371,8 +371,8 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
         }
     }
 
-    private void showLoginDialog(Bundle args){
-        mLoginDialog = new LoginDialog(NASFinderActivity.this, args, isRemoteAccess) {
+    private void showLoginDialog(Bundle args, boolean delete){
+        mLoginDialog = new LoginDialog(NASFinderActivity.this, args, isRemoteAccess, delete) {
             @Override
             public void onConfirm(Bundle args) {
                 startLoginLoader(args);

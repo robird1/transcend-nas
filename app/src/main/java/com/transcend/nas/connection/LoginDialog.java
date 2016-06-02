@@ -57,11 +57,13 @@ public abstract class LoginDialog implements View.OnClickListener {
     private String mUsername;
     private String mPassword;
     private String mNasId;
-    private boolean isRemoeteAccess;
+    private boolean isRemoeteAccess = false;
+    private boolean isDelete = false;
 
-    public LoginDialog(Context context, Bundle args, boolean isRemoteAccess) {
+    public LoginDialog(Context context, Bundle args, boolean isRemoteAccess, boolean isDelete) {
         mActivity = (AppCompatActivity) context;
         this.isRemoeteAccess = isRemoteAccess;
+        this.isDelete = isDelete;
         mNasId = args.getString("nasId");
         mNickname = args.getString("nickname");
         mHostname = args.getString("hostname");
@@ -80,7 +82,8 @@ public abstract class LoginDialog implements View.OnClickListener {
         builder.setView(R.layout.dialog_login);
         builder.setCancelable(true);
         builder.setNegativeButton(R.string.cancel, null);
-        builder.setPositiveButton(R.string.login, null);
+        if(!isDelete)
+            builder.setPositiveButton(R.string.login, null);
         if (isRemoeteAccess)
             builder.setNeutralButton(R.string.delete, null);
         mDialog = builder.show();

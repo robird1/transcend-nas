@@ -7,6 +7,8 @@ import android.os.Bundle;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
+import com.transcend.nas.R;
+import com.transcend.nas.utils.FileFactory;
 import com.tutk.IOTC.P2PService;
 
 /**
@@ -15,6 +17,7 @@ import com.tutk.IOTC.P2PService;
 public class LoginLoader extends AsyncTaskLoader<Boolean> {
 
     private Server mServer;
+    private String mError;
 
     public LoginLoader(Context context, Bundle args) {
         super(context);
@@ -30,6 +33,9 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
         if (success) {
             updateServerManager();
             updateLoginPreference();
+        }
+        else{
+            mError = mServer.getLoginError();
         }
         return success;
     }
@@ -54,6 +60,13 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
         NASPref.setUsername(getContext(), mServer.getUsername());
         NASPref.setPassword(getContext(), mServer.getPassword());
         NASPref.setUUID(getContext(), mServer.getTutkUUID());
+        FileFactory.getInstance().cleanRealPathMap();
+    }
 
+    public String getLoginError(){
+        if(mError != null && !mError.equals(""))
+            return mError;
+        else
+            return getContext().getString(R.string.network_error);
     }
 }

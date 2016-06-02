@@ -8,7 +8,10 @@ import com.transcend.nas.NASApp;
 import com.transcend.nas.management.FileInfo;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by ike_lee on 2016/5/23.
@@ -19,9 +22,12 @@ public class FileFactory {
     private static FileFactory mFileFactory;
     private static final Object mMute = new Object();
     private List<String> mNotificationList;
+    private Map<String, String> mRealPathMap;
+    private int RealPathMapLifeCycle = 10;
 
     public FileFactory() {
         mNotificationList = new ArrayList<String>();
+        mRealPathMap = new HashMap<String, String>();
     }
 
     public static FileFactory getInstance() {
@@ -39,7 +45,7 @@ public class FileFactory {
         }
         fileList.clear();
         for (int i = 0; i < 2; i++) {
-            if(i == 0) {
+            if (i == 0) {
                 for (FileInfo file : tmp) {
                     if (file.type == FileInfo.TYPE.DIR) {
                         fileList.add(file);
@@ -47,7 +53,7 @@ public class FileFactory {
                 }
             }
 
-            if(i == 1) {
+            if (i == 1) {
                 for (FileInfo file : tmp) {
                     if (file.type != FileInfo.TYPE.DIR) {
                         fileList.add(file);
@@ -108,10 +114,15 @@ public class FileFactory {
                 filepath = Server.USER_DAV_HOME + path.replaceFirst(Server.HOME, "/");
             else if (path.startsWith("/" + username + "/"))
                 filepath = Server.USER_DAV_HOME + path.replaceFirst("/" + username + "/", "/");
-            else if (path.startsWith("/Public/"))
-                filepath = Server.ADMIN_DAV_HOME + path.replaceFirst("/Public/", "/public/");
-            else
-                filepath = "/dav/devices/home" + path;
+            else {
+                for (String key : mRealPathMap.keySet()) {
+                    if (path.startsWith(key)) {
+                        path = path.replaceFirst(key, mRealPathMap.get(key));
+                        break;
+                    }
+                }
+                filepath = Server.DEVICE_DAV_HOME + path.replaceFirst("/home/", "/");
+            }
 
             if (thumbnail)
                 url = "http://" + hostname + filepath + "?session=" + hash + "&thumbnail";
@@ -127,8 +138,7 @@ public class FileFactory {
             String value = mNotificationList.get(mNotificationList.size() - 1);
             id = Integer.parseInt(value) + 1;
             mNotificationList.add(Integer.toString(id));
-        }
-        else{
+        } else {
             mNotificationList.add(Integer.toString(id));
         }
         return id;
@@ -137,5 +147,63 @@ public class FileFactory {
     public void releaseNotificationID(int id) {
         String value = "" + id;
         mNotificationList.remove(value);
+    }
+
+    public void addRealPathToMap(String path, String realPath) {
+        if (mRealPathMap == null)
+            mRealPathMap = new HashMap<String, String>();
+        if (!path.startsWith("/"))
+            path = "/" + path + "/";
+        if(!realPath.endsWith("/"))
+            realPath = realPath + "/";
+        mRealPathMap.put(path, realPath);
+    }
+
+    public int getRealPathMapSize(){
+        int size = 0;
+        if(mRealPathMap != null)
+            size = mRealPathMap.size();
+        return size;
+    }
+
+    public String getRealPathKeyFromMap(String path) {
+        String result = "";
+        if (mRealPathMap != null) {
+            for (String key : mRealPathMap.keySet()) {
+                if (path.startsWith(key)) {
+                    result = key;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+    public String getRealPathFromMap(String path) {
+        String realPath = "";
+        if (mRealPathMap != null) {
+            for (String key : mRealPathMap.keySet()) {
+                if (path.startsWith(key)) {
+                    realPath = mRealPathMap.get(key);
+                    break;
+                }
+            }
+        }
+        return realPath;
+    }
+
+    public boolean checkRealPathMapLifeCycle(){
+        RealPathMapLifeCycle--;
+        if(RealPathMapLifeCycle > 0)
+            return true;
+        else{
+            RealPathMapLifeCycle = 10;
+            return false;
+        }
+    }
+
+    public void cleanRealPathMap() {
+        if (mRealPathMap != null)
+            mRealPathMap.clear();
     }
 }

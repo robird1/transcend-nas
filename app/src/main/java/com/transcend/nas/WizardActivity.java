@@ -23,6 +23,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.connection.AutoLinkLoader;
 import com.transcend.nas.connection.LoginLoader;
@@ -144,8 +146,8 @@ public class WizardActivity extends AppCompatActivity implements LoaderManager.L
             //args.putString("username", "admin");
             //getLoaderManager().restartLoader(LoaderID.LOGIN, args, this).forceLoad();
         } else if(loader instanceof LoginLoader){
-            if(!success){;
-                Toast.makeText(this,getString(R.string.network_error),Toast.LENGTH_SHORT).show();
+            if(!success){
+                Toast.makeText(this, ((LoginLoader)loader).getLoginError(), Toast.LENGTH_SHORT).show();
                 return;
             }
 

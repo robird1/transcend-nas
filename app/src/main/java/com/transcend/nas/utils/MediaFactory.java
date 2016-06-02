@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
 import android.util.Log;
 
 import com.google.android.exoplayer.ExoPlayer;
@@ -102,21 +103,16 @@ public class MediaFactory {
 
             String url;
             String filepath;
-            if(path.startsWith(Server.HOME)) {
+            if (path.startsWith(Server.HOME))
                 filepath = Server.USER_DAV_HOME + path.replaceFirst(Server.HOME, "/");
-            }
-            else if(path.startsWith("/"+username+"/")) {
+            else if (path.startsWith("/" + username + "/"))
                 filepath = Server.USER_DAV_HOME + path.replaceFirst("/" + username + "/", "/");
-            }
             else {
-                String[] paths = path.replaceFirst("/","").split("/");
-                filepath = Server.ADMIN_DAV_HOME;
-                for(int i=0 ;i < paths.length; i++){
-                    if(i == 0)
-                        filepath += "/"  + paths[i].toLowerCase();
-                    else
-                        filepath += "/"  + paths[i];
-                }
+                String key = FileFactory.getInstance().getRealPathKeyFromMap(path);
+                String realPath = FileFactory.getInstance().getRealPathFromMap(path);
+                if(key != null && !key.equals(""))
+                    path = path.replaceFirst(key, realPath);
+                filepath = Server.DEVICE_DAV_HOME + path.replaceFirst("/home/", "/");
             }
 
             url = "http://" + hostname + filepath + "?session=" + hash;
