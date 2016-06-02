@@ -115,19 +115,34 @@ public class FileFactory {
             else if (path.startsWith("/" + username + "/"))
                 filepath = Server.USER_DAV_HOME + path.replaceFirst("/" + username + "/", "/");
             else {
-                for (String key : mRealPathMap.keySet()) {
-                    if (path.startsWith(key)) {
-                        path = path.replaceFirst(key, mRealPathMap.get(key));
-                        break;
+                if(username.equals("admin")) {
+                    for (String key : mRealPathMap.keySet()) {
+                        if (path.startsWith(key)) {
+                            path = path.replaceFirst(key, mRealPathMap.get(key));
+                            break;
+                        }
                     }
+                    filepath = Server.DEVICE_DAV_HOME + path.replaceFirst("/home/", "/");
                 }
-                filepath = Server.DEVICE_DAV_HOME + path.replaceFirst("/home/", "/");
+                else{
+                    String newPath = "";
+                    String[] paths = path.replaceFirst("/", "").split("/");
+                    int length = paths.length;
+                    for(int i = 0; i< length; i++){
+                        if(i==0)
+                            newPath = "/" + paths[i].toLowerCase();
+                        else
+                            newPath = newPath + "/" + paths[i];
+                    }
+                    filepath = "/dav" + newPath;
+                }
             }
 
             if (thumbnail)
                 url = "http://" + hostname + filepath + "?session=" + hash + "&thumbnail";
             else
                 url = "http://" + hostname + filepath + "?session=" + hash + "&webview";
+            Log.d(TAG, url);
         }
         return url;
     }

@@ -122,7 +122,7 @@ public class WizardActivity extends AppCompatActivity implements LoaderManager.L
             case LoaderID.WIZARD_INIT:
                 return new WizardInitLoader(this, args, isRemoteAccess);
             case LoaderID.LOGIN:
-                return new LoginLoader(this, args);
+                return new LoginLoader(this, args, true);
         }
         return null;
     }

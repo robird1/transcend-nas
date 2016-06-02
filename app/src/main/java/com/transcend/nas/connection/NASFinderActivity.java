@@ -221,7 +221,7 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
                 mProgressView.setVisibility(View.VISIBLE);
                 return new NASListLoader(this);
             case LoaderID.LOGIN:
-                return new LoginLoader(this, args);
+                return new LoginLoader(this, args, true);
             case LoaderID.TUTK_NAS_LINK:
                 return new TutkLinkNasLoader(this, args);
             case LoaderID.TUTK_NAS_GET:

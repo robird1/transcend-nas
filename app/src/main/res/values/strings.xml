@@ -1,7 +1,7 @@
 <resources>
 
     <string name="app_name">StoreJet Cloud</string>
-    <string name="app_version">StoreJet Cloud v0.95</string>
+    <string name="app_version">StoreJet Cloud v1.0</string>
     <string name="storage_name">Storage</string>
     <string name="backups_name">Backups</string>
     <string name="downloads_name">Downloads</string>
@@ -87,6 +87,7 @@
     <string name="password_confirm">Confirm Password</string>
     <string name="submit">Submit</string>
     <string name="resend">Resend</string>
+    <string name="bind">Set Up</string>
     <string name="find_nas">Find StoreJet Cloud</string>
     <string name="new_user">New User</string>
     <string name="back">Back</string>
@@ -109,7 +110,7 @@
     <string name="video">Video</string>
     <string name="view">View</string>
     <string name="wifi_only">Wi-Fi only</string>
-    <string name="legal">Legal \u0026 Privacy</string>
+    <string name="legal">Privacy</string>
     <string name="term_of_use">Terms of use</string>
     <string name="licenses">Licenses</string>
     <string name="contact_us">Contact us</string>
@@ -141,10 +142,10 @@
     <string name="network_error">Please check your network, or try again later</string>
     <string name="access_error">Access deny</string>
     <string name="login_error">Invalid account or password</string>
-    <string name="remote_access_always_warning">For \"Always\", you need to set remote access at first</string>
-    <string name="remote_access_register">Create new remote access account, and we will automatically bind your StoreJet Cloud later</string>
-    <string name="remote_access_welcome">Please input your email and password, and we will automatically bind your StoreJet Cloud later</string>
+    <string name="remote_access_always_warning">For \"Always\", you need to set up remote access</string>
     <string name="remote_access_send_activate_info">Please check your email to activate it</string>
+    <string name="remote_access_bind_info">You can set up the relationship between your StoreJet Cloud and the email</string>
+    <string name="remote_access_success_info">Success set up the relationship between your StoreJet Cloud and the email</string>
     <string name="remote_access_send_activate_warning">Are your sure to resend activate email?</string>
     <string name="remote_access_logout">Are you sure to logout?</string>
     <string name="remote_access_no_login">At first, you need to register or login</string>
@@ -180,7 +181,7 @@
     <string name="msg_cache_cleared">Cache cleared</string>
 
     <!-- about -->
-    <string name="rights_reserved">\u00AE2016 Transcend Information Inc.\nAll rights reserved.</string>
+    <string name="rights_reserved">\u00A92016 Transcend Information Inc.\nAll rights reserved.</string>
 
 
 
@@ -221,6 +222,7 @@
     <string name="pref_username">USERNAME</string>
     <string name="pref_password">PASSWORD</string>
     <string name="pref_uuid">UUID</string>
+    <string name="pref_mac">MAC ADDRESS</string>
 
     <string name="pref_local_hostname">LOCAL HOSTNAME</string>
 

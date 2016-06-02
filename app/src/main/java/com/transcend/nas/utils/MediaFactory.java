@@ -108,11 +108,25 @@ public class MediaFactory {
             else if (path.startsWith("/" + username + "/"))
                 filepath = Server.USER_DAV_HOME + path.replaceFirst("/" + username + "/", "/");
             else {
-                String key = FileFactory.getInstance().getRealPathKeyFromMap(path);
-                String realPath = FileFactory.getInstance().getRealPathFromMap(path);
-                if(key != null && !key.equals(""))
-                    path = path.replaceFirst(key, realPath);
-                filepath = Server.DEVICE_DAV_HOME + path.replaceFirst("/home/", "/");
+                if(username.equals("admin")) {
+                    String key = FileFactory.getInstance().getRealPathKeyFromMap(path);
+                    String realPath = FileFactory.getInstance().getRealPathFromMap(path);
+                    if (key != null && !key.equals(""))
+                        path = path.replaceFirst(key, realPath);
+                    filepath = Server.DEVICE_DAV_HOME + path.replaceFirst("/home/", "/");
+                }
+                else{
+                    String newPath = "";
+                    String[] paths = path.replaceFirst("/", "").split("/");
+                    int length = paths.length;
+                    for(int i = 0; i< length; i++){
+                        if(i==0)
+                            newPath = "/" + paths[i].toLowerCase();
+                        else
+                            newPath = newPath + "/" + paths[i];
+                    }
+                    filepath = "/dav" + newPath;
+                }
             }
 
             url = "http://" + hostname + filepath + "?session=" + hash;

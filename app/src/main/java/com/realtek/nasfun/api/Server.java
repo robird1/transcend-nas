@@ -1481,7 +1481,7 @@ public class Server {
 				// use ServerInfo to set firmware
 				isSuccess = setFirmwareType();
 				// to get tutk uid
-				if(!checkTutkuid()){
+				if(!username.equals("admin") || !checkTutkuid()){
 					setTutkUUID(null);
 				}
 				getServerProfile();

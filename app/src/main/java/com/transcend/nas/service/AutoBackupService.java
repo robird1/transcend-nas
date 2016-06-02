@@ -18,6 +18,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
@@ -349,16 +350,19 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
     }
 
     private void addBackupTaskToDatabase(String path) {
+        String macAddress = "";
         Server server = ServerManager.INSTANCE.getCurrentServer();
-        String hostname = server.getTutkUUID();
-        if (hostname == null) {
-            hostname = NASPref.getUUID(getApplicationContext());
+        ServerInfo info = server.getServerInfo();
+        if(info != null)
+             macAddress = info.mac;
+        if(macAddress == null || "".equals(macAddress)){
+            macAddress = NASPref.getMacAddress(getApplicationContext());
         }
 
         File file = new File(path);
         if (mHelper == null)
             mHelper = new AutoBackupHelper(getApplicationContext(), Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
-        mHelper.insertTask(file.getName(), file.getPath(), Long.toString(file.lastModified()), hostname);
+        mHelper.insertTask(file.getName(), file.getPath(), Long.toString(file.lastModified()), macAddress);
     }
 
     private Runnable runnable = new Runnable() {

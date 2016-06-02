@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.realtek.nasfun.api.SambaStatus;
 import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.management.FileInfo;
@@ -37,7 +38,7 @@ public class AutoBackupHelper {
     private String mUsername;
     private String mPassword;
     private String mHostname;
-    private String mTutkuuid;
+    private String mMacAddress;
 
     public AutoBackupHelper(Context context, String path) {
         mContext = context;
@@ -66,9 +67,11 @@ public class AutoBackupHelper {
         mUsername = mServer.getUsername();
         mPassword = mServer.getPassword();
         mHostname = mServer.getHostname();
-        mTutkuuid = mServer.getTutkUUID();
-        if(mTutkuuid == null){
-            mTutkuuid = NASPref.getUUID(mContext);
+        ServerInfo info = mServer.getServerInfo();
+        if(info != null)
+            mMacAddress = info.mac;
+        if(mMacAddress == null || "".equals(mMacAddress)){
+            mMacAddress = NASPref.getMacAddress(mContext);
         }
         String p2pIP = P2PService.getInstance().getP2PIP();
         if(mHostname.contains(p2pIP)){
@@ -193,7 +196,7 @@ public class AutoBackupHelper {
         boolean exist = false;
         String url;
         Cursor c = null;
-        url = "select * from " + MyDBHelper.TABLE_NAME + " WHERE " + key + "='" + value + "' AND " + MyDBHelper.DESTINATION + "='" + mTutkuuid + "'";
+        url = "select * from " + MyDBHelper.TABLE_NAME + " WHERE " + key + "='" + value + "' AND " + MyDBHelper.DESTINATION + "='" + mMacAddress + "'";
         try {
             c = db.rawQuery(url, null);
             exist = c.getCount() > 0;

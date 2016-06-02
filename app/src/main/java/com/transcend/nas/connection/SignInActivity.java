@@ -334,7 +334,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
             case LoaderID.TUTK_NAS_LINK:
                 return new TutkLinkNasLoader(this, args);
             case LoaderID.LOGIN:
-                return new LoginLoader(this, args);
+                return new LoginLoader(this, args, true);
             case LoaderID.TUTK_LOGOUT:
                 return new TutkLogoutLoader(this);
         }

@@ -3,6 +3,7 @@ package com.transcend.nas.connection;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
@@ -18,9 +19,13 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
 
     private Server mServer;
     private String mError;
+    private Bundle mArgs;
+    private boolean mReplace = true;
 
-    public LoginLoader(Context context, Bundle args) {
+    public LoginLoader(Context context, Bundle args, boolean replaceServer) {
         super(context);
+        mArgs = args;
+        mReplace = replaceServer;
         String hostname = args.getString("hostname");
         String username = args.getString("username");
         String password = args.getString("password");
@@ -31,8 +36,19 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
     public Boolean loadInBackground() {
         boolean success = mServer.connect();
         if (success) {
-            updateServerManager();
-            updateLoginPreference();
+            if(mReplace) {
+                updateServerManager();
+                updateLoginPreference();
+            }
+            else{
+                String uuid = mServer.getTutkUUID();
+                if(uuid != null && !uuid.equals("")) {
+                    mArgs.putString("nasUUID", uuid);
+                    NASPref.setUUID(getContext(), uuid);
+                }
+                else
+                    success = false;
+            }
         }
         else{
             mError = mServer.getLoginError();
@@ -60,6 +76,8 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
         NASPref.setUsername(getContext(), mServer.getUsername());
         NASPref.setPassword(getContext(), mServer.getPassword());
         NASPref.setUUID(getContext(), mServer.getTutkUUID());
+        NASPref.setMacAddress(getContext(), mServer.getServerInfo().mac);
+
         FileFactory.getInstance().cleanRealPathMap();
     }
 
@@ -68,5 +86,9 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
             return mError;
         else
             return getContext().getString(R.string.network_error);
+    }
+
+    public Bundle getBundleArgs(){
+        return mArgs;
     }
 }

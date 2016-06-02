@@ -100,6 +100,19 @@ public class NASPref {
         PrefUtil.write(context, name, key, uuid);
     }
 
+    public static String getMacAddress(Context context) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_mac);
+        String def = "";
+        return PrefUtil.read(context, name, key, def);
+    }
+
+    public static void setMacAddress(Context context, String uuid) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_mac);
+        PrefUtil.write(context, name, key, uuid);
+    }
+
     /**
      *
      * Sign In

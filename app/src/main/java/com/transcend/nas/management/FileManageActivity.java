@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.Loader;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -1419,9 +1420,12 @@ public class FileManageActivity extends AppCompatActivity implements
             NASPref.setHostname(this, "");
             NASPref.setPassword(this, "");
             NASPref.setUUID(this, "");
+            NASPref.setMacAddress(this, "");
+            NASPref.setCloudUUID(this, "");
             String[] scenarios = getResources().getStringArray(R.array.backup_scenario_values);
             NASPref.setBackupScenario(this, scenarios[1]);
             NASPref.setBackupSetting(this, false);
+            NASPref.setBackupLocation(this, "/homes/" + Build.MODEL + "/");
         }
 
         //show SignIn activity

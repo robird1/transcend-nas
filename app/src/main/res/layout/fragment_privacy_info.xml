@@ -11,16 +11,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:text="Transcend Information, Inc."
-        android:gravity="center"
-        android:textStyle="bold" />
-
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="10dp"
         android:text="(“Transcend”) will collect, process and use certain non-identifying information from your experience of using the App (including, but not limited to, the type of your device, your device’s ID, IP address, your operating system, and the browser being used), through Google Analytics SDK, for the purpose of improving the quality of the App." />
 
     <TextView
