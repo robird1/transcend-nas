@@ -1,7 +1,6 @@
 <resources>
 
     <string name="app_name">StoreJet Cloud</string>
-    <string name="app_version">StoreJet Cloud v1.0</string>
     <string name="storage_name">Storage</string>
     <string name="backups_name">Backups</string>
     <string name="downloads_name">Downloads</string>
@@ -35,6 +34,7 @@
 
     <!-- string -->
 
+    <string name="done">Done</string>
     <string name="start">Start</string>
     <string name="wizard">Wizard</string>
     <string name="wizard_info">Let\'s set up StoreJet Cloud.\nSetup the administrator password</string>
@@ -57,7 +57,6 @@
     <string name="reverse_date">Date (Reverse)</string>
     <string name="delete">Delete</string>
     <string name="download">Download</string>
-    <string name="downloads">Downloads</string>
     <string name="duplicate_name">Duplicate name</string>
     <string name="edit_mode">Edit mode</string>
     <string name="email">Email</string>
@@ -90,7 +89,6 @@
     <string name="bind">Set Up</string>
     <string name="find_nas">Find StoreJet Cloud</string>
     <string name="new_user">New User</string>
-    <string name="back">Back</string>
     <string name="register">Register</string>
     <string name="photo">Photo</string>
     <string name="refresh">Refresh</string>
@@ -101,11 +99,9 @@
     <string name="sign_in">Sign In</string>
     <string name="size">Size</string>
     <string name="sort_by">Sort by</string>
-    <string name="sync">Sync</string>
     <string name="type">Type</string>
     <string name="unknown_format">Unknown format</string>
     <string name="untitled_folder">Untitled folder</string>
-    <string name="unused">Unused</string>
     <string name="upload">Upload</string>
     <string name="video">Video</string>
     <string name="view">View</string>
@@ -126,6 +122,7 @@
     <string name="try_remote_access">Remote access</string>
     <string name="nas_logout">Are you sure to logout StoreJet Cloud?</string>
 
+    <string name="ask_admin_password">Please input administrator password</string>
     <string name="search_result_empty">No match file</string>
     <string name="empty">(Empty)</string>
     <string name="empty_folder">(Empty Folder)</string>
@@ -133,7 +130,7 @@
     <string name="empty_email">Empty Email</string>
     <string name="empty_password">Empty Password</string>
     <string name="password_size">Password size : 6~20</string>
-    <string name="empty_uuid">Empty UUID, we can\'t bind this model</string>
+    <string name="empty_uuid">Empty UUID, we can\'t set up</string>
     <string name="forget_password_title">Enter your email to send the reset password email</string>
     <string name="forget_password_warning">Current password will be deprecated. Are you sure to send the email?</string>
     <string name="forget_password_send">The password mail is sent. Please check your mail.</string>
@@ -153,8 +150,6 @@
     <string name="remote_access_verification_expired">Your account\'s verification is expired. Please register it again.</string>
     <string name="error_format">Error format</string>
     <string name="nas_list">StoreJet Cloud List</string>
-    <string name="bind_nas_list">Bind StoreJet Cloud:</string>
-    <string name="current_device">Current Device</string>
 
     <string name="conj_selected">%1$d selected</string>
     <string name="conj_used">%1$s used</string>

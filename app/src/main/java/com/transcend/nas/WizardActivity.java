@@ -132,8 +132,15 @@ public class WizardActivity extends AppCompatActivity implements LoaderManager.L
         if(loader instanceof WizardInitLoader){
             if(!success){
                 mProgressView.setVisibility(View.INVISIBLE);
-                Toast.makeText(this,getString(R.string.network_error),Toast.LENGTH_SHORT).show();
-                return;
+                String error = ((WizardInitLoader) loader).getErrorResult();
+                Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+                if(error.equals(getString(R.string.network_error))) {
+                    return;
+                }
+                else{
+                    finish();
+                    return;
+                }
             }
 
             mProgressView.setVisibility(View.INVISIBLE);

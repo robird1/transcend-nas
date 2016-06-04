@@ -58,9 +58,6 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         mHostname = mServer.getHostname();
         mUsername = mServer.getUsername();
         mPassword = mServer.getPassword();
-        String p2pIP = P2PService.getInstance().getP2PIP();
-        if (mHostname.contains(p2pIP))
-            mHostname = p2pIP + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.SMB);
     }
 
     @Override
@@ -91,7 +88,11 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
             builder.append(mPassword);
             builder.append("@");
         }
-        builder.append(mHostname);
+        String hostname = mHostname;
+        String p2pIP = P2PService.getInstance().getP2PIP();
+        if (hostname.contains(p2pIP))
+            hostname = p2pIP + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.SMB);
+        builder.append(hostname);
         if (isValid(path))
             builder.append(path);
         return builder.toString();

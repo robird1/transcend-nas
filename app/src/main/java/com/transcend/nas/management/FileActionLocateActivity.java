@@ -325,8 +325,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
                     mNewFolder.setVisible(!mRoot.equals(mPath));
                 mFabControl.setVisibility(mRoot.equals(mPath) ? View.INVISIBLE : View.VISIBLE);
             }
-        } else
-        if (loader instanceof LocalFileListLoader) {
+        } else if (loader instanceof LocalFileListLoader) {
             if (success) {
                 //file list change, stop previous image loader
                 ImageLoader.getInstance().stop();
@@ -350,6 +349,14 @@ public class FileActionLocateActivity extends AppCompatActivity implements
                 doRefresh();
             }
         }
+
+        if(!success){
+            if(loader instanceof SmbAbstractLoader)
+                Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(this, getString(R.string.error), Toast.LENGTH_SHORT).show();
+        }
+
         mProgressView.setVisibility(View.INVISIBLE);
     }
 

@@ -49,7 +49,8 @@ public class SmbFileMoveLoader extends SmbAbstractLoader {
         } catch (Exception e) {
             e.printStackTrace();
             closeProgressWatcher();
-            updateResult(mType, "Error");
+            setException(e);
+            updateResult(mType, getContext().getString(R.string.error));
         }
         return false;
     }
@@ -65,7 +66,7 @@ public class SmbFileMoveLoader extends SmbAbstractLoader {
             else
                 moveFile(source, getSmbUrl(mDest));
         }
-        updateResult(mType, "Done");
+        updateResult(mType, getContext().getString(R.string.done));
         return true;
     }
 

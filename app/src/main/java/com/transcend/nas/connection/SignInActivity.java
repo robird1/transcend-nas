@@ -101,7 +101,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
     private void initFindButton() {
         bnFind = (Button) findViewById(R.id.activity_find_nas_button);
         bnFind.setOnClickListener(this);
-        StyleFactory.set_button_Drawable_center(this, bnFind, R.drawable.ic_search_white_24dp, 40);
+        StyleFactory.set_button_Drawable_center(this, bnFind, R.drawable.ic_search_white_24dp, 50);
     }
 
     private void initProgressView() {

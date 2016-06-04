@@ -31,6 +31,7 @@ public class SmbFileDeleteLoader extends SmbAbstractLoader {
             return delete();
         } catch (Exception e) {
             e.printStackTrace();
+            setException(e);
         }
         return false;
     }

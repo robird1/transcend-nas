@@ -58,7 +58,7 @@ public class LocalFileMoveLoader extends AsyncTaskLoader<Boolean> {
         } catch (IOException e) {
             e.printStackTrace();
             closeProgressWatcher();
-            updateResult("Error");
+            updateResult(getContext().getString(R.string.error));
         }
         return false;
     }
@@ -74,7 +74,7 @@ public class LocalFileMoveLoader extends AsyncTaskLoader<Boolean> {
             else
                 moveFile(source, mDest);
         }
-        updateResult("Done");
+        updateResult(getContext().getString(R.string.done));
         return true;
     }
 

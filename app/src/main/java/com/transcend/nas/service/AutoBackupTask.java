@@ -69,12 +69,9 @@ public class AutoBackupTask extends AsyncTask<String, String, Boolean>
 
     public void updateServerInfo(boolean isRemoteAccess){
         mServer = ServerManager.INSTANCE.getCurrentServer();
+        mHostname = mServer.getHostname();
         mUsername = mServer.getUsername();
         mPassword = mServer.getPassword();
-        if(isRemoteAccess)
-            mHostname = P2PService.getInstance().getP2PIP() + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.SMB);
-        else
-            mHostname = mServer.getHostname();
     }
 
     @Override
@@ -133,7 +130,12 @@ public class AutoBackupTask extends AsyncTask<String, String, Boolean>
             builder.append(mPassword);
             builder.append("@");
         }
-        builder.append(mHostname);
+        String hostname = mHostname;
+        String p2pIP = P2PService.getInstance().getP2PIP();
+        if(hostname.contains(p2pIP)){
+            hostname = p2pIP + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.SMB);
+        }
+        builder.append(hostname);
         if (isValid(path))
             builder.append(path);
 
@@ -149,7 +151,10 @@ public class AutoBackupTask extends AsyncTask<String, String, Boolean>
             if (source.isDirectory())
                 uploadDirectory(source, getSmbUrl(mDest));
             else {
-                uploadFile(source, getSmbUrl(mDest));
+                if(source.exists())
+                    uploadFile(source, getSmbUrl(mDest));
+                else
+                    Log.d(TAG, "Auto backup task fail due to no exist : " + source.getPath());
                 if(mListener != null) {
                     mProgress = i;
                     mListener.onAutoBackupTaskPerFinished(this, size, i + 1);

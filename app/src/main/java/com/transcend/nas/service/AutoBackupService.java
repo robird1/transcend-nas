@@ -40,7 +40,7 @@ import jcifs.smb.SmbException;
 public class AutoBackupService extends Service implements RecursiveFileObserver.RecursiveFileChanged, AutoBackupTask.AutoBackupTaskCallback {
 
     private static final String TAG = "AutoBackupService";
-    private static final int NOTIFICATION_ID = 1;
+    private static final int NOTIFICATION_ID = 0;
     private ConnectivityManager connectivityManager;
     private AutoBackupHelper mHelper;
     private NetworkInfo info;

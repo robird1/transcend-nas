@@ -93,7 +93,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="20dp"
             android:paddingLeft="8dp"
-            android:text="@string/bind_nas_list"
+            android:text="@string/nas_list"
             android:textColor="@android:color/black"
             android:visibility="gone" />
 

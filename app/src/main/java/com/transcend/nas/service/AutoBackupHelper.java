@@ -73,10 +73,6 @@ public class AutoBackupHelper {
         if(mMacAddress == null || "".equals(mMacAddress)){
             mMacAddress = NASPref.getMacAddress(mContext);
         }
-        String p2pIP = P2PService.getInstance().getP2PIP();
-        if(mHostname.contains(p2pIP)){
-            mHostname = p2pIP + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.SMB);
-        }
     }
 
     public ArrayList<String> getNeedUploadImageList(boolean filter) {
@@ -115,7 +111,12 @@ public class AutoBackupHelper {
             builder.append(mPassword);
             builder.append("@");
         }
-        builder.append(mHostname);
+        String hostname = mHostname;
+        String p2pIP = P2PService.getInstance().getP2PIP();
+        if(hostname.contains(p2pIP)){
+            hostname = p2pIP + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.SMB);
+        }
+        builder.append(hostname);
         if (isValid(path))
             builder.append(path);
         return builder.toString();

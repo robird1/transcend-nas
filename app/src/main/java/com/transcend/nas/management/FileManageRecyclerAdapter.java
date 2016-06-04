@@ -85,7 +85,8 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
             int resId = getPreviewResourceId(fileInfo.type);
             if (holder.title != null) {
                 holder.title.setText(name);
-                holder.title.setVisibility((fileInfo.type.equals(FileInfo.TYPE.PHOTO) && mLayoutType == LayoutType.GRID) ? View.GONE : View.VISIBLE);
+                holder.title.setVisibility(((fileInfo.type.equals(FileInfo.TYPE.PHOTO) || fileInfo.type.equals(FileInfo.TYPE.VIDEO))
+                        && mLayoutType == LayoutType.GRID) ? View.GONE : View.VISIBLE);
                 if(mLayoutType == LayoutType.GRID)
                     holder.title.setGravity(Gravity.CENTER);
                 else
@@ -97,6 +98,9 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
             }
             if (holder.icon != null)
                 holder.icon.setImageResource(resId);
+            if (holder.indicate != null){
+                holder.indicate.setVisibility( fileInfo.type.equals(FileInfo.TYPE.VIDEO) ? View.VISIBLE : View.GONE);
+            }
             if (fileInfo.type.equals(FileInfo.TYPE.PHOTO) || fileInfo.type.equals(FileInfo.TYPE.VIDEO) )
                 ImageLoader.getInstance().displayImage(FileFactory.getInstance().getPhotoPath(true,path), holder.icon);
 
@@ -165,6 +169,7 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
         ImageView mark;
         ImageView icon;
         ImageView info;
+        ImageView indicate;
         TextView title;
         TextView subtitle;
 
@@ -185,6 +190,7 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
                     mark = (ImageView)itemView.findViewById(R.id.griditem_file_manage_mark);
                     icon = (ImageView)itemView.findViewById(R.id.griditem_file_manage_icon);
                     title = (TextView)itemView.findViewById(R.id.griditem_file_manage_title);
+                    indicate = (ImageView)itemView.findViewById(R.id.griditem_file_indicate_icon);
                 }
                 itemView.setOnClickListener(this);
                 itemView.setOnLongClickListener(this);

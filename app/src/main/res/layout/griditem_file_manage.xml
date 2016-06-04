@@ -6,17 +6,23 @@
     android:background="@drawable/selector">
 
     <TextView
+        android:id="@+id/center"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
+        android:layout_centerInParent="true"/>
+
+    <TextView
         android:id="@+id/griditem_file_manage_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:layout_marginBottom="4dp"
         android:background="#80FFFFFF"
         android:ellipsize="marquee"
         android:gravity="center"
         android:marqueeRepeatLimit="marquee_forever"
         android:singleLine="true"
         android:textColor="@color/textColorPrimary"
-        android:layout_marginBottom="4dp"
         android:textSize="12sp" />
 
     <ImageView
@@ -28,6 +34,15 @@
         android:layout_margin="1dp"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_file_gray_big" />
+
+    <ImageView
+        android:id="@+id/griditem_file_indicate_icon"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:src="@drawable/ic_movies_gray_24dp"
+        android:visibility="gone" />
 
     <ImageView
         android:id="@+id/griditem_file_manage_mark"

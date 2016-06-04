@@ -34,6 +34,7 @@ public class SmbFileRenameLoader extends SmbAbstractLoader {
             return rename();
         } catch (Exception e) {
             e.printStackTrace();
+            setException(e);
         }
         return false;
     }

@@ -69,7 +69,8 @@ public class SmbFileDownloadLoader extends SmbAbstractLoader {
             return download();
         } catch (Exception e) {
             e.printStackTrace();
-            updateResult(mType, "Error");
+            setException(e);
+            updateResult(mType, getContext().getString(R.string.error));
         } finally {
             try {
                 if (mOS != null) mOS.close();
@@ -89,7 +90,7 @@ public class SmbFileDownloadLoader extends SmbAbstractLoader {
             else
                 downloadFile(source, mDest);
         }
-        updateResult(mType, "Done");
+        updateResult(mType, getContext().getString(R.string.done));
         return true;
     }
 

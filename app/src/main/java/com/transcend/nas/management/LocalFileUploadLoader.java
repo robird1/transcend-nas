@@ -66,7 +66,8 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
             return upload();
         } catch (Exception e) {
             e.printStackTrace();
-            updateResult(mType, "Error");
+            setException(e);
+            updateResult(mType, getContext().getString(R.string.error));
         } finally {
             try {
                 if (mOS != null) mOS.close();
@@ -86,7 +87,7 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
             else
                 uploadFile(source, getSmbUrl(mDest));
         }
-        updateResult(mType, "Done");
+        updateResult(mType, getContext().getString(R.string.done));
         return true;
     }
 

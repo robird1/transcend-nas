@@ -30,6 +30,7 @@ public class SmbFolderCreateLoader extends SmbAbstractLoader {
             return createNewFolder();
         } catch (Exception e) {
             e.printStackTrace();
+            setException(e);
         }
         return false;
     }

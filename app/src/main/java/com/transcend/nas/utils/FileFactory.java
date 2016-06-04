@@ -6,6 +6,7 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.management.FileInfo;
+import com.tutk.IOTC.P2PService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -107,6 +108,10 @@ public class FileFactory {
         } else {
             Server server = ServerManager.INSTANCE.getCurrentServer();
             String hostname = server.getHostname();
+            String p2pIp = P2PService.getInstance().getP2PIP();
+            if(hostname.contains(p2pIp)){
+                hostname = p2pIp + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
+            }
             String username = server.getUsername();
             String hash = server.getHash();
             String filepath;
@@ -142,7 +147,6 @@ public class FileFactory {
                 url = "http://" + hostname + filepath + "?session=" + hash + "&thumbnail";
             else
                 url = "http://" + hostname + filepath + "?session=" + hash + "&webview";
-            Log.d(TAG, url);
         }
         return url;
     }

@@ -566,10 +566,10 @@ public class FileManageActivity extends AppCompatActivity implements
                 if (isEmpty) toast(R.string.no_item_selected);
                 else doRename();
                 break;
-            case R.id.file_manage_editor_action_share:
-                if (isEmpty) toast(R.string.no_item_selected);
-                else doShare();
-                break;
+            //case R.id.file_manage_editor_action_share:
+            //    if (isEmpty) toast(R.string.no_item_selected);
+            //    else doShare();
+            //    break;
             case R.id.file_manage_editor_action_copy:
                 if (isEmpty) toast(R.string.no_item_selected);
                 else startFileActionLocateActivity(NASApp.ACT_COPY);
@@ -1303,7 +1303,7 @@ public class FileManageActivity extends AppCompatActivity implements
     private void toggleEditorModeAction(int count) {
         boolean visible = (count == 1);
         mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_rename).setVisible(visible);
-        mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_share).setVisible(visible);
+        //mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_share).setVisible(visible);
     }
 
     private void toggleDrawerCheckedItem() {

@@ -63,16 +63,17 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
 
     private void updateLoginPreference() {
         String p2pIp = P2PService.getInstance().getP2PIP();
-        if(mServer.getHostname().contains(p2pIp)) {
+        String hostname = mServer.getHostname();
+        if(hostname.contains(p2pIp)) {
             NASPref.setCloudUUID(getContext(), P2PService.getInstance().getTUTKUUID());
             NASPref.setCloudMode(getContext(), true);
         }
         else {
-            NASPref.setLocalHostname(getContext(), mServer.getHostname());
+            NASPref.setLocalHostname(getContext(), hostname);
             NASPref.setCloudMode(getContext(), false);
         }
 
-        NASPref.setHostname(getContext(), mServer.getHostname());
+        NASPref.setHostname(getContext(), hostname);
         NASPref.setUsername(getContext(), mServer.getUsername());
         NASPref.setPassword(getContext(), mServer.getPassword());
         NASPref.setUUID(getContext(), mServer.getTutkUUID());

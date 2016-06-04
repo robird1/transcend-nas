@@ -33,7 +33,7 @@ public class MediaFactory {
         Server server = ServerManager.INSTANCE.getCurrentServer();
         String hostname = server.getHostname();
         String p2pIP = P2PService.getInstance().getP2PIP();
-        if (P2PService.getInstance().isConnected() && hostname.contains(p2pIP)) {
+        if (hostname.contains(p2pIP)) {
             String newHostname = p2pIP + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
             if(paths.length > 0){
                 url = "http://" + newHostname + "/hls/" + paths[paths.length-1];
@@ -94,13 +94,12 @@ public class MediaFactory {
         else {
             Server server = ServerManager.INSTANCE.getCurrentServer();
             String hostname = server.getHostname();
-            String username = server.getUsername();
-            String hash = server.getHash();
             String p2pIP = P2PService.getInstance().getP2PIP();
             if (P2PService.getInstance().isConnected() && hostname.contains(p2pIP)) {
                 hostname = p2pIP + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
             }
-
+            String username = server.getUsername();
+            String hash = server.getHash();
             String url;
             String filepath;
             if (path.startsWith(Server.HOME))

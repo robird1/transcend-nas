@@ -26,6 +26,8 @@ import com.transcend.nas.BuildConfig;
 import com.transcend.nas.R;
 import com.transcend.nas.common.NotificationDialog;
 
+import org.w3c.dom.Text;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -41,6 +43,7 @@ public class AboutActivity extends AppCompatActivity {
     private static TextView mTitle = null;
     private static LinearLayout mAbout = null;
 
+    private TextView mVersion;
     private int mLoaderID;
 
     @Override
@@ -48,6 +51,8 @@ public class AboutActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
         mAbout = (LinearLayout) findViewById(R.id.about_layout);
+        mVersion = (TextView) findViewById(R.id.about_version);
+        mVersion.setText(getString(R.string.app_name) + " v" + BuildConfig.VERSION_NAME);
         initToolbar();
         initFragment();
     }
@@ -118,7 +123,7 @@ public class AboutActivity extends AppCompatActivity {
         public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
             int id = -1;
             if (preference.getKey().equals(getString(R.string.pref_about))) {
-                showNotificationDialog(R.string.app_version, R.layout.dialog_about);
+                showNotificationDialog(R.string.app_name, R.layout.dialog_about);
             } else if (preference.getKey().equals(getString(R.string.pref_about_legal))) {
                 id = R.string.legal;
             } else if (preference.getKey().equals(getString(R.string.pref_about_term_of_use))) {

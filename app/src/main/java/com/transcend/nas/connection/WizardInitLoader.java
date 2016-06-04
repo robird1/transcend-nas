@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.realtek.nasfun.api.HttpClientManager;
+import com.transcend.nas.R;
 import com.tutk.IOTC.P2PService;
 
 import org.apache.http.HttpEntity;
@@ -37,6 +38,7 @@ public class WizardInitLoader extends AsyncTaskLoader<Boolean> {
     private String mUrl;
     private Bundle mArgs;
     private boolean mRemoteAccess = false;
+    private String mError = null;
 
     public WizardInitLoader(Context context, Bundle args, boolean isRemoteAccess) {
         super(context);
@@ -121,6 +123,11 @@ public class WizardInitLoader extends AsyncTaskLoader<Boolean> {
                             if(curTagName.equals("detail")){
                                  if(text.equals("OK"))
                                      success = true;
+                            }
+
+                            if(curTagName.equals("wizard")){
+                                if(text.equals("NAS has been intialized"))
+                                    mError = "StoreJet Cloud has been intialized";
                             }
                         }
                     }
@@ -319,6 +326,13 @@ public class WizardInitLoader extends AsyncTaskLoader<Boolean> {
 
     public Bundle getBundleArgs(){
         return mArgs;
+    }
+
+    public String getErrorResult(){
+        if(mError != null)
+            return mError;
+        else
+            return getContext().getString(R.string.network_error);
     }
 
 }

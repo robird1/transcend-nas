@@ -4,7 +4,7 @@
 
     <PreferenceCategory
         android:layout="@layout/preference_category_widget"
-        android:title="@string/downloads">
+        android:title="@string/download">
 
         <Preference
             android:key="@string/pref_download_location"

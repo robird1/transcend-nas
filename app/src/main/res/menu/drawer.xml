@@ -12,7 +12,7 @@
         <item
             android:id="@+id/nav_downloads"
             android:icon="@drawable/ic_file_download2_gray_24dp"
-            android:title="@string/downloads" />
+            android:title="@string/download" />
 
     </group>
 

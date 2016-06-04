@@ -22,11 +22,12 @@
                 android:title="@string/rename"
                 app:showAsAction="never" />
 
+            <!--
             <item
                 android:id="@+id/file_manage_editor_action_share"
                 android:icon="@drawable/ic_share_gray_24dp"
                 android:title="@string/share"
-                app:showAsAction="never" />
+                app:showAsAction="never" /> !-->
 
             <item
                 android:id="@+id/file_manage_editor_action_copy"
