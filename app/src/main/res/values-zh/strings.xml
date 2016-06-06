@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- string -->
-
+    <string name="done">完成</string>
     <string name="start">開始</string>
     <string name="wizard">初始設置</string>
     <string name="wizard_info">開始對 StoreJet Cloud 進行設置\n請設定管理者密碼</string>
@@ -85,6 +84,7 @@
     <string name="try_search_device">搜尋裝置中</string>
     <string name="try_remote_access">遠端存取</string>
     <string name="nas_logout">確定登出 StoreJet Cloud?</string>
+    <string name="ask_admin_password">請輸入管理者密碼</string>
     <string name="search_result_empty">沒有符合檔案</string>
     <string name="empty">(空)</string>
     <string name="empty_folder">(空目錄)</string>
@@ -112,14 +112,14 @@
     <string name="remote_access_verification_expired">你的帳戶驗證已過期. 請重新註冊</string>
     <string name="error_format">錯誤格式</string>
     <string name="nas_list">StoreJet Cloud 列表</string>
-    <string name="conj_selected">%1$d個被選擇</string>
+    <string name="conj_selected">%1$d個項目被選取</string>
     <string name="conj_used">%1$s個被使用</string>
     <string name="backup_file">備份檔案</string>
     <string name="backup_success">備份成功</string>
     <string name="backup_fail">備份失敗</string>
     <string name="backup_fail_no_space">沒有足夠的硬碟空間</string>
     <string name="backup_fail_network_unreachable">無法連線到 StoreJet Cloud</string>
-    <string name="msg_conj_deleted">%1$d個項目向被刪除</string>
+    <string name="msg_conj_deleted">%1$d個項目將被刪除</string>
     <string name="msg_exit_app">確定要關閉應用程式?</string>
     <string name="msg_paste_to">複製到…</string>
     <string name="msg_direct_to">導向到…</string>
@@ -128,7 +128,4 @@
     <string name="msg_auto_backup">自動備份相機照片與影片到 StoreJet Cloud</string>
     <string name="msg_backup_scenario">選擇備份相機照片與影片的設置</string>
     <string name="msg_cache_cleared">已清除快取</string>
-    <string name="ask_admin_password">請輸入管理者密碼</string>
-    <string name="done">完成</string>
-
 </resources>

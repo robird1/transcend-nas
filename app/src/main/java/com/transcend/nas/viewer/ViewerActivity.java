@@ -25,6 +25,7 @@ import com.transcend.nas.management.FileInfo;
 import com.transcend.nas.management.FileInfoActivity;
 import com.transcend.nas.management.LocalFileDeleteLoader;
 import com.transcend.nas.management.LocalFileUploadLoader;
+import com.transcend.nas.management.SmbAbstractLoader;
 import com.transcend.nas.management.SmbFileDeleteLoader;
 import com.transcend.nas.management.SmbFileDownloadLoader;
 
@@ -323,7 +324,10 @@ public class ViewerActivity extends AppCompatActivity implements
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
         mProgressView.setVisibility(View.INVISIBLE);
         if (!success) {
-            Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+            if(loader instanceof SmbAbstractLoader)
+                Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
             return;
         }
 

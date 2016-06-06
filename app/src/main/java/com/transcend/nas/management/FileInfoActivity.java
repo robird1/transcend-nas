@@ -84,7 +84,7 @@ public class FileInfoActivity extends AppCompatActivity {
             ivImage.setImageResource(R.drawable.ic_movies_gray_big);
         else if (fileInfo.type.equals(FileInfo.TYPE.MUSIC))
             ivImage.setImageResource(R.drawable.ic_audiotrack_gray_big);
-        if (fileInfo.type.equals(FileInfo.TYPE.PHOTO))
+        if (fileInfo.type.equals(FileInfo.TYPE.PHOTO) || fileInfo.type.equals(FileInfo.TYPE.VIDEO))
             ImageLoader.getInstance().displayImage(FileFactory.getInstance().getPhotoPath(true, fileInfo.path), ivImage);
     }
 
