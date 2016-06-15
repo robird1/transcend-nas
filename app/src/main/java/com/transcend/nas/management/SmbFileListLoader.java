@@ -100,6 +100,7 @@ public class SmbFileListLoader extends SmbAbstractLoader {
                 if (!file.name.equals(mUsername) && !file.name.equals("homes"))
                     shardFolderSize++;
             }
+            Log.w(TAG, "ShardFolderSize : " + shardFolderSize + ", RealPathMapSize : " + size);
             if (shardFolderSize > 0) {
                 if (shardFolderSize != size || !FileFactory.getInstance().checkRealPathMapLifeCycle()) {
                     getSharedList();
@@ -155,6 +156,7 @@ public class SmbFileListLoader extends SmbAbstractLoader {
                 String text = null;
                 String name = null;
                 String path = null;
+                boolean add = false;
 
                 do {
                     String tagName = xpp.getName();
@@ -169,9 +171,16 @@ public class SmbFileListLoader extends SmbAbstractLoader {
                                 path = text;
                                 if (name != null) {
                                     isSuccess = true;
-                                    FileFactory.getInstance().addRealPathToMap(name, path);
+                                    if(add) {
+                                        FileFactory.getInstance().addRealPathToMap(name, path);
+                                    }
                                     name = null;
                                     path = null;
+                                    add = false;
+                                }
+                            } else if (curTagName.equals("services")){
+                                if(text.equals("smb")){
+                                    add = true;
                                 }
                             }
                         }

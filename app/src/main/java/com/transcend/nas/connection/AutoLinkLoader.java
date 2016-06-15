@@ -241,6 +241,7 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
     private void updateServerManager() {
         ServerManager.INSTANCE.saveServer(mServer);
         ServerManager.INSTANCE.setCurrentServer(mServer);
+        NASPref.setSessionVerifiedTime(getContext(), Long.toString(System.currentTimeMillis()));
     }
 
     public LinkType getLinkType() {

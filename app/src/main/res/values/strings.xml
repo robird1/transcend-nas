@@ -220,6 +220,7 @@
     <string name="pref_password">PASSWORD</string>
     <string name="pref_uuid">UUID</string>
     <string name="pref_mac">MAC ADDRESS</string>
+    <string name="pref_hash_verified_time">HASH VERIFIED TIME</string>
 
     <string name="pref_local_hostname">LOCAL HOSTNAME</string>
 

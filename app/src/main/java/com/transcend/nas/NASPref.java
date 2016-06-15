@@ -113,6 +113,19 @@ public class NASPref {
         PrefUtil.write(context, name, key, uuid);
     }
 
+    public static String getSessionVerifiedTime(Context context) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_hash_verified_time);
+        String def = "0";
+        return PrefUtil.read(context, name, key, def);
+    }
+
+    public static void setSessionVerifiedTime(Context context, String time) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_hash_verified_time);
+        PrefUtil.write(context, name, key, time);
+    }
+
     /**
      *
      * Sign In

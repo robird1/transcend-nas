@@ -49,6 +49,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.common.NotificationDialog;
+import com.transcend.nas.connection.LoginLoader;
 import com.transcend.nas.connection.SignInActivity;
 import com.transcend.nas.service.AutoBackupService;
 import com.transcend.nas.settings.AboutActivity;
@@ -208,13 +209,12 @@ public class FileManageActivity extends AppCompatActivity implements
                     doMove(path);
                 closeEditorMode();
             }
-        }
-        else if(requestCode == ViewerActivity.REQUEST_CODE){
+        } else if (requestCode == ViewerActivity.REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 Bundle bundle = data.getExtras();
                 if (bundle == null) return;
                 boolean delete = bundle.getBoolean("delete");
-                if(delete)
+                if (delete)
                     doRefresh();
             }
         }
@@ -485,7 +485,7 @@ public class FileManageActivity extends AppCompatActivity implements
     public boolean onNavigationItemSelected(MenuItem item) {
 
         int id = item.getItemId();
-        if(id != R.id.nav_logout)
+        if (id != R.id.nav_logout)
             mDrawer.closeDrawer(GravityCompat.START);
 
         switch (id) {
@@ -716,7 +716,7 @@ public class FileManageActivity extends AppCompatActivity implements
      */
     @Override
     public Loader<Boolean> onCreateLoader(int id, Bundle args) {
-        if (LoaderID.SMB_MIN_COMMAND <= id && id <= LoaderID.SMB_MAX_COMMAND)
+        if ((LoaderID.SMB_MIN_COMMAND <= id && id <= LoaderID.SMB_MAX_COMMAND) || id == LoaderID.LOGIN)
             setRecordLoader(id, args);
 
         ArrayList<String> paths = args.getStringArrayList("paths");
@@ -769,17 +769,21 @@ public class FileManageActivity extends AppCompatActivity implements
             case LoaderID.MEDIA_PLAYER:
                 mProgressView.setVisibility(View.VISIBLE);
                 return new MediaManagerLoader(this, args);
+            case LoaderID.LOGIN:
+                mProgressView.setVisibility(View.VISIBLE);
+                if (isRemoteAccess())
+                    args.putString("hostname", P2PService.getInstance().getP2PIP() + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP));
+                return new LoginLoader(this, args, true);
         }
         return null;
     }
 
     @Override
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
-        if (loader instanceof SmbFileListLoader) {
-            if (success) {
+        if (success) {
+            if (loader instanceof SmbFileListLoader) {
                 //file list change, stop previous image loader
                 ImageLoader.getInstance().stop();
-
                 mMode = NASApp.MODE_SMB;
                 mRoot = NASApp.ROOT_SMB;
                 mPath = ((SmbFileListLoader) loader).getPath();
@@ -790,12 +794,9 @@ public class FileManageActivity extends AppCompatActivity implements
                 closeEditorMode();
                 enableFabEdit(!mPath.equals(mRoot));
                 updateScreen();
-            }
-        } else if (loader instanceof LocalFileListLoader) {
-            if (success) {
+            } else if (loader instanceof LocalFileListLoader) {
                 //file list change, stop previous image loader
                 ImageLoader.getInstance().stop();
-
                 mMode = NASApp.MODE_STG;
                 mRoot = NASApp.ROOT_STG;
                 mPath = ((LocalFileListLoader) loader).getPath();
@@ -803,69 +804,58 @@ public class FileManageActivity extends AppCompatActivity implements
                 Collections.sort(mFileList, FileInfoSort.comparator(this));
                 FileFactory.getInstance().addFileTypeSortRule(mFileList);
                 closeEditorMode();
-                /*// expanded fabs
-                resetActionFabs();
-                /*/
                 enableFabEdit(true);
                 updateScreen();
-            }
-        } else if (loader instanceof TutkLinkNasLoader) {
-            TutkLinkNasLoader linkLoader = (TutkLinkNasLoader) loader;
-            if (!success) {
-                Log.w(TAG, "Remote Access connect fail: " + linkLoader.getError());
-                Toast.makeText(this, linkLoader.getError(), Toast.LENGTH_SHORT).show();
-            } else {
-                Log.w(TAG, "Remote Access connect success, start execute previous loader");
+            } else if (loader instanceof TutkLinkNasLoader) {
+                Log.w(TAG, "Remote Access connect success, start execute previous loader : " + mPreviousLoaderID);
                 if (mPreviousLoaderArgs != null && mPreviousLoaderID >= 0) {
                     mPreviousLoaderArgs.putBoolean("retry", true);
                     getLoaderManager().restartLoader(mPreviousLoaderID, mPreviousLoaderArgs, this).forceLoad();
-                    mPreviousLoaderID = -1;
-                    mPreviousLoaderArgs = null;
                     return;
                 }
-            }
-        } else if (loader instanceof TutkLogoutLoader) {
-            startSignInActivity(true);
-        } else if (loader instanceof AutoBackupLoader) {
-            //do nothing
-        } else if (loader instanceof MediaManagerLoader) {
-            if(!success){
-                Toast.makeText(this,getString(R.string.network_error),Toast.LENGTH_SHORT).show();
-            }
-            else {
-                Bundle args =  ((MediaManagerLoader) loader).getBundleArgs();
+            } else if (loader instanceof TutkLogoutLoader) {
+                startSignInActivity(true);
+            } else if (loader instanceof LoginLoader) {
+                Bundle args = ((LoginLoader) loader).getBundleArgs();
+                String path = args.getString("path");
+                doLoad(path);
+            } else if (loader instanceof AutoBackupLoader) {
+                //do nothing
+            } else if (loader instanceof MediaManagerLoader) {
+                Bundle args = ((MediaManagerLoader) loader).getBundleArgs();
                 MediaFactory.open(this, args);
-            }
-        } else {
-            if (success) {
+            } else {
                 doRefresh();
             }
-        }
-
-        if (!success && LoaderID.SMB_MIN_COMMAND <= mLoaderID && mLoaderID <= LoaderID.SMB_MAX_COMMAND) {
-            if (isRemoteAccess() && mPreviousLoaderArgs != null && !mPreviousLoaderArgs.getBoolean("retry")) {
-                Log.w(TAG, "Remote Access connect fail, try reConnect");
-                Bundle args = new Bundle();
-                String uuid = P2PService.getInstance().getTUTKUUID();
-                if(uuid == null || "".equals(uuid)) {
-                    uuid = NASPref.getUUID(this);
-                    if(uuid == null || "".equals(uuid)) {
-                        uuid = NASPref.getCloudUUID(this);
-                        if(uuid == null || "".equals(uuid)) {
-                            startSignInActivity(false);
-                            return;
+        } else {
+            Log.w(TAG, "Connect Fail, current loader : " + mLoaderID);
+            if (loader instanceof SmbAbstractLoader || mLoaderID == LoaderID.LOGIN) {
+                if (isRemoteAccess() && mPreviousLoaderArgs != null && !mPreviousLoaderArgs.getBoolean("retry")) {
+                    Log.w(TAG, "Remote Access connect fail, try reConnect");
+                    Bundle args = new Bundle();
+                    String uuid = P2PService.getInstance().getTUTKUUID();
+                    if (uuid == null || "".equals(uuid)) {
+                        uuid = NASPref.getUUID(this);
+                        if (uuid == null || "".equals(uuid)) {
+                            uuid = NASPref.getCloudUUID(this);
+                            if (uuid == null || "".equals(uuid)) {
+                                startSignInActivity(false);
+                                return;
+                            }
                         }
                     }
+                    args.putString("hostname", uuid);
+                    getLoaderManager().restartLoader(LoaderID.TUTK_NAS_LINK, args, this).forceLoad();
+                    return;
+                } else {
+                    checkEmptyView();
+                    if (loader instanceof SmbAbstractLoader)
+                        Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
+                    else
+                        Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
                 }
-                args.putString("hostname", uuid);
-                getLoaderManager().restartLoader(LoaderID.TUTK_NAS_LINK, args, this).forceLoad();
-                return;
             } else {
-                checkEmptyView();
-                if(loader instanceof SmbAbstractLoader)
-                    Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
-                else
-                    Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.error) + " (" + mLoaderID + ")", Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -888,10 +878,24 @@ public class FileManageActivity extends AppCompatActivity implements
     private void doLoad(String path) {
         int id = path.startsWith(NASApp.ROOT_STG)
                 ? LoaderID.LOCAL_FILE_LIST : LoaderID.SMB_FILE_LIST;
-        Bundle args = new Bundle();
-        args.putString("path", path);
-        getLoaderManager().restartLoader(id, args, this).forceLoad();
-        Log.w(TAG, "doLoad: " + path);
+
+        Long lastTime = Long.parseLong(NASPref.getSessionVerifiedTime(this));
+        Long currTime = System.currentTimeMillis();
+        if (id == LoaderID.SMB_FILE_LIST && currTime - lastTime >= 86400000) {
+            Log.w(TAG, "doLogin");
+            Server server = ServerManager.INSTANCE.getCurrentServer();
+            Bundle args = new Bundle();
+            args.putString("hostname", server.getHostname());
+            args.putString("username", server.getUsername());
+            args.putString("password", server.getPassword());
+            args.putString("path", path);
+            getLoaderManager().restartLoader(LoaderID.LOGIN, args, this).forceLoad();
+        } else {
+            Bundle args = new Bundle();
+            args.putString("path", path);
+            getLoaderManager().restartLoader(id, args, this).forceLoad();
+            Log.w(TAG, "doLoad: " + path);
+        }
     }
 
     private void doRefresh() {
@@ -1024,8 +1028,8 @@ public class FileManageActivity extends AppCompatActivity implements
 
     private void doCopy(String dest) {
         ArrayList<String> paths = getSelectedPaths();
-        for(String path : paths){
-            if(dest.startsWith(path)) {
+        for (String path : paths) {
+            if (dest.startsWith(path)) {
                 Toast.makeText(this, getString(R.string.select_folder_error), Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -1043,8 +1047,8 @@ public class FileManageActivity extends AppCompatActivity implements
 
     private void doMove(String dest) {
         ArrayList<String> paths = getSelectedPaths();
-        for(String path : paths){
-            if(dest.startsWith(path)) {
+        for (String path : paths) {
+            if (dest.startsWith(path)) {
                 Toast.makeText(this, getString(R.string.select_folder_error), Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -1118,8 +1122,8 @@ public class FileManageActivity extends AppCompatActivity implements
         checkEmptyView();
     }
 
-    private void checkEmptyView(){
-        if(mFileList != null)
+    private void checkEmptyView() {
+        if (mFileList != null)
             mRecyclerEmptyView.setVisibility(mFileList.size() == 0 ? View.VISIBLE : View.GONE);
         else
             mRecyclerEmptyView.setVisibility(View.GONE);
@@ -1128,7 +1132,7 @@ public class FileManageActivity extends AppCompatActivity implements
     private void updateListView(boolean update) {
         LinearLayoutManager list = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(list);
-        if(update) {
+        if (update) {
             mRecyclerView.getRecycledViewPool().clear();
             mRecyclerAdapter.notifyDataSetChanged();
         }
@@ -1159,7 +1163,7 @@ public class FileManageActivity extends AppCompatActivity implements
         GridLayoutManager grid = new GridLayoutManager(this, spanCount);
         grid.setSpanSizeLookup(new SpanSizeLookup(grid.getSpanCount()));
         mRecyclerView.setLayoutManager(grid);
-        if(update) {
+        if (update) {
             mRecyclerView.getRecycledViewPool().clear();
             mRecyclerAdapter.notifyDataSetChanged();
         }
@@ -1346,7 +1350,7 @@ public class FileManageActivity extends AppCompatActivity implements
         startActivityForResult(intent, FileActionLocateActivity.REQUEST_CODE);
     }
 
-    private void startVideoActivity(FileInfo fileInfo){
+    private void startVideoActivity(FileInfo fileInfo) {
         if (!fileInfo.path.startsWith(NASApp.ROOT_STG) && mCastManager != null && mCastManager.isConnected()) {
             MediaInfo info = MediaFactory.createMediaInfo(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK, fileInfo.path);
             mCastManager.startVideoCastControllerActivity(this, info, 0, true);
