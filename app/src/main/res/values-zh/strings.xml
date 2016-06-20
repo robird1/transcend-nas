@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="done">完成</string>
-    <string name="start">開始</string>
-    <string name="wizard">初始設置</string>
-    <string name="wizard_info">開始對 StoreJet Cloud 進行設置\n請設定管理者密碼</string>
-    <string name="success_wizard">設定成功</string>
     <string name="about">關於</string>
     <string name="account">帳號</string>
     <string name="always">總是</string>
@@ -91,7 +87,7 @@
     <string name="empty_account">空白帳號</string>
     <string name="empty_email">空白信箱</string>
     <string name="empty_password">空白密碼</string>
-    <string name="password_size">密碼長度: 6~20</string>
+    <string name="password_size">密碼長度:</string>
     <string name="empty_uuid">空白UUID, 無法建立</string>
     <string name="forget_password_title">輸入你的信箱來發送重設密碼信件</string>
     <string name="forget_password_warning">目前使用的密碼會被棄用,確定要發送信件?</string>
@@ -121,11 +117,28 @@
     <string name="backup_fail_network_unreachable">無法連線到 StoreJet Cloud</string>
     <string name="msg_conj_deleted">%1$d個項目將被刪除</string>
     <string name="msg_exit_app">確定要關閉應用程式?</string>
-    <string name="msg_paste_to">複製到…</string>
-    <string name="msg_direct_to">導向到…</string>
+    <string name="msg_paste_to">貼到…</string>
+    <string name="msg_direct_to">導到…</string>
     <string name="msg_upload_to">上傳到…</string>
     <string name="msg_download_to">下載到…</string>
     <string name="msg_auto_backup">自動備份相機照片與影片到 StoreJet Cloud</string>
     <string name="msg_backup_scenario">選擇備份相機照片與影片的設置</string>
     <string name="msg_cache_cleared">已清除快取</string>
+
+    <!-- wizard -->
+    <string name="wizard">初始設置</string>
+    <string name="wizard_setup_start">開始使用 StoreJet Cloud</string>
+    <string name="wizard_ethernet_info">將網路線連接到路由器上</string>
+    <string name="wizard_plug_info">插上電源線</string>
+    <string name="wizard_power_info">打開電源開關</string>
+    <string name="wizard_wifi_info">將手機Wi-Fi連線到路由器所在網路</string>
+    <string name="wizard_setup_found_error">找不到 StoreJet Cloud\n請確認以下步驟:</string>
+    <string name="wizard_setup_admin">設置管理者密碼</string>
+    <string name="wizard_setup_remote_access">Setup the admin password</string>
+    <string name="wizard_success">StoreJet Cloud 已準備完成</string>
+    <string name="wizard_start">開始</string>
+    <string name="wizard_continue">繼續</string>
+    <string name="wizard_try">重試</string>
+    <string name="wizard_remote_access_error">請先在區網內完成初始設置</string>
+    <string name="wizard_password_space_error">密碼不能包含空白</string>
 </resources>

@@ -5,115 +5,240 @@
     android:layout_height="match_parent"
     tools:context="com.transcend.nas.WizardActivity">
 
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/wizard_app_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:elevation="0dp">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/wizard_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/colorActionBarBackground">
-
-            <TextView
-                android:id="@+id/wizard_toolbar_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="@string/wizard"
-                android:textSize="20sp"
-                android:textColor="@color/textColorPrimary" />
-
-        </android.support.v7.widget.Toolbar>
-
-    </android.support.design.widget.AppBarLayout>
-
-    <View
-        android:id="@+id/nas_finder_toolbar_shadow"
-        android:layout_width="match_parent"
-        android:layout_height="6dp"
-        android:layout_below="@+id/wizard_app_bar"
-        android:background="@drawable/toolbar_dropshadow" />
-
-    <ImageView
-        android:id="@+id/wizard_bg"
+    <RelativeLayout
+        android:id="@+id/wizard_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/wizard_app_bar" />
+        android:visibility="visible">
 
-    <TextView
-        android:id="@+id/wizard_center"
-        android:layout_width="1dp"
-        android:layout_height="1dp"
-        android:layout_centerInParent="true" />
-
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/wizard_password_confirm"
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/wizard_center"
-        android:layout_centerHorizontal="true"
-        android:hint="@string/password_confirm">
-
-        <EditText
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/wizard_app_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPassword" />
+            android:elevation="0dp">
 
-    </android.support.design.widget.TextInputLayout>
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/wizard_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/colorActionBarBackground">
 
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/wizard_password"
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/wizard_password_confirm"
-        android:layout_centerHorizontal="true"
-        android:hint="@string/password">
+                <TextView
+                    android:id="@+id/wizard_toolbar_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/wizard"
+                    android:textColor="@color/textColorPrimary"
+                    android:textSize="20sp" />
 
-        <EditText
+            </android.support.v7.widget.Toolbar>
+
+        </android.support.design.widget.AppBarLayout>
+
+        <View
+            android:id="@+id/nas_finder_toolbar_shadow"
+            android:layout_width="match_parent"
+            android:layout_height="6dp"
+            android:layout_below="@+id/wizard_app_bar"
+            android:background="@drawable/toolbar_dropshadow" />
+
+        <ImageView
+            android:id="@+id/wizard_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/wizard_app_bar"
+            android:scaleType="centerCrop" />
+
+
+        <TextView
+            android:id="@+id/wizard_title_info"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_below="@id/wizard_app_bar"
+            android:layout_marginBottom="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:text="@string/wizard_setup_admin"
+            android:textSize="@dimen/wizard_title_text_size"
+            android:textStyle="bold" />
+
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/wizard_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPassword" />
+            android:layout_below="@id/wizard_title_info"
+            android:layout_centerHorizontal="true"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:hint="@string/password">
 
-    </android.support.design.widget.TextInputLayout>
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword" />
 
-    <TextView
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/wizard_password"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="20dp"
-        android:gravity="center_horizontal"
-        android:text="@string/wizard_info" />
+        </android.support.design.widget.TextInputLayout>
 
-    <Button
-        android:id="@+id/wizard_start"
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/wizard_password_confirm"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
-        android:background="@color/colorAccentDialogButton"
-        android:text="@string/start"
-        android:textColor="@color/colorPrimary" />
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/wizard_password_confirm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/wizard_password"
+            android:layout_centerHorizontal="true"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:hint="@string/password_confirm">
 
-    <TextView
-        android:id="@+id/wizard_status"
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/wizard_start"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
-        android:gravity="center_horizontal" />
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword" />
+
+        </android.support.design.widget.TextInputLayout>
+
+
+        <Button
+            android:id="@+id/wizard_start"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/wizard_password_confirm"
+            android:layout_centerHorizontal="true"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginTop="16dp"
+            android:background="@color/colorAccentDialogButton"
+            android:text="@string/wizard_continue"
+            android:textAllCaps="false"
+            android:textColor="@color/colorPrimary"
+            android:textSize="@dimen/wizard_button_text_size" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/ready_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:id="@+id/ready_option_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:orientation="vertical"
+            android:paddingBottom="16dp"
+            android:paddingTop="36dp">
+
+            <RelativeLayout
+                android:id="@+id/ready_option_backup_layout"
+                android:layout_width="match_parent"
+                android:paddingLeft="30dp"
+                android:paddingRight="28dp"
+                android:layout_height="wrap_content">
+
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/wizard_camera_backup_indicator"
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:padding="8dp">
+
+                </android.support.v7.widget.SwitchCompat>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:layout_toLeftOf="@id/wizard_camera_backup_indicator"
+                    android:orientation="vertical"
+                    android:paddingLeft="8dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/camera_backup"
+                        android:textSize="@dimen/wizard_button_text_size"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/msg_auto_backup"
+                        android:textSize="@dimen/sub_info_text_size" />
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <Button
+                android:id="@+id/ready_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="30dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:background="@color/colorAccentDialogButton"
+                android:text="@string/wizard_start"
+                android:textAllCaps="false"
+                android:textColor="@color/colorPrimary"
+                android:textSize="18dp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/ready_title"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:text="@string/wizard_success"
+            android:textColor="@android:color/black"
+            android:textSize="24dp"
+            android:textStyle="bold" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/ready_option_layout"
+            android:layout_below="@id/ready_title">
+
+            <ImageView
+                android:id="@+id/ready_nas_icon"
+                android:layout_width="128dp"
+                android:layout_height="128dp"
+                android:layout_centerInParent="true"
+                android:layout_marginBottom="16dp"
+                android:src="@drawable/icon_1bay" />
+
+            <TextView
+                android:id="@+id/ready_nas_ip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/ready_nas_icon"
+                android:layout_centerHorizontal="true"
+                android:text="@string/ip"
+                android:textSize="@dimen/wizard_info_text_size"
+                android:textStyle="bold" />
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
 
     <RelativeLayout
         android:id="@+id/wizard_progress_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="invisible"
-        android:clickable="true">
+        android:clickable="true"
+        android:visibility="invisible">
 
         <ProgressBar
             android:layout_width="wrap_content"

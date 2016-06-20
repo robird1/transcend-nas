@@ -21,6 +21,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.transcend.nas.InitialActivity;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.WizardActivity;
@@ -48,8 +49,8 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
     private RelativeLayout mProgressView;
     private LoginDialog mLoginDialog;
     private boolean isRemoteAccess = false;
+    private boolean isWizard = false;
     private int mLoaderID;
-    private int resultNum = 0;
 
     private ArrayList<HashMap<String, String>> mNASList;
 
@@ -74,7 +75,10 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                startSignInActivity();
+                if(isWizard)
+                    startInitialActivity();
+                else
+                    startSignInActivity();
                 break;
             case R.id.action_refresh_nas_finder:
                 startNASListLoader();
@@ -95,7 +99,10 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
                 mRecyclerEmtpyView.setVisibility((mNASList != null && mNASList.size() > 0) ? View.GONE : View.VISIBLE);
             }
         } else {
-            startSignInActivity();
+            if(isWizard)
+                startInitialActivity();
+            else
+                startSignInActivity();
         }
     }
 
@@ -105,6 +112,7 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
      */
     private void initData() {
         Intent intent = getIntent();
+        isWizard = (boolean) intent.getBooleanExtra("Wizard", false);
         isRemoteAccess = (boolean) intent.getBooleanExtra("RemoteAccess", false);
         mNASList = (ArrayList<HashMap<String, String>>) intent.getSerializableExtra("NASList");
         if (mNASList == null)
@@ -157,12 +165,20 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
         }
     }
 
+    private void startInitialActivity() {
+        Intent intent = new Intent();
+        intent.setClass(NASFinderActivity.this, InitialActivity.class);
+        intent.putExtra("Retry", false);
+        startActivity(intent);
+        finish();
+    }
+
     private void startWizardActivity(Bundle args) {
         Intent intent = new Intent();
         intent.setClass(NASFinderActivity.this, WizardActivity.class);
         intent.putExtra("Hostname", args.getString("hostname"));
         intent.putExtra("RemoteAccess", isRemoteAccess);
-        startActivityForResult(intent, resultNum);
+        startActivityForResult(intent, WizardActivity.REQUEST_CODE);
     }
 
     private void startFileManageActivity() {
@@ -202,7 +218,7 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == RESULT_OK){
-            if(requestCode == resultNum){
+            if(requestCode == WizardActivity.REQUEST_CODE){
                 Bundle args = data.getExtras();
                 showLoginDialog(args, false);
             }
@@ -273,6 +289,7 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
     private void checkWizardLoader(boolean success, WizardCheckLoader loader){
         mProgressView.setVisibility(View.INVISIBLE);
         Bundle args = loader.getBundleArgs();
+        args.putString("Model", loader.getModel());
         if(!success){
             Toast.makeText(this,getString(R.string.network_error),Toast.LENGTH_SHORT).show();
             return;
@@ -282,7 +299,10 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
             showLoginDialog(args, false);
         }
         else{
-            startWizardActivity(args);
+            if(isRemoteAccess)
+                Toast.makeText(this, getString(R.string.wizard_remote_access_error), Toast.LENGTH_SHORT).show();
+            else
+                startWizardActivity(args);
         }
     }
 
@@ -386,7 +406,8 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
             @Override
             public void onCancel() {
                 getLoaderManager().destroyLoader(mLoaderID);
-                mLoginDialog.dismiss();
+                if(mLoginDialog != null)
+                    mLoginDialog.dismiss();
                 mLoginDialog = null;
             }
         };

@@ -27,6 +27,12 @@
         </activity>
 
         <activity
+            android:name=".InitialActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
+
+        <activity
             android:name=".WizardActivity"
             android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden|screenSize">

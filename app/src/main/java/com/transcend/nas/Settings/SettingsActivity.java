@@ -1009,7 +1009,7 @@ public class SettingsActivity extends AppCompatActivity implements
                         Toast.makeText(mContext, getString(R.string.empty_password), Toast.LENGTH_SHORT).show();
                         return;
                     } else if(pwd.length() < 6  || pwd.length() > 20){
-                        Toast.makeText(mContext, getString(R.string.password_size), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, getString(R.string.password_size) + "", Toast.LENGTH_SHORT).show();
                         return;
                     }
 

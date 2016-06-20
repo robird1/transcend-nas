@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.realtek.nasfun.api.HttpClientManager;
+import com.realtek.nasfun.api.ServerInfo;
 import com.transcend.nas.R;
 import com.tutk.IOTC.P2PService;
 

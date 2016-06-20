@@ -139,6 +139,7 @@ public class FileManageActivity extends AppCompatActivity implements
         initDrawer();
         initActionModeView();
         doRefresh();
+        NASPref.setInitial(this, true);
     }
 
     @Override

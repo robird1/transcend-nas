@@ -12,17 +12,33 @@
 
         <ImageView
             android:id="@+id/listitem_nas_finder_icon"
-            android:src="@drawable/ic_storage_2b_gray_24dp"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_storage_2b_gray_24dp" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/listitem_nas_next_icon_layout"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_alignParentRight="true"
+        android:padding="8dp"
+        android:layout_marginRight="-8dp">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:rotation="180"
+            android:src="@drawable/ic_navigation_arrow_gray_24dp" />
 
     </FrameLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="72dp"
-        android:layout_toRightOf="@+id/listitem_nas_finder_icon_layout"
-        android:paddingRight="16dp"
+        android:layout_toLeftOf="@id/listitem_nas_next_icon_layout"
+        android:layout_toRightOf="@id/listitem_nas_finder_icon_layout"
         android:orientation="vertical">
 
         <TextView
@@ -30,26 +46,26 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="bottom"
-            android:text="title"
-            android:textSize="16sp"
-            android:textColor="@color/textColorPrimary"
-            android:singleLine="true"
             android:ellipsize="marquee"
-            android:marqueeRepeatLimit="marquee_forever" />
+            android:gravity="bottom"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:singleLine="true"
+            android:text="title"
+            android:textColor="@color/textColorPrimary"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/listitem_nas_finder_subtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="top"
-            android:text="subtitle"
-            android:textSize="14sp"
-            android:textColor="@color/textColorSecondary"
-            android:singleLine="true"
             android:ellipsize="marquee"
-            android:marqueeRepeatLimit="marquee_forever" />
+            android:gravity="top"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:singleLine="true"
+            android:text="subtitle"
+            android:textColor="@color/textColorSecondary"
+            android:textSize="14sp" />
 
     </LinearLayout>
 

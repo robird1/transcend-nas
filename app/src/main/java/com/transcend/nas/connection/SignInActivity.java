@@ -19,6 +19,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.transcend.nas.InitialActivity;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
@@ -44,6 +45,7 @@ import java.util.List;
 public class SignInActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Boolean>, View.OnClickListener {
 
     private static final String TAG = SignInActivity.class.getSimpleName();
+    public static final int REQUEST_CODE = SignInActivity.class.hashCode() & 0xFFFF;
 
     private LinearLayout layoutInit;
     private LinearLayout layoutSignIn;
@@ -57,6 +59,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
     private RelativeLayout mProgressView;
     private int mLoaderID;
     private ArrayList<HashMap<String, String>> mNASList = new ArrayList<HashMap<String, String>>();
+    private boolean isWizard = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +72,12 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
         initSignInForgetButton();
         initFindButton();
         initProgressView();
+
+        Intent intent = getIntent();
+        if(intent != null) {
+            isWizard = (boolean) intent.getBooleanExtra("Wizard", false);
+            changeView(!isWizard);
+        }
     }
 
     private void initLayout(){
@@ -101,7 +110,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
     private void initFindButton() {
         bnFind = (Button) findViewById(R.id.activity_find_nas_button);
         bnFind.setOnClickListener(this);
-        StyleFactory.set_button_Drawable_center(this, bnFind, R.drawable.ic_search_white_24dp, 50);
+        StyleFactory.set_button_Drawable_left(this, bnFind, R.drawable.ic_search_white_24dp, 50);
     }
 
     private void initProgressView() {
@@ -149,6 +158,14 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
         finish();
     }
 
+    private void startInitialActivity() {
+        Intent intent = new Intent();
+        intent.setClass(SignInActivity.this, InitialActivity.class);
+        intent.putExtra("Retry", true);
+        startActivity(intent);
+        finish();
+    }
+
     private void startNASFinderActivity(ArrayList<HashMap<String, String>> list, boolean isRemoteAccess) {
         Intent intent = new Intent();
         intent.setClass(SignInActivity.this, NASFinderActivity.class);
@@ -168,7 +185,6 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
         if(resultCode == RESULT_OK){
             if(requestCode == NASFinderActivity.REQUEST_CODE){
                 startFileManageActivity();
-                finish();
             }
         }
     }
@@ -379,8 +395,12 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
             getLoaderManager().destroyLoader(mLoaderID);
             mProgressView.setVisibility(View.INVISIBLE);
         } else {
-            if(layoutSignIn.getVisibility() == View.VISIBLE)
-                changeView(true);
+            if(layoutSignIn.getVisibility() == View.VISIBLE) {
+                if(isWizard)
+                    startInitialActivity();
+                else
+                    changeView(true);
+            }
             else
                 super.onBackPressed();
         }

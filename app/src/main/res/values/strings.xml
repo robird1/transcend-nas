@@ -33,14 +33,26 @@
         <item>500MB</item>
     </string-array>
 
+    <!-- wizard -->
+    <string name="wizard">Wizard</string>
+    <string name="wizard_setup_start">Let\'s Setup StoreJet Cloud</string>
+    <string name="wizard_ethernet_info">Connect ethernet cable to router</string>
+    <string name="wizard_plug_info">Plug Power Adapter</string>
+    <string name="wizard_power_info">Power On</string>
+    <string name="wizard_wifi_info">Connect device Wi-Fi to router network</string>
+    <string name="wizard_setup_found_error">No StoreJet Cloud Found\nPlease check following:</string>
+    <string name="wizard_setup_admin">Setup the admin password</string>
+    <string name="wizard_setup_remote_access">Setup the admin password</string>
+    <string name="wizard_success">StoreJet Cloud is Ready</string>
+    <string name="wizard_start">Get Started</string>
+    <string name="wizard_continue">Continue</string>
+    <string name="wizard_try">Try Again</string>
+    <string name="wizard_remote_access_error">Please complete wizard first in LAN</string>
+    <string name="wizard_password_space_error">Password can\'t contain space</string>
 
     <!-- string -->
 
     <string name="done">Done</string>
-    <string name="start">Start</string>
-    <string name="wizard">Wizard</string>
-    <string name="wizard_info">Let\'s set up StoreJet Cloud.\nSetup the administrator password</string>
-    <string name="success_wizard">Success Wizard</string>
     <string name="about">About</string>
     <string name="account">Account</string>
     <string name="always">Always</string>
@@ -131,7 +143,7 @@
     <string name="empty_account">Empty Account</string>
     <string name="empty_email">Empty Email</string>
     <string name="empty_password">Empty Password</string>
-    <string name="password_size">Password size : 6~20</string>
+    <string name="password_size">Password size :</string>
     <string name="empty_uuid">Empty UUID, we can\'t set up</string>
     <string name="forget_password_title">Enter your email to send the reset password email</string>
     <string name="forget_password_warning">Current password will be deprecated. Are you sure to send the email?</string>
@@ -221,6 +233,7 @@
     <string name="pref_uuid">UUID</string>
     <string name="pref_mac">MAC ADDRESS</string>
     <string name="pref_hash_verified_time">HASH VERIFIED TIME</string>
+    <string name="pref_initial">INITIAL SETUP</string>
 
     <string name="pref_local_hostname">LOCAL HOSTNAME</string>
 

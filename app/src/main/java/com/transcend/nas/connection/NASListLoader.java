@@ -49,13 +49,18 @@ public class NASListLoader extends AsyncTaskLoader<Boolean> {
 
     private JmDNS mJmDNS;
     private ArrayList<HashMap<String, String>> mNASList;
-
+    private int mRetry = 1;
 
     public NASListLoader(Context context) {
         super(context);
         mWifiMgr = (WifiManager)getContext().getSystemService(Context.WIFI_SERVICE);
         mLock = mWifiMgr.createMulticastLock(TAG);
         mNASList = new ArrayList<HashMap<String, String>>();
+    }
+
+    public NASListLoader(Context context, int retry) {
+        this(context);
+        mRetry = retry;
     }
 
     @Override
@@ -108,16 +113,14 @@ public class NASListLoader extends AsyncTaskLoader<Boolean> {
 
     private void loadNASList() {
         // Returns a list of service infos of the specified type.
-
-        if (mJmDNS == null)
-            return;
-
-        int retry = 1;
+        int retry = mRetry;
 
         while ((mNASList.size() == 0) && (retry > 0)) {
+            if (mJmDNS == null)
+                return;
 
             ServiceInfo[] serviceInfos = mJmDNS.list(TYPE);
-            Log.w(TAG, "ServiceInfo");
+            Log.w(TAG, "Server Scan" );
 
             for (ServiceInfo info : serviceInfos) {
                 boolean isMyNAS = false;
@@ -150,7 +153,7 @@ public class NASListLoader extends AsyncTaskLoader<Boolean> {
 
                     String name = info.getServer();
                     String end = ".local.";
-                    if(name.endsWith(".local.")){
+                    if(name.endsWith(end)){
                         name = name.substring(0, name.length() - end.length());
                     }
 
@@ -166,6 +169,10 @@ public class NASListLoader extends AsyncTaskLoader<Boolean> {
             }
 
             retry--;
+            if((mNASList.size() == 0) && (retry > 0)){
+                Log.w(TAG, "Server Scan empty, retry times : " + retry );
+                createJmDNS();
+            }
         }
 
 

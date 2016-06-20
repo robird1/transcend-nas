@@ -32,6 +32,24 @@ public class NASPref {
 
     /**
      *
+     * Init
+     *
+     */
+    public static boolean getInitial(Context context) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_initial);
+        boolean def = false;
+        return PrefUtil.read(context, name, key, def);
+    }
+
+    public static void setInitial(Context context, boolean init) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_initial);
+        PrefUtil.write(context, name, key, init);
+    }
+
+    /**
+     *
      * Login
      *
      */

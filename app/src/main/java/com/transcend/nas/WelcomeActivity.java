@@ -35,7 +35,14 @@ public class WelcomeActivity extends Activity implements LoaderManager.LoaderCal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
         mTextView = (TextView) findViewById(R.id.welcome_text);
-        getLoaderManager().initLoader(LoaderID.AUTO_LINK, null, this).forceLoad();
+
+        boolean isInit = NASPref.getInitial(this);
+        if(isInit) {
+            getLoaderManager().initLoader(LoaderID.AUTO_LINK, null, this).forceLoad();
+        }
+        else{
+            startInitialActivity();
+        }
     }
 
     @Override
@@ -147,6 +154,13 @@ public class WelcomeActivity extends Activity implements LoaderManager.LoaderCal
     private void startSignInActivity() {
         Intent intent = new Intent();
         intent.setClass(WelcomeActivity.this, SignInActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    private void startInitialActivity() {
+        Intent intent = new Intent();
+        intent.setClass(WelcomeActivity.this, InitialActivity.class);
         startActivity(intent);
         finish();
     }

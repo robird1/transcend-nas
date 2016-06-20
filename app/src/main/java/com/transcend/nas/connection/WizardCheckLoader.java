@@ -34,6 +34,7 @@ public class WizardCheckLoader extends AsyncTaskLoader<Boolean> {
     private Bundle mArgs;
     private boolean mRemoteAccess = false;
     private boolean isWizard = false;
+    private String mModel = "";
 
     public WizardCheckLoader(Context context, Bundle args, boolean isRemoteAccess) {
         super(context);
@@ -95,9 +96,15 @@ public class WizardCheckLoader extends AsyncTaskLoader<Boolean> {
                                     String initialized = text;
                                     if (initialized != null) {
                                         isWizard = initialized.equals("yes");
-                                        break;
                                     }
                                 }
+                                if (curTagName.equals("model")) {
+                                    String model = text;
+                                    if (model != null) {
+                                        mModel = model;
+                                    }
+                                }
+
                             }
                         }
 
@@ -127,7 +134,12 @@ public class WizardCheckLoader extends AsyncTaskLoader<Boolean> {
         return mArgs;
     }
 
+    public String getModel() {
+        return mModel;
+    }
+
     public boolean isWizard(){
         return isWizard;
     }
+
 }
