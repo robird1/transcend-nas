@@ -40,6 +40,18 @@
                 android:title="@string/search"
                 app:showAsAction="never" />
 
+            <item
+                android:id="@+id/file_manage_viewer_action_upload"
+                android:icon="@drawable/ic_file_upload_gray_24dp"
+                android:title="@string/upload"
+                app:showAsAction="never" />
+
+            <!--<item
+                android:id="@+id/file_manage_viewer_action_download"
+                android:icon="@drawable/ic_file_download_gray_24dp"
+                android:title="@string/download"
+                app:showAsAction="never" /> -->
+
         </menu>
 
     </item>

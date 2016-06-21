@@ -23,13 +23,13 @@
         android:layout_width="72dp"
         android:layout_height="72dp"
         android:layout_alignParentRight="true"
-        android:padding="8dp"
         android:layout_marginRight="-8dp">
 
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:rotation="180"
+            android:padding="20dp"
             android:src="@drawable/ic_navigation_arrow_gray_24dp" />
 
     </FrameLayout>

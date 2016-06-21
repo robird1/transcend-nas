@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.transcend.nas.NASApp;
+import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.utils.FileFactory;
@@ -42,15 +43,15 @@ import java.util.List;
 /**
  * Created by silverhsu on 16/2/2.
  */
-public class FileActionLocateActivity extends AppCompatActivity implements
+public class FileActionPickerActivity extends AppCompatActivity implements
         FileManageDropdownAdapter.OnDropdownItemSelectedListener,
         FileManageRecyclerAdapter.OnRecyclerItemCallbackListener,
         LoaderManager.LoaderCallbacks<Boolean>,
         View.OnClickListener {
 
-    public static final int REQUEST_CODE = FileActionLocateActivity.class.hashCode() & 0xFFFF;
+    public static final int REQUEST_CODE = FileActionPickerActivity.class.hashCode() & 0xFFFF;
 
-    private static final String TAG = FileActionLocateActivity.class.getSimpleName();
+    private static final String TAG = FileActionPickerActivity.class.getSimpleName();
 
     private Toolbar mToolbar;
     private AppCompatSpinner mDropdown;
@@ -59,13 +60,13 @@ public class FileActionLocateActivity extends AppCompatActivity implements
     private FileManageRecyclerAdapter mRecyclerAdapter;
     private FloatingActionButton mFabControl;
     private RelativeLayout mProgressView;
-    private MenuItem mNewFolder;
     private Toast mToast;
 
     private String mMode;
     private String mType;
     private String mRoot;
     private String mPath;
+    private String mTarget;
     private ArrayList<FileInfo> mFileList;
     private int mLoaderID;
 
@@ -82,7 +83,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         initFabs();
         initProgressView();
         doRefresh();
-        toast(getHintResId(), Toast.LENGTH_SHORT);
+        //toast(getHintResId(), Toast.LENGTH_SHORT);
     }
 
     /**
@@ -96,6 +97,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         mType = args.getString("type");
         mRoot = args.getString("root");
         mPath = args.getString("path");
+        mTarget = args.getString("target");
         mFileList = new ArrayList<FileInfo>();
     }
 
@@ -129,11 +131,9 @@ public class FileActionLocateActivity extends AppCompatActivity implements
     private void initFabs() {
         mFabControl = (FloatingActionButton) findViewById(R.id.locate_fab_control);
         mFabControl.setOnClickListener(this);
-        if (NASApp.ACT_COPY.equals(mType) || NASApp.ACT_MOVE.equals(mType))
-            mFabControl.setImageResource(R.drawable.ic_content_copy_white_24dp);
-        if (NASApp.ACT_UPLOAD.equals(mType))
+        if (NASApp.ACT_PICK_UPLOAD.equals(mType))
             mFabControl.setImageResource(R.drawable.ic_file_upload_white_24dp);
-        if (NASApp.ACT_DOWNLOAD.equals(mType))
+        if (NASApp.ACT_PICK_DOWNLOAD.equals(mType))
             mFabControl.setImageResource(R.drawable.ic_file_download_white_24dp);
     }
 
@@ -172,17 +172,8 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         FileInfo fileInfo = mFileList.get(position);
         if (fileInfo.type.equals(FileInfo.TYPE.DIR)) {
             doLoad(fileInfo.path);
-        } else
-        if (fileInfo.type.equals(FileInfo.TYPE.PHOTO)) {
-            startViewerActivity(fileInfo.path);
-        } else
-        if (fileInfo.type.equals(FileInfo.TYPE.VIDEO)) {
-            MediaFactory.open(this, fileInfo.path);
-        } else
-        if (fileInfo.type.equals(FileInfo.TYPE.MUSIC)) {
-            MediaFactory.open(this, fileInfo.path);
-        } else {
-            toast(R.string.unknown_format, Toast.LENGTH_SHORT);
+        } else{
+            selectAtPosition(position);
         }
     }
 
@@ -195,7 +186,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
     public void onRecyclerItemInfoClick(int position) {
         FileInfo fileInfo = mFileList.get(position);
         if (FileInfo.TYPE.DIR.equals(fileInfo.type)) {
-                doLoad(fileInfo.path);
+            doLoad(fileInfo.path);
         } else {
             startFileInfoActivity(fileInfo);
         }
@@ -203,7 +194,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
 
     @Override
     public void onRecyclerItemIconClick(int position) {
-
+        selectAtPosition(position);
     }
 
 
@@ -214,8 +205,12 @@ public class FileActionLocateActivity extends AppCompatActivity implements
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.file_locate, menu);
-        mNewFolder = menu.findItem(R.id.file_locate_action_new_folder);
+        getMenuInflater().inflate(R.menu.file_picker, menu);
+        int count = getSelectedCount();
+        if(mFileList != null && mFileList.size() == count && count > 0)
+            menu.findItem(R.id.file_locate_action_selected_all).setIcon(R.drawable.ic_clear_all_white_24dp);
+        else
+            menu.findItem(R.id.file_locate_action_selected_all).setIcon(R.drawable.ic_done_all_white_24dp);
         return true;
     }
 
@@ -225,13 +220,59 @@ public class FileActionLocateActivity extends AppCompatActivity implements
             case android.R.id.home:
                 finish();
                 break;
-            case R.id.file_locate_action_new_folder:
-                doNewFolder();
+            case R.id.file_locate_action_selected_all:
+                toggleSelectAll();
                 break;
+
         }
         return super.onOptionsItemSelected(item);
     }
 
+
+    private void toggleSelectAll() {
+        int count = getSelectedCount();
+        boolean selectAll = (count != 0) && (count == mFileList.size());
+        if (selectAll)
+            clearAllSelection();
+        else
+            checkAllSelection();
+        invalidateOptionsMenu();
+    }
+
+    private void checkAllSelection() {
+        for (FileInfo file : mFileList)
+            file.checked = true;
+        mRecyclerAdapter.notifyDataSetChanged();
+    }
+
+    private void clearAllSelection() {
+        for (FileInfo file : mFileList)
+            file.checked = false;
+        mRecyclerAdapter.notifyDataSetChanged();
+    }
+
+    private int getSelectedCount() {
+        int count = 0;
+        for (FileInfo file : mFileList) {
+            if (file.checked) count++;
+        }
+        return count;
+    }
+
+    private ArrayList<String> getSelectedPaths() {
+        ArrayList<String> paths = new ArrayList<String>();
+        for (FileInfo file : mFileList) {
+            if (file.checked) paths.add(file.path);
+        }
+        return paths;
+    }
+
+    private void selectAtPosition(int position) {
+        boolean checked = mFileList.get(position).checked;
+        mFileList.get(position).checked = !checked;
+        mRecyclerAdapter.notifyItemChanged(position);
+        invalidateOptionsMenu();
+    }
 
     /**
      *
@@ -303,10 +344,6 @@ public class FileActionLocateActivity extends AppCompatActivity implements
                 return new SmbFileListLoader(this, path);
             case LoaderID.LOCAL_FILE_LIST:
                 return new LocalFileListLoader(this, path);
-            case LoaderID.SMB_NEW_FOLDER:
-                return new SmbFolderCreateLoader(this, path);
-            case LoaderID.LOCAL_NEW_FOLDER:
-                return new LocalFolderCreateLoader(this, path);
         }
         return null;
     }
@@ -318,21 +355,11 @@ public class FileActionLocateActivity extends AppCompatActivity implements
                 //file list change, stop previous image loader
                 ImageLoader.getInstance().stop();
                 mPath = ((SmbFileListLoader) loader).getPath();
-                ArrayList<FileInfo> list = ((SmbFileListLoader) loader).getFileList();
-                if(mFileList == null)
-                    mFileList = new ArrayList<FileInfo>();
-                else
-                    mFileList.clear();
-                for (FileInfo info : list) {
-                    if (FileInfo.TYPE.DIR.equals(info.type))
-                        mFileList.add(info);
-                }
+                mFileList = ((SmbFileListLoader) loader).getFileList();
                 Collections.sort(mFileList, FileInfoSort.comparator(this));
                 FileFactory.getInstance().addFolderFilterRule(mPath, mFileList);
                 FileFactory.getInstance().addFileTypeSortRule(mFileList);
                 updateScreen();
-                if(mNewFolder != null)
-                    mNewFolder.setVisible(!mRoot.equals(mPath));
                 mFabControl.setVisibility(mRoot.equals(mPath) ? View.INVISIBLE : View.VISIBLE);
             }
         } else if (loader instanceof LocalFileListLoader) {
@@ -340,15 +367,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
                 //file list change, stop previous image loader
                 ImageLoader.getInstance().stop();
                 mPath = ((LocalFileListLoader) loader).getPath();
-                ArrayList<FileInfo> list = ((LocalFileListLoader) loader).getFileList();
-                if(mFileList == null)
-                    mFileList = new ArrayList<FileInfo>();
-                else
-                    mFileList.clear();
-                for (FileInfo info : list) {
-                    if (FileInfo.TYPE.DIR.equals(info.type))
-                        mFileList.add(info);
-                }
+                mFileList = ((LocalFileListLoader) loader).getFileList();
                 Collections.sort(mFileList, FileInfoSort.comparator(this));
                 FileFactory.getInstance().addFileTypeSortRule(mFileList);
                 updateScreen();
@@ -395,31 +414,6 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         doLoad(mPath);
     }
 
-    private void doNewFolder() {
-        List<String> folderNames = new ArrayList<String>();
-        for (FileInfo file : mFileList) {
-            if (file.type.equals(FileInfo.TYPE.DIR))
-                folderNames.add(file.name);
-        }
-        new FileActionNewFolderDialog(this, folderNames) {
-            @Override
-            public void onConfirm(String newName) {
-                int id = (NASApp.MODE_SMB.equals(mMode))
-                        ? LoaderID.SMB_NEW_FOLDER
-                        : LoaderID.LOCAL_NEW_FOLDER;
-                StringBuilder builder = new StringBuilder(mPath);
-                if (!mPath.endsWith("/"))
-                    builder.append("/");
-                builder.append(newName);
-                String path = builder.toString();
-                Bundle args = new Bundle();
-                args.putString("path", path);
-                getLoaderManager().restartLoader(id, args, FileActionLocateActivity.this).forceLoad();
-                Log.w(TAG, "doNewFolder: " + path);
-            }
-        };
-    }
-
 
     /**
      *
@@ -431,6 +425,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         mDropdownAdapter.notifyDataSetChanged();
         mRecyclerAdapter.updateList(mFileList);
         mRecyclerAdapter.notifyDataSetChanged();
+        invalidateOptionsMenu();
     }
 
     private void resizeToolbar() {
@@ -450,17 +445,24 @@ public class FileActionLocateActivity extends AppCompatActivity implements
     }
 
     private int getHintResId() {
-        return NASApp.ACT_COPY.equals(mType) ? R.string.msg_paste_to
-                : NASApp.ACT_MOVE.equals(mType) ? R.string.msg_paste_to
-                : NASApp.ACT_UPLOAD.equals(mType) ? R.string.msg_upload_to
-                : NASApp.ACT_DOWNLOAD.equals(mType) ? R.string.msg_download_to
+        return NASApp.ACT_PICK_UPLOAD.equals(mType) ? R.string.msg_upload_to
+                : NASApp.ACT_PICK_DOWNLOAD.equals(mType) ? R.string.msg_download_to
                 : R.string.msg_direct_to;
     }
 
     private void popupConfirmDialog() {
+        int count = getSelectedCount();
+        if(count == 0){
+            Toast.makeText(this, getString(R.string.no_item_selected), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String format = getResources().getString(R.string.conj_selected);
+        String message = String.format(format, count);
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(getHintResId());
-        builder.setMessage(mPath);
+        builder.setTitle(getString(getHintResId()).replace(".","") + " " + mTarget);
+        builder.setMessage(message);
         builder.setNegativeButton(R.string.cancel, null);
         builder.setPositiveButton(R.string.confirm, null);
         builder.setCancelable(true);
@@ -474,36 +476,22 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         });
     }
 
-    private void startViewerActivity(String path) {
-        ArrayList<FileInfo> list = new ArrayList<FileInfo>();
-        for (FileInfo info : mFileList) {
-            if (FileInfo.TYPE.PHOTO.equals(info.type))
-                list.add(info);
-        }
-        Bundle args = new Bundle();
-        args.putString("path", path);
-        args.putSerializable("list", list);
-        Intent intent = new Intent();
-        intent.setClass(FileActionLocateActivity.this, ViewerActivity.class);
-        intent.putExtras(args);
-        startActivity(intent);
-    }
-
     private void startFileInfoActivity(FileInfo info) {
         Bundle args = new Bundle();
         args.putSerializable("info", info);
         Intent intent = new Intent();
-        intent.setClass(FileActionLocateActivity.this, FileInfoActivity.class);
+        intent.setClass(FileActionPickerActivity.this, FileInfoActivity.class);
         intent.putExtras(args);
         startActivity(intent);
     }
 
     private void backToMainActivity() {
+        Intent intent = new Intent();
         Bundle bundle = new Bundle();
         bundle.putString("mode", mMode);
         bundle.putString("path", mPath);
         bundle.putString("type", mType);
-        Intent intent = new Intent();
+        bundle.putStringArrayList("paths", getSelectedPaths());
         intent.putExtras(bundle);
         setResult(RESULT_OK, intent);
         finish();

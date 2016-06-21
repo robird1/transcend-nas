@@ -49,6 +49,7 @@
     <string name="wizard_try">Try Again</string>
     <string name="wizard_remote_access_error">Please complete wizard first in LAN</string>
     <string name="wizard_password_space_error">Password can\'t contain space</string>
+    <string name="device">Device</string>
 
     <!-- string -->
 
@@ -180,10 +181,10 @@
     <string name="msg_conj_deleted">%1$d item(s) will be deleted.</string>
     <string name="msg_exit_app">Are you sure you want to exit the app?</string>
 
-    <string name="msg_paste_to">Paste to…</string>
-    <string name="msg_direct_to">Direct to…</string>
-    <string name="msg_upload_to">Upload to…</string>
-    <string name="msg_download_to">Download to…</string>
+    <string name="msg_paste_to">Paste to..</string>
+    <string name="msg_direct_to">Direct to..</string>
+    <string name="msg_upload_to">Upload to..</string>
+    <string name="msg_download_to">Download to..</string>
 
     <string name="msg_auto_backup">Auto upload your camera photos and video to StoreJet Cloud.</string>
     <string name="msg_backup_scenario">Choose a scenario to backup your camera photos and video.</string>

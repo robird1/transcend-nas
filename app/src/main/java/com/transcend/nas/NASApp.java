@@ -35,6 +35,8 @@ public class NASApp extends Application {
     public static final String ACT_DIRECT   = "DIRECT";
     public static final String ACT_UPLOAD   = "UPLOAD";
     public static final String ACT_DOWNLOAD = "DOWNLOAD";
+    public static final String ACT_PICK_UPLOAD = "PICKUPLOAD";
+    public static final String ACT_PICK_DOWNLOAD = "PICKUPDOWNLOAD";
 
     private static Context mContext;
 

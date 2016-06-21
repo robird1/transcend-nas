@@ -40,6 +40,7 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
         void onRecyclerItemClick(int position);
         void onRecyclerItemLongClick(int position);
         void onRecyclerItemInfoClick(int position);
+        void onRecyclerItemIconClick(int position);
     }
 
     public FileManageRecyclerAdapter(ArrayList<FileInfo> list) {
@@ -95,6 +96,16 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
             if (holder.subtitle != null) {
                 holder.subtitle.setVisibility((time == null || "".equals(time)) ? View.GONE : View.VISIBLE);
                 holder.subtitle.setText(time);
+            }
+            if(holder.info != null){
+                if (fileInfo.type.equals(FileInfo.TYPE.DIR)) {
+                    holder.info.setImageResource(R.drawable.ic_navigation_arrow_gray_24dp);
+                    holder.info.setRotation(180);
+                }
+                else {
+                    holder.info.setImageResource(R.drawable.ic_info_gray_24dp);
+                    holder.info.setRotation(0);
+                }
             }
             if (holder.icon != null)
                 holder.icon.setImageResource(resId);
@@ -224,6 +235,15 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
                     if (mCallback == null) return;
                     int position = getAdapterPosition();
                     mCallback.onRecyclerItemInfoClick(position);
+                }
+            });
+
+            icon.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mCallback == null) return;
+                    int position = getAdapterPosition();
+                    mCallback.onRecyclerItemIconClick(position);
                 }
             });
         }

@@ -9,9 +9,21 @@
             android:id="@+id/nav_storage"
             android:icon="@drawable/ic_storage_2b_gray_24dp"
             android:title="@string/app_name" />
+
+    </group>
+
+    <group
+        android:id="@+id/nav_group_2st"
+        android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/nav_device"
+            android:icon="@drawable/ic_file_download2_gray_24dp"
+            android:title="@string/device" />
+
         <item
             android:id="@+id/nav_downloads"
-            android:icon="@drawable/ic_file_download2_gray_24dp"
+            android:icon="@drawable/ic_file_download_gray_24dp"
             android:title="@string/download" />
 
     </group>
