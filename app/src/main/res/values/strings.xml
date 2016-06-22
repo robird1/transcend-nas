@@ -50,6 +50,7 @@
     <string name="wizard_remote_access_error">Please complete wizard first in LAN</string>
     <string name="wizard_password_space_error">Password can\'t contain space</string>
     <string name="device">Device</string>
+    <string name="used">Used</string>
 
     <!-- string -->
 

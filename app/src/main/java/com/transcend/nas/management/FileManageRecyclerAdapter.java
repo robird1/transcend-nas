@@ -112,7 +112,7 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
             if (holder.indicate != null){
                 holder.indicate.setVisibility( fileInfo.type.equals(FileInfo.TYPE.VIDEO) ? View.VISIBLE : View.GONE);
             }
-            if (fileInfo.type.equals(FileInfo.TYPE.PHOTO) || fileInfo.type.equals(FileInfo.TYPE.VIDEO) )
+            if (fileInfo.type.equals(FileInfo.TYPE.PHOTO) || fileInfo.type.equals(FileInfo.TYPE.VIDEO) || fileInfo.type.equals(FileInfo.TYPE.MUSIC) )
                 ImageLoader.getInstance().displayImage(FileFactory.getInstance().getPhotoPath(true,path), holder.icon);
 
             holder.itemView.setSelected(fileInfo.checked);

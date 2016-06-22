@@ -84,7 +84,7 @@ public class FileInfoActivity extends AppCompatActivity {
             ivImage.setImageResource(R.drawable.ic_movies_gray_big);
         else if (fileInfo.type.equals(FileInfo.TYPE.MUSIC))
             ivImage.setImageResource(R.drawable.ic_audiotrack_gray_big);
-        if (fileInfo.type.equals(FileInfo.TYPE.PHOTO) || fileInfo.type.equals(FileInfo.TYPE.VIDEO))
+        if (fileInfo.type.equals(FileInfo.TYPE.PHOTO) || fileInfo.type.equals(FileInfo.TYPE.VIDEO) || fileInfo.type.equals(FileInfo.TYPE.MUSIC))
             ImageLoader.getInstance().displayImage(FileFactory.getInstance().getPhotoPath(true, fileInfo.path), ivImage);
     }
 
@@ -153,22 +153,7 @@ public class FileInfoActivity extends AppCompatActivity {
             String key = getString(R.string.pref_info_size);
             Preference pref = findPreference(key);
 
-            //calculator the file size
-            String s = " MB";
-            double sizeMB = (double) mFileInfo.size / 1024 / 1024;
-            if(sizeMB < 1){
-                sizeMB = (double) mFileInfo.size / 1024;
-                s = " KB";
-            }
-            else if (sizeMB >= 1000) {
-                sizeMB = (double) sizeMB / 1024;
-                s = " GB";
-            }
-
-            //format the size
-            DecimalFormat df=new DecimalFormat("#.##");
-            String formatSize = df.format(sizeMB) + s;
-
+            String formatSize = FileFactory.getInstance().getFileSize(mFileInfo.size);
             if(!FileInfo.TYPE.DIR.equals(mFileInfo.type))
                 pref.setSummary(formatSize);
         }

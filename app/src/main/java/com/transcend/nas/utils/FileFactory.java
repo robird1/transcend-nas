@@ -1,13 +1,17 @@
 package com.transcend.nas.utils;
 
+import android.content.Context;
 import android.util.Log;
 
+import com.nostra13.universalimageloader.utils.StorageUtils;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.management.FileInfo;
 import com.tutk.IOTC.P2PService;
 
+import java.io.File;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -149,6 +153,47 @@ public class FileFactory {
                 url = "http://" + hostname + filepath + "?session=" + hash + "&webview";
         }
         return url;
+    }
+
+    public String getFileSize(String path){
+        File file = new File(path);
+        long length = 0;
+        if(file != null && file.exists()) {
+            if (file.isDirectory()) {
+                for (File f : file.listFiles()) {
+                    if (f.isDirectory()) {
+                        for (File child : f.listFiles()) {
+                            length = length + child.length();
+                        }
+                    } else {
+                        length += f.length();
+                    }
+                }
+            } else {
+                length = file.length();
+            }
+        }
+        return getFileSize(length);
+    }
+
+    public String getFileSize(Long size){
+        //calculator the file size
+        String s = " MB";
+        double sizeMB = (double) size / 1024 / 1024;
+        if(sizeMB < 1){
+            sizeMB = (double) size / 1024;
+            s = " KB";
+        }
+        else if (sizeMB >= 1000) {
+            sizeMB = (double) sizeMB / 1024;
+            s = " GB";
+        }
+
+        //format the size
+        DecimalFormat df=new DecimalFormat("#.##");
+        String formatSize = df.format(sizeMB) + s;
+
+        return formatSize;
     }
 
     public int getNotificationID() {

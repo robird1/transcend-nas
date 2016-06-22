@@ -142,4 +142,5 @@
     <string name="wizard_remote_access_error">請先在區網內完成初始設置</string>
     <string name="wizard_password_space_error">密碼不能包含空白</string>
     <string name="device">裝置</string>
+    <string name="used">已使用</string>
 </resources>

@@ -12,6 +12,7 @@ import android.media.Image;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.storage.StorageManager;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -20,6 +21,7 @@ import android.preference.PreferenceScreen;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -37,7 +39,10 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.nostra13.universalimageloader.cache.disc.DiskCache;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.utils.DiskCacheUtils;
+import com.nostra13.universalimageloader.utils.StorageUtils;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
@@ -59,7 +64,9 @@ import com.transcend.nas.management.TutkLoginLoader;
 import com.transcend.nas.management.TutkRegisterLoader;
 import com.transcend.nas.management.TutkResendActivateLoader;
 import com.transcend.nas.service.AutoBackupService;
+import com.transcend.nas.utils.FileFactory;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -566,6 +573,7 @@ public class SettingsActivity extends AppCompatActivity implements
             refreshColumnBackupScenario(true, false);
             refreshColumnBackupLocation(true);
             refreshColumnDownloadLocation();
+            refreshColumnCacheUseSize();
             getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
         }
 
@@ -634,6 +642,7 @@ public class SettingsActivity extends AppCompatActivity implements
             ImageLoader.getInstance().clearMemoryCache();
             ImageLoader.getInstance().clearDiskCache();
             toast(R.string.msg_cache_cleared);
+            refreshColumnCacheUseSize();
         }
 
         private void startRemoteAccessFragment() {
@@ -778,6 +787,13 @@ public class SettingsActivity extends AppCompatActivity implements
             String key = getString(R.string.pref_download_location);
             Preference pref = findPreference(key);
             pref.setSummary(location);
+        }
+
+        private void refreshColumnCacheUseSize() {
+            String key = getString(R.string.pref_cache_clean);
+            Preference pref = findPreference(key);
+            String size = getString(R.string.used) + ": " + FileFactory.getInstance().getFileSize(StorageUtils.getCacheDirectory(mContext).getAbsolutePath());
+            pref.setSummary(size);
         }
 
         private void refreshColumnCacheSize() {
