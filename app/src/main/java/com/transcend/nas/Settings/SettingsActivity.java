@@ -84,6 +84,7 @@ public class SettingsActivity extends AppCompatActivity implements
 
     private int mLoaderID;
 
+    private boolean isInitRemoteAccessCheck = true;
     private boolean isSubFragment = false;
     private boolean isInitFragment = true;
     private boolean isRemoteAccessRegister = false;
@@ -113,6 +114,21 @@ public class SettingsActivity extends AppCompatActivity implements
             Bundle arg = new Bundle();
             arg.putString("path", path);
             getLoaderManager().restartLoader(LoaderID.SMB_NEW_FOLDER, arg, this).forceLoad();
+        }
+        else{
+            if(isInitRemoteAccessCheck){
+                String email = NASPref.getCloudUsername(mContext);
+                String pwd = NASPref.getCloudPassword(mContext);
+                if (!email.equals("") && !pwd.equals("")) {
+                    Bundle arg = new Bundle();
+                    arg.putString("server", NASPref.getCloudServer(mContext));
+                    arg.putString("email", email);
+                    arg.putString("password", pwd);
+                    getLoaderManager().restartLoader(LoaderID.TUTK_LOGIN, arg, SettingsActivity.this).forceLoad();
+                }
+                else
+                    isInitRemoteAccessCheck = false;
+            }
         }
     }
 
@@ -244,22 +260,38 @@ public class SettingsActivity extends AppCompatActivity implements
                 Bundle arg = new Bundle();
                 getLoaderManager().restartLoader(LoaderID.AUTO_BACKUP, arg, this).forceLoad();
             }
-            else
-                mProgressView.setVisibility(View.INVISIBLE);
+            else {
+                if(isInitRemoteAccessCheck){
+                    String email = NASPref.getCloudUsername(mContext);
+                    String pwd = NASPref.getCloudPassword(mContext);
+                    if (!email.equals("") && !pwd.equals("")) {
+                        Bundle arg = new Bundle();
+                        arg.putString("server", NASPref.getCloudServer(mContext));
+                        arg.putString("email", email);
+                        arg.putString("password", pwd);
+                        getLoaderManager().restartLoader(LoaderID.TUTK_LOGIN, arg, SettingsActivity.this).forceLoad();
+                    }
+                }
+                else
+                    mProgressView.setVisibility(View.INVISIBLE);
+            }
             isStartService = false;
             return;
         }
 
         if (!success) {
-            if(loader instanceof LoginLoader) {
-                if (mBindDialog != null)
-                    mBindDialog.hideProgress();
-                Toast.makeText(this, ((LoginLoader) loader).getLoginError(), Toast.LENGTH_SHORT).show();
+            if(!isInitRemoteAccessCheck) {
+                if (loader instanceof LoginLoader) {
+                    if (mBindDialog != null)
+                        mBindDialog.hideProgress();
+                    Toast.makeText(this, ((LoginLoader) loader).getLoginError(), Toast.LENGTH_SHORT).show();
+                } else {
+                    mProgressView.setVisibility(View.INVISIBLE);
+                    Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+                }
             }
-            else {
-                mProgressView.setVisibility(View.INVISIBLE);
-                Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
-            }
+            mProgressView.setVisibility(View.INVISIBLE);
+            isInitRemoteAccessCheck = false;
             return;
         }
 
@@ -376,7 +408,9 @@ public class SettingsActivity extends AppCompatActivity implements
                     return;
             }
 
-            showRemoteAccessFragment(getString(R.string.remote_access));
+            if(!isInitRemoteAccessCheck)
+                showRemoteAccessFragment(getString(R.string.remote_access));
+            isInitRemoteAccessCheck = false;
         }
     }
 
@@ -418,31 +452,47 @@ public class SettingsActivity extends AppCompatActivity implements
             for(TutkGetNasLoader.TutkNasNode nas : naslist){
                 if(nas.nasUUID.equals(uuid)){
                     NASPref.setCloudUUID(mContext, uuid);
+                    NASPref.setCloudAccountStatus(mContext, NASPref.Status.Bind.ordinal());
                     isBind = true;
                     break;
                 }
             }
 
-            if (isRemoteAccessCheck) {
-                if(isBind) {
-                    if (mSettingsFragment == null)
-                        showSettingFragment();
-                    else
-                        mSettingsFragment.refreshColumnBackupScenario(false, false);
-                }
-                else{
-                    showRemoteAccessFragment(getString(R.string.remote_access));
-                    setAutoBackupToWifi();
-                    Toast.makeText(this, getString(R.string.remote_access_always_warning), Toast.LENGTH_SHORT).show();
-                }
+            if(!isBind){
+                NASPref.setCloudAccountStatus(mContext, NASPref.Status.Active.ordinal());
             }
-            else {
-                showRemoteAccessFragment(getString(R.string.remote_access));
+
+            if(!isInitRemoteAccessCheck) {
+                if (isRemoteAccessCheck) {
+                    if (isBind) {
+                        if (mSettingsFragment == null)
+                            showSettingFragment();
+                        else
+                            mSettingsFragment.refreshColumnBackupScenario(false, false);
+                    } else {
+                        showRemoteAccessFragment(getString(R.string.remote_access));
+                        setAutoBackupToWifi();
+                        Toast.makeText(this, getString(R.string.remote_access_always_warning), Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    showRemoteAccessFragment(getString(R.string.remote_access));
+                }
             }
         } else {
-            setAutoBackupToWifi();
-            Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
+            if(!isInitRemoteAccessCheck) {
+                setAutoBackupToWifi();
+                Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
+            }
         }
+
+        if(isInitRemoteAccessCheck){
+            if (mSettingsFragment == null)
+                showSettingFragment();
+            else
+                mSettingsFragment.refreshColumnRemoteAccessSetting();
+        }
+
+        isInitRemoteAccessCheck = false;
         mProgressView.setVisibility(View.INVISIBLE);
     }
 
@@ -718,7 +768,9 @@ public class SettingsActivity extends AppCompatActivity implements
             if(status == NASPref.Status.Padding.ordinal())
                 pref.setTitle(getString(R.string.remote_access_padding));
             else if(status == NASPref.Status.Active.ordinal())
-                pref.setTitle(getString(R.string.remote_access_active));
+                pref.setTitle(getString(R.string.remote_access_active) + ", " + getString(R.string.remote_access_unbind) + " " + getString(R.string.app_name));
+            else if(status == NASPref.Status.Bind.ordinal())
+                pref.setTitle(getString(R.string.remote_access_bind) + " " + getString(R.string.app_name));
             else
                 pref.setTitle(getString(R.string.remote_access_inactive));
         }
@@ -885,10 +937,12 @@ public class SettingsActivity extends AppCompatActivity implements
                     }
 
                     if(isBind) {
+                        NASPref.setCloudAccountStatus(mContext, NASPref.Status.Bind.ordinal());
                         tvStatus.setText(getString(R.string.remote_access_success_info));
                         btBind.setVisibility(View.GONE);
                     }
                     else {
+                        NASPref.setCloudAccountStatus(mContext, NASPref.Status.Active.ordinal());
                         tvStatus.setText(getString(R.string.remote_access_bind_info));
                         btBind.setVisibility(View.VISIBLE);
                     }
@@ -967,6 +1021,8 @@ public class SettingsActivity extends AppCompatActivity implements
                     arg.putString("token", NASPref.getCloudAuthToken(mContext));
                     Server server = ServerManager.INSTANCE.getCurrentServer();
                     String uuid = server.getTutkUUID();
+                    if(uuid == null)
+                        uuid = NASPref.getUUID(getActivity());
                     if(uuid != null && !uuid.equals("")){
                         arg.putString("nasName", server.getServerInfo().hostName);
                         arg.putString("nasUUID", uuid);

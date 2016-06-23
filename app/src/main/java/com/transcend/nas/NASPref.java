@@ -27,7 +27,8 @@ public class NASPref {
     public enum Status {
         Inactive,
         Padding,
-        Active
+        Active,
+        Bind
     }
 
     /**

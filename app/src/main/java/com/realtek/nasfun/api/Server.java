@@ -1482,7 +1482,7 @@ public class Server {
 				// but for StoreJet Cloud, we don't need to check firmwareType
 				// isSuccess = setFirmwareType();
 				// to get tutk uid
-				if(!username.equals("admin") || !checkTutkuid()){
+				if(!checkTutkuid()){
 					setTutkUUID(null);
 				}
 				// for StoreJet Cloud, we don't need get server profile

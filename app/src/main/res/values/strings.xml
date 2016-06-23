@@ -52,6 +52,8 @@
     <string name="device">Device</string>
     <string name="used">Used</string>
     <string name="msg_move_to">Move to..</string>
+    <string name="remote_access_bind">Bind</string>
+    <string name="remote_access_unbind">Unbind</string>
 
     <!-- string -->
 
