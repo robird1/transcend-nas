@@ -451,7 +451,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
 
     private int getHintResId() {
         return NASApp.ACT_COPY.equals(mType) ? R.string.msg_paste_to
-                : NASApp.ACT_MOVE.equals(mType) ? R.string.msg_paste_to
+                : NASApp.ACT_MOVE.equals(mType) ? R.string.msg_move_to
                 : NASApp.ACT_UPLOAD.equals(mType) ? R.string.msg_upload_to
                 : NASApp.ACT_DOWNLOAD.equals(mType) ? R.string.msg_download_to
                 : R.string.msg_direct_to;

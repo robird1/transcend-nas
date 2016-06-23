@@ -57,13 +57,20 @@ public class SmbFileCopyLoader extends SmbAbstractLoader {
     private boolean copy() throws MalformedURLException, SmbException {
         updateProgress(mType, getContext().getResources().getString(R.string.loading), 0, 0);
         for (String path : mSrcs) {
+            if(!success)
+                break;
+
             SmbFile source = new SmbFile(getSmbUrl(path));
             if (source.isDirectory())
                 copyDirectory(source, getSmbUrl(mDest));
             else
                 copyFile(source, getSmbUrl(mDest));
         }
-        updateResult(mType, getContext().getString(R.string.done));
+
+        if(success)
+            updateResult(mType, getContext().getString(R.string.done));
+        else
+            updateResult(mType, getContext().getString(R.string.error));
         return true;
     }
 
@@ -74,6 +81,9 @@ public class SmbFileCopyLoader extends SmbAbstractLoader {
         SmbFile[] files = source.listFiles();
         String path = target.getPath();
         for (SmbFile file : files) {
+            if(!success)
+                break;
+
             if(file.isHidden())
                 continue;
 

@@ -85,6 +85,8 @@ public class FileManageActivity extends AppCompatActivity implements
     private static final int GRID_PORTRAIT = 3;
     private static final int GRID_LANDSCAPE = 5;
 
+    private int[] RETRY_CMD = new int[]{LoaderID.SMB_FILE_LIST, LoaderID.SMB_FILE_RENAME, LoaderID.SMB_FILE_DELETE,
+            LoaderID.SMB_NEW_FOLDER, LoaderID.LOGIN};
     private Toolbar mToolbar;
     private AppCompatSpinner mDropdown;
     private FileManageDropdownAdapter mDropdownAdapter;
@@ -210,8 +212,9 @@ public class FileManageActivity extends AppCompatActivity implements
                     doCopy(path);
                 if (NASApp.ACT_MOVE.equals(type))
                     doMove(path);
-                closeEditorMode();
             }
+            //force close editor mode
+            closeEditorMode();
         } else if (requestCode == ViewerActivity.REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 Bundle bundle = data.getExtras();
@@ -220,16 +223,16 @@ public class FileManageActivity extends AppCompatActivity implements
                 if (delete)
                     doRefresh();
             }
-        } else if (requestCode == FileActionPickerActivity.REQUEST_CODE){
+        } else if (requestCode == FileActionPickerActivity.REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 Bundle bundle = data.getExtras();
                 if (bundle == null) return;
                 String type = bundle.getString("type");
                 ArrayList<String> paths = bundle.getStringArrayList("paths");
-                if (NASApp.ACT_PICK_UPLOAD.equals(type)){
+                if (NASApp.ACT_PICK_UPLOAD.equals(type)) {
                     doUpload(mPath, paths);
                 }
-                if (NASApp.ACT_PICK_DOWNLOAD.equals(type)){
+                if (NASApp.ACT_PICK_DOWNLOAD.equals(type)) {
                     doDownload(mPath, paths);
                 }
             }
@@ -414,7 +417,7 @@ public class FileManageActivity extends AppCompatActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.file_manage_viewer, menu);
-        if(NASApp.MODE_STG.equals(mMode) || (NASApp.MODE_SMB.equals(mMode) && NASApp.ROOT_SMB.equals(mPath)))
+        if (NASApp.MODE_STG.equals(mMode) || (NASApp.MODE_SMB.equals(mMode) && NASApp.ROOT_SMB.equals(mPath)))
             menu.findItem(R.id.file_manage_viewer_action_upload).setVisible(false);
         FileManageRecyclerAdapter.LayoutType type = NASPref.getFileViewType(this);
         switch (type) {
@@ -743,9 +746,32 @@ public class FileManageActivity extends AppCompatActivity implements
         //Log.d("ike", "TEST CHANGE ");
     }
 
-    private void setRecordLoader(int id, Bundle args) {
-        mPreviousLoaderID = id;
-        mPreviousLoaderArgs = args;
+    public boolean setRecordCommand(int id, Bundle args) {
+        if (id == LoaderID.TUTK_NAS_LINK) {
+            Log.w(TAG, "TUTK_NAS_LINK don't need to record");
+            return false;
+        }
+
+        boolean record = false;
+        for (int cmd : RETRY_CMD) {
+            if (id == cmd) {
+                boolean retry = args.getBoolean("retry");
+                if(args != null && !retry) {
+                    mPreviousLoaderID = id;
+                    mPreviousLoaderArgs = args;
+                    record = true;
+                }
+                break;
+            }
+        }
+
+        if (!record) {
+            mPreviousLoaderID = -1;
+            mPreviousLoaderArgs = null;
+        }
+
+        Log.w(TAG, "Previous Loader ID: " + id);
+        return record;
     }
 
     /**
@@ -753,9 +779,7 @@ public class FileManageActivity extends AppCompatActivity implements
      */
     @Override
     public Loader<Boolean> onCreateLoader(int id, Bundle args) {
-        if ((LoaderID.SMB_MIN_COMMAND <= id && id <= LoaderID.SMB_MAX_COMMAND) || id == LoaderID.LOGIN)
-            setRecordLoader(id, args);
-
+        setRecordCommand(id, args);
         ArrayList<String> paths = args.getStringArrayList("paths");
         String path = args.getString("path");
         String name = args.getString("name");
@@ -817,6 +841,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
     @Override
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
+        Log.w(TAG, "onLoaderFinished: " + loader.getClass().getSimpleName() + " " + success);
         if (success) {
             if (loader instanceof SmbFileListLoader) {
                 //file list change, stop previous image loader
@@ -865,9 +890,13 @@ public class FileManageActivity extends AppCompatActivity implements
                 doRefresh();
             }
         } else {
-            Log.w(TAG, "Connect Fail, current loader : " + mLoaderID);
-            if (loader instanceof SmbAbstractLoader || mLoaderID == LoaderID.LOGIN) {
-                if (isRemoteAccess() && mPreviousLoaderArgs != null && !mPreviousLoaderArgs.getBoolean("retry")) {
+            if (isRemoteAccess() && mPreviousLoaderID > 0 && mPreviousLoaderArgs != null) {
+                if(mLoaderID == LoaderID.TUTK_NAS_LINK){
+                    mPreviousLoaderID = -1;
+                    mPreviousLoaderArgs = null;
+                    Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+                }
+                else {
                     Log.w(TAG, "Remote Access connect fail, try reConnect");
                     Bundle args = new Bundle();
                     String uuid = P2PService.getInstance().getTUTKUUID();
@@ -884,15 +913,13 @@ public class FileManageActivity extends AppCompatActivity implements
                     args.putString("hostname", uuid);
                     getLoaderManager().restartLoader(LoaderID.TUTK_NAS_LINK, args, this).forceLoad();
                     return;
-                } else {
-                    checkEmptyView();
-                    if (loader instanceof SmbAbstractLoader)
-                        Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
-                    else
-                        Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
                 }
             } else {
-                Toast.makeText(this, getString(R.string.error) + " (" + mLoaderID + ")", Toast.LENGTH_SHORT).show();
+                checkEmptyView();
+                if (loader instanceof SmbAbstractLoader)
+                    Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
+                else
+                    Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -1344,6 +1371,7 @@ public class FileManageActivity extends AppCompatActivity implements
         boolean visible = (count == 1);
         mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_rename).setVisible(visible);
         //mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_share).setVisible(visible);
+        mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_new_folder).setVisible(count == 0);
     }
 
     private void toggleDrawerCheckedItem() {
@@ -1387,7 +1415,7 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void startFileActionPickerActivity(String type) {
-        if(NASApp.ACT_PICK_UPLOAD.equals(type) && NASApp.MODE_SMB.equals(mMode) && NASApp.ROOT_SMB.equals(mPath)){
+        if (NASApp.ACT_PICK_UPLOAD.equals(type) && NASApp.MODE_SMB.equals(mMode) && NASApp.ROOT_SMB.equals(mPath)) {
             Toast.makeText(this, "Can't upload to this folder", Toast.LENGTH_SHORT).show();
             return;
         }

@@ -8,8 +8,6 @@ public class LoaderID {
     public static final int AUTO_LINK = 0;
     public static final int NAS_LIST  = 1;
     public static final int LOGIN  = 2;
-    public static final int SMB_MIN_COMMAND = 3;
-    public static final int SMB_MAX_COMMAND = 10;
     public static final int SMB_FILE_LIST = 3;
     public static final int SMB_NEW_FOLDER = 4;
     public static final int SMB_FILE_RENAME = 5;

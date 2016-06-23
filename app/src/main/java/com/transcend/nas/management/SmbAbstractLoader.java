@@ -47,6 +47,8 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
     protected HandlerThread mThread;
     protected Handler mHandler;
     protected Runnable mWatcher;
+    protected boolean success = true;
+    protected int mCount = 0;
 
     public SmbAbstractLoader(Context context) {
         super(context);
@@ -117,8 +119,15 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         if(mException != null) {
             if (mException instanceof jcifs.smb.SmbAuthException) {
                 message = getContext().getString(R.string.access_error);
-            } else if (mException instanceof jcifs.smb.SmbException) {
-                message = getContext().getString(R.string.network_error);
+            } else if (mException instanceof SmbException) {
+                SmbException e = (SmbException) mException;
+                String msg = e.getMessage();
+                if(msg != null && msg.contains("Invalid operation")){
+                    message = getContext().getString(R.string.operation_error);
+                }
+                else {
+                    message = getContext().getString(R.string.network_error);
+                }
             }
         }
         return message;
@@ -158,6 +167,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
     }
 
     protected void startProgressWatcher(final SmbFile target, final int total) {
+        mCount = 0;
         mThread = new HandlerThread(TAG);
         mThread.start();
         mHandler = new Handler(mThread.getLooper());
@@ -169,6 +179,12 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
                     mHandler.postDelayed(mWatcher, 1000);
                     updateProgress(mType, target.getName(), count, total);
                 }
+
+                if(count >= mCount)
+                    mCount = count;
+                else
+                    success = false;
+
             }
         });
     }

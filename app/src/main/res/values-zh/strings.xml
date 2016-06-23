@@ -143,4 +143,6 @@
     <string name="wizard_password_space_error">密碼不能包含空白</string>
     <string name="device">裝置</string>
     <string name="used">已使用</string>
+    <string name="operation_error">無效操作</string>
+    <string name="msg_move_to">移動到..</string>
 </resources>

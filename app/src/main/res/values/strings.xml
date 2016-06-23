@@ -51,6 +51,7 @@
     <string name="wizard_password_space_error">Password can\'t contain space</string>
     <string name="device">Device</string>
     <string name="used">Used</string>
+    <string name="msg_move_to">Move to..</string>
 
     <!-- string -->
 
@@ -153,6 +154,7 @@
     <string name="confirm_password_error">Please confirm your password</string>
     <string name="select_folder_error">Destination can\'t in the selected list</string>
     <string name="network_error">Please check your network, or try again later</string>
+    <string name="operation_error">Invalid operation</string>
     <string name="access_error">Access deny</string>
     <string name="login_error">Invalid account or password</string>
     <string name="remote_access_always_warning">For \"Always\", you need to set up remote access</string>
