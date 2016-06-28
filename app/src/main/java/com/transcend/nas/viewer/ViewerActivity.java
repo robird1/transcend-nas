@@ -3,7 +3,9 @@ package com.transcend.nas.viewer;
 import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -11,10 +13,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewPropertyAnimator;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.google.android.gms.cast.ApplicationMetadata;
+import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
+import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCastConsumer;
+import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCastConsumerImpl;
+import com.google.android.libraries.cast.companionlibrary.cast.exceptions.NoConnectionException;
+import com.google.android.libraries.cast.companionlibrary.cast.exceptions.TransientNetworkDisconnectionException;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
@@ -28,6 +37,7 @@ import com.transcend.nas.management.LocalFileUploadLoader;
 import com.transcend.nas.management.SmbAbstractLoader;
 import com.transcend.nas.management.SmbFileDeleteLoader;
 import com.transcend.nas.management.SmbFileDownloadLoader;
+import com.transcend.nas.utils.FileFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -54,6 +64,9 @@ public class ViewerActivity extends AppCompatActivity implements
     private ImageView mDownload;
     private ViewerPager mPager;
     private ViewerPagerAdapter mPagerAdapter;
+    private VideoCastManager mCastManager;
+    private VideoCastConsumer mCastConsumer;
+    private MenuItem mMediaRouteMenuItem;
 
     private int mLoaderID;
     private String mPath;
@@ -66,6 +79,42 @@ public class ViewerActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_viewer);
+        mCastManager = VideoCastManager.getInstance();
+        mCastConsumer = new VideoCastConsumerImpl() {
+
+            @Override
+            public void onFailed(int resourceId, int statusCode) {
+                String reason = "Not Available";
+                if (resourceId > 0) {
+                    reason = getString(resourceId);
+                }
+                Log.e(TAG, "Action failed, reason:  " + reason + ", status code: " + statusCode);
+            }
+
+            @Override
+            public void onApplicationConnected(ApplicationMetadata appMetadata, String sessionId,
+                                               boolean wasLaunched) {
+                invalidateOptionsMenu();
+                for (int i = 0; i < mList.size();i++) {
+                    FileInfo info = mList.get(i);
+                    if(info.path != null && info.path.equals(mPath)) {
+                        doPhotoCast(i);
+                        break;
+                    }
+                }
+
+            }
+
+            @Override
+            public void onDisconnected() {
+                invalidateOptionsMenu();
+            }
+
+            @Override
+            public void onConnectionSuspended(int cause) {
+                Log.d(TAG, "onConnectionSuspended() was called with cause: " + cause);
+            }
+        };
         initData();
         initHeaderBar();
         initFooterBar();
@@ -73,9 +122,32 @@ public class ViewerActivity extends AppCompatActivity implements
     }
 
     @Override
+    protected void onResume() {
+        mCastManager = VideoCastManager.getInstance();
+        if (null != mCastManager) {
+            mCastManager.addVideoCastConsumer(mCastConsumer);
+            mCastManager.incrementUiCounter();
+        }
+        super.onResume();
+        Log.w(TAG, "onResume");
+    }
+
+    @Override
+    protected void onPause() {
+        if (null != mCastManager) {
+            mCastManager.decrementUiCounter();
+            mCastManager.removeVideoCastConsumer(mCastConsumer);
+        }
+        super.onPause();
+        Log.w(TAG, "onPause");
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        //getMenuInflater().inflate(R.menu.image_manage_editor, menu);
-        //menu.removeItem(NASApp.MODE_SMB.equals(mMode) ? R.id.image_manage_editor_action_upload : R.id.image_manage_editor_action_download);
+        getMenuInflater().inflate(R.menu.image_manage_editor, menu);
+        menu.findItem(R.id.image_manage_editor_action_upload).setVisible(false);
+        menu.findItem( R.id.image_manage_editor_action_download).setVisible(false);
+        mMediaRouteMenuItem = mCastManager.addMediaRouterButton(menu, R.id.media_route_menu_item);
         return true;
     }
 
@@ -213,12 +285,42 @@ public class ViewerActivity extends AppCompatActivity implements
 
         ArrayList<String> list = new ArrayList<String>();
         for (FileInfo info : mList) list.add(info.path);
+        int index = list.indexOf(mPath);
         mPagerAdapter = new ViewerPagerAdapter(this);
         mPagerAdapter.setContent(list);
         mPagerAdapter.setOnPhotoTapListener(this);
         mPager = (ViewerPager) findViewById(R.id.viewer_pager);
         mPager.setAdapter(mPagerAdapter);
-        mPager.setCurrentItem(list.indexOf(mPath));
+        mPager.setCurrentItem(index);
+        mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                doPhotoCast(position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+        doPhotoCast(index);
+    }
+
+    private void doPhotoCast (int position){
+        if (NASApp.MODE_SMB.equals(mMode) && mCastManager != null && mCastManager.isConnected()) {
+            try {
+                mCastManager.sendDataMessage(FileFactory.getInstance().getPhotoPath(false, mList.get(position).path));
+            } catch (TransientNetworkDisconnectionException e) {
+                e.printStackTrace();
+            } catch (NoConnectionException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 

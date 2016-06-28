@@ -82,7 +82,7 @@ public class NASApp extends Application {
     }
 
     private void initChromeCastManager(){
-        String applicationId = CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID;
+        String applicationId = "A22AADD0";
 
         // Build a CastConfiguration object and initialize VideoCastManager
         CastConfiguration options = new CastConfiguration.Builder(applicationId)
@@ -99,6 +99,7 @@ public class NASApp extends Application {
                 .addNotificationAction(CastConfiguration.NOTIFICATION_ACTION_PLAY_PAUSE, true)
                 .addNotificationAction(CastConfiguration.NOTIFICATION_ACTION_DISCONNECT, true)
                 .setForwardStep(10)
+                .addNamespace("urn:x-cast:com.transcend.nas")
                 .build();
         VideoCastManager.initialize(this, options);
     }

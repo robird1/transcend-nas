@@ -259,6 +259,8 @@ public class SettingsActivity extends AppCompatActivity implements
             if(isStartService){
                 Bundle arg = new Bundle();
                 getLoaderManager().restartLoader(LoaderID.AUTO_BACKUP, arg, this).forceLoad();
+                isStartService = false;
+                return;
             }
             else {
                 if(isInitRemoteAccessCheck){
@@ -270,13 +272,13 @@ public class SettingsActivity extends AppCompatActivity implements
                         arg.putString("email", email);
                         arg.putString("password", pwd);
                         getLoaderManager().restartLoader(LoaderID.TUTK_LOGIN, arg, SettingsActivity.this).forceLoad();
+                        return;
                     }
                 }
-                else
-                    mProgressView.setVisibility(View.INVISIBLE);
+
+                mProgressView.setVisibility(View.INVISIBLE);
+                return;
             }
-            isStartService = false;
-            return;
         }
 
         if (!success) {
