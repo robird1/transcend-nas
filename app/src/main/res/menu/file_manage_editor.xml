@@ -50,7 +50,7 @@
             <item
                 android:id="@+id/file_manage_editor_action_new_folder"
                 android:icon="@drawable/ic_create_new_folder_gray_24dp"
-                android:title="@string/new_folder"
+                android:title="@string/msg_new_folder"
                 app:showAsAction="never" />
 
         </menu>

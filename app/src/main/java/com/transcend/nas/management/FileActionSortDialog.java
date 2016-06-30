@@ -26,7 +26,7 @@ public abstract class FileActionSortDialog implements DialogInterface.OnClickLis
     private void initDialog() {
         String[] items = mContext.getResources().getStringArray(R.array.sort_items);
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        builder.setTitle(mContext.getResources().getString(R.string.sort_by));
+        builder.setTitle(mContext.getResources().getString(R.string.sort));
         builder.setIcon(R.drawable.ic_sort_gray_24dp);
         builder.setSingleChoiceItems(items, 0, this);
         builder.setCancelable(true);

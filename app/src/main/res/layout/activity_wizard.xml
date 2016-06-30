@@ -91,7 +91,7 @@
             android:layout_centerHorizontal="true"
             android:layout_marginLeft="30dp"
             android:layout_marginRight="30dp"
-            android:hint="@string/password_confirm">
+            android:hint="@string/confrim_password">
 
             <EditText
                 android:layout_width="match_parent"

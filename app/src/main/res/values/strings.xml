@@ -97,13 +97,13 @@
     <string name="music">Music</string>
     <string name="name">Name</string>
     <string name="reverse_name">Name (Reverse)</string>
-    <string name="new_folder">New folder</string>
+    <string name="msg_new_folder">New folder</string>
     <string name="no_item_selected">No items selected</string>
     <string name="ok">OK</string>
-    <string name="on_top">On top</string>
+    <string name="msg_location_on_top">Already at top-level folder!</string>
     <string name="password">Password</string>
-    <string name="password_confirm">Confirm Password</string>
-    <string name="submit">Submit</string>
+    <string name="confrim_password">Confirm password</string>
+    <string name="submitStr">Submit</string>
     <string name="resend">Resend</string>
     <string name="bind">Set Up</string>
     <string name="find_nas">Find StoreJet Cloud</string>
@@ -117,7 +117,7 @@
     <string name="share">Share</string>
     <string name="sign_in">Sign In</string>
     <string name="size">Size</string>
-    <string name="sort_by">Sort by</string>
+    <string name="sort">Sort</string>
     <string name="type">Type</string>
     <string name="unknown_format">Unknown format</string>
     <string name="untitled_folder">Untitled folder</string>
@@ -126,9 +126,9 @@
     <string name="view">View</string>
     <string name="wifi_only">Wi-Fi only</string>
     <string name="legal">Privacy</string>
-    <string name="term_of_use">Terms of use</string>
+    <string name="termsofuse">Terms of Use</string>
     <string name="licenses">Licenses</string>
-    <string name="contact_us">Contact us</string>
+    <string name="contact">Contact</string>
     <string name="forget_password">forget password?</string>
     <string name="send">Send</string>
     <string name="remote_access">Remote Access</string>
@@ -141,10 +141,10 @@
     <string name="try_remote_access">Remote access</string>
     <string name="nas_logout">Are you sure to logout StoreJet Cloud?</string>
 
-    <string name="ask_admin_password">Please input administrator password</string>
+    <string name="msg_enteradminpw">Please enter Administrator Password</string>
     <string name="search_result_empty">No match file</string>
-    <string name="empty">(Empty)</string>
-    <string name="empty_folder">(Empty Folder)</string>
+    <string name="empty">Empty</string>
+    <string name="empty_folder">Empty Folder</string>
     <string name="empty_account">Empty Account</string>
     <string name="empty_email">Empty Email</string>
     <string name="empty_password">Empty Password</string>
@@ -171,7 +171,8 @@
     <string name="error_format">Error format</string>
     <string name="nas_list">StoreJet Cloud List</string>
 
-    <string name="conj_selected">%1$d selected</string>
+    <string name="msg_file_selected">%1$d file selected</string>
+    <string name="msg_files_selected">%1$d files selected</string>
     <string name="conj_used">%1$s used</string>
 
     <string name="backup_file">Backup file</string>

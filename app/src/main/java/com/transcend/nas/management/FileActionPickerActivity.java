@@ -304,7 +304,7 @@ public class FileActionPickerActivity extends AppCompatActivity implements
             doLoad(parent);
         }
         else {
-            toast(R.string.on_top, Toast.LENGTH_SHORT);
+            toast(R.string.msg_location_on_top, Toast.LENGTH_SHORT);
         }
     }
 
@@ -457,7 +457,7 @@ public class FileActionPickerActivity extends AppCompatActivity implements
             return;
         }
 
-        String format = getResources().getString(R.string.conj_selected);
+        String format = getResources().getString(count <= 1 ? R.string.msg_file_selected : R.string.msg_files_selected);
         String message = String.format(format, count);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);

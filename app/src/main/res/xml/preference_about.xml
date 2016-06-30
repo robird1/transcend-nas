@@ -10,7 +10,7 @@
     <Preference
         android:key="@string/pref_about_term_of_use"
         android:layout="@layout/preference_item"
-        android:title="@string/term_of_use" />
+        android:title="@string/termsofuse" />
 
     <Preference
         android:key="@string/pref_about_license"
@@ -20,6 +20,6 @@
     <Preference
         android:key="@string/pref_about_contact"
         android:layout="@layout/preference_item"
-        android:title="@string/contact_us" />
+        android:title="@string/contact" />
 
 </PreferenceScreen>

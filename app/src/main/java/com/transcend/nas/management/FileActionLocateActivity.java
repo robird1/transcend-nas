@@ -263,7 +263,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
             doLoad(parent);
         }
         else {
-            toast(R.string.on_top, Toast.LENGTH_SHORT);
+            toast(R.string.msg_location_on_top, Toast.LENGTH_SHORT);
         }
     }
 

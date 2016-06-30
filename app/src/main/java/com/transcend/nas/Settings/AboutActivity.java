@@ -127,7 +127,7 @@ public class AboutActivity extends AppCompatActivity {
             } else if (preference.getKey().equals(getString(R.string.pref_about_legal))) {
                 id = R.string.legal;
             } else if (preference.getKey().equals(getString(R.string.pref_about_term_of_use))) {
-                id = R.string.term_of_use;
+                id = R.string.termsofuse;
             } else if (preference.getKey().equals(getString(R.string.pref_about_license))) {
                 id = R.string.licenses;
             } else if (preference.getKey().equals(getString(R.string.pref_about_contact))) {
@@ -203,7 +203,7 @@ public class AboutActivity extends AppCompatActivity {
             if(id == R.string.legal) {
                 v = inflater.inflate(R.layout.fragment_privacy_info, container, false);
             }
-            else if(id == R.string.term_of_use){
+            else if(id == R.string.termsofuse){
                 v = inflater.inflate(R.layout.fragment_term_of_use, container, false);
                 TextView info = (TextView) v.findViewById(R.id.info);
                 try {

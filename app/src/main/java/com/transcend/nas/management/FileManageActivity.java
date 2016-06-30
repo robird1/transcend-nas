@@ -1321,7 +1321,7 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void updateEditorModeTitle(int count) {
-        String format = getResources().getString(R.string.conj_selected);
+        String format = getResources().getString(count <= 1 ? R.string.msg_file_selected : R.string.msg_files_selected);
         mEditorModeTitle.setText(String.format(format, count));
     }
 

@@ -161,7 +161,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:hint="@string/password_confirm"
+            android:hint="@string/confrim_password"
             android:visibility="visible">
 
             <EditText
@@ -178,7 +178,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="16dp"
             android:background="@color/colorAccentDialogButton"
-            android:text="@string/submit"
+            android:text="@string/submitStr"
             android:textColor="@color/colorPrimary"
             android:visibility="visible" />
     </LinearLayout>

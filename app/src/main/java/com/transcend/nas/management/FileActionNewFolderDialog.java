@@ -39,7 +39,7 @@ public abstract class FileActionNewFolderDialog implements TextWatcher, View.OnC
 
     private void initDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        builder.setTitle(mContext.getResources().getString(R.string.new_folder));
+        builder.setTitle(mContext.getResources().getString(R.string.msg_new_folder));
         builder.setIcon(R.drawable.ic_create_new_folder_gray_24dp);
         builder.setView(R.layout.dialog_folder_create);
         builder.setNegativeButton(R.string.cancel, null);

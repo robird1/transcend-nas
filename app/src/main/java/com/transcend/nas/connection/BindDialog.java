@@ -48,7 +48,7 @@ public abstract class BindDialog implements View.OnClickListener {
 
     private void initDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-        builder.setMessage(mActivity.getString(R.string.ask_admin_password));
+        builder.setMessage(mActivity.getString(R.string.msg_enteradminpw));
         builder.setView(R.layout.dialog_bind);
         builder.setCancelable(true);
         builder.setNegativeButton(R.string.cancel, null);
