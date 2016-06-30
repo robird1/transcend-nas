@@ -2,14 +2,18 @@ package com.transcend.nas.utils;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.text.Editable;
 import android.util.Log;
 
 import com.google.android.exoplayer.ExoPlayer;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
+import com.google.android.gms.common.images.WebImage;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
@@ -21,6 +25,7 @@ import com.tutk.IOTC.P2PService;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
 
 /**
  * Created by silverhsu on 16/1/25.
@@ -56,6 +61,7 @@ public class MediaFactory {
         String uri = createUri(path).toString();
         String type = MimeUtil.getMimeType(path);
         MediaMetadata metadata = new MediaMetadata(mediaType);
+        //metadata.addImage(new WebImage(Uri.parse(FileFactory.getInstance().getPhotoPath(true, path))));
 
         MediaInfo info = new MediaInfo.Builder(uri)
                 .setContentType(type)
@@ -176,6 +182,15 @@ public class MediaFactory {
         intent.setDataAndType(uri, type);
         intent.putExtra("title", title);
         act.startActivityForResult(intent, 0);
+
+        /*MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+        if (Build.VERSION.SDK_INT >= 14)
+            mmr.setDataSource(uri.toString(), new HashMap<String, String>());
+        else
+            mmr.setDataSource(uri.toString());
+        String albumName = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+        String albumArtist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST);
+        Log.d("ike", "TEST ALBUM : " + albumName);*/
     }
 
     private static void openLocal(Activity act, Uri uri, String type, String title){

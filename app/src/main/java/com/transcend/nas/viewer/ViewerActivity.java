@@ -22,6 +22,7 @@ import com.google.android.gms.cast.ApplicationMetadata;
 import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
 import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCastConsumer;
 import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCastConsumerImpl;
+import com.google.android.libraries.cast.companionlibrary.cast.exceptions.CastException;
 import com.google.android.libraries.cast.companionlibrary.cast.exceptions.NoConnectionException;
 import com.google.android.libraries.cast.companionlibrary.cast.exceptions.TransientNetworkDisconnectionException;
 import com.transcend.nas.NASApp;
@@ -73,6 +74,7 @@ public class ViewerActivity extends AppCompatActivity implements
     private String mMode;
     private String mRoot;
     private ArrayList<FileInfo> mList;
+    private int mCurrentIndex = -1;
     private boolean evenDelete = false;
 
     @Override
@@ -95,14 +97,7 @@ public class ViewerActivity extends AppCompatActivity implements
             public void onApplicationConnected(ApplicationMetadata appMetadata, String sessionId,
                                                boolean wasLaunched) {
                 invalidateOptionsMenu();
-                for (int i = 0; i < mList.size();i++) {
-                    FileInfo info = mList.get(i);
-                    if(info.path != null && info.path.equals(mPath)) {
-                        doPhotoCast(i);
-                        break;
-                    }
-                }
-
+                doPhotoCast(mCurrentIndex);
             }
 
             @Override
@@ -312,7 +307,25 @@ public class ViewerActivity extends AppCompatActivity implements
     }
 
     private void doPhotoCast (int position){
+        if(position >= mList.size())
+            return;
+
+        mCurrentIndex = position;
         if (NASApp.MODE_SMB.equals(mMode) && mCastManager != null && mCastManager.isConnected()) {
+            try {
+                Log.d(TAG,"CastManager loaded : " + mCastManager.isRemoteMediaLoaded());
+                if(mCastManager.isRemoteMediaLoaded()){
+                    mCastManager.stop();
+                    mCastManager.clearMediaSession();
+                }
+            } catch (CastException e) {
+                e.printStackTrace();
+            } catch (TransientNetworkDisconnectionException e) {
+                e.printStackTrace();
+            } catch (NoConnectionException e) {
+                e.printStackTrace();
+            }
+
             try {
                 mCastManager.sendDataMessage(FileFactory.getInstance().getPhotoPath(false, mList.get(position).path));
             } catch (TransientNetworkDisconnectionException e) {
@@ -439,8 +452,25 @@ public class ViewerActivity extends AppCompatActivity implements
                 int position = mPager.getCurrentItem();
                 mList.remove(position);
                 mPagerAdapter.removeView(position);
-                if(mList.size() == 0)
+                if(mList.size() == 0) {
+                    if (NASApp.MODE_SMB.equals(mMode) && mCastManager != null && mCastManager.isConnected()) {
+                        try {
+                            mCastManager.sendDataMessage("close");
+                        } catch (TransientNetworkDisconnectionException e) {
+                            e.printStackTrace();
+                        } catch (NoConnectionException e) {
+                            e.printStackTrace();
+                        }
+                    }
                     doFinish();
+                }
+                else{
+                    //check is last photo or not
+                    if(position >= mList.size()){
+                        position = mList.size() - 1;
+                    }
+                    doPhotoCast(position);
+                }
             }
             else if (loader instanceof SmbFileDownloadLoader || loader instanceof LocalFileUploadLoader){
                 //do nothing
