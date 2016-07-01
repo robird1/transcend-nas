@@ -1,5 +1,7 @@
 package com.transcend.nas.utils;
 
+import android.webkit.MimeTypeMap;
+
 import org.apache.commons.io.FilenameUtils;
 
 /**

@@ -65,12 +65,26 @@
             android:textSize="@dimen/wizard_title_text_size"
             android:textStyle="bold" />
 
+        <TextView
+            android:id="@+id/wizard_account"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/wizard_title_info"
+            android:layout_centerHorizontal="true"
+            android:layout_marginLeft="34dp"
+            android:layout_marginRight="34dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:text="@string/account"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/wizard_button_text_size" />
+
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/wizard_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/wizard_title_info"
+            android:layout_below="@id/wizard_account"
             android:layout_centerHorizontal="true"
             android:layout_marginLeft="30dp"
             android:layout_marginRight="30dp"

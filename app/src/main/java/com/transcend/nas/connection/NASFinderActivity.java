@@ -22,11 +22,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.transcend.nas.InitialActivity;
+import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.WizardActivity;
 import com.transcend.nas.common.DividerItemDecoration;
 import com.transcend.nas.common.LoaderID;
+import com.transcend.nas.common.NotificationDialog;
 import com.transcend.nas.common.TutkCodeID;
 import com.transcend.nas.management.FileManageActivity;
 import com.transcend.nas.management.TutkDeleteNasLoader;
@@ -142,7 +144,7 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
     }
 
     private void reloadNASListIfNotFound() {
-        if (mNASList.size() == 0) {
+        if (mNASList == null || mNASList.size() == 0) {
             startNASListLoader();
         }
     }
@@ -246,6 +248,8 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
                 token = args.getString("token");
                 return new TutkGetNasLoader(this, server, token);
             case LoaderID.TUTK_NAS_DELETE:
+                if(mLoginDialog == null)
+                    mProgressView.setVisibility(View.VISIBLE);
                 server = args.getString("server");
                 token = args.getString("token");
                 nasId = args.getString("nasId");
@@ -283,7 +287,7 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
         mProgressView.setVisibility(View.INVISIBLE);
         mNASList = loader.getList();
         mAdapter.notifyDataSetChanged();
-        mRecyclerEmtpyView.setVisibility(mNASList.size() == 0 ? View.VISIBLE : View.GONE);
+        mRecyclerEmtpyView.setVisibility((mNASList != null && mNASList.size() > 0) ? View.GONE : View.VISIBLE);
     }
 
     private void checkWizardLoader(boolean success, WizardCheckLoader loader){
@@ -330,6 +334,7 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
         if (code.equals("")) {
             mNASList = loader.getNasArrayList();
             mAdapter.notifyDataSetChanged();
+            mRecyclerEmtpyView.setVisibility((mNASList != null && mNASList.size() > 0) ? View.GONE : View.VISIBLE);
         } else {
             Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
             if(code.equals(TutkCodeID.AUTH_FAIL)){
@@ -339,6 +344,7 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
     }
 
     private void checkTutkDeleteNasLoader(boolean success, TutkDeleteNasLoader loader){
+        mProgressView.setVisibility(View.INVISIBLE);
         if(!success){
             hideLoginDialog(false);
             Toast.makeText(this, getString(R.string.network_error),Toast.LENGTH_SHORT).show();
@@ -358,6 +364,7 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
                 }
             }
             mAdapter.notifyDataSetChanged();
+            mRecyclerEmtpyView.setVisibility((mNASList != null && mNASList.size() > 0) ? View.GONE : View.VISIBLE);
             Toast.makeText(this, status, Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
@@ -413,6 +420,22 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
         };
     }
 
+    private void showNotificationDialog(final Bundle args) {
+        Bundle value = new Bundle();
+        value.putString(NotificationDialog.DIALOG_MESSAGE, getString(R.string.remote_access_delete_warning));
+        NotificationDialog mNotificationDialog = new NotificationDialog(this, value) {
+            @Override
+            public void onConfirm() {
+                startRemoteAccessDeleteLoader(args);
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+        };
+    }
+
     /**
      * RECYCLER VIEW ADAPTER
      */
@@ -430,13 +453,34 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
         public void onBindViewHolder(ViewHolder holder, int position) {
             String nickname = mNASList.get(position).get("nickname");
             String hostname = mNASList.get(position).get("hostname");
-            holder.title.setText(nickname);
-            holder.subtitle.setText(hostname);
+            if(nickname != null && nickname.contains(NASApp.TUTK_NAME_TAG)) {
+                String[] splitname = nickname.split(NASApp.TUTK_NAME_TAG);
+                int length = splitname.length;
+                if(length == 0){
+                    holder.title.setText(nickname);
+                    holder.subtitle.setText(hostname);
+                }
+                else if(length == 1 ){
+                    holder.title.setText(splitname[0]);
+                    holder.subtitle.setText(hostname);
+                }
+                else{
+                    holder.title.setText(splitname[0]);
+                    holder.subtitle.setText(splitname[1]);
+                }
+            }
+            else {
+                holder.title.setText(nickname);
+                holder.subtitle.setText(hostname);
+            }
         }
 
         @Override
         public int getItemCount() {
-            return mNASList.size();
+            int size = 0;
+            if(mNASList != null)
+                size = mNASList.size();
+            return size;
         }
 
         class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -444,12 +488,19 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
             ImageView icon;
             TextView title;
             TextView subtitle;
+            ImageView delete;
+            ImageView next;
 
             public ViewHolder(View itemView) {
                 super(itemView);
                 icon = (ImageView) itemView.findViewById(R.id.listitem_nas_finder_icon);
                 title = (TextView) itemView.findViewById(R.id.listitem_nas_finder_title);
                 subtitle = (TextView) itemView.findViewById(R.id.listitem_nas_finder_subtitle);
+                next = (ImageView) itemView.findViewById(R.id.listitem_nas_next_icon);
+                next.setVisibility(isRemoteAccess ? View.INVISIBLE : View.VISIBLE);
+                delete = (ImageView) itemView.findViewById(R.id.listitem_nas_delete_icon);
+                delete.setVisibility(isRemoteAccess ? View.VISIBLE : View.INVISIBLE);
+                delete.setOnClickListener(this);
                 itemView.setOnClickListener(this);
             }
 
@@ -458,12 +509,28 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
                 int pos = getAdapterPosition();
                 HashMap<String, String> nas = mNASList.get(pos);
                 Bundle args = new Bundle();
-                args.putString("nasId", nas.get("nasId"));
-                args.putString("nickname", nas.get("nickname"));
-                args.putString("hostname", nas.get("hostname"));
-                args.putString("username", NASPref.getUsername(NASFinderActivity.this));
-                args.putString("password", NASPref.getPassword(NASFinderActivity.this));
-                getLoaderManager().restartLoader(LoaderID.WIZARD, args, NASFinderActivity.this).forceLoad();
+
+                if(v.getId() == R.id.listitem_nas_delete_icon){
+                    args.putString("server", NASPref.getCloudServer(NASFinderActivity.this));
+                    args.putString("token", NASPref.getCloudAuthToken(NASFinderActivity.this));
+                    args.putString("nasId", nas.get("nasId"));
+                    showNotificationDialog(args);
+                }
+                else {
+                    args.putString("nasId", nas.get("nasId"));
+                    String nickname = nas.get("nickname");
+                    if(nickname != null && nickname.contains(NASApp.TUTK_NAME_TAG)) {
+                        String[] splitname = nickname.split(NASApp.TUTK_NAME_TAG);
+                        if(splitname.length >= 1){
+                            nickname = splitname[0];
+                        }
+                    }
+                    args.putString("nickname", nickname);
+                    args.putString("hostname", nas.get("hostname"));
+                    args.putString("username", NASPref.getUsername(NASFinderActivity.this));
+                    args.putString("password", NASPref.getPassword(NASFinderActivity.this));
+                    getLoaderManager().restartLoader(LoaderID.WIZARD, args, NASFinderActivity.this).forceLoad();
+                }
             }
         }
     }

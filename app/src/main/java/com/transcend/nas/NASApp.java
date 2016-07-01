@@ -38,6 +38,8 @@ public class NASApp extends Application {
     public static final String ACT_PICK_UPLOAD = "PICKUPLOAD";
     public static final String ACT_PICK_DOWNLOAD = "PICKUPDOWNLOAD";
 
+    public static final String TUTK_NAME_TAG     = "@tS#";
+
     private static Context mContext;
 
     @Override

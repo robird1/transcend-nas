@@ -55,6 +55,7 @@ public class WizardActivity extends AppCompatActivity implements LoaderManager.L
     public static final int REQUEST_CODE = WizardActivity.class.hashCode() & 0xFFFF;
     private static final String TAG = WizardActivity.class.getSimpleName();
     private Toolbar mToolbar;
+    private TextView tAccount;
     private TextInputLayout tlPassword;
     private TextInputLayout tlConfirmPassword;
     private ImageView iBackground;
@@ -91,6 +92,8 @@ public class WizardActivity extends AppCompatActivity implements LoaderManager.L
 
     public void initWizardLayout(){
         mWizardLayout = (RelativeLayout) findViewById(R.id.wizard_layout);
+        tAccount = (TextView) findViewById(R.id.wizard_account);
+        tAccount.setText(getString(R.string.account) + " : admin");
         tlPassword = (TextInputLayout) findViewById(R.id.wizard_password);
         tlConfirmPassword = (TextInputLayout) findViewById(R.id.wizard_password_confirm);
         Button button = (Button) findViewById(R.id.wizard_start);
