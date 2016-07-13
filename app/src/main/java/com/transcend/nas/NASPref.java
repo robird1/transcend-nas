@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.transcend.nas.management.FileManageRecyclerAdapter;
 import com.transcend.nas.utils.PrefUtil;
+import com.transcend.nas.viewer.music.MusicActivity;
 
 /**
  * Created by silverhsu on 16/1/15.
@@ -383,6 +384,24 @@ public class NASPref {
         String name = context.getResources().getString(R.string.pref_name);
         String key = context.getResources().getString(R.string.pref_file_view_type);
         PrefUtil.write(context, name, key, type.ordinal());
+    }
+
+    /**
+     *
+     * Music Type
+     *
+     */
+    public static MusicActivity.MUSIC_MODE getMusicType(Context context) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_music_type);
+        int def = MusicActivity.MUSIC_MODE.NORMAL.ordinal();
+        return MusicActivity.MUSIC_MODE.values()[PrefUtil.read(context, name, key, def)];
+    }
+
+    public static void setMusicType(Context context, MusicActivity.MUSIC_MODE mode) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_music_type);
+        PrefUtil.write(context, name, key, mode.ordinal());
     }
 
 }

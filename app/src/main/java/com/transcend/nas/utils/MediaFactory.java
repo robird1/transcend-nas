@@ -6,20 +6,13 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.text.Editable;
-import android.util.Log;
 
-import com.google.android.exoplayer.ExoPlayer;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
-import com.google.android.gms.common.images.WebImage;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
-import com.transcend.nas.NASPref;
-import com.transcend.nas.utils.MimeUtil;
-import com.transcend.nas.viewer.PlayerActivity;
+import com.transcend.nas.viewer.player.PlayerActivity;
 import com.tutk.IOTC.P2PService;
 
 import java.io.File;
@@ -177,20 +170,20 @@ public class MediaFactory {
         return name;
     }
 
+    public static MediaMetadataRetriever getMediaMetadataRetriever(Uri uri){
+        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+        if (Build.VERSION.SDK_INT >= 14)
+            mmr.setDataSource(uri.toString(), new HashMap<String, String>());
+        else
+            mmr.setDataSource(uri.toString());
+        return mmr;
+    }
+
     private static void openIn(Activity act, Uri uri, String type, String title) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(uri, type);
         intent.putExtra("title", title);
         act.startActivityForResult(intent, 0);
-
-        /*MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        if (Build.VERSION.SDK_INT >= 14)
-            mmr.setDataSource(uri.toString(), new HashMap<String, String>());
-        else
-            mmr.setDataSource(uri.toString());
-        String albumName = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
-        String albumArtist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST);
-        Log.d("ike", "TEST ALBUM : " + albumName);*/
     }
 
     private static void openLocal(Activity act, Uri uri, String type, String title){

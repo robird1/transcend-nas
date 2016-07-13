@@ -28,17 +28,13 @@ import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.transcend.nas.NASApp;
-import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.utils.FileFactory;
-import com.transcend.nas.utils.MediaFactory;
-import com.transcend.nas.viewer.ViewerActivity;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * Created by silverhsu on 16/2/2.

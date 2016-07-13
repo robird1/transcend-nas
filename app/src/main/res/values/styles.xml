@@ -43,4 +43,8 @@
         <item name="android:background">@color/colorActionBarBackground</item>
     </style>
 
+    <style name="AppTheme.SeekBar">
+        <item name="colorAccent">#FFFFFF</item>
+    </style>
+
 </resources>

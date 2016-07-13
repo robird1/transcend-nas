@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.transcend.nas.viewer;
+package com.transcend.nas.viewer.player;
 
 import com.google.android.exoplayer.AspectRatioFrameLayout;
 import com.google.android.exoplayer.ExoPlaybackException;
@@ -36,11 +36,6 @@ import com.google.android.exoplayer.util.MimeTypes;
 import com.google.android.exoplayer.util.Util;
 import com.google.android.exoplayer.util.VerboseLogUtil;
 import com.transcend.nas.R;
-import com.transcend.nas.viewer.player.DashRendererBuilder;
-import com.transcend.nas.viewer.player.DemoPlayer;
-import com.transcend.nas.viewer.player.ExtractorRendererBuilder;
-import com.transcend.nas.viewer.player.HlsRendererBuilder;
-import com.transcend.nas.viewer.player.SmoothStreamingRendererBuilder;
 
 import android.Manifest.permission;
 import android.annotation.TargetApi;

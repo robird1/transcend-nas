@@ -1,4 +1,4 @@
-package com.transcend.nas.viewer;
+package com.transcend.nas.viewer.photo;
 
 import android.content.Context;
 import android.support.v4.view.ViewPager;

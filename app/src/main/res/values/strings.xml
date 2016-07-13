@@ -54,6 +54,10 @@
     <string name="msg_move_to">Move to..</string>
     <string name="remote_access_bind">Bind</string>
     <string name="remote_access_unbind">Unbind</string>
+    <string name="unknown_title">Unknown Title</string>
+    <string name="unknown_artist">Unknown Artist</string>
+    <string name="unknown_album">Unknown Album</string>
+    <string name="device_offline">Device is offline</string>
 
     <!-- string -->
 
@@ -255,6 +259,7 @@
 
     <string name="pref_file_sort_type">FILE SORT TYPE</string>
     <string name="pref_file_view_type">FILE VIEW TYPE</string>
+    <string name="pref_music_type">MUSIC TYPE</string>
 
     <string name="pref_about">ABOUT</string>
     <string name="pref_about_legal">ABOUT LEGAL</string>

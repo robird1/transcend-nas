@@ -1,4 +1,4 @@
-package com.transcend.nas.viewer;
+package com.transcend.nas.viewer.photo;
 
 import android.content.Context;
 import android.support.v4.view.PagerAdapter;
@@ -8,9 +8,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.realtek.nasfun.api.Server;
-import com.realtek.nasfun.api.ServerManager;
-import com.transcend.nas.NASApp;
 import com.transcend.nas.utils.FileFactory;
 
 import java.util.ArrayList;

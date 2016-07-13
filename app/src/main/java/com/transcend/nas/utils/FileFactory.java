@@ -1,9 +1,9 @@
 package com.transcend.nas.utils;
 
-import android.content.Context;
+import android.media.MediaMetadataRetriever;
+import android.media.MediaPlayer;
 import android.util.Log;
 
-import com.nostra13.universalimageloader.utils.StorageUtils;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Created by ike_lee on 2016/5/23.
@@ -29,10 +28,28 @@ public class FileFactory {
     private List<String> mNotificationList;
     private Map<String, String> mRealPathMap;
     private int RealPathMapLifeCycle = 10;
+    private ArrayList<FileInfo> mFileList;
+    private int mFileIndex = -1;
+    private ArrayList<FileInfo> mMusicList;
+    private int mMusicIndex = -1;
+    private MediaPlayer mMediaPlayer;
+    private MediaMetadataRetriever mMediaMetadataRetriever;
+    private ArrayList<MediaPlayerListener> mMediaPlayerListener;
+
+    public enum MediaPlayerStatus {
+        NEW, LOAD, PLAY, PAUSE, STOP, PREV, NEXT, ERROR
+    }
+
+    public interface MediaPlayerListener {
+        public void onMusicChange(MediaPlayerStatus status);
+    }
 
     public FileFactory() {
         mNotificationList = new ArrayList<String>();
         mRealPathMap = new HashMap<String, String>();
+        mFileList = new ArrayList<FileInfo>();
+        mMusicList = new ArrayList<FileInfo>();
+        mMediaPlayerListener = new ArrayList<MediaPlayerListener>();
     }
 
     public static FileFactory getInstance() {
@@ -113,7 +130,7 @@ public class FileFactory {
             Server server = ServerManager.INSTANCE.getCurrentServer();
             String hostname = server.getHostname();
             String p2pIp = P2PService.getInstance().getP2PIP();
-            if(hostname.contains(p2pIp)){
+            if (hostname.contains(p2pIp)) {
                 hostname = p2pIp + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
             }
             String username = server.getUsername();
@@ -124,7 +141,7 @@ public class FileFactory {
             else if (path.startsWith("/" + username + "/"))
                 filepath = Server.USER_DAV_HOME + path.replaceFirst("/" + username + "/", "/");
             else {
-                if(username.equals("admin")) {
+                if (username.equals("admin")) {
                     for (String key : mRealPathMap.keySet()) {
                         if (path.startsWith(key)) {
                             path = path.replaceFirst(key, mRealPathMap.get(key));
@@ -132,13 +149,12 @@ public class FileFactory {
                         }
                     }
                     filepath = Server.DEVICE_DAV_HOME + path.replaceFirst("/home/", "/");
-                }
-                else{
+                } else {
                     String newPath = "";
                     String[] paths = path.replaceFirst("/", "").split("/");
                     int length = paths.length;
-                    for(int i = 0; i< length; i++){
-                        if(i==0)
+                    for (int i = 0; i < length; i++) {
+                        if (i == 0)
                             newPath = "/" + paths[i].toLowerCase();
                         else
                             newPath = newPath + "/" + paths[i];
@@ -155,10 +171,10 @@ public class FileFactory {
         return url;
     }
 
-    public String getFileSize(String path){
+    public String getFileSize(String path) {
         File file = new File(path);
         long length = 0;
-        if(file != null && file.exists()) {
+        if (file != null && file.exists()) {
             if (file.isDirectory()) {
                 for (File f : file.listFiles()) {
                     if (f.isDirectory()) {
@@ -176,21 +192,20 @@ public class FileFactory {
         return getFileSize(length);
     }
 
-    public String getFileSize(Long size){
+    public String getFileSize(Long size) {
         //calculator the file size
         String s = " MB";
         double sizeMB = (double) size / 1024 / 1024;
-        if(sizeMB < 1){
+        if (sizeMB < 1) {
             sizeMB = (double) size / 1024;
             s = " KB";
-        }
-        else if (sizeMB >= 1000) {
+        } else if (sizeMB >= 1000) {
             sizeMB = (double) sizeMB / 1024;
             s = " GB";
         }
 
         //format the size
-        DecimalFormat df=new DecimalFormat("#.##");
+        DecimalFormat df = new DecimalFormat("#.##");
         String formatSize = df.format(sizeMB) + s;
 
         return formatSize;
@@ -218,14 +233,14 @@ public class FileFactory {
             mRealPathMap = new HashMap<String, String>();
         if (!path.startsWith("/"))
             path = "/" + path + "/";
-        if(!realPath.endsWith("/"))
+        if (!realPath.endsWith("/"))
             realPath = realPath + "/";
         mRealPathMap.put(path, realPath);
     }
 
-    public int getRealPathMapSize(){
+    public int getRealPathMapSize() {
         int size = 0;
-        if(mRealPathMap != null)
+        if (mRealPathMap != null)
             size = mRealPathMap.size();
         return size;
     }
@@ -256,11 +271,11 @@ public class FileFactory {
         return realPath;
     }
 
-    public boolean checkRealPathMapLifeCycle(){
+    public boolean checkRealPathMapLifeCycle() {
         RealPathMapLifeCycle--;
-        if(RealPathMapLifeCycle > 0)
+        if (RealPathMapLifeCycle > 0)
             return true;
-        else{
+        else {
             RealPathMapLifeCycle = 10;
             return false;
         }
@@ -269,5 +284,91 @@ public class FileFactory {
     public void cleanRealPathMap() {
         if (mRealPathMap != null)
             mRealPathMap.clear();
+    }
+
+    public void setFileList(ArrayList<FileInfo> list) {
+        if (mFileList == null)
+            mFileList = new ArrayList<FileInfo>();
+        mFileList.clear();
+
+        for (FileInfo info : list) {
+            mFileList.add(info);
+        }
+    }
+
+    public ArrayList<FileInfo> getFileList() {
+        return mFileList;
+    }
+
+    public void setMusicList(ArrayList<FileInfo> list) {
+        if (mMusicList == null)
+            mMusicList = new ArrayList<FileInfo>();
+        mMusicList.clear();
+
+        for (FileInfo info : list) {
+            mMusicList.add(info);
+        }
+    }
+
+    public ArrayList<FileInfo> getMusicList() {
+        return mMusicList;
+    }
+
+    public void setMusicIndex(int index) {
+        mMusicIndex = index;
+    }
+
+    public int getMusicIndex() {
+        return mMusicIndex;
+    }
+
+    public void addMediaPlayerListener(MediaPlayerListener listener) {
+        if (mMediaPlayerListener == null)
+            mMediaPlayerListener = new ArrayList<MediaPlayerListener>();
+
+        if (!mMediaPlayerListener.contains(listener)) {
+            mMediaPlayerListener.add(listener);
+        }
+    }
+
+    public void removeMediaPlayerListener(MediaPlayerListener listener) {
+        if (mMediaPlayerListener != null) {
+            mMediaPlayerListener.remove(listener);
+        }
+    }
+
+    public void notifyMediaPlayerListener(MediaPlayerStatus status) {
+        Log.d(TAG, "MediaPlayerListener Notify: " + status.toString());
+        if (mMediaPlayerListener != null && mMediaPlayerListener.size() > 0) {
+            Log.d(TAG, "MediaPlayerListener Size: " + mMediaPlayerListener.size());
+            for (MediaPlayerListener listener : mMediaPlayerListener) {
+                listener.onMusicChange(status);
+            }
+        } else {
+            //empty lister, reset mediaInfo
+            Log.d(TAG, "MediaPlayerListener Size: Empty, release media item");
+            if (mMediaPlayer != null) {
+                mMediaPlayer.release();
+                mMediaPlayer = null;
+            }
+            if (mMediaMetadataRetriever != null) {
+                mMediaMetadataRetriever.release();
+                mMediaMetadataRetriever = null;
+            }
+            mFileIndex = -1;
+        }
+    }
+
+    public void setMediaInfo(MediaPlayer mediaPlayer, MediaMetadataRetriever mediaMetadataRetriever) {
+        mMediaPlayer = mediaPlayer;
+        mMediaMetadataRetriever = mediaMetadataRetriever;
+    }
+
+    public MediaPlayer getMediaPlayer() {
+        return mMediaPlayer;
+    }
+
+    public MediaMetadataRetriever getMediaMetadataRetriever() {
+        return mMediaMetadataRetriever;
     }
 }

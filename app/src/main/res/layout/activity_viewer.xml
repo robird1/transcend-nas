@@ -5,12 +5,12 @@
     android:layout_height="match_parent"
     android:background="@android:color/black">
 
-    <com.transcend.nas.viewer.ViewerPager
+    <com.transcend.nas.viewer.photo.ViewerPager
         android:id="@+id/viewer_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    </com.transcend.nas.viewer.ViewerPager>
+    </com.transcend.nas.viewer.photo.ViewerPager>
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/viewer_header_bar"

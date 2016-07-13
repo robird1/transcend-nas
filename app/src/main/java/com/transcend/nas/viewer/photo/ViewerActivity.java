@@ -1,9 +1,8 @@
-package com.transcend.nas.viewer;
+package com.transcend.nas.viewer.photo;
 
 import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -13,7 +12,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewPropertyAnimator;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -40,7 +38,6 @@ import com.transcend.nas.management.SmbFileDeleteLoader;
 import com.transcend.nas.management.SmbFileDownloadLoader;
 import com.transcend.nas.utils.FileFactory;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
@@ -189,7 +186,7 @@ public class ViewerActivity extends AppCompatActivity implements
         mPath = args.getString("path");
         mMode = args.getString("mode");
         mRoot = args.getString("root");
-        mList = (ArrayList<FileInfo>) args.getSerializable("list");
+        mList = FileFactory.getInstance().getFileList();
     }
 
     private void initHeaderBar() {

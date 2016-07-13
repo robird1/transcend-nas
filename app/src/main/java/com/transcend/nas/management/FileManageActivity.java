@@ -48,7 +48,6 @@ import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCa
 import com.google.android.libraries.cast.companionlibrary.cast.exceptions.NoConnectionException;
 import com.google.android.libraries.cast.companionlibrary.cast.exceptions.TransientNetworkDisconnectionException;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.listener.PauseOnScrollListener;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.common.NotificationDialog;
@@ -63,7 +62,9 @@ import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.settings.SettingsActivity;
 import com.transcend.nas.utils.FileFactory;
 import com.transcend.nas.utils.MediaFactory;
-import com.transcend.nas.viewer.ViewerActivity;
+import com.transcend.nas.viewer.music.MusicActivity;
+import com.transcend.nas.viewer.music.MusicService;
+import com.transcend.nas.viewer.photo.ViewerActivity;
 import com.tutk.IOTC.P2PService;
 import com.tutk.IOTC.P2PTunnelAPIs;
 import com.tutk.IOTC.sP2PTunnelSessionInfo;
@@ -476,7 +477,7 @@ public class FileManageActivity extends AppCompatActivity implements
             } else if (FileInfo.TYPE.VIDEO.equals(fileInfo.type)) {
                 startVideoActivity(fileInfo);
             } else if (FileInfo.TYPE.MUSIC.equals(fileInfo.type)) {
-                startVideoActivity(fileInfo);
+                startMusicActivity(mMode, mRoot, fileInfo);
             } else {
                 toast(R.string.unknown_format);
             }
@@ -758,7 +759,7 @@ public class FileManageActivity extends AppCompatActivity implements
         for (int cmd : RETRY_CMD) {
             if (id == cmd) {
                 boolean retry = args.getBoolean("retry");
-                if(args != null && !retry) {
+                if (args != null && !retry) {
                     mPreviousLoaderID = id;
                     mPreviousLoaderArgs = args;
                     record = true;
@@ -893,12 +894,11 @@ public class FileManageActivity extends AppCompatActivity implements
             }
         } else {
             if (isRemoteAccess() && mPreviousLoaderID > 0 && mPreviousLoaderArgs != null) {
-                if(mLoaderID == LoaderID.TUTK_NAS_LINK){
+                if (mLoaderID == LoaderID.TUTK_NAS_LINK) {
                     mPreviousLoaderID = -1;
                     mPreviousLoaderArgs = null;
                     Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
-                }
-                else {
+                } else {
                     Log.w(TAG, "Remote Access connect fail, try reConnect");
                     Bundle args = new Bundle();
                     String uuid = P2PService.getInstance().getTUTKUUID();
@@ -1409,7 +1409,6 @@ public class FileManageActivity extends AppCompatActivity implements
         args.putString("type", type);
         args.putString("root", root);
         args.putString("path", path);
-        //args.putSerializable("list", mFileList);
         Intent intent = new Intent();
         intent.setClass(FileManageActivity.this, FileActionLocateActivity.class);
         intent.putExtras(args);
@@ -1435,6 +1434,30 @@ public class FileManageActivity extends AppCompatActivity implements
         intent.setClass(FileManageActivity.this, FileActionPickerActivity.class);
         intent.putExtras(args);
         startActivityForResult(intent, FileActionPickerActivity.REQUEST_CODE);
+    }
+
+    private void startMusicActivity(String mode, String root, FileInfo fileInfo) {
+        if(!MusicActivity.checkFormatSupportOrNot(fileInfo.path)){
+            startVideoActivity(fileInfo);
+            return;
+        }
+
+        ArrayList<FileInfo> list = new ArrayList<FileInfo>();
+        for (FileInfo info : mFileList) {
+            if (FileInfo.TYPE.MUSIC.equals(info.type) && MusicActivity.checkFormatSupportOrNot(info.path)) {
+                list.add(info);
+            }
+        }
+        FileFactory.getInstance().setMusicList(list);
+
+        Bundle args = new Bundle();
+        args.putString("path", fileInfo.path);
+        args.putString("mode", mode);
+        args.putString("root", root);
+        Intent intent = new Intent();
+        intent.setClass(FileManageActivity.this, MusicActivity.class);
+        intent.putExtras(args);
+        startActivityForResult(intent, MusicActivity.REQUEST_CODE);
     }
 
     private void startVideoActivity(FileInfo fileInfo) {
@@ -1471,11 +1494,12 @@ public class FileManageActivity extends AppCompatActivity implements
             if (FileInfo.TYPE.PHOTO.equals(info.type))
                 list.add(info);
         }
+        FileFactory.getInstance().setFileList(list);
+
         Bundle args = new Bundle();
         args.putString("path", path);
         args.putString("mode", mode);
         args.putString("root", root);
-        args.putSerializable("list", list);
         Intent intent = new Intent();
         intent.setClass(FileManageActivity.this, ViewerActivity.class);
         intent.putExtras(args);
@@ -1511,6 +1535,13 @@ public class FileManageActivity extends AppCompatActivity implements
         isRunning = isMyServiceRunning(AutoBackupService.class);
         if (isRunning) {
             Intent intent = new Intent(FileManageActivity.this, AutoBackupService.class);
+            stopService(intent);
+        }
+
+        //stop music service
+        isRunning = isMyServiceRunning(MusicService.class);
+        if (isRunning) {
+            Intent intent = new Intent(FileManageActivity.this, MusicService.class);
             stopService(intent);
         }
 

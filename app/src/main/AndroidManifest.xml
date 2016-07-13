@@ -81,11 +81,16 @@
         </activity>
 
         <activity
-            android:name=".viewer.ViewerActivity"
+            android:name=".viewer.photo.ViewerActivity"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 
-        <activity android:name=".viewer.PlayerActivity"
+        <activity
+            android:name=".viewer.music.MusicActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
+
+        <activity android:name=".viewer.player.PlayerActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:launchMode="singleTop"
             android:label="@string/app_name">
@@ -117,6 +122,19 @@
 
         <service android:name=".service.AutoBackupService">
         </service>
+
+        <service android:name=".viewer.music.MusicService">
+        </service>
+
+        <receiver android:name=".viewer.music.MusicReceiver" >
+            <intent-filter>
+                <action android:name="transcend_music_prev" />
+                <action android:name="transcend_music_next" />
+                <action android:name="transcend_music_play" />
+                <action android:name="transcend_music_pause" />
+                <action android:name="transcend_music_close" />
+            </intent-filter>
+        </receiver>
 
         <meta-data
             android:name="com.google.android.gms.version"

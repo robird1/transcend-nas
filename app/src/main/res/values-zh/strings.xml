@@ -148,4 +148,9 @@
     <string name="msg_move_to">移動到..</string>
     <string name="remote_access_bind">已綁定</string>
     <string name="remote_access_unbind">未綁定</string>
+    <string name="unknown_title">未知標題</string>
+    <string name="unknown_artist">未知作者</string>
+    <string name="unknown_album">未知專輯</string>
+    <string name="device_offline">離線裝置</string>
+
 </resources>

@@ -32,7 +32,7 @@ import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.utils.FileFactory;
 import com.transcend.nas.utils.MediaFactory;
-import com.transcend.nas.viewer.ViewerActivity;
+import com.transcend.nas.viewer.photo.ViewerActivity;
 
 import java.io.File;
 import java.util.ArrayList;
