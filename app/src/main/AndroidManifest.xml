@@ -87,6 +87,7 @@
 
         <activity
             android:name=".viewer.music.MusicActivity"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 

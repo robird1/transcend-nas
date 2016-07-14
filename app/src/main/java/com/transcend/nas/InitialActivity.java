@@ -5,10 +5,15 @@ import android.app.LoaderManager;
 import android.app.Notification;
 import android.content.Intent;
 import android.content.Loader;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,6 +33,7 @@ public class InitialActivity extends Activity implements LoaderManager.LoaderCal
     private TextView mTitle;
     private Button mStart;
     private Button mRemoteAccess;
+    private ImageView iBackground;
     private RelativeLayout mProgressView;
     private int mLoaderID = -1;
 
@@ -40,13 +46,18 @@ public class InitialActivity extends Activity implements LoaderManager.LoaderCal
 
         mStart = (Button) findViewById(R.id.initial_started_button);
         mStart.setOnClickListener(this);
-        StyleFactory.set_button_touch_effect(this, mStart);
+        StyleFactory.set_white_button_touch_effect(this, mStart);
 
         mRemoteAccess = (Button) findViewById(R.id.initial_remote_access_button);
         mRemoteAccess.setOnClickListener(this);
-        StyleFactory.set_button_touch_effect(this, mRemoteAccess);
+        StyleFactory.set_white_button_touch_effect(this, mRemoteAccess);
 
         mProgressView = (RelativeLayout) findViewById(R.id.activity_init_progress_view);
+
+        iBackground = (ImageView) findViewById(R.id.initial_bg);
+        Point p = new Point();
+        getWindowManager().getDefaultDisplay().getSize(p);
+        iBackground.setImageBitmap(createBitmapFromResource(R.drawable.bg_wizard, p.x, p.y));
 
         Intent intent = getIntent();
         if(intent != null) {
@@ -54,6 +65,18 @@ public class InitialActivity extends Activity implements LoaderManager.LoaderCal
             if(retry)
                 showRetryPage();
         }
+    }
+
+    public Bitmap createBitmapFromResource(int drawableId, int reqWidth,int reqHeight){
+        Bitmap bmp = BitmapFactory.decodeResource(getResources(), drawableId);
+        int oldwidth = bmp.getWidth();
+        int oldheight = bmp.getHeight();
+        float scaleWidth = reqWidth / (float)oldwidth;
+        float scaleHeight = reqHeight / (float)oldheight;
+        Matrix matrix = new Matrix();
+        matrix.postScale(scaleWidth, scaleHeight);
+        Bitmap resizedBitmap = Bitmap.createBitmap(bmp, 0, 0, oldwidth, oldheight, matrix, true);
+        return resizedBitmap;
     }
 
     @Override

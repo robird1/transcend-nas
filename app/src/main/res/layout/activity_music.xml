@@ -21,6 +21,13 @@
 
     </android.support.v7.widget.Toolbar>
 
+    <View
+        android:id="@+id/music_toolbar_shadow"
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:layout_below="@id/music_header_bar"
+        android:background="@drawable/toolbar_dropshadow" />
+
     <RelativeLayout
         android:id="@+id/music_control_layout"
         android:layout_width="match_parent"
@@ -104,8 +111,8 @@
                 android:id="@+id/music_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/unknown_title"
                 android:layout_gravity="center_horizontal"
+                android:text="@string/unknown_title"
                 android:textColor="@android:color/holo_red_dark"
                 android:textSize="16sp" />
 
@@ -135,11 +142,12 @@
 
     <ImageView
         android:id="@+id/music_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_above="@id/music_control_layout"
-        android:layout_below="@id/music_header_bar"
+        android:layout_below="@id/music_toolbar_shadow"
         android:layout_centerHorizontal="true"
+        android:scaleType="fitXY"
         android:src="@drawable/player_album" />
 
     <RelativeLayout

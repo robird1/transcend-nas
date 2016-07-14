@@ -50,7 +50,6 @@
             android:layout_below="@+id/wizard_app_bar"
             android:scaleType="centerCrop" />
 
-
         <TextView
             android:id="@+id/wizard_title_info"
             android:layout_width="match_parent"
@@ -76,7 +75,6 @@
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
             android:text="@string/account"
-            android:textColor="@android:color/black"
             android:textSize="@dimen/wizard_button_text_size" />
 
 
@@ -214,7 +212,6 @@
             android:layout_marginTop="20dp"
             android:gravity="center"
             android:text="@string/wizard_success"
-            android:textColor="@android:color/black"
             android:textSize="24dp"
             android:textStyle="bold" />
 

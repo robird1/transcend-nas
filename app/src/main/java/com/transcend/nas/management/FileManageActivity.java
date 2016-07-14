@@ -1442,22 +1442,36 @@ public class FileManageActivity extends AppCompatActivity implements
             return;
         }
 
-        ArrayList<FileInfo> list = new ArrayList<FileInfo>();
-        for (FileInfo info : mFileList) {
-            if (FileInfo.TYPE.MUSIC.equals(info.type) && MusicActivity.checkFormatSupportOrNot(info.path)) {
-                list.add(info);
+        if (!fileInfo.path.startsWith(NASApp.ROOT_STG) && mCastManager != null && mCastManager.isConnected()) {
+            try {
+                //clean image
+                mCastManager.sendDataMessage("close");
+            } catch (TransientNetworkDisconnectionException e) {
+                e.printStackTrace();
+            } catch (NoConnectionException e) {
+                e.printStackTrace();
             }
+            MediaInfo info = MediaFactory.createMediaInfo(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK, fileInfo.path);
+            mCastManager.startVideoCastControllerActivity(this, info, 0, true);
         }
-        FileFactory.getInstance().setMusicList(list);
+        else {
+            ArrayList<FileInfo> list = new ArrayList<FileInfo>();
+            for (FileInfo info : mFileList) {
+                if (FileInfo.TYPE.MUSIC.equals(info.type) && MusicActivity.checkFormatSupportOrNot(info.path)) {
+                    list.add(info);
+                }
+            }
+            FileFactory.getInstance().setMusicList(list);
 
-        Bundle args = new Bundle();
-        args.putString("path", fileInfo.path);
-        args.putString("mode", mode);
-        args.putString("root", root);
-        Intent intent = new Intent();
-        intent.setClass(FileManageActivity.this, MusicActivity.class);
-        intent.putExtras(args);
-        startActivityForResult(intent, MusicActivity.REQUEST_CODE);
+            Bundle args = new Bundle();
+            args.putString("path", fileInfo.path);
+            args.putString("mode", mode);
+            args.putString("root", root);
+            Intent intent = new Intent();
+            intent.setClass(FileManageActivity.this, MusicActivity.class);
+            intent.putExtras(args);
+            startActivityForResult(intent, MusicActivity.REQUEST_CODE);
+        }
     }
 
     private void startVideoActivity(FileInfo fileInfo) {

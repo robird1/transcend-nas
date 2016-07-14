@@ -98,12 +98,12 @@ public class WizardActivity extends AppCompatActivity implements LoaderManager.L
         tlConfirmPassword = (TextInputLayout) findViewById(R.id.wizard_password_confirm);
         Button button = (Button) findViewById(R.id.wizard_start);
         button.setOnClickListener(this);
-        StyleFactory.set_button_touch_effect(this, button);
+        StyleFactory.set_gray_button_touch_effect(this, button);
         StyleFactory.set_button_Drawable_right(this, button, R.drawable.ic_navigation_arrow_rotation, 50);
-        //iBackground = (ImageView) findViewById(R.id.wizard_bg);
-        //Point p = new Point();
-        //getWindowManager().getDefaultDisplay().getSize(p);
-        //iBackground.setImageBitmap(createBitmapFromResource(R.drawable.bg_wizard, p.x, p.y));
+        iBackground = (ImageView) findViewById(R.id.wizard_bg);
+        Point p = new Point();
+        getWindowManager().getDefaultDisplay().getSize(p);
+        iBackground.setImageBitmap(createBitmapFromResource(R.drawable.bg_wizard, p.x, p.y));
     }
 
     public void initReadyLayout(){
@@ -122,7 +122,7 @@ public class WizardActivity extends AppCompatActivity implements LoaderManager.L
         }
         Button button = (Button) findViewById(R.id.ready_button);
         button.setOnClickListener(this);
-        StyleFactory.set_button_touch_effect(this, button);
+        StyleFactory.set_gray_button_touch_effect(this, button);
         mCameraBackupSwitch = (SwitchCompat) findViewById(R.id.wizard_camera_backup_indicator);
     }
 
