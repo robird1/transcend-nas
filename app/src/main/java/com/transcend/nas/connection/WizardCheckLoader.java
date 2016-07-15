@@ -35,6 +35,7 @@ public class WizardCheckLoader extends AsyncTaskLoader<Boolean> {
     private boolean mRemoteAccess = false;
     private boolean isWizard = false;
     private String mModel = "";
+    private String mSerialNum = "";
 
     public WizardCheckLoader(Context context, Bundle args, boolean isRemoteAccess) {
         super(context);
@@ -104,7 +105,13 @@ public class WizardCheckLoader extends AsyncTaskLoader<Boolean> {
                                         mModel = model;
                                     }
                                 }
-
+                                if (curTagName.equals("serialnum")) {
+                                    String serialNum = text;
+                                    if (serialNum != null) {
+                                        mSerialNum = serialNum;
+                                        NASPref.setSerialNum(getContext(), mSerialNum);
+                                    }
+                                }
                             }
                         }
 
@@ -136,6 +143,10 @@ public class WizardCheckLoader extends AsyncTaskLoader<Boolean> {
 
     public String getModel() {
         return mModel;
+    }
+
+    public String getSerialNum() {
+        return mSerialNum;
     }
 
     public boolean isWizard(){

@@ -39,8 +39,8 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
     protected Activity mActivity;
     protected Server mServer;
     protected String mUsername;
-    private String mPassword;
-    private String mHostname;
+    protected String mPassword;
+    protected String mHostname;
     protected Exception mException;
     protected int mNotificationID = 0;
     protected String mType = "";

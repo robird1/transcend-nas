@@ -1565,6 +1565,7 @@ public class FileManageActivity extends AppCompatActivity implements
             NASPref.setPassword(this, "");
             NASPref.setUUID(this, "");
             NASPref.setMacAddress(this, "");
+            NASPref.setSerialNum(this, "");
             NASPref.setCloudUUID(this, "");
             String[] scenarios = getResources().getStringArray(R.array.backup_scenario_values);
             NASPref.setBackupScenario(this, scenarios[1]);

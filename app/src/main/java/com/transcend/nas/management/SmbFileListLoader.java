@@ -17,7 +17,9 @@ import com.tutk.IOTC.P2PService;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
@@ -52,6 +54,8 @@ public class SmbFileListLoader extends SmbAbstractLoader {
 
     private ArrayList<FileInfo> mFileList;
     private String mPath;
+    private boolean isValid = true;
+    private String mError;
 
     public SmbFileListLoader(Context context, String path) {
         super(context);
@@ -105,6 +109,23 @@ public class SmbFileListLoader extends SmbAbstractLoader {
                 if (shardFolderSize != size || !FileFactory.getInstance().checkRealPathMapLifeCycle()) {
                     getSharedList();
                     Log.d(TAG, "folder mapping size : " + FileFactory.getInstance().getRealPathMapSize());
+                    Log.d(TAG, "hash key valid : " + isValid);
+                    if (!isValid) {
+                        Log.d(TAG, "hash key not valid, start login again");
+                        mServer = new Server(mHostname, mUsername, mPassword);
+                        boolean success = mServer.connect();
+                        if (success) {
+                            ServerManager.INSTANCE.saveServer(mServer);
+                            ServerManager.INSTANCE.setCurrentServer(mServer);
+                            NASPref.setSessionVerifiedTime(getContext(), Long.toString(System.currentTimeMillis()));
+                            FileFactory.getInstance().cleanRealPathMap();
+                            getSharedList();
+                            Log.d(TAG, "folder mapping size : " + FileFactory.getInstance().getRealPathMapSize());
+                        } else {
+                            mError = mServer.getLoginError();
+                            Log.d(TAG, "login fail due to : " + mError );
+                        }
+                    }
                 }
             }
         }
@@ -113,6 +134,7 @@ public class SmbFileListLoader extends SmbAbstractLoader {
     }
 
     private boolean getSharedList() {
+        isValid = true;
         boolean isSuccess = false;
         Server server = ServerManager.INSTANCE.getCurrentServer();
         String hostname = server.getHostname();
@@ -171,18 +193,25 @@ public class SmbFileListLoader extends SmbAbstractLoader {
                                 path = text;
                                 if (name != null) {
                                     isSuccess = true;
-                                    if(add) {
+                                    if (add) {
                                         FileFactory.getInstance().addRealPathToMap(name, path);
                                     }
                                     name = null;
                                     path = null;
                                     add = false;
                                 }
-                            } else if (curTagName.equals("services")){
-                                if(text.equals("smb")){
+                            } else if (curTagName.equals("services")) {
+                                if (text.equals("smb")) {
                                     add = true;
                                 }
                             }
+                            if (curTagName.equals("reason")) {
+                                String reason = text;
+                                if(reason != null && reason.equals("Not Login")){
+                                    isValid = false;
+                                }
+                            }
+
                         }
                     } else if (eventType == XmlPullParser.END_TAG) {
                         curTagName = null;

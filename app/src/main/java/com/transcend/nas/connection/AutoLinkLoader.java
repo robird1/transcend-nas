@@ -38,6 +38,8 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
     private ConnectivityManager mConnMgr;
     private Server mServer;
     private boolean isWizard = false;
+    private String mModel = "";
+    private String mSerialNum = "";
     private LinkType mLinkType = LinkType.NO_LINK;
 
     public enum LinkType {
@@ -167,6 +169,19 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
                                         break;
                                     }
                                 }
+                                if (curTagName.equals("model")) {
+                                    String model = text;
+                                    if (model != null) {
+                                        mModel = model;
+                                    }
+                                }
+                                if (curTagName.equals("serialnum")) {
+                                    String serialNum = text;
+                                    if (serialNum != null) {
+                                        mSerialNum = serialNum;
+                                        NASPref.setSerialNum(getContext(), mSerialNum);
+                                    }
+                                }
                             }
                         }
 
@@ -246,6 +261,14 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
 
     public LinkType getLinkType() {
         return mLinkType;
+    }
+
+    public String getModel() {
+        return mModel;
+    }
+
+    public String getSerialNum() {
+        return mSerialNum;
     }
 
     public boolean isWizard() {

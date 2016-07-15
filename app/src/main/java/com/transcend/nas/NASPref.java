@@ -120,6 +120,19 @@ public class NASPref {
         PrefUtil.write(context, name, key, uuid);
     }
 
+    public static String getSerialNum(Context context) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_serial_num);
+        String def = "";
+        return PrefUtil.read(context, name, key, def);
+    }
+
+    public static void setSerialNum(Context context, String serialNum) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_serial_num);
+        PrefUtil.write(context, name, key, serialNum);
+    }
+
     public static String getMacAddress(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
         String key = context.getResources().getString(R.string.pref_mac);

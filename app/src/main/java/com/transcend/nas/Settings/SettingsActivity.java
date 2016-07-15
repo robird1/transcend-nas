@@ -913,8 +913,10 @@ public class SettingsActivity extends AppCompatActivity implements
                         String uuid = mServer.getTutkUUID();
                         if(uuid == null)
                             uuid = NASPref.getUUID(getActivity());
+                        String serialNum = NASPref.getSerialNum(getActivity());
                         Log.d(TAG, "Current user: " + mServer.getUsername());
                         Log.d(TAG, "Current UUID: " + uuid);
+                        Log.d(TAG, "Current SerialNum: " + serialNum);
                         String ID_TITLE = "TITLE", ID_SUBTITLE = "SUBTITLE";
                         ArrayList<HashMap<String, String>> myListData = new ArrayList<HashMap<String, String>>();
 
@@ -1022,11 +1024,15 @@ public class SettingsActivity extends AppCompatActivity implements
                     arg.putString("server", NASPref.getCloudServer(mContext));
                     arg.putString("token", NASPref.getCloudAuthToken(mContext));
                     Server server = ServerManager.INSTANCE.getCurrentServer();
+                    String nasName = server.getServerInfo().hostName;
+                    String serialNum = NASPref.getSerialNum(getActivity());
+                    if(serialNum != null && !serialNum.equals(""))
+                        nasName = nasName + NASApp.TUTK_NAME_TAG + serialNum;
+                    arg.putString("nasName", nasName);
                     String uuid = server.getTutkUUID();
                     if(uuid == null)
                         uuid = NASPref.getUUID(getActivity());
                     if(uuid != null && !uuid.equals("")){
-                        arg.putString("nasName", server.getServerInfo().hostName);
                         arg.putString("nasUUID", uuid);
                         getLoaderManager().restartLoader(LoaderID.TUTK_NAS_CREATE, arg, SettingsActivity.this).forceLoad();
                     }
