@@ -58,10 +58,18 @@ public class MusicLoader extends AsyncTask<String, String, Boolean> {
             Uri uri = MediaFactory.createUri(mPath);
             mMediaPlayer = MediaPlayer.create(mContext, uri);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                mMediaMetadataRetriever = MediaFactory.getMediaMetadataRetriever(uri);
+                mMediaMetadataRetriever = MediaFactory.getMediaMetadataRetriever(mPath, uri);
             }
         } catch (Exception e){
             e.printStackTrace();
+            if(mMediaPlayer != null){
+                mMediaPlayer.release();
+                mMediaPlayer = null;
+            }
+            if(mMediaMetadataRetriever != null) {
+                mMediaMetadataRetriever.release();
+                mMediaMetadataRetriever = null;
+            }
             return false;
         }
         return true;

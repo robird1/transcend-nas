@@ -170,12 +170,16 @@ public class MediaFactory {
         return name;
     }
 
-    public static MediaMetadataRetriever getMediaMetadataRetriever(Uri uri){
+    public static MediaMetadataRetriever getMediaMetadataRetriever(String path, Uri uri){
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        if (Build.VERSION.SDK_INT >= 14)
-            mmr.setDataSource(uri.toString(), new HashMap<String, String>());
-        else
-            mmr.setDataSource(uri.toString());
+        if (path.startsWith(NASApp.ROOT_STG)) {
+            mmr.setDataSource(path);
+        } else {
+            if (Build.VERSION.SDK_INT >= 14)
+                mmr.setDataSource(uri.toString(), new HashMap<String, String>());
+            else
+                mmr.setDataSource(uri.toString());
+        }
         return mmr;
     }
 

@@ -55,7 +55,7 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
         super.onCreate();
         Log.d(TAG, "onCreate");
 
-        if(showProgress)
+        if (showProgress)
             mHandler = new Handler();
         mFileList = FileFactory.getInstance().getMusicList();
         mFileIndex = FileFactory.getInstance().getMusicIndex();
@@ -95,8 +95,7 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
             mMusicLoader = new MusicLoader(getApplicationContext(), mFileList.get(index).path);
             mMusicLoader.setListener(this);
             mMusicLoader.execute();
-        }
-        else{
+        } else {
             stopMusicLoader();
             stopSelf();
         }
@@ -109,7 +108,7 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
                 mHandler.postDelayed(runnable, 0);
         }
 
-        setUpNotification(true, true);
+        setUpNotification(false, true, true);
     }
 
     private void pauseMusicPlayer() {
@@ -119,11 +118,11 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
                 mHandler.removeCallbacks(runnable);
         }
 
-        setUpNotification(false, true);
+        setUpNotification(false, false, true);
     }
 
     private void stopMusicPlayer() {
-        setUpNotification(false, false);
+        setUpNotification(false, false, false);
         if (mHandler != null) {
             mHandler.removeCallbacks(runnable);
             mHandler = null;
@@ -156,8 +155,7 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
                 if (length == 1) {
                     mMediaPlayer.seekTo(0);
                     startMusicPlayer();
-                }
-                else {
+                } else {
                     loadNextMusic();
                 }
                 break;
@@ -187,108 +185,111 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
         }
     }
 
-    private void setUpNotification(boolean play, boolean addIntent) {
-        String tmp = "" ;
-        String title = getString(R.string.unknown_title);
-        String album = getString(R.string.unknown_album);
-        Bitmap bm = null;
-        int icon = play ? R.drawable.player_pause_button : R.drawable.player_play_button;
-
-        Intent intent1 = new Intent();
-        intent1.setAction(play ? MusicReceiver.MUSIC_PAUSE : MusicReceiver.MUSIC_PLAY);
-        PendingIntent pendingIntent1 = PendingIntent.getBroadcast(getApplicationContext(), 0, intent1, 0);
-
-        Intent intent2 = new Intent();
-        intent2.setAction(MusicReceiver.MUSIC_NEXT);
-        PendingIntent pendingIntent2 = PendingIntent.getBroadcast(getApplicationContext(), 0, intent2, 0);
-
-        Intent intent3 = new Intent();
-        intent3.setAction(MusicReceiver.MUSIC_CLOSE);
-        PendingIntent pendingIntent3 = PendingIntent.getBroadcast(getApplicationContext(), 0, intent3, 0);
-
-        Intent intent4 = new Intent();
-        intent4.setAction(MusicReceiver.MUSIC_PREV);
-        PendingIntent pendingIntent4 = PendingIntent.getBroadcast(getApplicationContext(), 0, intent4, 0);
-
-        if(mFileList != null && mFileIndex >= 0 && mFileList.size() > mFileIndex) {
-            tmp = mFileList.get(mFileIndex).name;
-            if (tmp != null && !tmp.equals(""))
-                title = tmp;
-        }
-
-        if (mMediaMetadataRetriever != null) {
-            tmp = mMediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
-            if (tmp != null && !tmp.equals(""))
-                album = tmp;
-
-            byte[] bytes = mMediaMetadataRetriever.getEmbeddedPicture();
-            if (bytes != null && bytes.length > 0) {
-                InputStream is = new ByteArrayInputStream(bytes);
-                bm = BitmapFactory.decodeStream(is);
-            }
-        }
-        else{
-            mRemoteViews.setViewVisibility(R.id.music_album,View.GONE);
-            if(mBigRemoteViews != null) {
-                mBigRemoteViews.setViewVisibility(R.id.music_album, View.GONE);
-            }
-        }
-
+    private void setRemoteViews(String title, String artist, String album, Bitmap bm, PendingIntent intent) {
         //set up RemoteView
-        mRemoteViews.setImageViewResource(R.id.music_play, icon);
         mRemoteViews.setTextViewText(R.id.music_title, title);
-        mRemoteViews.setTextViewText(R.id.music_album, album);
-        if(bm != null)
+        mRemoteViews.setTextViewText(R.id.music_album, artist + " - " + album);
+        if (bm != null)
             mRemoteViews.setImageViewBitmap(R.id.music_image, bm);
         else
             mRemoteViews.setImageViewResource(R.id.music_image, R.drawable.ic_audiotrack_gray_big);
 
-        mRemoteViews.setOnClickPendingIntent(R.id.music_close, pendingIntent3);
+        mRemoteViews.setOnClickPendingIntent(R.id.music_close, intent);
+    }
+
+    private void setBigRemoteViews(String title, String artist, String album, Bitmap bm, PendingIntent intent) {
+        if (mBigRemoteViews == null)
+            return;
+
+        mBigRemoteViews.setTextViewText(R.id.music_title, title);
+        mBigRemoteViews.setTextViewText(R.id.music_album, artist + " - " + album);
+        if (bm != null)
+            mBigRemoteViews.setImageViewBitmap(R.id.music_image, bm);
+        else
+            mBigRemoteViews.setImageViewResource(R.id.music_image, R.drawable.ic_audiotrack_gray_big);
+
+        mBigRemoteViews.setOnClickPendingIntent(R.id.music_close, intent);
+    }
+
+    private void setUpNotification(boolean init, boolean play, boolean addIntent) {
+        String tmp = "";
+        String title = getString(R.string.unknown_title);
+        String artist = getString(R.string.unknown_artist);
+        String album = getString(R.string.unknown_album);
+        Bitmap bm = null;
+        int icon = play ? R.drawable.player_pause_button : R.drawable.player_play_button;
+
+        if(init) {
+            if (mFileList != null && mFileIndex >= 0 && mFileList.size() > mFileIndex) {
+                tmp = mFileList.get(mFileIndex).name;
+                if (tmp != null && !tmp.equals(""))
+                    title = tmp;
+            }
+
+            if (mMediaMetadataRetriever != null) {
+                tmp = mMediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+                if (tmp != null && !tmp.equals(""))
+                    artist = tmp;
+
+                tmp = mMediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+                if (tmp != null && !tmp.equals(""))
+                    album = tmp;
+
+                byte[] bytes = mMediaMetadataRetriever.getEmbeddedPicture();
+                if (bytes != null && bytes.length > 0) {
+                    InputStream is = new ByteArrayInputStream(bytes);
+                    bm = BitmapFactory.decodeStream(is);
+                }
+            } else {
+                mRemoteViews.setViewVisibility(R.id.music_album, View.GONE);
+                if (mBigRemoteViews != null) {
+                    mBigRemoteViews.setViewVisibility(R.id.music_album, View.GONE);
+                }
+            }
+
+            Intent intent = new Intent();
+            intent.setAction(MusicReceiver.MUSIC_CLOSE);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
+
+            setRemoteViews(title, artist, album, bm, pendingIntent);
+            setBigRemoteViews(title, artist, album, bm, pendingIntent);
+        }
+
         if(addIntent) {
+            Intent intent1 = new Intent();
+            intent1.setAction(play ? MusicReceiver.MUSIC_PAUSE : MusicReceiver.MUSIC_PLAY);
+            PendingIntent pendingIntent1 = PendingIntent.getBroadcast(getApplicationContext(), 0, intent1, 0);
+
+            Intent intent2 = new Intent();
+            intent2.setAction(MusicReceiver.MUSIC_NEXT);
+            PendingIntent pendingIntent2 = PendingIntent.getBroadcast(getApplicationContext(), 0, intent2, 0);
+
             mRemoteViews.setOnClickPendingIntent(R.id.music_play, pendingIntent1);
             mRemoteViews.setOnClickPendingIntent(R.id.music_next, pendingIntent2);
+            if (mBigRemoteViews != null) {
+                mBigRemoteViews.setOnClickPendingIntent(R.id.music_play, pendingIntent1);
+                mBigRemoteViews.setOnClickPendingIntent(R.id.music_next, pendingIntent2);
+
+                Intent intent = new Intent();
+                intent.setAction(MusicReceiver.MUSIC_PREV);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
+                mBigRemoteViews.setOnClickPendingIntent(R.id.music_previous, pendingIntent);
+            }
         }
         else{
             mRemoteViews.setOnClickPendingIntent(R.id.music_play, null);
             mRemoteViews.setOnClickPendingIntent(R.id.music_next, null);
-        }
-
-        //set up bigRemoteView
-        if (mBigRemoteViews != null) {
-            mBigRemoteViews.setImageViewResource(R.id.music_play, icon);
-            mBigRemoteViews.setTextViewText(R.id.music_title, title);
-            mBigRemoteViews.setTextViewText(R.id.music_album, album);
-            if(bm != null)
-                mBigRemoteViews.setImageViewBitmap(R.id.music_image, bm);
-            else
-                mBigRemoteViews.setImageViewResource(R.id.music_image, R.drawable.ic_audiotrack_gray_big);
-
-            mBigRemoteViews.setOnClickPendingIntent(R.id.music_close, pendingIntent3);
-            if(addIntent) {
-                mBigRemoteViews.setOnClickPendingIntent(R.id.music_play, pendingIntent1);
-                mBigRemoteViews.setOnClickPendingIntent(R.id.music_next, pendingIntent2);
-                mBigRemoteViews.setOnClickPendingIntent(R.id.music_previous, pendingIntent4);
-            }
-            else{
+            if (mBigRemoteViews != null) {
                 mBigRemoteViews.setOnClickPendingIntent(R.id.music_play, null);
                 mBigRemoteViews.setOnClickPendingIntent(R.id.music_next, null);
                 mBigRemoteViews.setOnClickPendingIntent(R.id.music_previous, null);
             }
         }
 
-        //check show progress dialog or not
-        /*if(addIntent) {
-            mRemoteViews.setViewVisibility(R.id.music_progress_view, View.INVISIBLE);
-            if (mBigRemoteViews != null) {
-                mBigRemoteViews.setViewVisibility(R.id.music_progress_view, View.INVISIBLE);
-            }
+        mRemoteViews.setImageViewResource(R.id.music_play, icon);
+        if(mBigRemoteViews != null) {
+            mBigRemoteViews.setImageViewResource(R.id.music_play, icon);
         }
-        else{
-            mRemoteViews.setViewVisibility(R.id.music_progress_view, View.VISIBLE);
-            if(mBigRemoteViews != null){
-                mBigRemoteViews.setViewVisibility(R.id.music_progress_view, View.VISIBLE);
-            }
-        }*/
 
         startForeground(MUSIC_NOTIFICATION, mNotification);
     }
@@ -339,14 +340,14 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
         ntfMgr.notify(ERROR_NOTIFICATION, builder.build());
     }
 
-    private void hideNotificationResult(){
+    private void hideNotificationResult() {
         NotificationManager ntfMgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         ntfMgr.cancel(ERROR_NOTIFICATION);
     }
 
-    private void stopMusicLoader(){
-        if(mMusicLoader != null){
-            if(!mMusicLoader.isCancelled()){
+    private void stopMusicLoader() {
+        if (mMusicLoader != null) {
+            if (!mMusicLoader.isCancelled()) {
                 mMusicLoader.cancel(true);
             }
             mMusicLoader = null;
@@ -356,7 +357,7 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
     @Override
     public void onMusicLoadFinish(MusicLoader loader) {
         mMediaPlayer = loader.getMediaPlayer();
-        if(mMediaPlayer != null) {
+        if (mMediaPlayer != null) {
             mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
@@ -376,11 +377,10 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
         mMediaMetadataRetriever = loader.getMediaMetadataRetriever();
 
         FileFactory.getInstance().setMediaInfo(mMediaPlayer, mMediaMetadataRetriever);
-        if(mMediaPlayer != null) {
+        if (mMediaPlayer != null) {
             FileFactory.getInstance().setMusicIndex(mFileIndex);
             FileFactory.getInstance().notifyMediaPlayerListener(FileFactory.MediaPlayerStatus.NEW);
-        }
-        else{
+        } else {
             FileFactory.getInstance().setMusicIndex(-1);
             FileFactory.getInstance().notifyMediaPlayerListener(FileFactory.MediaPlayerStatus.ERROR);
         }
@@ -403,8 +403,9 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
 
     @Override
     public void onMusicChange(FileFactory.MediaPlayerStatus status) {
-        switch(status){
+        switch (status) {
             case NEW:
+                setUpNotification(true, true, true);
                 startMusicPlayer();
                 break;
             case LOAD:

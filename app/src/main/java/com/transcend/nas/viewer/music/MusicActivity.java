@@ -341,11 +341,15 @@ public class MusicActivity extends AppCompatActivity implements FileFactory.Medi
 
         if (mMediaMetadataRetriever != null) {
             try {
+                String artist = mMediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+                if(artist == null || "".equals(artist))
+                    artist = getString(R.string.unknown_artist);
+
                 String album = mMediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
-                if (album != null && !album.equals(""))
-                    musicAlbum.setText(album);
-                else
-                    musicAlbum.setText(getString(R.string.unknown_album));
+                if(album == null || "".equals(album))
+                    album = getString(R.string.unknown_album);
+
+                musicAlbum.setText(artist + " - " + album );
 
                 byte[] bytes = mMediaMetadataRetriever.getEmbeddedPicture();
                 if (bytes != null && bytes.length > 0) {
@@ -440,7 +444,7 @@ public class MusicActivity extends AppCompatActivity implements FileFactory.Medi
                 pauseMusicPlayer();
                 doFinish();
             } else if (index == FileFactory.MediaPlayerStatus.ERROR.ordinal()) {
-                Toast.makeText(MusicActivity.this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+                Toast.makeText(MusicActivity.this, getString(R.string.music) + " - " + getString(R.string.error), Toast.LENGTH_SHORT).show();
                 mProgressView.setVisibility(View.INVISIBLE);
                 pauseMusicPlayer();
                 doFinish();
