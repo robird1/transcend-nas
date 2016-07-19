@@ -167,7 +167,7 @@
     <string name="remote_access_send_activate_info">Please check your email to activate it</string>
     <string name="remote_access_bind_info">You can set up the relationship between your StoreJet Cloud and the email</string>
     <string name="remote_access_success_info">Success set up the relationship between your StoreJet Cloud and the email</string>
-    <string name="remote_access_send_activate_warning">Are your sure to resend activate email?</string>
+    <string name="remote_access_send_activate_warning">Are you sure to resend activate email?</string>
     <string name="remote_access_logout">Are you sure to logout?</string>
     <string name="remote_access_no_login">At first, you need to register or login</string>
     <string name="remote_access_delete_warning">Are you sure to delete the bind StoreJet Cloud?</string>

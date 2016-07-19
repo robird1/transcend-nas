@@ -84,7 +84,7 @@ public class NASPref {
     public static String getUsername(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
         String key = context.getResources().getString(R.string.pref_username);
-        String def = "";
+        String def = "admin";
         return PrefUtil.read(context, name, key, def);
     }
 

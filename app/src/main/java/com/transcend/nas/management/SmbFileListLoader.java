@@ -105,27 +105,30 @@ public class SmbFileListLoader extends SmbAbstractLoader {
                     shardFolderSize++;
             }
             Log.w(TAG, "ShardFolderSize : " + shardFolderSize + ", RealPathMapSize : " + size);
-            if (shardFolderSize > 0) {
-                if (shardFolderSize != size || !FileFactory.getInstance().checkRealPathMapLifeCycle()) {
-                    getSharedList();
-                    Log.d(TAG, "folder mapping size : " + FileFactory.getInstance().getRealPathMapSize());
-                    Log.d(TAG, "hash key valid : " + isValid);
-                    if (!isValid) {
-                        Log.d(TAG, "hash key not valid, start login again");
-                        mServer = new Server(mHostname, mUsername, mPassword);
-                        boolean success = mServer.connect();
-                        if (success) {
-                            ServerManager.INSTANCE.saveServer(mServer);
-                            ServerManager.INSTANCE.setCurrentServer(mServer);
-                            NASPref.setSessionVerifiedTime(getContext(), Long.toString(System.currentTimeMillis()));
-                            FileFactory.getInstance().cleanRealPathMap();
-                            getSharedList();
-                            Log.d(TAG, "folder mapping size : " + FileFactory.getInstance().getRealPathMapSize());
-                        } else {
-                            mError = mServer.getLoginError();
-                            Log.d(TAG, "login fail due to : " + mError );
-                        }
+            if (shardFolderSize != size || !FileFactory.getInstance().checkRealPathMapLifeCycle()) {
+                FileFactory.getInstance().cleanRealPathMap();
+                getSharedList();
+                Log.d(TAG, "folder mapping size : " + FileFactory.getInstance().getRealPathMapSize());
+                Log.d(TAG, "hash key valid : " + isValid);
+                if (!isValid) {
+                    Log.d(TAG, "hash key not valid, start login again");
+                    mServer = new Server(mHostname, mUsername, mPassword);
+                    boolean success = mServer.connect();
+                    if (success) {
+                        ServerManager.INSTANCE.saveServer(mServer);
+                        ServerManager.INSTANCE.setCurrentServer(mServer);
+                        NASPref.setSessionVerifiedTime(getContext(), Long.toString(System.currentTimeMillis()));
+                        FileFactory.getInstance().cleanRealPathMap();
+                        getSharedList();
+                        Log.d(TAG, "folder mapping size : " + FileFactory.getInstance().getRealPathMapSize());
+                    } else {
+                        mError = mServer.getLoginError();
+                        Log.d(TAG, "login fail due to : " + mError);
                     }
+                }
+
+                if(shardFolderSize == 0){
+                    FileFactory.getInstance().cleanRealPathMap();
                 }
             }
         }
@@ -207,7 +210,7 @@ public class SmbFileListLoader extends SmbAbstractLoader {
                             }
                             if (curTagName.equals("reason")) {
                                 String reason = text;
-                                if(reason != null && reason.equals("Not Login")){
+                                if (reason != null && reason.equals("Not Login")) {
                                     isValid = false;
                                 }
                             }
