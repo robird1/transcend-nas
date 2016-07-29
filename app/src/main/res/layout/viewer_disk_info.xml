@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/disk_info_title_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/loading"
+        android:visibility="gone" />
+
+    <View
+        android:id="@+id/disk_info_split_line"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_alignParentBottom="true" />
+
+    <ListView
+        android:id="@+id/disk_info_list_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/disk_info_split_line"
+        android:layout_below="@id/disk_info_title_label"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp" />
+
+
+</RelativeLayout>

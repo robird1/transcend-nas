@@ -59,6 +59,17 @@
     <string name="unknown_album">Unknown Album</string>
     <string name="device_offline">Device is offline</string>
 
+    <!-- Disk -->
+    <string name="disk_info">Disk Information</string>
+    <string name="available">Available</string>
+    <string name="total">Total</string>
+    <string name="temperature">Temperature</string>
+    <string name="other">Other</string>
+    <string name="disk_smart">S.M.A.R.T</string>
+    <string name="disk_smart_info">Help to check disk status</string>
+    <string name="detail">Detail</string>
+    <string name="capacity">Capacity</string>
+
     <!-- string -->
 
     <string name="done">Done</string>

@@ -68,7 +68,6 @@
     <string name="wifi_only">只在使用WiFi時</string>
     <string name="legal">隱私</string>
     <string name="termsofuse">使用條款</string>
-    <string name="licenses">許可權</string>
     <string name="contact">聯繫我們</string>
     <string name="forget_password">忘記密碼?</string>
     <string name="send">發送</string>
@@ -152,5 +151,16 @@
     <string name="unknown_artist">未知作者</string>
     <string name="unknown_album">未知專輯</string>
     <string name="device_offline">離線裝置</string>
+
+    <!-- Disk -->
+    <string name="disk_info">硬碟資訊</string>
+    <string name="available">可用</string>
+    <string name="total">全部</string>
+    <string name="temperature">溫度</string>
+    <string name="other">其他</string>
+    <string name="disk_smart">S.M.A.R.T</string>
+    <string name="disk_smart_info">協助確認硬碟狀態</string>
+    <string name="detail">詳細資訊</string>
+    <string name="capacity">容量</string>
 
 </resources>

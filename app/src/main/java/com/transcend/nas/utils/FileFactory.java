@@ -202,6 +202,10 @@ public class FileFactory {
         } else if (sizeMB >= 1000) {
             sizeMB = (double) sizeMB / 1024;
             s = " GB";
+            if(sizeMB >= 1000) {
+                sizeMB = (double) sizeMB / 1024;
+                s = " TB";
+            }
         }
 
         //format the size

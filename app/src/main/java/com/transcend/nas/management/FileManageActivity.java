@@ -59,6 +59,8 @@ import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
+import com.transcend.nas.settings.DiskFactory;
+import com.transcend.nas.settings.DiskInfoActivity;
 import com.transcend.nas.settings.SettingsActivity;
 import com.transcend.nas.utils.FileFactory;
 import com.transcend.nas.utils.MediaFactory;
@@ -387,6 +389,7 @@ public class FileManageActivity extends AppCompatActivity implements
             mNavHeaderSubtitle.setText(String.format("%s", email));
         else
             mNavHeaderSubtitle.setText(String.format("%s@%s", mServer.getUsername(), mServer.getHostname()));
+        mNavView.getMenu().findItem(R.id.nav_disk_info).setVisible("admin".equals(mServer.getUsername()));
     }
 
     private void initActionModeView() {
@@ -545,6 +548,9 @@ public class FileManageActivity extends AppCompatActivity implements
             case R.id.nav_downloads:
                 mDevice = false;
                 doLoad(NASPref.getDownloadLocation(this));
+                break;
+            case R.id.nav_disk_info:
+                startDiskInfoActivity();
                 break;
             case R.id.nav_settings:
                 startSettingsActivity();
@@ -1529,6 +1535,12 @@ public class FileManageActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
+    private void startDiskInfoActivity() {
+        Intent intent = new Intent();
+        intent.setClass(FileManageActivity.this, DiskInfoActivity.class);
+        startActivity(intent);
+    }
+
     private void startSettingsActivity() {
         Intent intent = new Intent();
         intent.setClass(FileManageActivity.this, SettingsActivity.class);
@@ -1572,6 +1584,9 @@ public class FileManageActivity extends AppCompatActivity implements
             NASPref.setBackupSetting(this, false);
             NASPref.setBackupLocation(this, "/homes/" + Build.MODEL + "/");
         }
+
+        //clean disk info
+        DiskFactory.getInstance().cleanDiskDevices();
 
         //show SignIn activity
         Intent intent = new Intent();

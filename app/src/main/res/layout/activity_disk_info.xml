@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.transcend.nas.settings.DiskInfoActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/disk_info_app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="0dp">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/disk_info_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorActionBarBackground">
+
+            <TextView
+                android:id="@+id/disk_info_toolbar_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/disk_info"
+                android:textColor="@color/textColorPrimary"
+                android:textSize="20sp" />
+
+            <android.support.v7.widget.AppCompatSpinner
+                android:id="@+id/disk_info_dropdown"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:visibility="gone"
+                app:theme="@style/AppTheme.Gray" />
+
+        </android.support.v7.widget.Toolbar>
+
+    </android.support.design.widget.AppBarLayout>
+
+    <View
+        android:id="@+id/disk_info_toolbar_shadow"
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:layout_below="@+id/disk_info_app_bar"
+        android:background="@drawable/toolbar_dropshadow" />
+
+    <ImageView
+        android:id="@+id/disk_info_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/disk_info_app_bar"
+        android:scaleType="centerCrop" />
+
+    <com.transcend.nas.settings.DiskInfoViewerPager
+        android:id="@+id/disk_info_view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/disk_info_toolbar_shadow" />
+
+    <com.github.mikephil.charting.charts.PieChart
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/disk_info_toolbar_shadow"
+        android:visibility="gone" />
+
+    <ScrollView
+        android:id="@+id/disk_info_smart_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/disk_info_toolbar_shadow"
+        android:background="@android:color/white"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/disk_info_smart_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </ScrollView>
+
+    <RelativeLayout
+        android:id="@+id/disk_info_progress_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/disk_info_toolbar_shadow"
+        android:clickable="true"
+        android:visibility="invisible">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true" />
+
+    </RelativeLayout>
+
+
+</RelativeLayout>
