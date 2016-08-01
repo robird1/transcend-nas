@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,17 +66,16 @@ public class DiskFactory {
         }
 
         //move the usb device to last page
-        //TODO : multiple usb devices
-        DiskStructDevice usb = null;
+        List<DiskStructDevice> usbs = new ArrayList<>();
         for (DiskStructDevice tmp : mDevices) {
             String external = tmp.infos.get("external");
             if (external != null && external.equals("yes")) {
-                usb = tmp;
-                mDevices.remove(tmp);
-                break;
+                usbs.add(tmp);
             }
         }
-        if (usb != null) {
+        Collections.sort(usbs, DiskInfoSort.comparator());
+        for(DiskStructDevice usb : usbs){
+            mDevices.remove(usb);
             mDevices.add(usb);
         }
 

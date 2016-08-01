@@ -7,6 +7,7 @@ import android.util.Log;
 import com.realtek.nasfun.api.HttpClientManager;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.NASPref;
 import com.tutk.IOTC.P2PService;
 
 import org.apache.http.HttpEntity;
@@ -34,6 +35,7 @@ public class DiskDeviceInfoLoader extends AsyncTaskLoader<Boolean> {
 
     private static final String TAG = DiskDeviceInfoLoader.class.getSimpleName();
     private List<DiskStructDevice> mDevices;
+    private int mRetry = 1;
 
     public DiskDeviceInfoLoader(Context context) {
         super(context);
@@ -42,11 +44,14 @@ public class DiskDeviceInfoLoader extends AsyncTaskLoader<Boolean> {
 
     @Override
     public Boolean loadInBackground() {
-        boolean isSuccess = getDevicesInfo();
+        boolean isSuccess = getDevicesInfo(mRetry);
         return isSuccess;
     }
 
-    private boolean getDevicesInfo() {
+    private boolean getDevicesInfo(int retry) {
+        if(retry < 0)
+            return false;
+
         Server server = ServerManager.INSTANCE.getCurrentServer();
         String hostname = server.getHostname();
         String hash = server.getHash();
@@ -129,7 +134,17 @@ public class DiskDeviceInfoLoader extends AsyncTaskLoader<Boolean> {
                                 device.infos.put(curTagName, text);
                             } else if (curTagName.equals("reason")) {
                                 if (text != null && text.equals("No Permission")) {
-                                    return false;
+                                    boolean success = server.connect();
+                                    if (success) {
+                                        ServerManager.INSTANCE.saveServer(server);
+                                        ServerManager.INSTANCE.setCurrentServer(server);
+                                        NASPref.setSessionVerifiedTime(getContext(), Long.toString(System.currentTimeMillis()));
+                                        return getDevicesInfo(retry-1);
+                                    } else {
+                                        String error = server.getLoginError();
+                                        Log.d(TAG, "login fail due to : " + error);
+                                        return false;
+                                    }
                                 }
                             } else {
                                 Log.d("ike", "other " + curTagName + " : " + text);

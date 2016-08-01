@@ -25,6 +25,7 @@ import java.text.DecimalFormat;
  */
 public class FileInfoActivity extends AppCompatActivity {
 
+    public static final int REQUEST_CODE = FileInfoActivity.class.hashCode() & 0xFFFF;
     public static final String TAG = FileInfoActivity.class.getSimpleName();
     private ImageView ivImage;
 

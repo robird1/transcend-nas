@@ -42,4 +42,5 @@ dependencies {
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
     compile project(':CastCompanionLibrary')
     compile 'com.google.android.exoplayer:exoplayer:r1.5.8'
+    compile 'com.github.PhilJay:MPAndroidChart:v3.0.0-beta1'
 }

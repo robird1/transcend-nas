@@ -97,11 +97,10 @@ public class SmbFileListLoader extends SmbAbstractLoader {
 
         //get shared folder mapping path
         if (mPath.equals(NASApp.ROOT_SMB)) {
-            boolean isValid = getEventNotify();
+            /*boolean isValid = getEventNotify();
             Log.w(TAG, "hash key valid : " + isValid);
             if (!isValid) {
                 Log.d(TAG, "hash key not valid, start login again");
-                mServer = new Server(mHostname, mUsername, mPassword);
                 boolean success = mServer.connect();
                 if (success) {
                     ServerManager.INSTANCE.saveServer(mServer);
@@ -111,7 +110,7 @@ public class SmbFileListLoader extends SmbAbstractLoader {
                     mError = mServer.getLoginError();
                     Log.d(TAG, "login fail due to : " + mError);
                 }
-            }
+            }*/
 
             int size = FileFactory.getInstance().getRealPathMapSize();
             int shardFolderSize = 0;

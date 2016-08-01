@@ -51,7 +51,6 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.common.NotificationDialog;
-import com.transcend.nas.connection.LoginLoader;
 import com.transcend.nas.connection.SignInActivity;
 import com.transcend.nas.service.AutoBackupService;
 import com.transcend.nas.settings.AboutActivity;
@@ -91,7 +90,7 @@ public class FileManageActivity extends AppCompatActivity implements
     private static final int GRID_LANDSCAPE = 5;
 
     private int[] RETRY_CMD = new int[]{LoaderID.SMB_FILE_LIST, LoaderID.SMB_FILE_RENAME, LoaderID.SMB_FILE_DELETE,
-            LoaderID.SMB_NEW_FOLDER, LoaderID.LOGIN};
+            LoaderID.SMB_NEW_FOLDER, LoaderID.EVENT_NOTIFY};
     private Toolbar mToolbar;
     private AppCompatSpinner mDropdown;
     private FileManageDropdownAdapter mDropdownAdapter;
@@ -129,6 +128,7 @@ public class FileManageActivity extends AppCompatActivity implements
     private int mPreviousLoaderID = -1;
     private Bundle mPreviousLoaderArgs = null;
     private boolean isAutoBackupServiceInit = false;
+    private boolean isNeedEventNotify = false;
 
     private VideoCastManager mCastManager;
     private VideoCastConsumer mCastConsumer;
@@ -171,6 +171,15 @@ public class FileManageActivity extends AppCompatActivity implements
             mCastManager.addVideoCastConsumer(mCastConsumer);
             mCastManager.incrementUiCounter();
         }
+
+        Log.d(TAG,"onResume is need event notify : " + isNeedEventNotify);
+        if(isNeedEventNotify){
+            isNeedEventNotify = false;
+            if(!mProgressView.isShown()) {
+                doEventNotify(false, mPath);
+            }
+        }
+
         super.onResume();
         Log.w(TAG, "onResume");
     }
@@ -187,6 +196,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
     @Override
     protected void onStop() {
+        isNeedEventNotify = true;
         super.onStop();
         Log.w(TAG, "onStop");
     }
@@ -242,6 +252,8 @@ public class FileManageActivity extends AppCompatActivity implements
                 }
             }
         }
+
+        isNeedEventNotify = false;
     }
 
     @Override
@@ -288,6 +300,7 @@ public class FileManageActivity extends AppCompatActivity implements
             }
         };
 
+        isNeedEventNotify = false;
     }
 
     private boolean initAutoBackUpService() {
@@ -839,11 +852,9 @@ public class FileManageActivity extends AppCompatActivity implements
             case LoaderID.MEDIA_PLAYER:
                 mProgressView.setVisibility(View.VISIBLE);
                 return new MediaManagerLoader(this, args);
-            case LoaderID.LOGIN:
+            case LoaderID.EVENT_NOTIFY:
                 mProgressView.setVisibility(View.VISIBLE);
-                if (isRemoteAccess())
-                    args.putString("hostname", P2PService.getInstance().getP2PIP() + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP));
-                return new LoginLoader(this, args, true);
+                return new EventNotifyLoader(this, args);
         }
         return null;
     }
@@ -886,10 +897,13 @@ public class FileManageActivity extends AppCompatActivity implements
                 }
             } else if (loader instanceof TutkLogoutLoader) {
                 startSignInActivity(true);
-            } else if (loader instanceof LoginLoader) {
-                Bundle args = ((LoginLoader) loader).getBundleArgs();
+            } else if (loader instanceof EventNotifyLoader) {
+                Bundle args = ((EventNotifyLoader) loader).getBundleArgs();
                 String path = args.getString("path");
-                doLoad(path);
+                if(path != null && !path.equals("")) {
+                    doLoad(path);
+                    return;
+                }
             } else if (loader instanceof AutoBackupLoader) {
                 //do nothing
             } else if (loader instanceof MediaManagerLoader) {
@@ -944,6 +958,24 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
 
+    private boolean doEventNotify(boolean update, String path){
+        int id = path.startsWith(NASApp.ROOT_STG)
+                ? LoaderID.LOCAL_FILE_LIST : LoaderID.SMB_FILE_LIST;
+
+        Long lastTime = Long.parseLong(NASPref.getSessionVerifiedTime(this));
+        Long currTime = System.currentTimeMillis();
+        Log.w(TAG, "hash key time check : " + (currTime - lastTime));
+        if (id == LoaderID.SMB_FILE_LIST && currTime - lastTime >= 180000) {
+            Bundle args = new Bundle();
+            args.putString("path", update ? path : "");
+            getLoaderManager().restartLoader(LoaderID.EVENT_NOTIFY, args, this).forceLoad();
+            Log.w(TAG, "doEventNotify");
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * FILE BROWSER
      */
@@ -951,18 +983,8 @@ public class FileManageActivity extends AppCompatActivity implements
         int id = path.startsWith(NASApp.ROOT_STG)
                 ? LoaderID.LOCAL_FILE_LIST : LoaderID.SMB_FILE_LIST;
 
-        Long lastTime = Long.parseLong(NASPref.getSessionVerifiedTime(this));
-        Long currTime = System.currentTimeMillis();
-        if (id == LoaderID.SMB_FILE_LIST && currTime - lastTime >= 86400000) {
-            Log.w(TAG, "doLogin");
-            Server server = ServerManager.INSTANCE.getCurrentServer();
-            Bundle args = new Bundle();
-            args.putString("hostname", server.getHostname());
-            args.putString("username", server.getUsername());
-            args.putString("password", server.getPassword());
-            args.putString("path", path);
-            getLoaderManager().restartLoader(LoaderID.LOGIN, args, this).forceLoad();
-        } else {
+        boolean pass = doEventNotify(true, path);
+        if(pass){
             Bundle args = new Bundle();
             args.putString("path", path);
             getLoaderManager().restartLoader(id, args, this).forceLoad();
@@ -1532,26 +1554,25 @@ public class FileManageActivity extends AppCompatActivity implements
         Intent intent = new Intent();
         intent.setClass(FileManageActivity.this, FileInfoActivity.class);
         intent.putExtras(args);
-        startActivity(intent);
+        startActivityForResult(intent, FileInfoActivity.REQUEST_CODE);
     }
 
     private void startDiskInfoActivity() {
         Intent intent = new Intent();
         intent.setClass(FileManageActivity.this, DiskInfoActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, DiskInfoActivity.REQUEST_CODE);
     }
 
     private void startSettingsActivity() {
         Intent intent = new Intent();
         intent.setClass(FileManageActivity.this, SettingsActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, SettingsActivity.REQUEST_CODE);
     }
 
     private void startAboutActivity() {
-        //TODO: implement about page
         Intent intent = new Intent();
         intent.setClass(FileManageActivity.this, AboutActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, AboutActivity.REQUEST_CODE);
     }
 
     private void startSignInActivity(boolean clear) {

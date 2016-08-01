@@ -38,5 +38,6 @@ public class LoaderID {
     public static final int DISK_INFO = 30;
     public static final int DISK_INFO_TEMPERATURE = 31;
     public static final int DISK_SMART = 32;
+    public static final int EVENT_NOTIFY = 33;
 
 }

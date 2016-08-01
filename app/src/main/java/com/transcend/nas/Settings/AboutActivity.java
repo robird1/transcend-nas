@@ -37,6 +37,7 @@ import java.io.InputStreamReader;
  */
 public class AboutActivity extends AppCompatActivity {
 
+    public static final int REQUEST_CODE = SettingsActivity.class.hashCode() & 0xFFFF;
     public static final String TAG = AboutActivity.class.getSimpleName();
 
     private static boolean isSubFragment = false;

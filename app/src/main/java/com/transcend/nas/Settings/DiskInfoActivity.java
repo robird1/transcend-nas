@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.content.Loader;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -49,6 +51,7 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
     private int mLoaderID = -1;
     private List<DiskStructDevice> mDevices;
     private boolean isInit = false;
+    private int mCurrentIndex = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +104,28 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
         mDiskInfoPagerAdapter = new DiskInfoPagerAdapter();
         mDiskInfoPagerAdapter.setContentList(views);
         mDiskInfoViewerPager.setAdapter(mDiskInfoPagerAdapter);
+        mDiskInfoViewerPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                mCurrentIndex = position;
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
+        //after views update, scroll to previous view's index
+        if( views.size() > mCurrentIndex){
+           mDiskInfoViewerPager.setCurrentItem(mCurrentIndex, true);
+        }
+
         if(titles.size() > 1) {
             mSpinnerAdapter = new DiskInfoDropdownAdapter();
             mSpinnerAdapter.setContentList(titles);

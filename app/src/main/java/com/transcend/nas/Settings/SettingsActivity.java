@@ -78,6 +78,7 @@ import java.util.List;
 public class SettingsActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Boolean> {
 
+    public static final int REQUEST_CODE = SettingsActivity.class.hashCode() & 0xFFFF;
     public static final String TAG = SettingsActivity.class.getSimpleName();
 
     private RelativeLayout mProgressView;
