@@ -180,7 +180,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
                     updateProgress(mType, target.getName(), count, total);
                 }
 
-                if(count >= mCount)
+                if (count >= mCount)
                     mCount = count;
                 else
                     success = false;
@@ -228,7 +228,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         ntfMgr.notify(mNotificationID, builder.build());
     }
 
-    protected void updateResult(String type, String result) {
+    protected void updateResult(String type, String result, String destination) {
         Log.w(TAG, "result: " + result);
 
         int icon = R.mipmap.ic_launcher;
@@ -239,6 +239,9 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         Intent intent = mActivity.getIntent();
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        if(destination != null && !destination.equals(""))
+            intent.putExtra("path", destination);
+
         PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext());
         builder.setSmallIcon(icon);

@@ -165,6 +165,19 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     @Override
+    protected void onNewIntent(Intent intent){
+        super.onNewIntent(intent);
+        String path = "";
+        if(intent != null) {
+            path = intent.getStringExtra("path");
+            if(path != null && !path.equals("")){
+                doLoad(path);
+            }
+        }
+        Log.w(TAG, "onNewIntent : " + path);
+    }
+
+    @Override
     protected void onResume() {
         mCastManager = VideoCastManager.getInstance();
         if (null != mCastManager) {

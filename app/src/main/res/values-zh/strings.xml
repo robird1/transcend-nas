@@ -162,5 +162,7 @@
     <string name="disk_smart_info">協助確認硬碟狀態</string>
     <string name="detail">詳細資訊</string>
     <string name="capacity">容量</string>
+    <string name="path">路徑</string>
+    <string name="model">型號</string>
 
 </resources>

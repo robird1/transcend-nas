@@ -8,6 +8,7 @@ import com.realtek.nasfun.api.HttpClientManager;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
+import com.transcend.nas.R;
 import com.tutk.IOTC.P2PService;
 
 import org.apache.http.HttpEntity;
@@ -36,6 +37,7 @@ public class DiskDeviceInfoLoader extends AsyncTaskLoader<Boolean> {
     private static final String TAG = DiskDeviceInfoLoader.class.getSimpleName();
     private List<DiskStructDevice> mDevices;
     private int mRetry = 1;
+    private String mError;
 
     public DiskDeviceInfoLoader(Context context) {
         super(context);
@@ -133,7 +135,7 @@ public class DiskDeviceInfoLoader extends AsyncTaskLoader<Boolean> {
                             } else if (device != null && DiskStructDevice.FORMAT.contains(curTagName)) {
                                 device.infos.put(curTagName, text);
                             } else if (curTagName.equals("reason")) {
-                                if (text != null && text.equals("No Permission")) {
+                                if ("No Permission".equals(text)) {
                                     boolean success = server.connect();
                                     if (success) {
                                         ServerManager.INSTANCE.saveServer(server);
@@ -141,10 +143,14 @@ public class DiskDeviceInfoLoader extends AsyncTaskLoader<Boolean> {
                                         NASPref.setSessionVerifiedTime(getContext(), Long.toString(System.currentTimeMillis()));
                                         return getDevicesInfo(retry-1);
                                     } else {
-                                        String error = server.getLoginError();
-                                        Log.d(TAG, "login fail due to : " + error);
+                                        mError = server.getLoginError();
+                                        Log.d(TAG, "login fail due to : " + mError);
                                         return false;
                                     }
+                                } else {
+                                    mError = text;
+                                    Log.d(TAG, "get device info fail due to : " + mError);
+                                    return false;
                                 }
                             } else {
                                 Log.d("ike", "other " + curTagName + " : " + text);
@@ -210,5 +216,11 @@ public class DiskDeviceInfoLoader extends AsyncTaskLoader<Boolean> {
 
     public List<DiskStructDevice> getDevices(){
         return mDevices;
+    }
+
+    public String getError(){
+        if(mError == null)
+            mError = getContext().getString(R.string.network_error);
+        return mError;
     }
 }

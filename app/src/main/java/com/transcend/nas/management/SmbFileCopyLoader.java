@@ -49,7 +49,7 @@ public class SmbFileCopyLoader extends SmbAbstractLoader {
             e.printStackTrace();
             closeProgressWatcher();
             setException(e);
-            updateResult(mType, getContext().getString(R.string.error));
+            updateResult(mType, getContext().getString(R.string.error), mDest);
         }
         return false;
     }
@@ -68,9 +68,9 @@ public class SmbFileCopyLoader extends SmbAbstractLoader {
         }
 
         if(success)
-            updateResult(mType, getContext().getString(R.string.done));
+            updateResult(mType, getContext().getString(R.string.done), mDest);
         else
-            updateResult(mType, getContext().getString(R.string.error));
+            updateResult(mType, getContext().getString(R.string.error), mDest);
         return true;
     }
 

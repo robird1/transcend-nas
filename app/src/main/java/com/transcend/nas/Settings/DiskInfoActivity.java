@@ -338,13 +338,15 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
     @Override
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
         mProgressView.setVisibility(View.INVISIBLE);
-        if (!success) {
-            Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         if (loader instanceof DiskDeviceInfoLoader) {
-            mDevices = ((DiskDeviceInfoLoader) loader).getDevices();
+            DiskDeviceInfoLoader tmp = (DiskDeviceInfoLoader) loader;
+            if (!success) {
+                String error = tmp.getError();
+                Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            mDevices = tmp.getDevices();
             if (mDevices != null && mDevices.size() > 0) {
                 setDeviceData(mDevices);
                 getLoaderManager().restartLoader(LoaderID.DISK_INFO_TEMPERATURE, null, this).forceLoad();

@@ -69,6 +69,8 @@
     <string name="disk_smart_info">Help to check disk status</string>
     <string name="detail">Detail</string>
     <string name="capacity">Capacity</string>
+    <string name="path">Path</string>
+    <string name="model">Model</string>
 
     <!-- string -->
 

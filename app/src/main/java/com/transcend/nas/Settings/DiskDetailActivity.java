@@ -137,15 +137,16 @@ public class DiskDetailActivity extends AppCompatActivity implements LoaderManag
 
     private ArrayList<HashMap<String, String>> getDeviceItems(String ID_TITLE, String ID_SUBTITLE, DiskStructDevice device){
         ArrayList<HashMap<String, String>> myListData = new ArrayList<>();
-        String[] keywords = new String[]{"model", "path"};
-        if(device.infos != null) {
-            for(String key : keywords) {
-                HashMap<String, String> item = new HashMap<String, String>();
-                item.put(ID_TITLE, key);
-                item.put(ID_SUBTITLE, device.infos.get(key));
-                myListData.add(item);
-            }
-        }
+
+        HashMap<String, String> model = new HashMap<String, String>();
+        model.put(ID_TITLE, getString(R.string.model));
+        model.put(ID_SUBTITLE, device.infos.get("model"));
+        myListData.add(model);
+
+        HashMap<String, String> path = new HashMap<String, String>();
+        path.put(ID_TITLE, getString(R.string.path));
+        path.put(ID_SUBTITLE, device.infos.get("path"));
+        myListData.add(path);
 
         float totalSize = DiskFactory.getInstance().getDeviceTotalSize(device);
         HashMap<String, String> total = new HashMap<String, String>();
