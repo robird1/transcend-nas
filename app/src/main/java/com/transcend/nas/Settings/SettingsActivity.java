@@ -212,7 +212,7 @@ public class SettingsActivity extends AppCompatActivity implements
         if(id != LoaderID.LOGIN)
             mProgressView.setVisibility(View.VISIBLE);
 
-        String server, email, pwd, token;
+        String server, email, pwd, token, nasName, nasUUID;
 
         switch (mLoaderID = id) {
             case LoaderID.SMB_NEW_FOLDER:
@@ -222,7 +222,9 @@ public class SettingsActivity extends AppCompatActivity implements
                 server = args.getString("server");
                 email = args.getString("email");
                 pwd = args.getString("password");
-                return new TutkRegisterLoader(this, server, email, pwd);
+                nasName = args.getString("nasName");
+                nasUUID = args.getString("nasUUID");
+                return new TutkRegisterLoader(this, server, email, pwd, nasName, nasUUID);
             case LoaderID.TUTK_LOGIN:
                 server = args.getString("server");
                 email = args.getString("email");
@@ -231,8 +233,8 @@ public class SettingsActivity extends AppCompatActivity implements
             case LoaderID.TUTK_NAS_CREATE:
                 server = args.getString("server");
                 token = args.getString("token");
-                String nasName = args.getString("nasName");
-                String nasUUID = args.getString("nasUUID");
+                nasName = args.getString("nasName");
+                nasUUID = args.getString("nasUUID");
                 return new TutkCreateNasLoader(this, server, token, nasName, nasUUID);
             case LoaderID.TUTK_NAS_GET:
                 server = args.getString("server");
@@ -1104,6 +1106,16 @@ public class SettingsActivity extends AppCompatActivity implements
                     arg.putString("server", NASPref.getCloudServer(mContext));
                     arg.putString("email", email);
                     arg.putString("password", pwd);
+                    Server mServer = ServerManager.INSTANCE.getCurrentServer();
+                    String name = mServer.getServerInfo().hostName;
+                    String serial = NASPref.getSerialNum(getActivity());
+                    if(serial != null && !serial.equals(""))
+                        name = name + NASApp.TUTK_NAME_TAG + serial;
+                    arg.putString("nasName", name);
+                    String id = mServer.getTutkUUID();
+                    if(id == null)
+                        id = NASPref.getUUID(getActivity());
+                    arg.putString("nasUUID", id);
                     getLoaderManager().restartLoader(LoaderID.TUTK_REGISTER, arg, SettingsActivity.this).forceLoad();
                     break;
                 case R.id.remote_access_login_forget:

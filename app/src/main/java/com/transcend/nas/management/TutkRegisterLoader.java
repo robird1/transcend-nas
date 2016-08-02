@@ -15,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -27,19 +28,42 @@ public class TutkRegisterLoader extends TutkBasicLoader {
 
     private String mEmail;
     private String mPwd;
+    private String mNasName;
+    private String mNasUUID;
 
-    public TutkRegisterLoader(Context context, String server, String email, String pwd) {
+    public TutkRegisterLoader(Context context, String server, String email, String pwd, String nasName, String nasUUID) {
         super(context, server);
         mEmail = email;
         mPwd = pwd;
+        mNasName = nasName;
+        mNasUUID = nasUUID;
     }
 
     @Override
     public Boolean loadInBackground() {
+        String result = "";
         String url = doGenerateUrl();
         String name = mEmail.split("@")[0];
-        String param = "username="+ name + "&password=" + mPwd + "&email=" + mEmail + "&language=" + getSystemLanguage();
-        String result = doPostRequest(url, param);
+        String param = "";
+        if(mNasName != null && mNasUUID != null){
+            param = "{\"username\":\""+ name + "\"" +
+                    ",\"password\":\""+ mPwd + "\"" +
+                    ",\"email\":\""+ mEmail + "\"" +
+                    ",\"language\":\""+ getSystemLanguage() + "\"" +
+                    ",\"meta\":{" +
+                        "\"nas\":{" +
+                            "\"name\":\"" + mNasName + "\"" +
+                            ",\"uid\":\"" + mNasUUID + "\"" +
+                            "}" +
+                        "}" +
+                    "}";
+            result = doJsonPostRequest(url, param);
+        }
+        else{
+            param = "username="+ name + "&password=" + mPwd + "&email=" + mEmail + "&language=" + getSystemLanguage();
+            result = doPostRequest(url, param);
+        }
+
         boolean success = doParserResult(result);
         return success;
     }

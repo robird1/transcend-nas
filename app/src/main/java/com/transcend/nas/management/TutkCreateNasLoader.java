@@ -26,7 +26,7 @@ public class TutkCreateNasLoader extends TutkBasicLoader {
     public Boolean loadInBackground() {
         String url = doGenerateUrl();
         String param = "authToken=" + mToken + "&name=" + mName + "&uid=" + mUUID;
-        String result = doPostRequest(url, param, mToken);
+        String result = doPostRequest(url, param, mToken, false);
         boolean success = doParserResult(result);
         return success;
     }

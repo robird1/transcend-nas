@@ -170,10 +170,14 @@ public abstract class TutkBasicLoader extends AsyncTaskLoader<Boolean> {
     }
 
     public String doPostRequest(String url, String param) {
-        return doPostRequest(url, param, null);
+        return doPostRequest(url, param, null, false);
     }
 
-    public String doPostRequest(String url, String param, String token) {
+    public String doJsonPostRequest(String url, String param) {
+        return doPostRequest(url, param, null, true);
+    }
+
+    public String doPostRequest(String url, String param, String token, boolean isJson) {
         HttpsURLConnection conn = null;
         String result = "";
         try {
@@ -183,7 +187,10 @@ public abstract class TutkBasicLoader extends AsyncTaskLoader<Boolean> {
             conn.setHostnameVerifier(DO_NOT_VERIFY);
             conn.setRequestMethod("POST");
             conn.setRequestProperty("x-transcend-header", "application/transcend.v1");
-            conn.setRequestProperty("content-type", "application/x-www-form-urlencoded");
+            if(isJson)
+                conn.setRequestProperty("content-type", "application/json");
+            else
+                conn.setRequestProperty("content-type", "application/x-www-form-urlencoded");
             if (token != null) {
                 conn.setRequestProperty("authorization", "Bearer " + token);
             }
