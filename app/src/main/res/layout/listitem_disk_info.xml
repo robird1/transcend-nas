@@ -8,8 +8,58 @@
         android:id="@+id/listitem_disk_info_pie_chart"
         android:layout_width="match_parent"
         android:layout_height="250dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp" />
+
+    <LinearLayout
+        android:id="@+id/listitem_disk_used_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginBottom="5dp"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_gravity="center_vertical"
+            android:background="#d3d3d3" />
+
+        <TextView
+            android:id="@+id/listitem_disk_used_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="5dp"
+            android:text="Used"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/listitem_disk_available_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
         android:layout_marginBottom="16dp"
-        android:layout_marginTop="10dp"/>
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_gravity="center_vertical"
+            android:background="#87cefa" />
+
+        <TextView
+            android:id="@+id/listitem_disk_available_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="5dp"
+            android:text="Available"
+            android:textSize="14sp" />
+
+    </LinearLayout>
 
     <RelativeLayout
         android:id="@+id/listitem_disk_info_layout"
@@ -32,9 +82,9 @@
             android:layout_height="72dp"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
+            android:paddingBottom="20dp"
             android:paddingRight="20dp"
             android:paddingTop="20dp"
-            android:paddingBottom="20dp"
             android:rotation="180"
             android:src="@drawable/ic_navigation_arrow_gray_24dp" />
 
@@ -45,7 +95,7 @@
             android:layout_gravity="center"
             android:layout_toLeftOf="@id/listitem_disk_info_next"
             android:layout_toRightOf="@id/listitem_disk_info_icon"
-            android:orientation="vertical" >
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/listitem_disk_info_title"

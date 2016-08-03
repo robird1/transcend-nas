@@ -66,24 +66,18 @@ public class FileFactory {
             tmp.add(file);
         }
         fileList.clear();
-        for (int i = 0; i < 2; i++) {
-            if (i == 0) {
-                for (FileInfo file : tmp) {
-                    if (file.type == FileInfo.TYPE.DIR) {
-                        fileList.add(file);
-                    }
-                }
-            }
 
-            if (i == 1) {
-                for (FileInfo file : tmp) {
-                    if (file.type != FileInfo.TYPE.DIR) {
-                        fileList.add(file);
-                    }
-                }
+        for (FileInfo file : tmp) {
+            if (file.type == FileInfo.TYPE.DIR) {
+                fileList.add(file);
             }
         }
 
+        for (FileInfo file : tmp) {
+            if (file.type != FileInfo.TYPE.DIR) {
+                fileList.add(file);
+            }
+        }
     }
 
     public void addFolderFilterRule(String path, ArrayList<FileInfo> fileList) {
@@ -103,20 +97,24 @@ public class FileFactory {
                 }
             }
 
+            Server server = ServerManager.INSTANCE.getCurrentServer();
+            String username = server.getUsername();
+            if (username != null && !username.equals("admin")) {
+                ArrayList<FileInfo> tmp = new ArrayList<>();
+                for (FileInfo file : fileList) {
+                    if (file.name.equals("Public") || file.name.equals(username))
+                        tmp.add(file);
+                }
+
+                fileList.clear();
+                for (FileInfo file : tmp) {
+                    fileList.add(file);
+                }
+            }
+
             for (FileInfo file : fileList) {
                 if (file.time.startsWith("1970/01/01")) {
                     file.time = "";
-                }
-            }
-        }
-    }
-
-    public void addSelfFilterRule(String path, ArrayList<FileInfo> fileList) {
-        if (NASApp.ROOT_SMB.equals(path)) {
-            for (FileInfo file : fileList) {
-                if (file.path.endsWith(path)) {
-                    fileList.remove(file);
-                    break;
                 }
             }
         }
@@ -202,7 +200,7 @@ public class FileFactory {
         } else if (sizeMB >= 1000) {
             sizeMB = (double) sizeMB / 1024;
             s = " GB";
-            if(sizeMB >= 1000) {
+            if (sizeMB >= 1000) {
                 sizeMB = (double) sizeMB / 1024;
                 s = " TB";
             }

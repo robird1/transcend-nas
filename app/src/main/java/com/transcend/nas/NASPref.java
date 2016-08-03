@@ -401,6 +401,24 @@ public class NASPref {
 
     /**
      *
+     * Picker File View
+     *
+     */
+    public static FileManageRecyclerAdapter.LayoutType getFilePickerViewType(Context context) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_file_picker_view_type);
+        int def = FileManageRecyclerAdapter.LayoutType.LIST.ordinal();
+        return FileManageRecyclerAdapter.LayoutType.values()[PrefUtil.read(context, name, key, def)];
+    }
+
+    public static void setFilePickerViewType(Context context, FileManageRecyclerAdapter.LayoutType type) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_file_picker_view_type);
+        PrefUtil.write(context, name, key, type.ordinal());
+    }
+
+    /**
+     *
      * Music Type
      *
      */

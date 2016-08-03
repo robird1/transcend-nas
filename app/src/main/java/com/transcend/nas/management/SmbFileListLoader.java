@@ -95,23 +95,8 @@ public class SmbFileListLoader extends SmbAbstractLoader {
         }
         Log.w(TAG, "mFileList size: " + mFileList.size());
 
-        //get shared folder mapping path
-        if (mPath.equals(NASApp.ROOT_SMB)) {
-            /*boolean isValid = getEventNotify();
-            Log.w(TAG, "hash key valid : " + isValid);
-            if (!isValid) {
-                Log.d(TAG, "hash key not valid, start login again");
-                boolean success = mServer.connect();
-                if (success) {
-                    ServerManager.INSTANCE.saveServer(mServer);
-                    ServerManager.INSTANCE.setCurrentServer(mServer);
-                    NASPref.setSessionVerifiedTime(getContext(), Long.toString(System.currentTimeMillis()));
-                } else {
-                    mError = mServer.getLoginError();
-                    Log.d(TAG, "login fail due to : " + mError);
-                }
-            }*/
-
+        //get shared folder mapping path for admin user
+        if (mPath.equals(NASApp.ROOT_SMB)  && "admin".equals(mUsername)) {
             int size = FileFactory.getInstance().getRealPathMapSize();
             int shardFolderSize = 0;
             for (FileInfo file : mFileList) {
@@ -129,92 +114,6 @@ public class SmbFileListLoader extends SmbAbstractLoader {
         }
 
         return true;
-    }
-
-    private boolean getEventNotify() {
-        boolean isSuccess = true;
-        Server server = ServerManager.INSTANCE.getCurrentServer();
-        String hostname = server.getHostname();
-        String hash = server.getHash();
-        String p2pIP = P2PService.getInstance().getP2PIP();
-        if (hostname.contains(p2pIP)) {
-            hostname = p2pIP + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
-        }
-        DefaultHttpClient httpClient = HttpClientManager.getClient();
-        String commandURL = "http://" + hostname + "/nas/query/event_notify";
-        HttpResponse response = null;
-        InputStream inputStream = null;
-        try {
-            do {
-                HttpPost httpPost = new HttpPost(commandURL);
-                List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-                nameValuePairs.add(new BasicNameValuePair("hash", hash));
-                httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-                response = httpClient.execute(httpPost);
-                if (response == null) {
-                    Log.e(TAG, "response is null");
-                    break;
-                }
-                HttpEntity entity = response.getEntity();
-                if (entity == null) {
-                    Log.e(TAG, "response entity is null");
-                    break;
-                }
-                inputStream = entity.getContent();
-                String inputEncoding = EntityUtils.getContentCharSet(entity);
-                if (inputEncoding == null) {
-                    inputEncoding = HTTP.DEFAULT_CONTENT_CHARSET;
-                }
-
-                XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-                factory.setNamespaceAware(true);
-                XmlPullParser xpp = factory.newPullParser();
-                xpp.setInput(inputStream, inputEncoding);
-                int eventType = xpp.getEventType();
-                String curTagName = null;
-                String text = null;
-
-                do {
-                    String tagName = xpp.getName();
-                    if (eventType == XmlPullParser.START_TAG) {
-                        curTagName = tagName;
-                    } else if (eventType == XmlPullParser.TEXT) {
-                        if (curTagName != null) {
-                            text = xpp.getText();
-                            if (curTagName.equals("reason")) {
-                                String reason = text;
-                                if (reason != null && reason.equals("Not Login")) {
-                                    isSuccess = false;
-                                }
-                            }
-
-                        }
-                    } else if (eventType == XmlPullParser.END_TAG) {
-                        curTagName = null;
-                    }
-                    eventType = xpp.next();
-                } while (eventType != XmlPullParser.END_DOCUMENT);
-            } while (false);
-
-        } catch (XmlPullParserException e) {
-            Log.d(TAG, "XML Parser error");
-            e.printStackTrace();
-        } catch (IOException e) {
-            Log.d(TAG, "Fail to connect to server");
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            Log.d(TAG, "catch IllegalArgumentException");
-            e.printStackTrace();
-        } finally {
-            try {
-                if (inputStream != null)
-                    inputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return isSuccess;
     }
 
     private boolean getSharedList() {

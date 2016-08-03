@@ -74,7 +74,7 @@ public class DiskInfoDropdownAdapter extends BaseAdapter {
             convertView = ViewHolder.get(view, R.id.dropdown_text);
         }
 
-        ((TextView)convertView).setText("");
+        ((TextView)convertView).setText(parent.getContext().getString(R.string.disk_info));
         return convertView;
     }
 

@@ -12,6 +12,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -23,11 +24,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.transcend.nas.NASApp;
+import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.utils.FileFactory;
@@ -46,12 +49,12 @@ public class FileActionPickerActivity extends AppCompatActivity implements
         View.OnClickListener {
 
     public static final int REQUEST_CODE = FileActionPickerActivity.class.hashCode() & 0xFFFF;
-
     private static final String TAG = FileActionPickerActivity.class.getSimpleName();
 
     private Toolbar mToolbar;
     private AppCompatSpinner mDropdown;
     private FileManageDropdownAdapter mDropdownAdapter;
+    private LinearLayout mRecyclerEmptyView;
     private RecyclerView mRecyclerView;
     private FileManageRecyclerAdapter mRecyclerAdapter;
     private FloatingActionButton mFabControl;
@@ -116,12 +119,22 @@ public class FileActionPickerActivity extends AppCompatActivity implements
     }
 
     private void initRecyclerView() {
+        FileManageRecyclerAdapter.LayoutType type = NASPref.getFilePickerViewType(this);
         mRecyclerAdapter = new FileManageRecyclerAdapter(mFileList);
         mRecyclerAdapter.setOnRecyclerItemCallbackListener(this);
         mRecyclerView = (RecyclerView)findViewById(R.id.locate_recycler_view);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        switch (type) {
+            case GRID:
+                updateGridView(false);
+                break;
+            default:
+                updateListView(false);
+                break;
+        }
         mRecyclerView.setAdapter(mRecyclerAdapter);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        mRecyclerView.setOnScrollListener(new FileManageRecyclerListener(ImageLoader.getInstance(), true, false));
+        mRecyclerEmptyView = (LinearLayout) findViewById(R.id.locate_recycler_empty_view);
     }
 
     private void initFabs() {
@@ -204,9 +217,19 @@ public class FileActionPickerActivity extends AppCompatActivity implements
         getMenuInflater().inflate(R.menu.file_picker, menu);
         int count = getSelectedCount();
         if(mFileList != null && mFileList.size() == count && count > 0)
-            menu.findItem(R.id.file_locate_action_selected_all).setIcon(R.drawable.ic_clear_all_white_24dp);
+            menu.findItem(R.id.file_picker_action_selected_all).setIcon(R.drawable.ic_clear_all_white_24dp);
         else
-            menu.findItem(R.id.file_locate_action_selected_all).setIcon(R.drawable.ic_done_all_white_24dp);
+            menu.findItem(R.id.file_picker_action_selected_all).setIcon(R.drawable.ic_done_all_white_24dp);
+
+        FileManageRecyclerAdapter.LayoutType type = NASPref.getFilePickerViewType(this);
+        switch (type) {
+            case GRID:
+                menu.findItem(R.id.file_picker_viewer_action_view).setIcon(R.drawable.ic_view_list_white_24dp);
+                break;
+            default:
+                menu.findItem(R.id.file_picker_viewer_action_view).setIcon(R.drawable.ic_view_module_white_24dp);
+                break;
+        }
         return true;
     }
 
@@ -216,12 +239,57 @@ public class FileActionPickerActivity extends AppCompatActivity implements
             case android.R.id.home:
                 finish();
                 break;
-            case R.id.file_locate_action_selected_all:
+            case R.id.file_picker_action_selected_all:
                 toggleSelectAll();
+                break;
+            case R.id.file_picker_viewer_action_view:
+                doChangeView();
                 break;
 
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void checkEmptyView() {
+        if (mFileList != null)
+            mRecyclerEmptyView.setVisibility(mFileList.size() == 0 ? View.VISIBLE : View.GONE);
+        else
+            mRecyclerEmptyView.setVisibility(View.GONE);
+    }
+
+    private void updateListView(boolean update) {
+        LinearLayoutManager list = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(list);
+        if (update) {
+            mRecyclerView.getRecycledViewPool().clear();
+            mRecyclerAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private void updateGridView(boolean update) {
+        final int GRID_PORTRAIT = 3;
+        final int GRID_LANDSCAPE = 5;
+        int orientation = getResources().getConfiguration().orientation;
+        int spanCount = (orientation == Configuration.ORIENTATION_PORTRAIT)
+                ? GRID_PORTRAIT : GRID_LANDSCAPE;
+        GridLayoutManager grid = new GridLayoutManager(this, spanCount);
+        grid.setSpanSizeLookup(new SpanSizeLookup(grid.getSpanCount()));
+        mRecyclerView.setLayoutManager(grid);
+        if (update) {
+            mRecyclerView.getRecycledViewPool().clear();
+            mRecyclerAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private void doChangeView() {
+        if (mRecyclerView.getLayoutManager() instanceof GridLayoutManager) {
+            updateListView(true);
+            NASPref.setFilePickerViewType(this, FileManageRecyclerAdapter.LayoutType.LIST);
+        } else {
+            updateGridView(true);
+            NASPref.setFilePickerViewType(this, FileManageRecyclerAdapter.LayoutType.GRID);
+        }
+        invalidateOptionsMenu();
     }
 
 
@@ -376,6 +444,7 @@ public class FileActionPickerActivity extends AppCompatActivity implements
         }
 
         if(!success){
+            checkEmptyView();
             if(loader instanceof SmbAbstractLoader)
                 Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
             else
@@ -421,6 +490,7 @@ public class FileActionPickerActivity extends AppCompatActivity implements
         mDropdownAdapter.notifyDataSetChanged();
         mRecyclerAdapter.updateList(mFileList);
         mRecyclerAdapter.notifyDataSetChanged();
+        checkEmptyView();
         invalidateOptionsMenu();
     }
 
@@ -491,6 +561,23 @@ public class FileActionPickerActivity extends AppCompatActivity implements
         intent.putExtras(bundle);
         setResult(RESULT_OK, intent);
         finish();
+    }
+
+    /**
+     * GRID LAYOUT MANAGER SPAN SIZE LOOKUP
+     */
+    private class SpanSizeLookup extends GridLayoutManager.SpanSizeLookup {
+
+        private int spanSize;
+
+        public SpanSizeLookup(int spanCount) {
+            spanSize = spanCount;
+        }
+
+        @Override
+        public int getSpanSize(int position) {
+            return mRecyclerAdapter.isFooter(position) ? spanSize : 1;
+        }
     }
 
 }

@@ -202,9 +202,15 @@ public class DiskFactory {
 
         for(String key : mTemperature.keySet()){
             for(DiskStructDevice device : mDevices){
+                int result = -1;
                 String path = device.infos.get("path");
-                if(path != null && path.contains(key)){
-                    device.infos.put("temperature", mTemperature.get(key) + "\u00B0" + "C");
+                String temperature = mTemperature.get(key);
+                if(temperature != null && !temperature.equals("")){
+                    result = Integer.parseInt(temperature);
+                }
+
+                if(path != null && path.contains(key) && result > 0){
+                    device.infos.put("temperature", result + "\u00B0C / " + (result*9/5 + 32) + "\u00B0F");
                     break;
                 }
             }
@@ -257,6 +263,16 @@ public class DiskFactory {
         //format the size
         DecimalFormat df = new DecimalFormat("##.##");
         String formatSize = df.format(availSize / totalSize * 100) + "%";
+        return formatSize;
+    }
+
+    public String getDeviceUsedSizePercent(DiskStructDevice device) {
+        float totalSize = getDeviceTotalSize(device);
+        float availSize = getDeviceAvailableSize(device);
+
+        //format the size
+        DecimalFormat df = new DecimalFormat("##.##");
+        String formatSize = df.format((totalSize - availSize) / totalSize * 100) + "%";
         return formatSize;
     }
 

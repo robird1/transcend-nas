@@ -1622,6 +1622,9 @@ public class FileManageActivity extends AppCompatActivity implements
         //clean disk info
         DiskFactory.getInstance().cleanDiskDevices();
 
+        //clean path map
+        FileFactory.getInstance().cleanRealPathMap();
+
         //show SignIn activity
         Intent intent = new Intent();
         intent.setClass(FileManageActivity.this, SignInActivity.class);

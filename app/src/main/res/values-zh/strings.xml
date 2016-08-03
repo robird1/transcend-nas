@@ -154,7 +154,7 @@
 
     <!-- Disk -->
     <string name="disk_info">硬碟資訊</string>
-    <string name="available">可用</string>
+    <string name="available">可使用</string>
     <string name="total">全部</string>
     <string name="temperature">溫度</string>
     <string name="other">其他</string>

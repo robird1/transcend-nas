@@ -3,7 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/file_locate_action_selected_all"
+        android:id="@+id/file_picker_viewer_action_view"
+        android:icon="@drawable/ic_view_module_white_24dp"
+        android:title="@string/view"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/file_picker_action_selected_all"
         android:icon="@drawable/ic_done_all_white_24dp"
         android:title="@string/done"
         app:showAsAction="always" />

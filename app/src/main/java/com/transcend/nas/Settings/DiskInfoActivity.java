@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
@@ -32,6 +33,8 @@ import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.utils.FileFactory;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -137,9 +140,11 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
             });
             mSpinner.setAdapter(mSpinnerAdapter);
             mSpinner.setVisibility(View.VISIBLE);
+            mTitle.setVisibility(View.GONE);
         }
         else{
             mSpinner.setVisibility(View.GONE);
+            mTitle.setVisibility(View.VISIBLE);
         }
     }
 
@@ -182,14 +187,26 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
                                 View view = super.getView(position, convertView, parent);
                                 PieChart chart = (PieChart) view.findViewById(R.id.listitem_disk_info_pie_chart);
                                 RelativeLayout layout = (RelativeLayout) view.findViewById(R.id.listitem_disk_info_layout);
-                                ImageView next = (ImageView) view.findViewById(R.id.listitem_disk_info_next);
+                                LinearLayout usedLayout = (LinearLayout) view.findViewById(R.id.listitem_disk_used_layout);
+                                LinearLayout availableLayout = (LinearLayout) view.findViewById(R.id.listitem_disk_available_layout);
+                                TextView usedText = (TextView) view.findViewById(R.id.listitem_disk_used_text);
+                                TextView availableText = (TextView) view.findViewById(R.id.listitem_disk_available_text);
+                                //ImageView next = (ImageView) view.findViewById(R.id.listitem_disk_info_next);
+                                //ImageView icon = (ImageView) view.findViewById(R.id.listitem_disk_info_icon);
                                 if (position == 0) {
                                     //pie chart
                                     chart.setVisibility(View.VISIBLE);
                                     layout.setVisibility(View.GONE);
+                                    usedLayout.setVisibility(View.VISIBLE);
+                                    availableLayout.setVisibility(View.VISIBLE);
+                                    usedText.setText(getString(R.string.used) + ": "
+                                            + FileFactory.getInstance().getFileSize((long) (device.totalSize - device.availableSize))
+                                            + " (" + DiskFactory.getInstance().getDeviceUsedSizePercent(device) + ")");
+                                    availableText.setText(getString(R.string.available) + ": "
+                                            + FileFactory.getInstance().getFileSize((long) (device.availableSize))
+                                            + " (" + DiskFactory.getInstance().getDeviceAvailableSizePercent(device) + ")");
                                     chart.setData(data);
                                     chart.highlightValues(null);
-                                    chart.setDescription(FileFactory.getInstance().getFileSize((long) device.totalSize));
                                     chart.setCenterTextSize(20f);
                                     chart.setHoleRadius(72f);
                                     chart.setTransparentCircleRadius(75f);
@@ -197,22 +214,17 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
                                     chart.setRotationEnabled(false);
                                     chart.setUsePercentValues(true);
                                     chart.setDrawEntryLabels(false);
-                                    chart.setCenterText(DiskFactory.getInstance().getDeviceAvailableSizePercent(device) + "\n" + getString(R.string.available));
-                                    Legend l = chart.getLegend();
-                                    l.setPosition(Legend.LegendPosition.BELOW_CHART_LEFT);
-                                    l.setXEntrySpace(7);
-                                    l.setYEntrySpace(5);
-                                    l.setOrientation(Legend.LegendOrientation.VERTICAL);
+                                    chart.setDescription("");
+                                    chart.getLegend().setEnabled(false);
+                                    chart.setCenterText(FileFactory.getInstance().getFileSize((long) device.availableSize) + "\n" + getString(R.string.available));
                                     if(!isInit)
                                         chart.animateY(1000, Easing.EasingOption.EaseInOutQuad);
                                     isInit = false;
                                 } else {
                                     chart.setVisibility(View.GONE);
                                     layout.setVisibility(View.VISIBLE);
-                                    if(isRAID && position == 1)
-                                        next.setVisibility(View.INVISIBLE);
-                                    else
-                                        next.setVisibility(View.VISIBLE);
+                                    usedLayout.setVisibility(View.GONE);
+                                    availableLayout.setVisibility(View.GONE);
                                 }
                                 return view;
                             }
@@ -223,10 +235,10 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     if (isRAID) {
-                        if(position >= 2) {
+                        if(position >= 1) {
                             List<DiskStructDevice> result = getRAIDPairDevice(device.raid);
                             if (result != null && result.size() > 0) {
-                                int index = position - 2;
+                                int index = position - 1;
                                 if (index >= 0 && index < result.size())
                                     startDiskDetailActivity(result.get(index));
                             }
@@ -252,13 +264,15 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
         myListData.add(item);
 
         //add Disk 1
-        String title = device.infos.get("model");
-        float totalSize = DiskFactory.getInstance().getDeviceTotalSize(device);
-        float availSize = DiskFactory.getInstance().getDeviceAvailableSize(device);
-        String size = getString(R.string.available) +" : " + FileFactory.getInstance().getFileSize((long) availSize);
+        String title = "";
+        if("yes".equals(device.infos.get("external")))
+            title = device.infos.get("model");
+        else
+            title = "Disk 1";
+        String path = device.infos.get("path");
         HashMap<String, String> item1 = new HashMap<String, String>();
         item1.put(ID_TITLE, title);
-        item1.put(ID_SUBTITLE, size);
+        item1.put(ID_SUBTITLE, path);
         myListData.add(item1);
         return myListData;
     }
@@ -298,21 +312,23 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
         myListData.add(item1);
 
         //add RAID
-        String title = device.infos.get("model");
+        /*String title = device.infos.get("model");
         float totalSize = DiskFactory.getInstance().getDeviceTotalSize(device);
         float availSize = DiskFactory.getInstance().getDeviceAvailableSize(device);
         String size = getString(R.string.available) +" : " + FileFactory.getInstance().getFileSize((long) availSize);
         HashMap<String, String> item2 = new HashMap<String, String>();
         item2.put(ID_TITLE, title);
         item2.put(ID_SUBTITLE, size);
-        myListData.add(item2);
+        myListData.add(item2);*/
 
         //add RAID corresponding Disks
+        int index = 1;
         List<DiskStructDevice> results = getRAIDPairDevice(device.raid);
         if (results != null && results.size() > 0) {
             for (DiskStructDevice result : results) {
                 HashMap<String, String> item = new HashMap<String, String>();
-                item.put(ID_TITLE, result.infos.get("model"));
+                //item.put(ID_TITLE, result.infos.get("model"));
+                item.put(ID_TITLE, "Disk " + (index++));
                 item.put(ID_SUBTITLE, result.infos.get("path"));
                 myListData.add(item);
             }
