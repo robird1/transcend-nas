@@ -60,6 +60,7 @@ import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.settings.DiskFactory;
 import com.transcend.nas.settings.DiskInfoActivity;
+import com.transcend.nas.settings.NewSettingsActivity;
 import com.transcend.nas.settings.SettingsActivity;
 import com.transcend.nas.utils.FileFactory;
 import com.transcend.nas.utils.MediaFactory;

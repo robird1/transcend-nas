@@ -71,6 +71,9 @@
     <string name="capacity">Capacity</string>
     <string name="path">Path</string>
     <string name="model">Model</string>
+    <string name="smart_passed">Healthy</string>
+    <string name="smart_failed">Warning</string>
+    <string name="smart_unknown">Unknown</string>
 
     <!-- string -->
 

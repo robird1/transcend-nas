@@ -5,6 +5,7 @@ import android.content.Loader;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -123,12 +124,10 @@ public class DiskDetailActivity extends AppCompatActivity implements LoaderManag
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                /*if(position == 4){
+                if(position == 4){
                     //S.M.A.R.T
-                    Bundle args = new Bundle();
-                    args.putString("device", device.infos.get("path"));
-                    getLoaderManager().restartLoader(LoaderID.DISK_SMART, args, DiskDetailActivity.this).forceLoad();
-                }*/
+                    getLoaderManager().restartLoader(LoaderID.DISK_SMART, null, DiskDetailActivity.this).forceLoad();
+                }
             }
         });
 
@@ -178,8 +177,7 @@ public class DiskDetailActivity extends AppCompatActivity implements LoaderManag
         mProgressView.setVisibility(View.VISIBLE);
         switch (mLoaderID = id) {
             case LoaderID.DISK_SMART:
-                String device = args.getString("device");
-                return new DiskDeviceSmartLoader(this, device);
+                return new DiskDeviceSmartLoader(this, mDevices, mCurrentDevice);
             default:
                 break;
         }

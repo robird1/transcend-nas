@@ -92,7 +92,6 @@ public class DiskDeviceInfoLoader extends AsyncTaskLoader<Boolean> {
                 XmlPullParser xpp = factory.newPullParser();
                 xpp.setInput(inputStream, inputEncoding);
 
-                DiskFactory.getInstance().cleanDiskDevices();
                 DiskStructDevice device = null;
                 DiskStructPartition partition = null;
                 DiskStructRAID raid = null;
@@ -190,6 +189,8 @@ public class DiskDeviceInfoLoader extends AsyncTaskLoader<Boolean> {
                     }
                     eventType = xpp.next();
                 } while (eventType != XmlPullParser.END_DOCUMENT);
+
+                DiskFactory.getInstance().cleanDiskDevices();
                 mDevices = DiskFactory.getInstance().createDiskDevices(mDevices);
             } while (false);
 

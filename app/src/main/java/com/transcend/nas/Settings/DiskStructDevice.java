@@ -11,10 +11,16 @@ import java.util.Map;
 public class DiskStructDevice {
     public final static List<String> FORMAT = Arrays.asList("sector", "cylinder", "sectorsize", "psectorsize", "head", "connectiontype",
             "length", "external", "path", "model", "type", "serial", "partition");
+    public static final String SMART_PASSED = "PASSED";
+    public static final String SMART_FAILED = "FAILED";
+    public static final String SMART_UNKNOW = "UNKNOW";
+
     public Map<String, String> infos = new HashMap<String, String>();
     public List<DiskStructPartition> partitions;
     public DiskStructRAID raid;
     public float totalSize = 0;
     public float availableSize = 0;
     public float blockSize = 0;
+    public String smart = "";
+    public boolean smartCheck = false;
 }

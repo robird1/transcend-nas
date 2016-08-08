@@ -1,12 +1,17 @@
 package com.transcend.nas.settings;
 
-import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.graphics.Color;
+import android.os.AsyncTask;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.realtek.nasfun.api.HttpClientManager;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.R;
+import com.transcend.nas.utils.FileFactory;
 import com.tutk.IOTC.P2PService;
 
 import org.apache.http.HttpEntity;
@@ -30,49 +35,42 @@ import java.util.List;
 /**
  * Created by ikelee on 16/7/22.
  */
-public class DiskDeviceSmartLoader extends AsyncTaskLoader<Boolean> {
+public class DiskDeviceSmartTask extends AsyncTask<String, String, Boolean> {
 
-    private static final String TAG = DiskDeviceSmartLoader.class.getSimpleName();
+    private static final String TAG = DiskDeviceSmartTask.class.getSimpleName();
+    private Context mContext;
     private DiskStructDevice mDevice;
     List<DiskStructDevice> mDevices;
     private String mResult = "";
+    private TextView mTextView;
 
-    public DiskDeviceSmartLoader(Context context, List<DiskStructDevice> devices, DiskStructDevice device) {
-        super(context);
+    public DiskDeviceSmartTask(Context context, List<DiskStructDevice> devices, DiskStructDevice device, TextView textView) {
+        mContext = context;
         mDevice = device;
         mDevices = devices;
+        mTextView = textView;
     }
 
     @Override
-    public Boolean loadInBackground() {
-        boolean isSuccess = false;
-        String title = mDevice.infos.get("model");
-        boolean isRAID = (title != null && title.contains("RAID"));
-        if(isRAID) {
-            List<DiskStructDevice> devices = DiskFactory.getInstance().getRAIDPairDevice(mDevices, mDevice.raid);
-            for(DiskStructDevice device : devices){
-                boolean tmp = getSMARTInfo(device.infos.get("path"));
-                if (mResult != null && mResult.contains("PASSED")) {
-                    device.smart = "PASSED";
-                } else {
-                    device.smart = "FAILED";
-                }
-                device.smartCheck = true;
-                isSuccess = isSuccess | tmp;
-            }
-        } else {
-            isSuccess = getSMARTInfo(mDevice.infos.get("path"));
-            if (mResult != null && mResult.contains("PASSED")) {
-                mDevice.smart = "PASSED";
-            } else {
-                mDevice.smart = "FAILED";
-            }
-        }
-        mDevice.smartCheck = true;
-        return isSuccess;
+    protected void onPostExecute(Boolean result) {
+        super.onPostExecute(result);
+        DiskFactory.getInstance().setDeviceSmartResult(mResult, mDevice);
+        DiskFactory.getInstance().setDeviceSmartText(mContext, mTextView, mDevice);
+        Log.d(TAG, "onPostExecute : " + result + ", " + mDevice.infos.get("path") + " : " + mDevice.smart);
+    }
+
+    @Override
+    protected void onCancelled() {
+        super.onCancelled();
+    }
+
+    @Override
+    protected Boolean doInBackground(String... params) {
+        return getSMARTInfo(mDevice.infos.get("path"));
     }
 
     private boolean getSMARTInfo(String path) {
+        Log.d(TAG, "getSmartInfo : " + path);
         boolean isSuccess = false;
 
         Server server = ServerManager.INSTANCE.getCurrentServer();
@@ -124,12 +122,14 @@ public class DiskDeviceSmartLoader extends AsyncTaskLoader<Boolean> {
                     } else if (eventType == XmlPullParser.TEXT) {
                         if (curTagName != null) {
                             text = xpp.getText();
-                            if(curTagName.equals("all")) {
+                            if (curTagName.equals("all")) {
+                                isSuccess = true;
+                                mResult = text;
+                            } else if (curTagName.equals("reason")){
                                 isSuccess = true;
                                 mResult = text;
                             }
                         }
-
                     } else if (eventType == XmlPullParser.END_TAG) {
                         curTagName = null;
                     }
@@ -156,9 +156,5 @@ public class DiskDeviceSmartLoader extends AsyncTaskLoader<Boolean> {
         }
 
         return isSuccess;
-    }
-
-    public String getResult(){
-        return mResult;
     }
 }

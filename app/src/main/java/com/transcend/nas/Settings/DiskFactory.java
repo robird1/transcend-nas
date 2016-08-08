@@ -1,12 +1,17 @@
 package com.transcend.nas.settings;
 
+import android.content.Context;
+import android.graphics.Color;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.realtek.nasfun.api.HttpClientManager;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.R;
 import com.tutk.IOTC.P2PService;
 
 import org.apache.http.HttpEntity;
@@ -15,6 +20,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+import org.w3c.dom.Text;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -52,7 +58,7 @@ public class DiskFactory {
     }
 
     public List<DiskStructDevice> createDiskDevices(List<DiskStructDevice> devices) {
-        for(DiskStructDevice tmp : devices){
+        for (DiskStructDevice tmp : devices) {
             mDevices.add(tmp);
         }
 
@@ -74,7 +80,7 @@ public class DiskFactory {
             }
         }
         Collections.sort(usbs, DiskInfoSort.comparator());
-        for(DiskStructDevice usb : usbs){
+        for (DiskStructDevice usb : usbs) {
             mDevices.remove(usb);
             mDevices.add(usb);
         }
@@ -165,7 +171,7 @@ public class DiskFactory {
                     String tagName = xpp.getName();
                     if (eventType == XmlPullParser.START_TAG) {
                         curTagName = tagName;
-                        if("hddtemp".equals(curTagName))
+                        if ("hddtemp".equals(curTagName))
                             startParser = true;
                     } else if (eventType == XmlPullParser.TEXT) {
                         if (curTagName != null && startParser) {
@@ -200,23 +206,51 @@ public class DiskFactory {
         }
 
 
-        for(String key : mTemperature.keySet()){
-            for(DiskStructDevice device : mDevices){
+        for (String key : mTemperature.keySet()) {
+            for (DiskStructDevice device : mDevices) {
                 int result = -1;
                 String path = device.infos.get("path");
                 String temperature = mTemperature.get(key);
-                if(temperature != null && !temperature.equals("")){
+                if (temperature != null && !temperature.equals("")) {
                     result = Integer.parseInt(temperature);
                 }
 
-                if(path != null && path.contains(key) && result > 0){
-                    device.infos.put("temperature", result + "\u00B0C / " + (result*9/5 + 32) + "\u00B0F");
+                if (path != null && path.contains(key) && result > 0) {
+                    device.infos.put("temperature", result + "\u00B0C / " + (result * 9 / 5 + 32) + "\u00B0F");
                     break;
                 }
             }
         }
 
         return mTemperature;
+    }
+
+    public List<DiskStructDevice> getRAIDPairDevice(List<DiskStructDevice> devices, DiskStructRAID deviceRAID) {
+        if (devices == null)
+            devices = mDevices;
+
+        List<DiskStructDevice> result = new ArrayList<>();
+        if (deviceRAID != null) {
+            String raiddevices = deviceRAID.infos.get("raiddevice");
+            if (raiddevices != null) {
+                String[] raidList = raiddevices.split(",");
+                for (String raid : raidList) {
+                    for (DiskStructDevice tmp : devices) {
+                        boolean find = false;
+                        for (DiskStructPartition partition : tmp.partitions) {
+                            if (raid.equals(partition.infos.get("path"))) {
+                                result.add(tmp);
+                                break;
+                            }
+                        }
+                        if (find)
+                            break;
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
     public float getDeviceTotalSize(DiskStructDevice device) {
@@ -333,6 +367,38 @@ public class DiskFactory {
             return dataSet;
         } else {
             return null;
+        }
+    }
+
+    public void setDeviceSmartResult(String result, DiskStructDevice device) {
+        if (result != null && device != null) {
+            device.smartCheck = true;
+            if (result.contains(DiskStructDevice.SMART_PASSED)) {
+                device.smart = DiskStructDevice.SMART_PASSED;
+            } else if (result.contains(DiskStructDevice.SMART_FAILED)) {
+                device.smart = DiskStructDevice.SMART_FAILED;
+            } else {
+                device.smart = result;
+            }
+        }
+    }
+
+    public void setDeviceSmartText(Context context, TextView textView, DiskStructDevice device) {
+        if (textView == null || device == null)
+            return;
+
+        if (DiskStructDevice.SMART_PASSED.equals(device.smart)) {
+            textView.setText(context.getString(R.string.smart_passed));
+            textView.setTextColor(Color.GREEN);
+        } else if (DiskStructDevice.SMART_FAILED.equals(device.smart)) {
+            textView.setText(context.getString(R.string.smart_failed));
+            textView.setTextColor(Color.RED);
+        } else {
+            if (device.smart != null && !device.smart.equals(""))
+                textView.setText(device.smart);
+            else
+                textView.setText(context.getString(R.string.loading));
+            textView.setTextColor(ContextCompat.getColor(context, R.color.textColorPrimary));
         }
     }
 

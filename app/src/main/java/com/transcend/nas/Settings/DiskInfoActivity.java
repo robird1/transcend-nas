@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.Loader;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatSpinner;
@@ -30,6 +31,7 @@ import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.formatter.PercentFormatter;
+import com.google.android.gms.cast.CastMediaControlIntent;
 import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.utils.FileFactory;
@@ -53,6 +55,7 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
     private DiskInfoPagerAdapter mDiskInfoPagerAdapter;
     private int mLoaderID = -1;
     private List<DiskStructDevice> mDevices;
+    private List<View> mViews;
     private boolean isInit = false;
     private int mCurrentIndex = 0;
 
@@ -94,18 +97,18 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
     }
 
     private void setDeviceData(List<DiskStructDevice> devices) {
-        List<View> views = new ArrayList<>();
+        mViews = new ArrayList<>();
         List<String> titles = new ArrayList<>();
         for (DiskStructDevice device : devices) {
             PieDataSet dataSet = DiskFactory.getInstance().getPieChartDataSet(false, device);
             if (dataSet != null) {
                 View view = getPieChartView(dataSet, device);
-                views.add(view);
+                mViews.add(view);
                 titles.add(device.infos.get("model"));
             }
         }
         mDiskInfoPagerAdapter = new DiskInfoPagerAdapter();
-        mDiskInfoPagerAdapter.setContentList(views);
+        mDiskInfoPagerAdapter.setContentList(mViews);
         mDiskInfoViewerPager.setAdapter(mDiskInfoPagerAdapter);
         mDiskInfoViewerPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -125,11 +128,11 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
         });
 
         //after views update, scroll to previous view's index
-        if( views.size() > mCurrentIndex){
-           mDiskInfoViewerPager.setCurrentItem(mCurrentIndex, true);
+        if (mViews.size() > mCurrentIndex) {
+            mDiskInfoViewerPager.setCurrentItem(mCurrentIndex, true);
         }
 
-        if(titles.size() > 1) {
+        if (titles.size() > 1) {
             mSpinnerAdapter = new DiskInfoDropdownAdapter();
             mSpinnerAdapter.setContentList(titles);
             mSpinnerAdapter.setOnDropdownItemSelectedListener(new DiskInfoDropdownAdapter.OnDropdownItemSelectedListener() {
@@ -141,8 +144,7 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
             mSpinner.setAdapter(mSpinnerAdapter);
             mSpinner.setVisibility(View.VISIBLE);
             mTitle.setVisibility(View.GONE);
-        }
-        else{
+        } else {
             mSpinner.setVisibility(View.GONE);
             mTitle.setVisibility(View.VISIBLE);
         }
@@ -151,6 +153,7 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
     private View getPieChartView(final PieDataSet dataSet, final DiskStructDevice device) {
         final String title = device.infos.get("model");
         final boolean isRAID = (title != null && title.contains("RAID"));
+        final boolean isExternal = "yes".equals(device.infos.get("external"));
 
         ArrayList<Integer> colors = new ArrayList<Integer>();
         colors.add(Color.rgb(211, 211, 211));
@@ -192,7 +195,8 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
                                 TextView usedText = (TextView) view.findViewById(R.id.listitem_disk_used_text);
                                 TextView availableText = (TextView) view.findViewById(R.id.listitem_disk_available_text);
                                 //ImageView next = (ImageView) view.findViewById(R.id.listitem_disk_info_next);
-                                //ImageView icon = (ImageView) view.findViewById(R.id.listitem_disk_info_icon);
+                                ImageView icon = (ImageView) view.findViewById(R.id.listitem_disk_info_icon);
+                                TextView smartText = (TextView) view.findViewById(R.id.listitem_disk_info_smart);
                                 if (position == 0) {
                                     //pie chart
                                     chart.setVisibility(View.VISIBLE);
@@ -217,7 +221,7 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
                                     chart.setDescription("");
                                     chart.getLegend().setEnabled(false);
                                     chart.setCenterText(FileFactory.getInstance().getFileSize((long) device.availableSize) + "\n" + getString(R.string.available));
-                                    if(!isInit)
+                                    if (!isInit)
                                         chart.animateY(1000, Easing.EasingOption.EaseInOutQuad);
                                     isInit = false;
                                 } else {
@@ -225,6 +229,35 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
                                     layout.setVisibility(View.VISIBLE);
                                     usedLayout.setVisibility(View.GONE);
                                     availableLayout.setVisibility(View.GONE);
+                                    if (isExternal) {
+                                        icon.setImageResource(R.drawable.icon_usb_gray_24dp);
+                                        smartText.setVisibility(View.GONE);
+                                    } else {
+                                        icon.setImageResource(R.drawable.icon_hdd_gray_24dp);
+                                        smartText.setVisibility(View.VISIBLE);
+                                        DiskStructDevice target = null;
+                                        if (isRAID) {
+                                            List<DiskStructDevice> result = DiskFactory.getInstance().getRAIDPairDevice(mDevices, device.raid);
+                                            if (result != null && result.size() > 0) {
+                                                int index = position - 1;
+                                                if (index >= 0 && index < result.size()) {
+                                                    DiskStructDevice tmp = result.get(index);
+                                                    Log.d(TAG,"Index : " + index + ", " + tmp.smartCheck);
+                                                    if (!tmp.smartCheck)
+                                                        new DiskDeviceSmartTask(getApplicationContext(), mDevices, tmp, smartText).execute();
+                                                    else
+                                                        target = tmp;
+                                                }
+                                            }
+                                        } else {
+                                            if (!device.smartCheck)
+                                                new DiskDeviceSmartTask(getApplicationContext(), mDevices, device, smartText).execute();
+                                            else
+                                                target = device;
+                                        }
+
+                                        DiskFactory.getInstance().setDeviceSmartText(DiskInfoActivity.this, smartText, target);
+                                    }
                                 }
                                 return view;
                             }
@@ -234,20 +267,20 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    if (isRAID) {
-                        if(position >= 1) {
-                            List<DiskStructDevice> result = getRAIDPairDevice(device.raid);
-                            if (result != null && result.size() > 0) {
-                                int index = position - 1;
-                                if (index >= 0 && index < result.size())
-                                    startDiskDetailActivity(result.get(index));
-                            }
-                        }
-                    } else {
-                        if (position >= 1) {
-                            startDiskDetailActivity(device);
+                if (isRAID) {
+                    if (position >= 1) {
+                        List<DiskStructDevice> result = DiskFactory.getInstance().getRAIDPairDevice(mDevices, device.raid);
+                        if (result != null && result.size() > 0) {
+                            int index = position - 1;
+                            if (index >= 0 && index < result.size())
+                                startDiskDetailActivity(result.get(index));
                         }
                     }
+                } else {
+                    if (position >= 1) {
+                        startDiskDetailActivity(device);
+                    }
+                }
             }
         });
 
@@ -265,41 +298,18 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
 
         //add Disk 1
         String title = "";
-        if("yes".equals(device.infos.get("external")))
+        if ("yes".equals(device.infos.get("external"))) {
             title = device.infos.get("model");
-        else
+        } else {
             title = "Disk 1";
+        }
         String path = device.infos.get("path");
         HashMap<String, String> item1 = new HashMap<String, String>();
         item1.put(ID_TITLE, title);
         item1.put(ID_SUBTITLE, path);
         myListData.add(item1);
+
         return myListData;
-    }
-
-    private List<DiskStructDevice> getRAIDPairDevice(DiskStructRAID deviceRAID) {
-        List<DiskStructDevice> result = new ArrayList<>();
-        if (deviceRAID != null) {
-            String raiddevices = deviceRAID.infos.get("raiddevice");
-            if (raiddevices != null) {
-                String[] raidList = raiddevices.split(",");
-                for (String raid : raidList) {
-                    for (DiskStructDevice tmp : mDevices) {
-                        boolean find = false;
-                        for (DiskStructPartition partition : tmp.partitions) {
-                            if (raid.equals(partition.infos.get("path"))) {
-                                result.add(tmp);
-                                break;
-                            }
-                        }
-                        if (find)
-                            break;
-                    }
-                }
-            }
-        }
-
-        return result;
     }
 
     private ArrayList<HashMap<String, String>> get2BayDeviceItems(String ID_TITLE, String ID_SUBTITLE, DiskStructDevice device) {
@@ -323,7 +333,7 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
 
         //add RAID corresponding Disks
         int index = 1;
-        List<DiskStructDevice> results = getRAIDPairDevice(device.raid);
+        List<DiskStructDevice> results = DiskFactory.getInstance().getRAIDPairDevice(mDevices, device.raid);
         if (results != null && results.size() > 0) {
             for (DiskStructDevice result : results) {
                 HashMap<String, String> item = new HashMap<String, String>();
@@ -345,6 +355,8 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
                 return new DiskDeviceInfoLoader(this);
             case LoaderID.DISK_INFO_TEMPERATURE:
                 return new DiskDeviceTemperatureLoader(this);
+            case LoaderID.DISK_SMART:
+                return new DiskDeviceSmartLoader(this, mDevices, mDevices.get(0));
             default:
                 break;
         }

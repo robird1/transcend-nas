@@ -15,8 +15,8 @@
         android:id="@+id/listitem_disk_used_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
         android:layout_marginBottom="5dp"
+        android:layout_marginLeft="20dp"
         android:orientation="horizontal">
 
         <ImageView
@@ -40,8 +40,8 @@
         android:id="@+id/listitem_disk_available_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
         android:layout_marginBottom="16dp"
+        android:layout_marginLeft="20dp"
         android:orientation="horizontal">
 
         <ImageView
@@ -88,12 +88,23 @@
             android:rotation="180"
             android:src="@drawable/ic_navigation_arrow_gray_24dp" />
 
+        <TextView
+            android:id="@+id/listitem_disk_info_smart"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_marginRight="-16dp"
+            android:layout_toLeftOf="@id/listitem_disk_info_next"
+            android:gravity="center_vertical|right"
+            android:text="@string/loading"
+            android:textColor="@color/textColorPrimary"
+            android:textSize="16sp" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="72dp"
             android:layout_centerVertical="true"
             android:layout_gravity="center"
-            android:layout_toLeftOf="@id/listitem_disk_info_next"
+            android:layout_toLeftOf="@id/listitem_disk_info_smart"
             android:layout_toRightOf="@id/listitem_disk_info_icon"
             android:orientation="vertical">
 
