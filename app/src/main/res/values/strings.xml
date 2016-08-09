@@ -74,6 +74,7 @@
     <string name="smart_passed">Healthy</string>
     <string name="smart_failed">Warning</string>
     <string name="smart_unknown">Unknown</string>
+    <string name="msg_backup_video">Video backup</string>
 
     <!-- string -->
 
@@ -245,6 +246,7 @@
 
     <string name="pref_remote_access">REMOTE ACCESS</string>
     <string name="pref_auto_backup">AUTO BACKUP</string>
+    <string name="pref_backup_video">BACKUP VIDEO</string>
     <string name="pref_backup_scenario">BACKUP SCENARIO</string>
     <string name="pref_backup_location">BACKUP LOCATION</string>
     <string name="pref_backup_error_task">BACKUP ERROR TASK</string>

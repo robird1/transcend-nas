@@ -167,5 +167,6 @@
     <string name="smart_passed">正常</string>
     <string name="smart_failed">警告</string>
     <string name="smart_unknown">未知</string>
+    <string name="msg_backup_video">備份影片</string>
 
 </resources>

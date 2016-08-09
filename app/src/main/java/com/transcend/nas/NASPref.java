@@ -16,6 +16,7 @@ import com.transcend.nas.viewer.music.MusicActivity;
 public class NASPref {
 
     private static final String TAG = NASPref.class.getSimpleName();
+    public static final boolean useDefaultDownloadFolder = true;
 
     public enum Sort {
         TYPE,
@@ -265,6 +266,24 @@ public class NASPref {
     public static Boolean getBackupSetting(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
         String key = context.getResources().getString(R.string.pref_auto_backup);
+        boolean def = false;
+        return PrefUtil.read(context, name, key, def);
+    }
+
+    /**
+     *
+     * Backup video
+     *
+     */
+    public static void setBackupVideo(Context context, boolean backup) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_backup_video);
+        PrefUtil.write(context, name, key, backup);
+    }
+
+    public static Boolean getBackupVideo(Context context) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_backup_video);
         boolean def = false;
         return PrefUtil.read(context, name, key, def);
     }

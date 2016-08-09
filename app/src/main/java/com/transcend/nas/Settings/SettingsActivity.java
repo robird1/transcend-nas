@@ -625,11 +625,22 @@ public class SettingsActivity extends AppCompatActivity implements
             getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
             refreshColumnRemoteAccessSetting();
             refreshColumnBackupSetting(false);
+            refreshColumnBackupVideo(true);
             refreshColumnBackupScenario(true, false);
             refreshColumnBackupLocation(true);
             refreshColumnDownloadLocation();
             refreshColumnCacheUseSize();
             getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+        }
+
+        @Override
+        public void onActivityCreated(Bundle savedInstanceState) {
+            Log.w(TAG, "onActivityCreated");
+            super.onActivityCreated(savedInstanceState);
+            // remove dividers
+            View rootView = getView();
+            ListView list = (ListView) rootView.findViewById(android.R.id.list);
+            list.setDivider(null);
         }
 
         @Override
@@ -682,6 +693,8 @@ public class SettingsActivity extends AppCompatActivity implements
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             if (key.equals(getString(R.string.pref_auto_backup))) {
                 refreshColumnBackupSetting(true);
+            } else if (key.equals(getString(R.string.pref_backup_video))) {
+                refreshColumnBackupVideo(false);
             } else if (key.equals(getString(R.string.pref_backup_scenario))) {
                 refreshColumnBackupScenario(false, true);
             } else if (key.equals(getString(R.string.pref_backup_location))) {
@@ -797,12 +810,24 @@ public class SettingsActivity extends AppCompatActivity implements
                     mContext.stopService(intent);
             }
 
+            CheckBoxPreference pref_backup_video = (CheckBoxPreference) findPreference(getString(R.string.pref_backup_video));
+            pref_backup_video.setEnabled(checked);
+            pref_backup_video.setSelectable(checked);
             ListPreference pref_backup_scenario = (ListPreference) findPreference(getString(R.string.pref_backup_scenario));
             pref_backup_scenario.setEnabled(checked);
             pref_backup_scenario.setSelectable(checked);
             Preference pref_backup_location = findPreference(getString(R.string.pref_backup_location));
             pref_backup_location.setEnabled(checked);
             pref_backup_location.setSelectable(checked);
+        }
+
+        private void refreshColumnBackupVideo(boolean init) {
+            String key = getString(R.string.pref_backup_video);
+            boolean checked = NASPref.getBackupVideo(getActivity());
+            CheckBoxPreference pref = (CheckBoxPreference) findPreference(key);
+            pref.setChecked(checked);
+            if(!init)
+                restartService(false);
         }
 
         public void refreshColumnBackupScenario(boolean init, boolean check) {

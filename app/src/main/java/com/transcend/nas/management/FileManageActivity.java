@@ -3,15 +3,18 @@ package com.transcend.nas.management;
 import android.app.ActivityManager;
 import android.app.LoaderManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -32,6 +35,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -150,6 +154,10 @@ public class FileManageActivity extends AppCompatActivity implements
         initActionModeView();
         doRefresh();
         NASPref.setInitial(this, true);
+
+        // Get intent, action and MIME type
+        Intent intent = getIntent();
+        onReceiveIntent(intent);
     }
 
     @Override
@@ -166,16 +174,10 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     @Override
-    protected void onNewIntent(Intent intent){
+    protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        String path = "";
-        if(intent != null) {
-            path = intent.getStringExtra("path");
-            if(path != null && !path.equals("")){
-                doLoad(path);
-            }
-        }
-        Log.w(TAG, "onNewIntent : " + path);
+        onReceiveIntent(intent);
+        Log.w(TAG, "onNewIntent");
     }
 
     @Override
@@ -186,10 +188,10 @@ public class FileManageActivity extends AppCompatActivity implements
             mCastManager.incrementUiCounter();
         }
 
-        Log.d(TAG,"onResume is need event notify : " + isNeedEventNotify);
-        if(isNeedEventNotify){
+        Log.d(TAG, "onResume is need event notify : " + isNeedEventNotify);
+        if (isNeedEventNotify) {
             isNeedEventNotify = false;
-            if(!mProgressView.isShown()) {
+            if (!mProgressView.isShown()) {
                 doEventNotify(false, mPath);
             }
         }
@@ -273,6 +275,51 @@ public class FileManageActivity extends AppCompatActivity implements
     @Override
     public boolean dispatchKeyEvent(@NonNull KeyEvent event) {
         return mCastManager.onDispatchVolumeKeyEvent(event, 0.05) || super.dispatchKeyEvent(event);
+    }
+
+    private void onReceiveIntent(Intent intent) {
+        if (intent == null) {
+            Log.d(TAG, "onReceiveIntent Empty");
+            return;
+        }
+
+        String action = intent.getAction();
+        String type = intent.getType();
+        if (Intent.ACTION_SEND.equals(action) && type != null) {
+            if ("text/plain".equals(type)) {
+                // Handle text being sent
+                String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+                if (sharedText != null) {
+                    Log.d(TAG, "ACTION_SEND " + sharedText);
+                }
+            } else if (type.startsWith("image/")) {
+                // Handle single image being sent
+                Uri imageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+                if (imageUri != null) {
+                    Log.d(TAG, "ACTION_SEND " + imageUri.toString());
+                }
+            }
+        } else if (Intent.ACTION_SEND_MULTIPLE.equals(action) && type != null) {
+            if (type.startsWith("image/")) {
+                // Handle multiple images being sent
+                ArrayList<Uri> imageUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+                if (imageUris != null) {
+                    String result = "";
+                    for (Uri uri : imageUris) {
+                        result = result + uri.toString() + ",";
+                    }
+                    Log.d(TAG, "ACTION_SEND_MULTIPLE " + result);
+                }
+
+            }
+        } else {
+            Log.d(TAG, "onReceiveIntent Other " + action + ", " + type);
+            // Handle other intents, such as being started from the home screen
+            String path = intent.getStringExtra("path");
+            if (path != null && !path.equals("")) {
+                doLoad(path);
+            }
+        }
     }
 
 
@@ -585,6 +632,9 @@ public class FileManageActivity extends AppCompatActivity implements
             case R.id.nav_about:
                 startAboutActivity();
                 break;
+            //case R.id.nav_help:
+            //    startHelpActivity();
+            //    break;
             case R.id.nav_logout:
                 showLogoutDialog();
                 break;
@@ -914,7 +964,7 @@ public class FileManageActivity extends AppCompatActivity implements
             } else if (loader instanceof EventNotifyLoader) {
                 Bundle args = ((EventNotifyLoader) loader).getBundleArgs();
                 String path = args.getString("path");
-                if(path != null && !path.equals("")) {
+                if (path != null && !path.equals("")) {
                     doLoad(path);
                     return;
                 }
@@ -972,7 +1022,7 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
 
-    private boolean doEventNotify(boolean update, String path){
+    private boolean doEventNotify(boolean update, String path) {
         int id = path.startsWith(NASApp.ROOT_STG)
                 ? LoaderID.LOCAL_FILE_LIST : LoaderID.SMB_FILE_LIST;
 
@@ -998,7 +1048,7 @@ public class FileManageActivity extends AppCompatActivity implements
                 ? LoaderID.LOCAL_FILE_LIST : LoaderID.SMB_FILE_LIST;
 
         boolean pass = doEventNotify(true, path);
-        if(pass){
+        if (pass) {
             Bundle args = new Bundle();
             args.putString("path", path);
             getLoaderManager().restartLoader(id, args, this).forceLoad();
@@ -1442,19 +1492,46 @@ public class FileManageActivity extends AppCompatActivity implements
                 = NASApp.ACT_UPLOAD.equals(type) ? NASApp.ROOT_SMB
                 : NASApp.ACT_DOWNLOAD.equals(type) ? NASApp.ROOT_STG
                 : mRoot;
-        String path
+        final String path
                 = NASApp.ACT_UPLOAD.equals(type) ? NASApp.ROOT_SMB
                 : NASApp.ACT_DOWNLOAD.equals(type) ? NASPref.getDownloadLocation(this)
                 : mPath;
-        Bundle args = new Bundle();
-        args.putString("mode", mode);
-        args.putString("type", type);
-        args.putString("root", root);
-        args.putString("path", path);
-        Intent intent = new Intent();
-        intent.setClass(FileManageActivity.this, FileActionLocateActivity.class);
-        intent.putExtras(args);
-        startActivityForResult(intent, FileActionLocateActivity.REQUEST_CODE);
+
+        //for Action Download, we use default download folder
+        if(NASApp.ACT_DOWNLOAD.equals(type) && NASPref.useDefaultDownloadFolder){
+            int count = getSelectedCount();
+            String format = getString(count <= 1 ? R.string.msg_file_selected : R.string.msg_files_selected);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.download);
+            builder.setIcon(R.drawable.ic_file_download_gray_24dp);
+            builder.setMessage(String.format(format, count));
+            builder.setNegativeButton(R.string.cancel, null);
+            builder.setPositiveButton(R.string.confirm, null);
+            builder.setCancelable(true);
+            final AlertDialog dialog = builder.show();
+            Button bnPos = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+            bnPos.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //start download
+                    doDownload(path, getSelectedPaths());
+                    //force close dialog
+                    dialog.dismiss();
+                    //force close editor mode
+                    closeEditorMode();
+                }
+            });
+        } else {
+            Bundle args = new Bundle();
+            args.putString("mode", mode);
+            args.putString("type", type);
+            args.putString("root", root);
+            args.putString("path", path);
+            Intent intent = new Intent();
+            intent.setClass(FileManageActivity.this, FileActionLocateActivity.class);
+            intent.putExtras(args);
+            startActivityForResult(intent, FileActionLocateActivity.REQUEST_CODE);
+        }
     }
 
     private void startFileActionPickerActivity(String type) {
@@ -1479,7 +1556,7 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void startMusicActivity(String mode, String root, FileInfo fileInfo) {
-        if(!MusicActivity.checkFormatSupportOrNot(fileInfo.path)){
+        if (!MusicActivity.checkFormatSupportOrNot(fileInfo.path)) {
             startVideoActivity(fileInfo);
             return;
         }
@@ -1495,8 +1572,7 @@ public class FileManageActivity extends AppCompatActivity implements
             }
             MediaInfo info = MediaFactory.createMediaInfo(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK, fileInfo.path);
             mCastManager.startVideoCastControllerActivity(this, info, 0, true);
-        }
-        else {
+        } else {
             ArrayList<FileInfo> list = new ArrayList<FileInfo>();
             for (FileInfo info : mFileList) {
                 if (FileInfo.TYPE.MUSIC.equals(info.type) && MusicActivity.checkFormatSupportOrNot(info.path)) {
@@ -1587,6 +1663,11 @@ public class FileManageActivity extends AppCompatActivity implements
         Intent intent = new Intent();
         intent.setClass(FileManageActivity.this, AboutActivity.class);
         startActivityForResult(intent, AboutActivity.REQUEST_CODE);
+    }
+
+    private void startHelpActivity() {
+        Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse("http://help.storejetcloud.com.s3-website-ap-northeast-1.amazonaws.com/TW/start.html"));
+        startActivity(i);
     }
 
     private void startSignInActivity(boolean clear) {

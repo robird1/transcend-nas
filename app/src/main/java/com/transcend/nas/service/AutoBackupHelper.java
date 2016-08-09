@@ -150,6 +150,7 @@ public class AutoBackupHelper {
         if (!dir.exists())
             return null;
 
+        boolean addVideo = NASPref.getBackupVideo(mContext);
         ArrayList<String> fileList = new ArrayList<String>();
 
         File files[] = dir.listFiles();
@@ -167,8 +168,14 @@ public class AutoBackupHelper {
                 for (String item : list) {
                     fileList.add(item);
                 }
-            } else
-                fileList.add(fileInfo.path);
+            } else {
+                if(!addVideo && fileInfo.type == FileInfo.TYPE.VIDEO) {
+                    continue;
+                }
+                else {
+                    fileList.add(fileInfo.path);
+                }
+            }
         }
         //Collections.sort(fileList, FileInfoSort.comparator(mContext));
         return fileList;

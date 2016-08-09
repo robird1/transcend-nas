@@ -55,16 +55,14 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
         Log.d(TAG, "onCreate() executed");
         mHelper = new AutoBackupHelper(getApplicationContext(), Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
 
-        IntentFilter mFilter = new IntentFilter();
-        mFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        registerReceiver(mReceiver, mFilter);
-
         mLocalFileObserver = new RecursiveFileObserver(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
         mLocalFileObserver.addListener(this);
         mLocalFileObserver.startWatching();
 
         mHandler = new Handler();
-        initBackup();
+        IntentFilter mFilter = new IntentFilter();
+        mFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(mReceiver, mFilter);
     }
 
     @Override
@@ -209,9 +207,15 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
             case FileObserver.CLOSE_WRITE:
                 File pictureFile = new File(path);
                 if (pictureFile.exists() && canAddTaskToQueue()) {
-                    ArrayList<String> paths = new ArrayList<String>();
-                    paths.add(path);
-                    addBackupTaskToQueue(paths, 1);
+                    boolean addVideo = NASPref.getBackupVideo(getApplicationContext());
+                    FileInfo.TYPE type = pictureFile.isFile() ? FileInfo.getType(path) : FileInfo.TYPE.DIR;
+                    if(!addVideo && type == FileInfo.TYPE.VIDEO) {
+                        Log.d(TAG, "Ignore video file : " + path);
+                    } else {
+                        ArrayList<String> paths = new ArrayList<String>();
+                        paths.add(path);
+                        addBackupTaskToQueue(paths, 1);
+                    }
                 }
                 break;
             default:
@@ -315,6 +319,12 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
     }
 
     private boolean canAddTaskToQueue() {
+        boolean enable = NASPref.getBackupSetting(getApplicationContext());
+        if(!enable) {
+            Log.d(TAG, "Can't add to queue due to service disable");
+            return false;
+        }
+
         boolean need = true;
         boolean wifi_only = isWifiOnly();
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);

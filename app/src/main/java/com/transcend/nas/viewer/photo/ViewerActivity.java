@@ -1,10 +1,12 @@
 package com.transcend.nas.viewer.photo;
 
 import android.app.LoaderManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -12,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -138,7 +141,7 @@ public class ViewerActivity extends AppCompatActivity implements
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.image_manage_editor, menu);
         menu.findItem(R.id.image_manage_editor_action_upload).setVisible(false);
-        menu.findItem( R.id.image_manage_editor_action_download).setVisible(false);
+        menu.findItem(R.id.image_manage_editor_action_download).setVisible(false);
         mMediaRouteMenuItem = mCastManager.addMediaRouterButton(menu, R.id.media_route_menu_item);
         return true;
     }
@@ -165,9 +168,9 @@ public class ViewerActivity extends AppCompatActivity implements
             doInfo();
         } else if (v.equals(mDelete)) {
             doDelete();
-        } else if(v.equals(mDownload)){
+        } else if (v.equals(mDownload)) {
             startFileActionLocateActivity(NASApp.ACT_DOWNLOAD);
-        } else if(v.equals(mUpload)){
+        } else if (v.equals(mUpload)) {
             startFileActionLocateActivity(NASApp.ACT_UPLOAD);
         }
     }
@@ -303,15 +306,15 @@ public class ViewerActivity extends AppCompatActivity implements
         doPhotoCast(index);
     }
 
-    private void doPhotoCast (int position){
-        if(position >= mList.size())
+    private void doPhotoCast(int position) {
+        if (position >= mList.size())
             return;
 
         mCurrentIndex = position;
         if (NASApp.MODE_SMB.equals(mMode) && mCastManager != null && mCastManager.isConnected()) {
             try {
-                Log.d(TAG,"CastManager loaded : " + mCastManager.isRemoteMediaLoaded());
-                if(mCastManager.isRemoteMediaLoaded()){
+                Log.d(TAG, "CastManager loaded : " + mCastManager.isRemoteMediaLoaded());
+                if (mCastManager.isRemoteMediaLoaded()) {
                     mCastManager.stop();
                     mCastManager.clearMediaSession();
                 }
@@ -436,7 +439,7 @@ public class ViewerActivity extends AppCompatActivity implements
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
         mProgressView.setVisibility(View.INVISIBLE);
         if (!success) {
-            if(loader instanceof SmbAbstractLoader)
+            if (loader instanceof SmbAbstractLoader)
                 Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
             else
                 Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
@@ -449,7 +452,7 @@ public class ViewerActivity extends AppCompatActivity implements
                 int position = mPager.getCurrentItem();
                 mList.remove(position);
                 mPagerAdapter.removeView(position);
-                if(mList.size() == 0) {
+                if (mList.size() == 0) {
                     if (NASApp.MODE_SMB.equals(mMode) && mCastManager != null && mCastManager.isConnected()) {
                         try {
                             mCastManager.sendDataMessage("close");
@@ -460,16 +463,14 @@ public class ViewerActivity extends AppCompatActivity implements
                         }
                     }
                     doFinish();
-                }
-                else{
+                } else {
                     //check is last photo or not
-                    if(position >= mList.size()){
+                    if (position >= mList.size()) {
                         position = mList.size() - 1;
                     }
                     doPhotoCast(position);
                 }
-            }
-            else if (loader instanceof SmbFileDownloadLoader || loader instanceof LocalFileUploadLoader){
+            } else if (loader instanceof SmbFileDownloadLoader || loader instanceof LocalFileUploadLoader) {
                 //do nothing
             }
         }
@@ -484,7 +485,7 @@ public class ViewerActivity extends AppCompatActivity implements
         doFinish();
     }
 
-    private void doFinish(){
+    private void doFinish() {
         Bundle bundle = new Bundle();
         bundle.putBoolean("delete", evenDelete);
         Intent intent = new Intent();
@@ -502,20 +503,43 @@ public class ViewerActivity extends AppCompatActivity implements
                 = NASApp.ACT_UPLOAD.equals(type) ? NASApp.ROOT_SMB
                 : NASApp.ACT_DOWNLOAD.equals(type) ? NASApp.ROOT_STG
                 : mRoot;
-        String path
+        final String path
                 = NASApp.ACT_UPLOAD.equals(type) ? NASApp.ROOT_SMB
                 : NASApp.ACT_DOWNLOAD.equals(type) ? NASPref.getDownloadLocation(this)
                 : mPath;
-        Bundle args = new Bundle();
-        args.putString("mode", mode);
-        args.putString("type", type);
-        args.putString("root", root);
-        args.putString("path", path);
-        //args.putSerializable("list", mFileList);
-        Intent intent = new Intent();
-        intent.setClass(ViewerActivity.this, FileActionLocateActivity.class);
-        intent.putExtras(args);
-        startActivityForResult(intent, FileActionLocateActivity.REQUEST_CODE);
+
+        //for Action Download, we use default download folder
+        if (NASApp.ACT_DOWNLOAD.equals(type) && NASPref.useDefaultDownloadFolder) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.download);
+            builder.setIcon(R.drawable.ic_file_download_gray_24dp);
+            builder.setMessage(String.format(getString(R.string.msg_file_selected), 1));
+            builder.setNegativeButton(R.string.cancel, null);
+            builder.setPositiveButton(R.string.confirm, null);
+            builder.setCancelable(true);
+            final AlertDialog dialog = builder.show();
+            Button bnPos = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+            bnPos.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //force close dialog
+                    dialog.dismiss();
+                    //start download
+                    doDownload(path);
+                }
+            });
+        } else {
+            Bundle args = new Bundle();
+            args.putString("mode", mode);
+            args.putString("type", type);
+            args.putString("root", root);
+            args.putString("path", path);
+            //args.putSerializable("list", mFileList);
+            Intent intent = new Intent();
+            intent.setClass(ViewerActivity.this, FileActionLocateActivity.class);
+            intent.putExtras(args);
+            startActivityForResult(intent, FileActionLocateActivity.REQUEST_CODE);
+        }
     }
 
     @Override

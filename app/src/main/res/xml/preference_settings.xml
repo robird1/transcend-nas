@@ -52,6 +52,12 @@
             android:summary="/"
             android:title="@string/location" />
 
+        <CheckBoxPreference
+            android:key="@string/pref_backup_video"
+            android:layout="@layout/preference_item"
+            android:title="@string/msg_backup_video"
+            android:widgetLayout="@layout/switch_button" />
+
     </PreferenceCategory>
 
 

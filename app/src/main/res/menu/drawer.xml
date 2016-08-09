@@ -41,6 +41,7 @@
             android:id="@+id/nav_settings"
             android:icon="@drawable/ic_settings_gray_24dp"
             android:title="@string/settings" />
+
         <item
             android:id="@+id/nav_about"
             android:icon="@drawable/ic_info_gray_24dp"
@@ -50,6 +51,7 @@
             android:id="@+id/nav_logout"
             android:icon="@drawable/ic_logout_gray_24dp"
             android:title="@string/logout" />
+
     </group>
 
 </menu>
