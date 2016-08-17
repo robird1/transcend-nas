@@ -204,7 +204,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         Log.w(TAG, "progress: " + count + "/" + total + ", " + name);
 
         int max = (count == total) ? 0 : 100;
-        int progress = (total > 0) ? count / (total / 100) : 0;
+        int progress = (total > 100) ? count / (total / 100) : 0;
         boolean indeterminate = (total == 0);
         int icon = R.mipmap.ic_launcher;
 

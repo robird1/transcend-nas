@@ -55,7 +55,7 @@
         <CheckBoxPreference
             android:key="@string/pref_backup_video"
             android:layout="@layout/preference_item"
-            android:title="@string/msg_backup_video"
+            android:title="@string/backup_videos"
             android:widgetLayout="@layout/switch_button" />
 
     </PreferenceCategory>

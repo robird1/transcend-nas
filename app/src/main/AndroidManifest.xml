@@ -56,6 +56,18 @@
         </activity>
 
         <activity
+            android:name=".management.FileSharedActivity"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+                <data android:mimeType="video/*" />
+            </intent-filter>
+        </activity>
+
+        <activity
             android:name=".management.FileInfoActivity"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>

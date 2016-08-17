@@ -49,6 +49,7 @@ public class NASApp extends Application {
         initServerManager();
         initImageLoader();
         createDownloadsDirectory();
+        createSharesDirectory();
         initChromeCastManager();
     }
 
@@ -81,6 +82,16 @@ public class NASApp extends Application {
         File dir = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name));
         File downloads = new File(dir, getString(R.string.downloads_name));
         if (downloads.mkdirs()) NASPref.setDownloadLocation(this, downloads.getAbsolutePath());
+    }
+
+    private void createSharesDirectory() {
+        String location = NASPref.getShareLocation(this);
+        File directory = new File(location);
+        directory.mkdirs();
+        if (directory.exists()) return;
+        File dir = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name));
+        File shares = new File(dir, getString(R.string.shares_name));
+        shares.mkdirs();
     }
 
     private void initChromeCastManager(){

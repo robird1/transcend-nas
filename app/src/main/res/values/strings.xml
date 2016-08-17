@@ -6,6 +6,7 @@
     <string name="storage_name">Storage</string>
     <string name="backups_name">Backups</string>
     <string name="downloads_name">Downloads</string>
+    <string name="shares_name">Shares</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
@@ -61,6 +62,7 @@
 
     <!-- Disk -->
     <string name="disk_info">Disk Information</string>
+    <string name="disk">Disk</string>
     <string name="available">Available</string>
     <string name="total">Total</string>
     <string name="temperature">Temperature</string>
@@ -72,9 +74,12 @@
     <string name="path">Path</string>
     <string name="model">Model</string>
     <string name="smart_passed">Healthy</string>
-    <string name="smart_failed">Warning</string>
+    <string name="warning">Warning</string>
     <string name="smart_unknown">Unknown</string>
-    <string name="msg_backup_video">Video backup</string>
+    <string name="backup_videos">Video backup</string>
+
+    <!-- String v2 -->
+    <string name="login_not">Not Login</string>
 
     <!-- string -->
 
@@ -252,6 +257,7 @@
     <string name="pref_backup_error_task">BACKUP ERROR TASK</string>
 
     <string name="pref_download_location">DOWNLOAD LOCATION</string>
+    <string name="pref_share_location">SHARE LOCATION</string>
 
     <string name="pref_cache_size">CACHE SIZE</string>
     <string name="pref_cache_clean">CACHE CLEAN</string>

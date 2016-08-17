@@ -39,5 +39,8 @@ public class LoaderID {
     public static final int DISK_INFO_TEMPERATURE = 31;
     public static final int DISK_SMART = 32;
     public static final int EVENT_NOTIFY = 33;
+    public static final int TUTK_NAS_ONLINE_CHECK = 34;
+    public static final int SMB_FILE_SHARE = 35;
+    public static final int LOCAL_FILE_SHARE = 36;
 
 }

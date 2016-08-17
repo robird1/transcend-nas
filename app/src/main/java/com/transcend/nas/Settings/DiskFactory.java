@@ -391,7 +391,7 @@ public class DiskFactory {
             textView.setText(context.getString(R.string.smart_passed));
             textView.setTextColor(Color.GREEN);
         } else if (DiskStructDevice.SMART_FAILED.equals(device.smart)) {
-            textView.setText(context.getString(R.string.smart_failed));
+            textView.setText(context.getString(R.string.warning));
             textView.setTextColor(Color.RED);
         } else {
             if (device.smart != null && !device.smart.equals(""))

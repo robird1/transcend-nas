@@ -14,6 +14,7 @@ import android.support.v7.app.AppCompatDialog;
 import android.support.v7.widget.AppCompatAutoCompleteTextView;
 import android.support.v7.widget.AppCompatEditText;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -86,6 +87,16 @@ public abstract class LoginDialog implements View.OnClickListener {
             builder.setPositiveButton(R.string.login, null);
         if (isRemoeteAccess)
             builder.setNeutralButton(R.string.delete, null);
+        builder.setOnKeyListener(new DialogInterface.OnKeyListener() {
+            @Override
+            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                if(keyCode == KeyEvent.KEYCODE_BACK){
+                    onCancel();
+                    return true;
+                }
+                return false;
+            }
+        });
         mDialog = builder.show();
         mDlgBtnPos = mDialog.getButton(DialogInterface.BUTTON_POSITIVE);
         mDlgBtnNeg = mDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
@@ -93,6 +104,7 @@ public abstract class LoginDialog implements View.OnClickListener {
         mDlgBtnPos.setOnClickListener(this);
         mDlgBtnNeg.setOnClickListener(this);
         mDlgBtnNeu.setOnClickListener(this);
+        mDialog.setCanceledOnTouchOutside(false);
     }
 
     private void initFieldIP() {

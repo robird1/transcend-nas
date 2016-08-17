@@ -360,6 +360,13 @@ public class NASPref {
         PrefUtil.write(context, name, key, path);
     }
 
+    public static String getShareLocation(Context context) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_share_location);
+        String def = getDefaultShareLocation(context);
+        return PrefUtil.read(context, name, key, def);
+    }
+
     private static String getDefaultDownloadLocation(Context context) {
         StringBuffer buf = new StringBuffer();
         buf.append(Environment.getExternalStorageDirectory().getAbsolutePath());
@@ -367,6 +374,16 @@ public class NASPref {
         buf.append(context.getResources().getString(R.string.app_name));
         buf.append("/");
         buf.append(context.getResources().getString(R.string.downloads_name));
+        return buf.toString();
+    }
+
+    private static String getDefaultShareLocation(Context context) {
+        StringBuffer buf = new StringBuffer();
+        buf.append(Environment.getExternalStorageDirectory().getAbsolutePath());
+        buf.append("/");
+        buf.append(context.getResources().getString(R.string.app_name));
+        buf.append("/");
+        buf.append(context.getResources().getString(R.string.shares_name));
         return buf.toString();
     }
 

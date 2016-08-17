@@ -141,6 +141,8 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
         for (SmbFile file : files) names.add(file.getName());
         String origin = source.getName();
         String unique = isDirectory ? String.format("%s/", origin) : origin;
+        if(unique.startsWith("."))
+            unique = unique.substring(1);
         String ext = FilenameUtils.getExtension(origin);
         String prefix = FilenameUtils.getBaseName(origin);
         String suffix = isDirectory ? "/" : ext.isEmpty() ? "" : String.format(".%s", ext);

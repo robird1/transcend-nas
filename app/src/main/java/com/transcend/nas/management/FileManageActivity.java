@@ -54,7 +54,9 @@ import com.google.android.libraries.cast.companionlibrary.cast.exceptions.Transi
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.InitialActivity;
 import com.transcend.nas.common.NotificationDialog;
+import com.transcend.nas.common.ProgressDialog;
 import com.transcend.nas.connection.SignInActivity;
 import com.transcend.nas.service.AutoBackupService;
 import com.transcend.nas.settings.AboutActivity;
@@ -122,6 +124,7 @@ public class FileManageActivity extends AppCompatActivity implements
     private RelativeLayout mEditorModeView;
     private TextView mEditorModeTitle;
     private Toast mToast;
+    private ProgressDialog mShareDialog;
 
     private String mMode;
     private String mRoot;
@@ -139,25 +142,36 @@ public class FileManageActivity extends AppCompatActivity implements
     private VideoCastConsumer mCastConsumer;
     private MenuItem mMediaRouteMenuItem;
 
+    private SmbFileShareLoader mSmbFileShareLoader;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.w(TAG, "onCreate");
         setContentView(R.layout.activity_file_manage);
-        init();
-        initToolbar();
-        initDropdown();
-        initRecyclerView();
-        initFabs();
-        initProgressView();
-        initDrawer();
-        initActionModeView();
-        doRefresh();
-        NASPref.setInitial(this, true);
+        String password = NASPref.getPassword(this);
+        if (password != null && !password.equals("")) {
+            init();
+            initToolbar();
+            initDropdown();
+            initRecyclerView();
+            initFabs();
+            initProgressView();
+            initDrawer();
+            initActionModeView();
+            doRefresh();
+            NASPref.setInitial(this, true);
 
-        // Get intent, action and MIME type
-        Intent intent = getIntent();
-        onReceiveIntent(intent);
+            // Get intent, action and MIME type
+            Intent intent = getIntent();
+            onReceiveIntent(intent);
+        } else {
+            boolean isInit = NASPref.getInitial(this);
+            if (isInit)
+                startSignInActivity(true);
+            else
+                startInitialActivity();
+        }
     }
 
     @Override
@@ -285,40 +299,11 @@ public class FileManageActivity extends AppCompatActivity implements
 
         String action = intent.getAction();
         String type = intent.getType();
-        if (Intent.ACTION_SEND.equals(action) && type != null) {
-            if ("text/plain".equals(type)) {
-                // Handle text being sent
-                String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
-                if (sharedText != null) {
-                    Log.d(TAG, "ACTION_SEND " + sharedText);
-                }
-            } else if (type.startsWith("image/")) {
-                // Handle single image being sent
-                Uri imageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
-                if (imageUri != null) {
-                    Log.d(TAG, "ACTION_SEND " + imageUri.toString());
-                }
-            }
-        } else if (Intent.ACTION_SEND_MULTIPLE.equals(action) && type != null) {
-            if (type.startsWith("image/")) {
-                // Handle multiple images being sent
-                ArrayList<Uri> imageUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
-                if (imageUris != null) {
-                    String result = "";
-                    for (Uri uri : imageUris) {
-                        result = result + uri.toString() + ",";
-                    }
-                    Log.d(TAG, "ACTION_SEND_MULTIPLE " + result);
-                }
-
-            }
-        } else {
-            Log.d(TAG, "onReceiveIntent Other " + action + ", " + type);
-            // Handle other intents, such as being started from the home screen
-            String path = intent.getStringExtra("path");
-            if (path != null && !path.equals("")) {
-                doLoad(path);
-            }
+        Log.d(TAG, "onReceiveIntent Other " + action + ", " + type);
+        // Handle other intents, such as being started from the home screen
+        String path = intent.getStringExtra("path");
+        if (path != null && !path.equals("")) {
+            doLoad(path);
         }
     }
 
@@ -692,10 +677,10 @@ public class FileManageActivity extends AppCompatActivity implements
                 if (isEmpty) toast(R.string.no_item_selected);
                 else doRename();
                 break;
-            //case R.id.file_manage_editor_action_share:
-            //    if (isEmpty) toast(R.string.no_item_selected);
-            //    else doShare();
-            //    break;
+            case R.id.file_manage_editor_action_share:
+                if (isEmpty) toast(R.string.no_item_selected);
+                else doShare();
+                break;
             case R.id.file_manage_editor_action_copy:
                 if (isEmpty) toast(R.string.no_item_selected);
                 else startFileActionLocateActivity(NASApp.ACT_COPY);
@@ -919,6 +904,9 @@ public class FileManageActivity extends AppCompatActivity implements
             case LoaderID.EVENT_NOTIFY:
                 mProgressView.setVisibility(View.VISIBLE);
                 return new EventNotifyLoader(this, args);
+            case LoaderID.SMB_FILE_SHARE:
+                mSmbFileShareLoader = new SmbFileShareLoader(this, paths, path);
+                return mSmbFileShareLoader;
         }
         return null;
     }
@@ -973,6 +961,10 @@ public class FileManageActivity extends AppCompatActivity implements
             } else if (loader instanceof MediaManagerLoader) {
                 Bundle args = ((MediaManagerLoader) loader).getBundleArgs();
                 MediaFactory.open(this, args);
+            } else if (loader instanceof SmbFileShareLoader) {
+                ArrayList<FileInfo> files = ((SmbFileShareLoader) loader).getShareList();
+                if(files != null && files.size() > 0)
+                    doLocalShare(files);
             } else {
                 doRefresh();
             }
@@ -1130,6 +1122,14 @@ public class FileManageActivity extends AppCompatActivity implements
         return paths;
     }
 
+    private ArrayList<FileInfo> getSelectedFiles() {
+        ArrayList<FileInfo> files = new ArrayList<FileInfo>();
+        for (FileInfo file : mFileList) {
+            if (file.checked) files.add(file);
+        }
+        return files;
+    }
+
     private void doUpload(String dest, ArrayList<String> paths) {
         int id = LoaderID.LOCAL_FILE_UPLOAD;
         Bundle args = new Bundle();
@@ -1177,9 +1177,70 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void doShare() {
-        // TODO: share local file with data
-        // TODO: share remote file with link
-        toast(R.string.share);
+        final int id = (NASApp.MODE_SMB.equals(mMode))
+                ? LoaderID.SMB_FILE_SHARE
+                : LoaderID.LOCAL_FILE_SHARE;
+
+        ArrayList<FileInfo> files = getSelectedFiles();
+        if (id == LoaderID.LOCAL_FILE_SHARE) {
+            doLocalShare(files);
+        } else {
+            Bundle value = new Bundle();
+            value.putString(ProgressDialog.DIALOG_TITLE, getString(R.string.share));
+            //String format = getResources().getString(files.size() <= 1 ? R.string.msg_file_selected : R.string.msg_files_selected);
+            //value.putString(ProgressDialog.DIALOG_MESSAGE, String.format(format, files.size()));
+            mShareDialog = new ProgressDialog(this, value) {
+                @Override
+                public void onConfirm() {
+                    Bundle args = new Bundle();
+                    args.putStringArrayList("paths", getSelectedPaths());
+                    args.putString("path", NASPref.getShareLocation(FileManageActivity.this));
+                    getLoaderManager().restartLoader(id, args, FileManageActivity.this).forceLoad();
+                    closeEditorMode();
+                }
+
+                @Override
+                public void onCancel() {
+                    getLoaderManager().destroyLoader(id);
+                    if(mSmbFileShareLoader != null){
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                            mSmbFileShareLoader.cancelLoad();
+                        }
+                        mSmbFileShareLoader = null;
+                    }
+                    mShareDialog = null;
+                }
+            };
+        }
+    }
+
+    private void doLocalShare(ArrayList<FileInfo> files) {
+        boolean onlyImage = true;
+        ArrayList<Uri> imageUris = new ArrayList<Uri>();
+        for (FileInfo file : files) {
+            Uri uri = Uri.fromFile(new File(file.path));
+            imageUris.add(uri);
+            if (!file.type.equals(FileInfo.TYPE.PHOTO))
+                onlyImage = false;
+        }
+
+        Intent shareIntent = new Intent();
+        shareIntent.setType(onlyImage ? "image/*" : "*/*");
+
+        if (imageUris.size() == 1) {
+            shareIntent.setAction(Intent.ACTION_SEND);
+            shareIntent.putExtra(Intent.EXTRA_STREAM, imageUris.get(0));
+        } else {
+            shareIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
+            shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris);
+        }
+        startActivity(Intent.createChooser(shareIntent, getResources().getText(R.string.share)));
+        if (mShareDialog != null) {
+            mShareDialog.dismiss();
+            mShareDialog = null;
+        }
+
+        Log.w(TAG, "doShare: " + files.size() + " item(s)");
     }
 
     private void doCopy(String dest) {
@@ -1334,44 +1395,6 @@ public class FileManageActivity extends AppCompatActivity implements
         array.recycle();
     }
 
-    /*// expanded fabs
-    private void toggleActionFabs() {
-        boolean isShown = (mFabNewFolder.isShown() && mFabNewFile.isShown());
-        int visibility = isShown ? View.INVISIBLE : View.VISIBLE;
-        int resId = isShown ? R.drawable.ic_add_white_24dp : R.drawable.ic_close_white_24dp;
-        mFabControl.setImageResource(resId);
-        mFabNewFolder.setVisibility(visibility);
-        mFabNewFile.setVisibility(visibility);
-    }
-
-    private void resetActionFabs() {
-        int resId = (NASApp.MODE_SMB.equals(mMode))
-                ? R.drawable.ic_file_upload_white_24dp
-                : R.drawable.ic_file_download_white_24dp;
-        mFabNewFile.setImageResource(resId);
-        mFabControl.setImageResource(R.drawable.ic_add_white_24dp);
-        mFabControl.setVisibility(View.VISIBLE);
-        mFabNewFolder.setVisibility(View.INVISIBLE);
-        mFabNewFile.setVisibility(View.INVISIBLE);
-    }
-
-    private void hideActionFabs() {
-        mFabControl.setVisibility(View.INVISIBLE);
-        mFabNewFolder.setVisibility(View.INVISIBLE);
-        mFabNewFile.setVisibility(View.INVISIBLE);
-    }
-
-    private void toggleSelectFabs (boolean selectAll) {
-        int resId = selectAll
-                ? R.drawable.ic_clear_all_white_24dp
-                : R.drawable.ic_done_all_white_24dp;
-        mFabControl.setImageResource(resId);
-        mFabControl.setVisibility(View.VISIBLE);
-        mFabNewFolder.setVisibility(View.INVISIBLE);
-        mFabNewFile.setVisibility(View.INVISIBLE);
-    }
-    /*/
-
     private void enableFabEdit(boolean enabled) {
         mFab.setImageResource(R.drawable.ic_edit_white_24dp);
         mFab.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
@@ -1425,9 +1448,6 @@ public class FileManageActivity extends AppCompatActivity implements
         boolean selectAll = (count == mFileList.size());
         updateEditorModeTitle(count);
         toggleEditorModeAction(count);
-        /*/ expanded fabs
-        toggleSelectFabs(selectAll);
-        /*/
         toggleFabSelectAll(selectAll);
     }
 
@@ -1442,11 +1462,7 @@ public class FileManageActivity extends AppCompatActivity implements
         count = selectAll ? mFileList.size() : 0;
         updateEditorModeTitle(count);
         toggleEditorModeAction(count);
-        /*/ expanded fabs
-        toggleSelectFabs(selectAll);
-        /*/
         toggleFabSelectAll(selectAll);
-        //*/
     }
 
     private void checkAllSelection() {
@@ -1464,7 +1480,7 @@ public class FileManageActivity extends AppCompatActivity implements
     private void toggleEditorModeAction(int count) {
         boolean visible = (count == 1);
         mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_rename).setVisible(visible);
-        //mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_share).setVisible(visible);
+        mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_share).setVisible(visible);
         mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_new_folder).setVisible(count == 0);
     }
 
@@ -1498,7 +1514,7 @@ public class FileManageActivity extends AppCompatActivity implements
                 : mPath;
 
         //for Action Download, we use default download folder
-        if(NASApp.ACT_DOWNLOAD.equals(type) && NASPref.useDefaultDownloadFolder){
+        if (NASApp.ACT_DOWNLOAD.equals(type) && NASPref.useDefaultDownloadFolder) {
             int count = getSelectedCount();
             String format = getString(count <= 1 ? R.string.msg_file_selected : R.string.msg_files_selected);
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -1668,6 +1684,14 @@ public class FileManageActivity extends AppCompatActivity implements
     private void startHelpActivity() {
         Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse("http://help.storejetcloud.com.s3-website-ap-northeast-1.amazonaws.com/TW/start.html"));
         startActivity(i);
+    }
+
+
+    private void startInitialActivity() {
+        Intent intent = new Intent();
+        intent.setClass(FileManageActivity.this, InitialActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void startSignInActivity(boolean clear) {
