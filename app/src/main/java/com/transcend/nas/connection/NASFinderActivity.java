@@ -151,7 +151,8 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
         if (mNASList == null || mNASList.size() == 0) {
             startNASListLoader();
         } else {
-            startP2PStatusLoader();
+            if(isRemoteAccess)
+                startP2PStatusLoader();
         }
     }
 

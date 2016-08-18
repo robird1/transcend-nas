@@ -38,6 +38,8 @@ public class SmbFileCopyLoader extends SmbAbstractLoader {
         mDest = dest;
         mNotificationID = FileFactory.getInstance().getNotificationID();
         mType = getContext().getString(R.string.copy);
+        mTotal = mSrcs.size();
+        mCurrent = 0;
     }
 
     @Override
@@ -65,6 +67,7 @@ public class SmbFileCopyLoader extends SmbAbstractLoader {
                 copyDirectory(source, getSmbUrl(mDest));
             else
                 copyFile(source, getSmbUrl(mDest));
+            mCurrent++;
         }
 
         if(success)
@@ -79,6 +82,10 @@ public class SmbFileCopyLoader extends SmbAbstractLoader {
         SmbFile target = new SmbFile(destination, name);
         target.mkdirs();
         SmbFile[] files = source.listFiles();
+        for (SmbFile file : files) {
+            if (!file.isHidden())
+                mTotal++;
+        }
         String path = target.getPath();
         for (SmbFile file : files) {
             if(!success)
@@ -91,6 +98,7 @@ public class SmbFileCopyLoader extends SmbAbstractLoader {
                 copyDirectory(file, path);
             else
                 copyFile(file, path);
+            mCurrent++;
         }
     }
 
@@ -98,9 +106,9 @@ public class SmbFileCopyLoader extends SmbAbstractLoader {
         String name = createUniqueName(source, destination);
         SmbFile target = new SmbFile(destination, name);
         int total = getSize(source);
-        startProgressWatcher(target, total);
+        startProgressWatcher(name, target, total);
         source.copyTo(target);
         closeProgressWatcher();
-        updateProgress(mType, target.getName(), total, total);
+        updateProgress(mType, name, total, total);
     }
 }

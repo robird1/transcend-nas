@@ -60,6 +60,8 @@ public class SmbFileDownloadLoader extends SmbAbstractLoader {
         mDest = dest;
         mNotificationID = FileFactory.getInstance().getNotificationID();
         mType = getContext().getString(R.string.download);
+        mTotal = mSrcs.size();
+        mCurrent = 0;
     }
 
     @Override
@@ -89,6 +91,7 @@ public class SmbFileDownloadLoader extends SmbAbstractLoader {
                 downloadDirectory(source, mDest);
             else
                 downloadFile(source, mDest);
+            mCurrent++;
         }
         updateResult(mType, getContext().getString(R.string.done), mDest);
         return true;
@@ -99,12 +102,21 @@ public class SmbFileDownloadLoader extends SmbAbstractLoader {
         File target = new File(destination, name);
         target.mkdirs();
         SmbFile[] files = source.listFiles();
+        for (SmbFile file : files) {
+            if (!file.isHidden())
+                mTotal++;
+        }
+
         String path = target.getPath();
         for (SmbFile file : files) {
+            if(file.isHidden())
+                continue;
+
             if (file.isDirectory())
                 downloadDirectory(file, path);
             else
                 downloadFile(file, path);
+            mCurrent++;
         }
     }
 

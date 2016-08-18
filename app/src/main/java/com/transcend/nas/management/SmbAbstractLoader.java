@@ -44,6 +44,8 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
     protected Exception mException;
     protected int mNotificationID = 0;
     protected String mType = "";
+    protected int mTotal = 0;
+    protected int mCurrent = 0;
     protected HandlerThread mThread;
     protected Handler mHandler;
     protected Runnable mWatcher;
@@ -133,6 +135,10 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         return message;
     }
 
+    public String getType(){
+        return mType;
+    }
+
     protected int getSize(SmbFile file) {
         int total = 0;
         do {
@@ -166,7 +172,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         return unique;
     }
 
-    protected void startProgressWatcher(final SmbFile target, final int total) {
+    protected void startProgressWatcher(final String title, final SmbFile target, final int total) {
         mCount = 0;
         mThread = new HandlerThread(TAG);
         mThread.start();
@@ -177,7 +183,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
                 int count = target.getContentLength();
                 if (mHandler != null) {
                     mHandler.postDelayed(mWatcher, 1000);
-                    updateProgress(mType, target.getName(), count, total);
+                    updateProgress(mType, title, count, total);
                 }
 
                 if (count >= mCount)
@@ -208,6 +214,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         boolean indeterminate = (total == 0);
         int icon = R.mipmap.ic_launcher;
 
+        String title = mTotal > 0 ? String.format("(%s/%s) " + name, mCurrent, mTotal) : name;
         String stat = String.format("%s / %s", MathUtil.getBytes(count), MathUtil.getBytes(total));
         String text = String.format("%s - %s", type, stat);
         String info = String.format("%d%%", progress);
@@ -219,7 +226,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext());
         builder.setSmallIcon(icon);
-        builder.setContentTitle(name);
+        builder.setContentTitle(title);
         builder.setContentText(text);
         builder.setContentInfo(info);
         builder.setProgress(max, progress, indeterminate);

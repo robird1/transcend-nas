@@ -11,6 +11,9 @@ import android.widget.Button;
 
 import com.transcend.nas.R;
 
+import org.apache.commons.io.FilenameUtils;
+
+import java.io.File;
 import java.util.List;
 
 /**
@@ -26,11 +29,19 @@ public abstract class FileActionRenameDialog implements TextWatcher, View.OnClic
     private TextInputLayout mFieldName;
 
     private String mName;
+    private String mType;
     private List<String> mNames;
+    private boolean mIgnoreType;
 
-    public FileActionRenameDialog(Context context, String name, List<String> names) {
+    public FileActionRenameDialog(Context context,boolean ignoreType, String name, List<String> names) {
         mContext = context;
-        mName = name;
+        mIgnoreType = ignoreType;
+        if(!ignoreType){
+            mName = FilenameUtils.getBaseName(name);
+            mType = FilenameUtils.getExtension(name);
+        } else {
+            mName = name;
+        }
         mNames = names;
         initDialog();
         initFieldName();
@@ -64,7 +75,7 @@ public abstract class FileActionRenameDialog implements TextWatcher, View.OnClic
 
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-        String name = s.toString();
+        String name = addExtension(s.toString());
         String error = null;
         boolean enabled = true;
         if (isInvalid(name)) {
@@ -88,7 +99,7 @@ public abstract class FileActionRenameDialog implements TextWatcher, View.OnClic
     public void onClick(View v) {
         if (v.equals(mDlgBtnPos)) {
             if (mFieldName.getEditText() == null) return;
-            String name = mFieldName.getEditText().getText().toString();
+            String name = addExtension(mFieldName.getEditText().getText().toString());
             onConfirm(name);
             mDialog.dismiss();
         }
@@ -101,5 +112,11 @@ public abstract class FileActionRenameDialog implements TextWatcher, View.OnClic
     private boolean isDuplicated(String name) {
         if (isInvalid(name)) return false;
         return mNames.contains(name);
+    }
+
+    private String addExtension(String name){
+        if(!mIgnoreType)
+            name = name + "." + mType;
+        return name;
     }
 }

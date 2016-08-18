@@ -44,6 +44,8 @@ public class LocalFileCopyLoader extends AsyncTaskLoader<Boolean> {
     private List<String> mSrcs;
     private String mDest;
     private int mNotificationID = 0;
+    private int mTotal = 0;
+    private int mCurrent = 0;
 
     public LocalFileCopyLoader(Context context, List<String> srcs, String dest) {
         super(context);
@@ -51,6 +53,8 @@ public class LocalFileCopyLoader extends AsyncTaskLoader<Boolean> {
         mSrcs = srcs;
         mDest = dest;
         mNotificationID = FileFactory.getInstance().getNotificationID();
+        mTotal = mSrcs.size();
+        mCurrent = 0;
     }
 
     @Override
@@ -73,6 +77,7 @@ public class LocalFileCopyLoader extends AsyncTaskLoader<Boolean> {
                 copyDirectory(source, mDest);
             else
                 copyFile(source, mDest);
+            mCurrent++;
         }
         updateResult(getContext().getString(R.string.done));
         return true;
@@ -83,6 +88,11 @@ public class LocalFileCopyLoader extends AsyncTaskLoader<Boolean> {
         File target = new File(destination, name);
         target.mkdirs();
         File[] files = source.listFiles();
+        for (File file : files) {
+            if (!file.isHidden())
+                mTotal++;
+        }
+
         String path = target.getPath();
         for (File file : files) {
             if(file.isHidden())
@@ -92,6 +102,7 @@ public class LocalFileCopyLoader extends AsyncTaskLoader<Boolean> {
                 copyDirectory(file, path);
             else
                 copyFile(file, path);
+            mCurrent++;
         }
     }
 
@@ -99,10 +110,10 @@ public class LocalFileCopyLoader extends AsyncTaskLoader<Boolean> {
         String name = createUniqueName(source, destination);
         File target = new File(destination, name);
         int total = (int) source.length();
-        startProgressWatcher(target, total);
+        startProgressWatcher(name, target, total);
         FileUtils.copyFile(source, target);
         closeProgressWatcher();
-        updateProgress(target.getName(), total, total);
+        updateProgress(name, total, total);
     }
 
     private String createUniqueName(File source, String destination) throws MalformedURLException, SmbException {
@@ -128,7 +139,7 @@ public class LocalFileCopyLoader extends AsyncTaskLoader<Boolean> {
         return unique;
     }
 
-    private void startProgressWatcher(final File target, final int total) {
+    private void startProgressWatcher(final String title, final File target, final int total) {
         mThread = new HandlerThread(TAG);
         mThread.start();
         mHandler = new Handler(mThread.getLooper());
@@ -138,7 +149,7 @@ public class LocalFileCopyLoader extends AsyncTaskLoader<Boolean> {
                 int count = (int) target.length();
                 if (mHandler != null) {
                     mHandler.postDelayed(mWatcher, 1000);
-                    updateProgress(target.getName(), count, total);
+                    updateProgress(title, count, total);
                 }
             }
         });
@@ -164,6 +175,7 @@ public class LocalFileCopyLoader extends AsyncTaskLoader<Boolean> {
         int icon = R.mipmap.ic_launcher;
 
         String type = getContext().getResources().getString(R.string.copy);
+        String title = mTotal > 0 ? String.format("(%s/%s) " + name, mCurrent, mTotal) : name;
         String stat = String.format("%s / %s", MathUtil.getBytes(count), MathUtil.getBytes(total));
         String text = String.format("%s - %s", type, stat);
         String info = String.format("%d%%", progress);
@@ -175,7 +187,7 @@ public class LocalFileCopyLoader extends AsyncTaskLoader<Boolean> {
         PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext());
         builder.setSmallIcon(icon);
-        builder.setContentTitle(name);
+        builder.setContentTitle(title);
         builder.setContentText(text);
         builder.setContentInfo(info);
         builder.setProgress(max, progress, indeterminate);

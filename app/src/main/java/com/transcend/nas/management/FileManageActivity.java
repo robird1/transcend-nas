@@ -77,6 +77,8 @@ import com.tutk.IOTC.P2PService;
 import com.tutk.IOTC.P2PTunnelAPIs;
 import com.tutk.IOTC.sP2PTunnelSessionInfo;
 
+import org.apache.commons.io.FilenameUtils;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -967,6 +969,12 @@ public class FileManageActivity extends AppCompatActivity implements
                     doLocalShare(files);
             } else {
                 doRefresh();
+                if(loader instanceof SmbAbstractLoader){
+                    String type = ((SmbAbstractLoader)loader).getType();
+                    if(type != null && !type.equals("")){
+                        Toast.makeText(FileManageActivity.this, type + " - " + getString(R.string.done),Toast.LENGTH_SHORT).show();
+                    }
+                }
             }
         } else {
             if (isRemoteAccess() && mPreviousLoaderID > 0 && mPreviousLoaderArgs != null) {
@@ -1157,9 +1165,11 @@ public class FileManageActivity extends AppCompatActivity implements
             else
                 names.add(file.name);
         }
+
         final String path = target.path;
         final String name = target.name;
-        new FileActionRenameDialog(this, name, names) {
+        boolean ignoreType = target.type.equals(FileInfo.TYPE.DIR);
+        new FileActionRenameDialog(this,ignoreType , name, names) {
             @Override
             public void onConfirm(String newName) {
                 if (newName.equals(name))

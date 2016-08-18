@@ -57,6 +57,8 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
         mDest = dest;
         mNotificationID = FileFactory.getInstance().getNotificationID();
         mType = getContext().getString(R.string.upload);
+        mTotal = mSrcs.size();
+        mCurrent = 0;
     }
 
     @Override
@@ -86,6 +88,7 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
                 uploadDirectory(source, getSmbUrl(mDest));
             else
                 uploadFile(source, getSmbUrl(mDest));
+            mCurrent++;
         }
         updateResult(mType, getContext().getString(R.string.done), mDest);
         return true;
@@ -96,6 +99,10 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
         SmbFile target = new SmbFile(destination, name);
         target.mkdirs();
         File[] files = source.listFiles();
+        for (File file : files) {
+            if (!file.isHidden())
+                mTotal++;
+        }
         String path = target.getPath();
         for (File file : files) {
             if(file.isHidden())
@@ -105,6 +112,7 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
                 uploadDirectory(file, path);
             else
                 uploadFile(file, path);
+            mCurrent++;
         }
     }
 
