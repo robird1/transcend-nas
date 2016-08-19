@@ -54,6 +54,7 @@ import com.google.android.libraries.cast.companionlibrary.cast.exceptions.Transi
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.AnalysisFactory;
 import com.transcend.nas.InitialActivity;
 import com.transcend.nas.common.NotificationDialog;
 import com.transcend.nas.common.ProgressDialog;
@@ -151,6 +152,7 @@ public class FileManageActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         Log.w(TAG, "onCreate");
         setContentView(R.layout.activity_file_manage);
+        AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.CATEGORY_VIEW.BROWSERREMOTE);
         String password = NASPref.getPassword(this);
         if (password != null && !password.equals("")) {
             init();
@@ -601,14 +603,17 @@ public class FileManageActivity extends AppCompatActivity implements
             case R.id.nav_storage:
                 mDevice = false;
                 doLoad(NASApp.ROOT_SMB);
+                AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.CATEGORY_VIEW.BROWSERREMOTE);
                 break;
             case R.id.nav_device:
                 mDevice = true;
                 doLoad(NASApp.ROOT_STG);
+                AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.CATEGORY_VIEW.BROWSERLOCAL);
                 break;
             case R.id.nav_downloads:
                 mDevice = false;
                 doLoad(NASPref.getDownloadLocation(this));
+                AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.CATEGORY_VIEW.BROWSERLOCALDOWNLOAD);
                 break;
             case R.id.nav_disk_info:
                 startDiskInfoActivity();

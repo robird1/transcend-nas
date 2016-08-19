@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.Environment;
 import android.util.Log;
 
+import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.cast.CastMediaControlIntent;
 import com.google.android.libraries.cast.companionlibrary.cast.CastConfiguration;
 import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
@@ -41,6 +43,7 @@ public class NASApp extends Application {
     public static final String TUTK_NAME_TAG     = "@tS#";
 
     private static Context mContext;
+    private Tracker mTracker;
 
     @Override
     public void onCreate() {
@@ -115,6 +118,19 @@ public class NASApp extends Application {
                 .addNamespace("urn:x-cast:com.transcend.nas")
                 .build();
         VideoCastManager.initialize(this, options);
+    }
+
+    /**
+     * Gets the default {@link Tracker} for this {@link Application}.
+     * @return tracker
+     */
+    synchronized public Tracker getDefaultTracker() {
+        if (mTracker == null) {
+            GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
+            // To enable debug logging use: adb shell setprop log.tag.GAv4 DEBUG
+            mTracker = analytics.newTracker(R.xml.global_tracker);
+        }
+        return mTracker;
     }
 
     public static Context getContext() {

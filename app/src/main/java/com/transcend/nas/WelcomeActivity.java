@@ -12,6 +12,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.connection.AutoLinkLoader;
 import com.transcend.nas.connection.NASFinderActivity;
@@ -34,8 +36,8 @@ public class WelcomeActivity extends Activity implements LoaderManager.LoaderCal
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
-        mTextView = (TextView) findViewById(R.id.welcome_text);
 
+        mTextView = (TextView) findViewById(R.id.welcome_text);
         boolean isInit = NASPref.getInitial(this);
         if(isInit) {
             getLoaderManager().initLoader(LoaderID.AUTO_LINK, null, this).forceLoad();

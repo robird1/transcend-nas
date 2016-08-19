@@ -23,6 +23,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.transcend.nas.AnalysisFactory;
 import com.transcend.nas.InitialActivity;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;

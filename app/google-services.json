@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "1075834748103",
+    "project_id": "transcend-storejet-cloud"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1075834748103:android:7de9094d66befd4a",
+        "android_client_info": {
+          "package_name": "com.transcend.nas"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4JXWSmSy6_xcikfuM-f28Ghnb1f2kLZE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 2,
+          "analytics_property": {
+            "tracking_id": "UA-54924476-7"
+          }
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
