@@ -1,28 +1,15 @@
 package com.transcend.nas.management;
 
-import android.app.Activity;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.support.v7.app.NotificationCompat;
-import android.util.Log;
 
 import com.transcend.nas.R;
-import com.transcend.nas.utils.FileFactory;
-import com.transcend.nas.utils.MathUtil;
-
-import org.apache.commons.io.FilenameUtils;
+import com.transcend.nas.common.FileFactory;
 
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
-import jcifs.smb.SmbFileFilter;
 
 /**
  * Created by silverhsu on 16/2/4.

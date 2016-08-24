@@ -1,17 +1,13 @@
 package com.transcend.nas.settings;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.os.AsyncTask;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.TextView;
 
 import com.realtek.nasfun.api.HttpClientManager;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
-import com.transcend.nas.R;
-import com.transcend.nas.utils.FileFactory;
 import com.tutk.IOTC.P2PService;
 
 import org.apache.http.HttpEntity;

@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.transcend.nas.WizardActivity">
+    tools:context="com.transcend.nas.connection.WizardActivity">
 
     <RelativeLayout
         android:id="@+id/wizard_layout"

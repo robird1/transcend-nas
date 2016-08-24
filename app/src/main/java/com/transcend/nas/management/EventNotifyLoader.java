@@ -3,15 +3,12 @@ package com.transcend.nas.management;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.realtek.nasfun.api.HttpClientManager;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
-import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
-import com.transcend.nas.utils.FileFactory;
 import com.tutk.IOTC.P2PService;
 
 import org.apache.http.HttpEntity;
@@ -29,12 +26,8 @@ import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import jcifs.smb.SmbException;
-import jcifs.smb.SmbFile;
 
 /**
  * Created by ikelee on 16/7/29.

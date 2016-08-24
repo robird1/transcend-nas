@@ -1,10 +1,8 @@
 package com.transcend.nas.viewer.music;
 
 import android.app.ActivityManager;
-import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.Loader;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
@@ -27,7 +25,7 @@ import android.widget.Toast;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.management.FileInfo;
-import com.transcend.nas.utils.FileFactory;
+import com.transcend.nas.common.FileFactory;
 
 import org.apache.commons.io.FilenameUtils;
 

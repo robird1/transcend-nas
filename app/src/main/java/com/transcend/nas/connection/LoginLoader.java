@@ -3,13 +3,12 @@ package com.transcend.nas.connection;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
-import com.transcend.nas.utils.FileFactory;
+import com.transcend.nas.common.FileFactory;
 import com.tutk.IOTC.P2PService;
 
 /**

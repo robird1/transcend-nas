@@ -11,14 +11,8 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.realtek.nasfun.api.Server;
-import com.realtek.nasfun.api.ServerManager;
-import com.transcend.nas.NASApp;
 import com.transcend.nas.R;
-import com.transcend.nas.utils.FileFactory;
-
-import java.io.File;
-import java.text.DecimalFormat;
+import com.transcend.nas.common.FileFactory;
 
 /**
  * Created by silverhsu on 16/3/9.

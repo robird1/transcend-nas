@@ -1,25 +1,17 @@
 package com.transcend.nas.management;
 
-import android.app.Activity;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
-import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import com.transcend.nas.R;
-import com.transcend.nas.utils.FileFactory;
-import com.transcend.nas.utils.MathUtil;
+import com.transcend.nas.common.FileFactory;
 
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

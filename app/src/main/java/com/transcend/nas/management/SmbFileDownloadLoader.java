@@ -1,18 +1,10 @@
 package com.transcend.nas.management;
 
-import android.app.Activity;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import com.transcend.nas.R;
-import com.transcend.nas.utils.FileFactory;
-import com.transcend.nas.utils.MathUtil;
+import com.transcend.nas.common.FileFactory;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -20,14 +12,11 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
-import java.net.UnknownHostException;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -35,7 +24,6 @@ import java.util.TimerTask;
 
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
-import jcifs.smb.SmbFileInputStream;
 
 /**
  * Created by silverhsu on 16/2/18.

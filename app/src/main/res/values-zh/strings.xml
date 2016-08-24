@@ -172,5 +172,12 @@
 
     <!-- String v2 -->
     <string name="login_not">尚未登入</string>
+    <string name="already_have_account">已有帳號?</string>
+    <string name="not_have_account">尚未擁有帳號?</string>
+    <string name="not_receive_active">未收到認證信?</string>
+    <string name="sign_up_by_email">使用電子信箱註冊</string>
+    <string name="sign_up_by_facebook">使用Facebook登入</string>
+    <string name="or">或</string>
+    <string name="status">狀態</string>
 
 </resources>

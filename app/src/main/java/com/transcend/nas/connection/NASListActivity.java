@@ -23,15 +23,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.transcend.nas.AnalysisFactory;
-import com.transcend.nas.InitialActivity;
+import com.transcend.nas.GuideActivity;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
-import com.transcend.nas.WizardActivity;
-import com.transcend.nas.common.DividerItemDecoration;
+import com.transcend.nas.view.DividerItemDecoration;
 import com.transcend.nas.common.LoaderID;
-import com.transcend.nas.common.NotificationDialog;
+import com.transcend.nas.view.NotificationDialog;
 import com.transcend.nas.common.TutkCodeID;
 import com.transcend.nas.management.FileManageActivity;
 import com.transcend.nas.management.TutkDeleteNasLoader;
@@ -42,10 +40,10 @@ import com.tutk.IOTC.P2PService;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class NASFinderActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Boolean> {
+public class NASListActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Boolean> {
 
-    public static final int REQUEST_CODE = NASFinderActivity.class.hashCode() & 0xFFFF;
-    private static final String TAG = NASFinderActivity.class.getSimpleName();
+    public static final int REQUEST_CODE = NASListActivity.class.hashCode() & 0xFFFF;
+    private static final String TAG = NASListActivity.class.getSimpleName();
 
     private Toolbar mToolbar;
     private RecyclerView mRecyclerView;
@@ -164,19 +162,19 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
     private void startSignInActivity() {
         if (getCallingActivity() == null) {
             Intent intent = new Intent();
-            intent.setClass(NASFinderActivity.this, SignInActivity.class);
+            intent.setClass(NASListActivity.this, AppSignInActivity.class);
             startActivity(intent);
             finish();
         } else {
             Intent intent = new Intent();
-            NASFinderActivity.this.setResult(RESULT_CANCELED, intent);
+            NASListActivity.this.setResult(RESULT_CANCELED, intent);
             finish();
         }
     }
 
     private void startInitialActivity() {
         Intent intent = new Intent();
-        intent.setClass(NASFinderActivity.this, InitialActivity.class);
+        intent.setClass(NASListActivity.this, GuideActivity.class);
         intent.putExtra("Retry", false);
         startActivity(intent);
         finish();
@@ -184,7 +182,7 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
 
     private void startWizardActivity(Bundle args) {
         Intent intent = new Intent();
-        intent.setClass(NASFinderActivity.this, WizardActivity.class);
+        intent.setClass(NASListActivity.this, WizardActivity.class);
         intent.putExtra("Hostname", args.getString("hostname"));
         intent.putExtra("RemoteAccess", isRemoteAccess);
         startActivityForResult(intent, WizardActivity.REQUEST_CODE);
@@ -193,12 +191,12 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
     private void startFileManageActivity() {
         if (getCallingActivity() == null) {
             Intent intent = new Intent();
-            intent.setClass(NASFinderActivity.this, FileManageActivity.class);
+            intent.setClass(NASListActivity.this, FileManageActivity.class);
             startActivity(intent);
             finish();
         } else {
             Intent intent = new Intent();
-            NASFinderActivity.this.setResult(RESULT_OK, intent);
+            NASListActivity.this.setResult(RESULT_OK, intent);
             finish();
         }
     }
@@ -268,7 +266,7 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
                 return new WizardCheckLoader(this, args, isRemoteAccess);
             case LoaderID.TUTK_NAS_ONLINE_CHECK:
                 mProgressView.setVisibility(View.VISIBLE);
-                return new P2PStautsLoader(NASFinderActivity.this, mNASList);
+                return new P2PStautsLoader(NASListActivity.this, mNASList);
         }
         return null;
     }
@@ -431,7 +429,7 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
     }
 
     private void showLoginDialog(Bundle args, boolean delete) {
-        mLoginDialog = new LoginDialog(NASFinderActivity.this, args, isRemoteAccess, delete) {
+        mLoginDialog = new LoginDialog(NASListActivity.this, args, isRemoteAccess, delete) {
             @Override
             public void onConfirm(Bundle args) {
                 startLoginLoader(args);
@@ -473,7 +471,7 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            LayoutInflater layoutInflater = LayoutInflater.from(NASFinderActivity.this);
+            LayoutInflater layoutInflater = LayoutInflater.from(NASListActivity.this);
             View view = layoutInflater.inflate(R.layout.listitem_nas_finder, parent, false);
             ViewHolder holder = new ViewHolder(view);
             return holder;
@@ -509,10 +507,10 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
                         holder.subtitle.setTextColor(Color.GREEN);
                     } else {
                         holder.subtitle.setText("Off");
-                        holder.subtitle.setTextColor(ContextCompat.getColor(NASFinderActivity.this, R.color.textColorSecondary));
+                        holder.subtitle.setTextColor(ContextCompat.getColor(NASListActivity.this, R.color.textColorSecondary));
                     }
                 } else {
-                    holder.subtitle.setTextColor(ContextCompat.getColor(NASFinderActivity.this, R.color.textColorSecondary));
+                    holder.subtitle.setTextColor(ContextCompat.getColor(NASListActivity.this, R.color.textColorSecondary));
                     holder.subtitle.setText(getString(R.string.loading));
                 }
             }
@@ -554,8 +552,8 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
                 Bundle args = new Bundle();
 
                 if (v.getId() == R.id.listitem_nas_delete_icon) {
-                    args.putString("server", NASPref.getCloudServer(NASFinderActivity.this));
-                    args.putString("token", NASPref.getCloudAuthToken(NASFinderActivity.this));
+                    args.putString("server", NASPref.getCloudServer(NASListActivity.this));
+                    args.putString("token", NASPref.getCloudAuthToken(NASListActivity.this));
                     args.putString("nasId", nas.get("nasId"));
                     showNotificationDialog(args);
                 } else {
@@ -569,9 +567,9 @@ public class NASFinderActivity extends AppCompatActivity implements LoaderManage
                     }
                     args.putString("nickname", nickname);
                     args.putString("hostname", nas.get("hostname"));
-                    args.putString("username", NASPref.getUsername(NASFinderActivity.this));
-                    args.putString("password", NASPref.getPassword(NASFinderActivity.this));
-                    getLoaderManager().restartLoader(LoaderID.WIZARD, args, NASFinderActivity.this).forceLoad();
+                    args.putString("username", NASPref.getUsername(NASListActivity.this));
+                    args.putString("password", NASPref.getPassword(NASListActivity.this));
+                    getLoaderManager().restartLoader(LoaderID.WIZARD, args, NASListActivity.this).forceLoad();
                 }
             }
         }

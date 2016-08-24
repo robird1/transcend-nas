@@ -1,16 +1,12 @@
 package com.transcend.nas.connection;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -19,7 +15,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.transcend.nas.InitialActivity;
+import com.transcend.nas.GuideActivity;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
@@ -30,22 +26,19 @@ import com.transcend.nas.management.TutkGetNasLoader;
 import com.transcend.nas.management.TutkLinkNasLoader;
 import com.transcend.nas.management.TutkLoginLoader;
 import com.transcend.nas.management.TutkLogoutLoader;
-import com.transcend.nas.utils.StyleFactory;
+import com.transcend.nas.common.StyleFactory;
 import com.tutk.IOTC.P2PService;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Created by silverhsu on 16/2/2.
  */
-public class SignInActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Boolean>, View.OnClickListener {
+public class AppSignInActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Boolean>, View.OnClickListener {
 
-    private static final String TAG = SignInActivity.class.getSimpleName();
-    public static final int REQUEST_CODE = SignInActivity.class.hashCode() & 0xFFFF;
+    private static final String TAG = AppSignInActivity.class.getSimpleName();
+    public static final int REQUEST_CODE = AppSignInActivity.class.hashCode() & 0xFFFF;
 
     private LinearLayout layoutInit;
     private LinearLayout layoutSignIn;
@@ -153,14 +146,14 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
 
     private void startFileManageActivity() {
         Intent intent = new Intent();
-        intent.setClass(SignInActivity.this, FileManageActivity.class);
+        intent.setClass(AppSignInActivity.this, FileManageActivity.class);
         startActivity(intent);
         finish();
     }
 
     private void startInitialActivity() {
         Intent intent = new Intent();
-        intent.setClass(SignInActivity.this, InitialActivity.class);
+        intent.setClass(AppSignInActivity.this, GuideActivity.class);
         intent.putExtra("Retry", true);
         startActivity(intent);
         finish();
@@ -168,7 +161,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
 
     private void startNASFinderActivity(ArrayList<HashMap<String, String>> list, boolean isRemoteAccess) {
         Intent intent = new Intent();
-        intent.setClass(SignInActivity.this, NASFinderActivity.class);
+        intent.setClass(AppSignInActivity.this, NASListActivity.class);
         if (isRemoteAccess) {
             intent.putExtra("NASList", list);
             intent.putExtra("RemoteAccess", isRemoteAccess);
@@ -176,14 +169,14 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
         //startActivity(intent);
         //finish();
 
-        startActivityForResult(intent, NASFinderActivity.REQUEST_CODE);
+        startActivityForResult(intent, NASListActivity.REQUEST_CODE);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == RESULT_OK){
-            if(requestCode == NASFinderActivity.REQUEST_CODE){
+            if(requestCode == NASListActivity.REQUEST_CODE){
                 startFileManageActivity();
             }
         }
@@ -310,7 +303,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderManager.L
         Bundle args = new Bundle();
         args.putString("title", getString(R.string.forget_password_title));
         args.putString("email", NASPref.getCloudUsername(this));
-        mForgetDialog = new ForgetPwdDialog(SignInActivity.this, args) {
+        mForgetDialog = new ForgetPwdDialog(AppSignInActivity.this, args) {
             @Override
             public void onConfirm(Bundle args) {
                 startForgetPwdLoader(args);

@@ -17,6 +17,7 @@ public class NASPref {
 
     private static final String TAG = NASPref.class.getSimpleName();
     public static final boolean useDefaultDownloadFolder = true;
+    public static final boolean useNewLoginFlow = false;
 
     public enum Sort {
         TYPE,
@@ -38,6 +39,19 @@ public class NASPref {
      * Init
      *
      */
+    public static boolean getIntroduce(Context context) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_introduce);
+        boolean def = false;
+        return PrefUtil.read(context, name, key, def);
+    }
+
+    public static void setIntroduce(Context context, boolean init) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_introduce);
+        PrefUtil.write(context, name, key, init);
+    }
+
     public static boolean getInitial(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
         String key = context.getResources().getString(R.string.pref_initial);

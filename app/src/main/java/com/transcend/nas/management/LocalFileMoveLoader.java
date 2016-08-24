@@ -12,10 +12,9 @@ import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import com.transcend.nas.R;
-import com.transcend.nas.utils.FileFactory;
+import com.transcend.nas.common.FileFactory;
 import com.transcend.nas.utils.MathUtil;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;

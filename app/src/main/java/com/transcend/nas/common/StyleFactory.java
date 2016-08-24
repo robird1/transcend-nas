@@ -1,14 +1,21 @@
-package com.transcend.nas.utils;
+package com.transcend.nas.common;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.transcend.nas.R;
+
+import org.w3c.dom.Text;
 
 /**
  * Created by ike_lee on 2016/5/23.
@@ -114,5 +121,34 @@ public class StyleFactory {
                 return false;
             }
         });
+    }
+
+    public static void set_blue_text_touch_effect(final Context context, final TextView textView){
+        textView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch(event.getAction()){
+                    case MotionEvent.ACTION_DOWN:
+                        textView.setTextColor(ContextCompat.getColor(context, R.color.textColorSecondary));
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        textView.setTextColor(ContextCompat.getColor(context, R.color.colorAccentDialog));
+                        break;
+                }
+                return false;
+            }
+        });
+    }
+
+    public static Bitmap createBitmapFromResource(Context context, int drawableId, int reqWidth,int reqHeight){
+        Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), drawableId);
+        int oldwidth = bmp.getWidth();
+        int oldheight = bmp.getHeight();
+        float scaleWidth = reqWidth / (float)oldwidth;
+        float scaleHeight = reqHeight / (float)oldheight;
+        Matrix matrix = new Matrix();
+        matrix.postScale(scaleWidth, scaleHeight);
+        Bitmap resizedBitmap = Bitmap.createBitmap(bmp, 0, 0, oldwidth, oldheight, matrix, true);
+        return resizedBitmap;
     }
 }

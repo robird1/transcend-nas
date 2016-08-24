@@ -30,8 +30,8 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
-import com.transcend.nas.utils.FileFactory;
-import com.transcend.nas.utils.MediaFactory;
+import com.transcend.nas.common.FileFactory;
+import com.transcend.nas.common.MediaFactory;
 import com.transcend.nas.viewer.photo.ViewerActivity;
 
 import java.io.File;

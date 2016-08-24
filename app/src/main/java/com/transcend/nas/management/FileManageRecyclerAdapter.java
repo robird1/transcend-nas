@@ -2,7 +2,6 @@ package com.transcend.nas.management;
 
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,11 +10,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.realtek.nasfun.api.Server;
-import com.realtek.nasfun.api.ServerManager;
-import com.transcend.nas.NASApp;
 import com.transcend.nas.R;
-import com.transcend.nas.utils.FileFactory;
+import com.transcend.nas.common.FileFactory;
 
 import java.util.ArrayList;
 

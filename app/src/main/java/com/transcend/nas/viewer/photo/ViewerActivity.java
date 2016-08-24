@@ -39,7 +39,7 @@ import com.transcend.nas.management.LocalFileUploadLoader;
 import com.transcend.nas.management.SmbAbstractLoader;
 import com.transcend.nas.management.SmbFileDeleteLoader;
 import com.transcend.nas.management.SmbFileDownloadLoader;
-import com.transcend.nas.utils.FileFactory;
+import com.transcend.nas.common.FileFactory;
 
 import java.util.ArrayList;
 

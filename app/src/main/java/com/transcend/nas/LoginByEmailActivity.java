@@ -1,73 +1,63 @@
-package com.transcend.nas.settings;
+package com.transcend.nas;
 
 import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.Loader;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.realtek.nasfun.api.Server;
-import com.realtek.nasfun.api.ServerManager;
-import com.transcend.nas.NASApp;
-import com.transcend.nas.NASPref;
-import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
-import com.transcend.nas.view.NotificationDialog;
+import com.transcend.nas.common.StyleFactory;
 import com.transcend.nas.common.TutkCodeID;
 import com.transcend.nas.connection.ForgetPwdDialog;
+import com.transcend.nas.connection.NASListActivity;
 import com.transcend.nas.management.TutkCreateNasLoader;
 import com.transcend.nas.management.TutkForgetPasswordLoader;
 import com.transcend.nas.management.TutkGetNasLoader;
 import com.transcend.nas.management.TutkLoginLoader;
 import com.transcend.nas.management.TutkRegisterLoader;
 import com.transcend.nas.management.TutkResendActivateLoader;
+import com.transcend.nas.view.NotificationDialog;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import org.w3c.dom.Text;
+
 
 /**
- * Created by ikelee on 16/8/4.
+ * Created by ikelee on 16/8/22.
  */
-public class RemoteAccessActivity extends AppCompatActivity implements
+public class LoginByEmailActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Boolean>,
         View.OnClickListener {
 
-    public static final int REQUEST_CODE = RemoteAccessActivity.class.hashCode() & 0xFFFF;
-    public static final String TAG = RemoteAccessActivity.class.getSimpleName();
+    public static final int REQUEST_CODE = LoginByEmailActivity.class.hashCode() & 0xFFFF;
+    public static final String TAG = LoginByEmailActivity.class.getSimpleName();
 
     private TextView mTitle;
     private RelativeLayout mProgressView;
-    LinearLayout initLayout;
-    LinearLayout loginLayout;
-    LinearLayout registerLayout;
-    RelativeLayout normalLayout;
+    private RelativeLayout loginLayout;
+    private RelativeLayout registerLayout;
+    private RelativeLayout normalLayout;
 
-    TextInputLayout tlEmail;
-    TextInputLayout tlPwd;
-    TextInputLayout tlPwdConfirm;
+    private TextInputLayout tlEmail;
+    private TextInputLayout tlPwd;
+    private TextInputLayout tlPwdConfirm;
 
     private int mLoaderID;
-    private boolean isInitFragment = true;
     private boolean isRemoteAccessRegister = false;
-    private boolean isRemoteAccessActive = false;
-    private List<TutkGetNasLoader.TutkNasNode> naslist;
     private ForgetPwdDialog mForgetDialog;
+    private boolean isSignUp = false;
 
     private Context mContext;
 
@@ -75,7 +65,8 @@ public class RemoteAccessActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = this;
-        setContentView(R.layout.activity_remote_access);
+        setContentView(R.layout.activity_login_by_email);
+        init();
         initToolbar();
         initProgressView();
         initView();
@@ -86,13 +77,12 @@ public class RemoteAccessActivity extends AppCompatActivity implements
             arg.putString("server", NASPref.getCloudServer(mContext));
             arg.putString("email", email);
             arg.putString("password", pwd);
-            getLoaderManager().restartLoader(LoaderID.TUTK_LOGIN, arg, RemoteAccessActivity.this).forceLoad();
+            getLoaderManager().restartLoader(LoaderID.TUTK_LOGIN, arg, LoginByEmailActivity.this).forceLoad();
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.nas_finder, menu);
         return true;
     }
 
@@ -100,25 +90,7 @@ public class RemoteAccessActivity extends AppCompatActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                if (!isInitFragment) {
-                    showInitView();
-                } else
-                    finish();
-                break;
-            case R.id.action_refresh_nas_finder:
-                String email = NASPref.getCloudUsername(mContext);
-                String pwd = NASPref.getCloudPassword(mContext);
-                if (isRemoteAccessRegister && !email.equals("") && !pwd.equals("")) {
-                    isRemoteAccessRegister = true;
-                    isRemoteAccessActive = false;
-                    Bundle arg = new Bundle();
-                    arg.putString("server", NASPref.getCloudServer(mContext));
-                    arg.putString("email", email);
-                    arg.putString("password", pwd);
-                    getLoaderManager().restartLoader(LoaderID.TUTK_LOGIN, arg, RemoteAccessActivity.this).forceLoad();
-                } else {
-                    Toast.makeText(this, getString(R.string.remote_access_no_login), Toast.LENGTH_SHORT).show();
-                }
+                startLoginActivity();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -126,20 +98,11 @@ public class RemoteAccessActivity extends AppCompatActivity implements
 
     @Override
     public void onBackPressed() {
-        if (mForgetDialog != null) {
-            getLoaderManager().destroyLoader(LoaderID.TUTK_FORGET_PASSWORD);
-            mForgetDialog.dismiss();
-            mForgetDialog = null;
-        }
-
         if (mProgressView.isShown()) {
             getLoaderManager().destroyLoader(mLoaderID);
             mProgressView.setVisibility(View.INVISIBLE);
         } else {
-            if (!isInitFragment) {
-                showInitView();
-            } else
-                super.onBackPressed();
+            startLoginActivity();
         }
     }
 
@@ -269,33 +232,29 @@ public class RemoteAccessActivity extends AppCompatActivity implements
         if (!token.equals("")) {
             //token not null mean login success
             isRemoteAccessRegister = true;
-            isRemoteAccessActive = true;
             NASPref.setCloudUsername(mContext, email);
             NASPref.setCloudPassword(mContext, pwd);
             NASPref.setCloudAuthToken(mContext, loader.getAuthToke());
             Bundle arg = new Bundle();
             arg.putString("server", loader.getServer());
             arg.putString("token", loader.getAuthToke());
-            getLoaderManager().restartLoader(LoaderID.TUTK_NAS_GET, arg, RemoteAccessActivity.this).forceLoad();
+            getLoaderManager().restartLoader(LoaderID.TUTK_NAS_GET, arg, LoginByEmailActivity.this).forceLoad();
         } else {
             mProgressView.setVisibility(View.INVISIBLE);
             if (code.equals(TutkCodeID.NOT_VERIFIED)) {
                 //account not verified
                 isRemoteAccessRegister = true;
-                isRemoteAccessActive = false;
                 NASPref.setCloudAccountStatus(mContext, NASPref.Status.Padding.ordinal());
                 NASPref.setCloudUsername(mContext, email);
                 NASPref.setCloudPassword(mContext, pwd);
+                updateView();
             } else {
                 isRemoteAccessRegister = false;
-                isRemoteAccessActive = false;
                 if (!code.equals(""))
                     Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
                 else
                     Toast.makeText(this, getString(R.string.error_format), Toast.LENGTH_SHORT).show();
             }
-
-            updateView();
         }
     }
 
@@ -307,7 +266,7 @@ public class RemoteAccessActivity extends AppCompatActivity implements
             Bundle arg = new Bundle();
             arg.putString("server", loader.getServer());
             arg.putString("token", loader.getAuthToken());
-            getLoaderManager().restartLoader(LoaderID.TUTK_NAS_GET, arg, RemoteAccessActivity.this).forceLoad();
+            getLoaderManager().restartLoader(LoaderID.TUTK_NAS_GET, arg, LoginByEmailActivity.this).forceLoad();
         } else {
             Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
         }
@@ -319,27 +278,17 @@ public class RemoteAccessActivity extends AppCompatActivity implements
         NASPref.setCloudAccountStatus(mContext, NASPref.Status.Active.ordinal());
 
         if (code.equals("")) {
-            naslist = loader.getNasList();
-            //check nas uuid and record it
-            Server mServer = ServerManager.INSTANCE.getCurrentServer();
-            String uuid = mServer.getTutkUUID();
-            if (uuid == null) {
-                uuid = NASPref.getUUID(mContext);
-            }
-
-            for (TutkGetNasLoader.TutkNasNode nas : naslist) {
-                if (nas.nasUUID.equals(uuid)) {
-                    NASPref.setCloudUUID(mContext, uuid);
-                    NASPref.setCloudAccountStatus(mContext, NASPref.Status.Bind.ordinal());
-                    break;
-                }
-            }
-
-            updateView();
+            NASPref.setInitial(this, true);
+            Intent intent = new Intent();
+            intent.setClass(LoginByEmailActivity.this, NASListActivity.class);
+            intent.putExtra("NASList", loader.getNasArrayList());
+            intent.putExtra("RemoteAccess", true);
+            startActivity(intent);
+            finish();
         } else {
             Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
+            mProgressView.setVisibility(View.INVISIBLE);
         }
-        mProgressView.setVisibility(View.INVISIBLE);
     }
 
     private void checkResendActivateResult(TutkResendActivateLoader loader) {
@@ -349,7 +298,6 @@ public class RemoteAccessActivity extends AppCompatActivity implements
             Toast.makeText(this, status, Toast.LENGTH_SHORT).show();
         else if (code.equals(TutkCodeID.VERIFICATIONEXPIRED)) {
             isRemoteAccessRegister = false;
-            isRemoteAccessActive = false;
             updateView();
         } else
             Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
@@ -370,10 +318,9 @@ public class RemoteAccessActivity extends AppCompatActivity implements
                     String[] scenarios = mContext.getResources().getStringArray(R.array.backup_scenario_values);
                     NASPref.setBackupScenario(mContext, scenarios[1]);
                     isRemoteAccessRegister = false;
-                    isRemoteAccessActive = false;
                     updateView();
                 } else
-                    getLoaderManager().restartLoader(loaderID, args, RemoteAccessActivity.this).forceLoad();
+                    getLoaderManager().restartLoader(loaderID, args, LoginByEmailActivity.this).forceLoad();
             }
 
             @Override
@@ -383,10 +330,16 @@ public class RemoteAccessActivity extends AppCompatActivity implements
         };
     }
 
-
     /**
      * INITIALIZATION
      */
+    private void init() {
+        Intent intent = getIntent();
+        if (intent != null) {
+            isSignUp = intent.getBooleanExtra("SignUp", false);
+        }
+    }
+
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.settings_toolbar);
         toolbar.setTitle("");
@@ -402,41 +355,21 @@ public class RemoteAccessActivity extends AppCompatActivity implements
     }
 
     private void initView() {
-        initLayout = (LinearLayout) findViewById(R.id.remote_access_init_layout);
-        registerLayout = (LinearLayout) findViewById(R.id.remote_access_register_layout);
-        loginLayout = (LinearLayout) findViewById(R.id.remote_access_login_layout);
+        registerLayout = (RelativeLayout) findViewById(R.id.remote_access_register_layout);
+        loginLayout = (RelativeLayout) findViewById(R.id.remote_access_login_layout);
         normalLayout = (RelativeLayout) findViewById(R.id.remote_access_normal_layout);
         int status = NASPref.getCloudAccountStatus(this);
-        if(status == NASPref.Status.Padding.ordinal()){
+        if (status == NASPref.Status.Padding.ordinal()) {
             isRemoteAccessRegister = true;
-            isRemoteAccessActive = false;
-        }
-        else if(status == NASPref.Status.Active.ordinal() || status == NASPref.Status.Bind.ordinal()){
+        } else if (status == NASPref.Status.Active.ordinal() || status == NASPref.Status.Bind.ordinal()) {
             isRemoteAccessRegister = true;
-            isRemoteAccessActive = true;
-        }
-        else{
+        } else {
             isRemoteAccessRegister = false;
-            isRemoteAccessActive = false;
         }
         updateView();
     }
 
-    private void showInitView(){
-        initLayout.setVisibility(View.VISIBLE);
-        registerLayout.setVisibility(View.GONE);
-        loginLayout.setVisibility(View.GONE);
-        normalLayout.setVisibility(View.GONE);
-        mTitle.setText(getString(R.string.remote_access));
-        Button btLogin = (Button) findViewById(R.id.remote_access_init_login);
-        btLogin.setOnClickListener(this);
-        Button btRegister = (Button) findViewById(R.id.remote_access_init_register);
-        btRegister.setOnClickListener(this);
-        isInitFragment = true;
-    }
-
-    private void showLoginView(){
-        initLayout.setVisibility(View.GONE);
+    private void showLoginView() {
         registerLayout.setVisibility(View.GONE);
         loginLayout.setVisibility(View.VISIBLE);
         normalLayout.setVisibility(View.GONE);
@@ -449,11 +382,13 @@ public class RemoteAccessActivity extends AppCompatActivity implements
         btLogin.setOnClickListener(this);
         TextView tvForget = (TextView) findViewById(R.id.remote_access_login_forget);
         tvForget.setOnClickListener(this);
-        isInitFragment = false;
+        StyleFactory.set_blue_text_touch_effect(this, tvForget);
+        TextView tvSignUp = (TextView) findViewById(R.id.remote_access_login_sign_up);
+        tvSignUp.setOnClickListener(this);
+        StyleFactory.set_blue_text_touch_effect(this, tvSignUp);
     }
 
-    private void showRegisterView(){
-        initLayout.setVisibility(View.GONE);
+    private void showRegisterView() {
         registerLayout.setVisibility(View.VISIBLE);
         loginLayout.setVisibility(View.GONE);
         normalLayout.setVisibility(View.GONE);
@@ -466,11 +401,12 @@ public class RemoteAccessActivity extends AppCompatActivity implements
         tlPwdConfirm.getEditText().setText("");
         Button btSubmit = (Button) findViewById(R.id.remote_access_register_submit);
         btSubmit.setOnClickListener(this);
-        isInitFragment = false;
+        TextView tvSignIn = (TextView) findViewById(R.id.remote_access_login_sign_in);
+        tvSignIn.setOnClickListener(this);
+        StyleFactory.set_blue_text_touch_effect(this, tvSignIn);
     }
 
-    private void showNormalView(){
-        initLayout.setVisibility(View.GONE);
+    private void showNormalView() {
         registerLayout.setVisibility(View.GONE);
         loginLayout.setVisibility(View.GONE);
         normalLayout.setVisibility(View.VISIBLE);
@@ -478,73 +414,31 @@ public class RemoteAccessActivity extends AppCompatActivity implements
 
         TextView tvEmail = (TextView) findViewById(R.id.remote_access_email);
         tvEmail.setText(NASPref.getCloudUsername(mContext));
-        Button btResend = (Button) findViewById(R.id.remote_access_resend_button);
-        btResend.setOnClickListener(this);
-        Button btBind = (Button) findViewById(R.id.remote_access_bind_button);
-        btBind.setOnClickListener(this);
+        Button btContinue = (Button) findViewById(R.id.remote_access_continue_button);
+        btContinue.setOnClickListener(this);
+        TextView tvResend = (TextView) findViewById(R.id.remote_access_resend_text);
+        tvResend.setOnClickListener(this);
+        StyleFactory.set_blue_text_touch_effect(this, tvResend);
         Button btDelete = (Button) findViewById(R.id.remote_access_delete_button);
         btDelete.setOnClickListener(this);
-        ListView lvList = (ListView) findViewById(R.id.remote_access_list);
-        TextView tvStatus = (TextView) findViewById(R.id.remote_access_status);
-
-        if (isRemoteAccessActive) {
-            btResend.setVisibility(View.GONE);
-
-            int status = NASPref.getCloudAccountStatus(mContext);
-            boolean isBind = status == NASPref.Status.Bind.ordinal();
-            if(isBind) {
-                tvStatus.setText(getString(R.string.remote_access_success_info));
-                btBind.setVisibility(View.GONE);
-            }
-            else {
-                tvStatus.setText(getString(R.string.remote_access_bind_info));
-                btBind.setVisibility(View.VISIBLE);
-            }
-
-            if (naslist != null) {
-                Server mServer = ServerManager.INSTANCE.getCurrentServer();
-                String uuid = mServer.getTutkUUID();
-                if(uuid == null)
-                    uuid = NASPref.getUUID(this);
-                String serialNum = NASPref.getSerialNum(this);
-                Log.d(TAG, "Current user: " + mServer.getUsername());
-                Log.d(TAG, "Current UUID: " + uuid);
-                Log.d(TAG, "Current SerialNum: " + serialNum);
-                String ID_TITLE = "TITLE", ID_SUBTITLE = "SUBTITLE";
-                ArrayList<HashMap<String, String>> myListData = new ArrayList<HashMap<String, String>>();
-
-                for (TutkGetNasLoader.TutkNasNode node : naslist) {
-                    HashMap<String, String> item = new HashMap<String, String>();
-                    item.put(ID_TITLE, node.nasName);
-                    item.put(ID_SUBTITLE, node.nasUUID);
-                    if (node.nasUUID.equals(uuid))
-                        myListData.add(0, item);
-                    else
-                        myListData.add(item);
-                }
-
-                lvList.setAdapter(new SimpleAdapter(mContext,
-                                myListData,
-                                android.R.layout.simple_list_item_2,
-                                new String[]{ID_TITLE, ID_SUBTITLE},
-                                new int[]{android.R.id.text1, android.R.id.text2})
-                );
-            }
-        } else {
-            tvStatus.setText(getString(R.string.remote_access_send_activate_info));
-            btResend.setVisibility(View.VISIBLE);
-            btBind.setVisibility(View.GONE);
-        }
-
-        isInitFragment = true;
     }
 
     private void updateView() {
         if (isRemoteAccessRegister) {
             showNormalView();
         } else {
-            showInitView();
+            if (isSignUp)
+                showRegisterView();
+            else
+                showLoginView();
         }
+    }
+
+    private void startLoginActivity() {
+        Intent intent = new Intent();
+        intent.setClass(LoginByEmailActivity.this, LoginActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     @Override
@@ -555,34 +449,27 @@ public class RemoteAccessActivity extends AppCompatActivity implements
         Bundle arg;
 
         switch (v.getId()) {
-            case R.id.remote_access_init_login:
-                showLoginView();
-                break;
-            case R.id.remote_access_init_register:
+            case R.id.remote_access_login_sign_up:
                 showRegisterView();
                 break;
-            case R.id.remote_access_resend_button:
+            case R.id.remote_access_login_sign_in:
+                showLoginView();
+                break;
+            case R.id.remote_access_resend_text:
                 arg = new Bundle();
                 arg.putString("server", NASPref.getCloudServer(mContext));
                 arg.putString("email", NASPref.getCloudUsername(mContext));
                 showNotificationDialog(getString(R.string.remote_access_send_activate_warning), LoaderID.TUTK_NAS_RESEND_ACTIVATE, arg);
                 break;
-            case R.id.remote_access_bind_button:
-                arg = new Bundle();
-                arg.putString("server", NASPref.getCloudServer(mContext));
-                arg.putString("token", NASPref.getCloudAuthToken(mContext));
-                Server server = ServerManager.INSTANCE.getCurrentServer();
-                String nasName = server.getServerInfo().hostName;
-                String serialNum = NASPref.getSerialNum(this);
-                if (serialNum != null && !serialNum.equals(""))
-                    nasName = nasName + NASApp.TUTK_NAME_TAG + serialNum;
-                arg.putString("nasName", nasName);
-                String uuid = server.getTutkUUID();
-                if (uuid == null)
-                    uuid = NASPref.getUUID(this);
-                if (uuid != null && !uuid.equals("")) {
-                    arg.putString("nasUUID", uuid);
-                    getLoaderManager().restartLoader(LoaderID.TUTK_NAS_CREATE, arg, RemoteAccessActivity.this).forceLoad();
+            case R.id.remote_access_continue_button:
+                email = NASPref.getCloudUsername(mContext);
+                pwd = NASPref.getCloudPassword(mContext);
+                if (isRemoteAccessRegister && !email.equals("") && !pwd.equals("")) {
+                    arg = new Bundle();
+                    arg.putString("server", NASPref.getCloudServer(mContext));
+                    arg.putString("email", email);
+                    arg.putString("password", pwd);
+                    getLoaderManager().restartLoader(LoaderID.TUTK_LOGIN, arg, LoginByEmailActivity.this).forceLoad();
                 }
                 break;
             case R.id.remote_access_delete_button:
@@ -606,7 +493,7 @@ public class RemoteAccessActivity extends AppCompatActivity implements
                 arg.putString("server", NASPref.getCloudServer(mContext));
                 arg.putString("email", email);
                 arg.putString("password", pwd);
-                getLoaderManager().restartLoader(LoaderID.TUTK_LOGIN, arg, RemoteAccessActivity.this).forceLoad();
+                getLoaderManager().restartLoader(LoaderID.TUTK_LOGIN, arg, LoginByEmailActivity.this).forceLoad();
                 break;
             case R.id.remote_access_register_submit:
                 email = tlEmail.getEditText().getText().toString();
@@ -636,17 +523,7 @@ public class RemoteAccessActivity extends AppCompatActivity implements
                 arg.putString("server", NASPref.getCloudServer(mContext));
                 arg.putString("email", email);
                 arg.putString("password", pwd);
-                Server mServer = ServerManager.INSTANCE.getCurrentServer();
-                String name = mServer.getServerInfo().hostName;
-                String serial = NASPref.getSerialNum(this);
-                if (serial != null && !serial.equals(""))
-                    name = name + NASApp.TUTK_NAME_TAG + serial;
-                arg.putString("nasName", name);
-                String id = mServer.getTutkUUID();
-                if (id == null)
-                    id = NASPref.getUUID(this);
-                arg.putString("nasUUID", id);
-                getLoaderManager().restartLoader(LoaderID.TUTK_REGISTER, arg, RemoteAccessActivity.this).forceLoad();
+                getLoaderManager().restartLoader(LoaderID.TUTK_REGISTER, arg, LoginByEmailActivity.this).forceLoad();
                 break;
             case R.id.remote_access_login_forget:
                 arg = new Bundle();
@@ -656,7 +533,7 @@ public class RemoteAccessActivity extends AppCompatActivity implements
                     @Override
                     public void onConfirm(Bundle args) {
                         args.putString("server", NASPref.getCloudServer(mContext));
-                        getLoaderManager().restartLoader(LoaderID.TUTK_FORGET_PASSWORD, args, RemoteAccessActivity.this).forceLoad();
+                        getLoaderManager().restartLoader(LoaderID.TUTK_FORGET_PASSWORD, args, LoginByEmailActivity.this).forceLoad();
                     }
 
                     @Override

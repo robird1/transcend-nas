@@ -80,6 +80,13 @@
 
     <!-- String v2 -->
     <string name="login_not">Not Login</string>
+    <string name="already_have_account">Already have an account?</string>
+    <string name="not_have_account">Don\'t have an account?</string>
+    <string name="not_receive_active">Don\'t receiver activation?</string>
+    <string name="sign_up_by_email">Sign up with email</string>
+    <string name="sign_up_by_facebook">Sign in with Facebook</string>
+    <string name="or">OR</string>
+    <string name="status">Status</string>
 
     <!-- string -->
 
@@ -116,8 +123,8 @@
     <string name="last_modified">Last modified</string>
     <string name="loading">Loading</string>
     <string name="location">Location</string>
-    <string name="login">Login</string>
-    <string name="logout">Logout</string>
+    <string name="login">Sign in</string>
+    <string name="logout">Sign out</string>
     <string name="more">More</string>
     <string name="move">Move</string>
     <string name="music">Music</string>
@@ -134,7 +141,7 @@
     <string name="bind">Set Up</string>
     <string name="find_nas">Find StoreJet Cloud</string>
     <string name="new_user">New User</string>
-    <string name="register">Register</string>
+    <string name="register">Sign up</string>
     <string name="photo">Photo</string>
     <string name="refresh">Refresh</string>
     <string name="rename">Rename</string>
@@ -270,6 +277,7 @@
     <string name="pref_mac">MAC ADDRESS</string>
     <string name="pref_hash_verified_time">HASH VERIFIED TIME</string>
     <string name="pref_initial">INITIAL SETUP</string>
+    <string name="pref_introduce">INTRODUCE SETUP</string>
 
     <string name="pref_local_hostname">LOCAL HOSTNAME</string>
 

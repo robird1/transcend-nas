@@ -5,7 +5,6 @@ import android.content.Loader;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,7 +21,7 @@ import android.widget.Toast;
 
 import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
-import com.transcend.nas.utils.FileFactory;
+import com.transcend.nas.common.FileFactory;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

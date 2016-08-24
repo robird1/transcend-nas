@@ -1,24 +1,10 @@
-package com.transcend.nas;
+package com.transcend.nas.common;
 
 import android.app.Activity;
-import android.content.Context;
-import android.media.MediaMetadataRetriever;
-import android.media.MediaPlayer;
-import android.util.Log;
 
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
-import com.realtek.nasfun.api.Server;
-import com.realtek.nasfun.api.ServerManager;
-import com.transcend.nas.management.FileInfo;
-import com.tutk.IOTC.P2PService;
-
-import java.io.File;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.transcend.nas.NASApp;
 
 /**
  * Created by ike_lee on 2016/8/18.

@@ -1,8 +1,6 @@
 package com.transcend.nas.settings;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
@@ -16,23 +14,14 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
-import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
-import android.widget.SimpleAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -43,26 +32,16 @@ import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
-import com.transcend.nas.common.NotificationDialog;
 import com.transcend.nas.common.TutkCodeID;
-import com.transcend.nas.connection.BindDialog;
-import com.transcend.nas.connection.ForgetPwdDialog;
-import com.transcend.nas.connection.LoginLoader;
 import com.transcend.nas.management.AutoBackupLoader;
 import com.transcend.nas.management.FileActionLocateActivity;
 import com.transcend.nas.management.SmbFolderCreateLoader;
-import com.transcend.nas.management.TutkCreateNasLoader;
-import com.transcend.nas.management.TutkForgetPasswordLoader;
 import com.transcend.nas.management.TutkGetNasLoader;
 import com.transcend.nas.management.TutkLoginLoader;
-import com.transcend.nas.management.TutkRegisterLoader;
-import com.transcend.nas.management.TutkResendActivateLoader;
 import com.transcend.nas.service.AutoBackupService;
-import com.transcend.nas.utils.FileFactory;
+import com.transcend.nas.common.FileFactory;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 /**

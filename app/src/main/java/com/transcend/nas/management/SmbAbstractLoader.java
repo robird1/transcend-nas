@@ -6,7 +6,6 @@ import android.app.PendingIntent;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SyncAdapterType;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.v7.app.NotificationCompat;
@@ -16,7 +15,7 @@ import com.realtek.nasfun.api.SambaStatus;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.R;
-import com.transcend.nas.utils.FileFactory;
+import com.transcend.nas.common.FileFactory;
 import com.transcend.nas.utils.MathUtil;
 import com.tutk.IOTC.P2PService;
 

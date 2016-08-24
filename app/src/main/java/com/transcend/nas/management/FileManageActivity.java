@@ -1,8 +1,6 @@
 package com.transcend.nas.management;
 
-import android.app.ActivityManager;
 import android.app.LoaderManager;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
@@ -54,11 +52,12 @@ import com.google.android.libraries.cast.companionlibrary.cast.exceptions.Transi
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
-import com.transcend.nas.AnalysisFactory;
-import com.transcend.nas.InitialActivity;
-import com.transcend.nas.common.NotificationDialog;
-import com.transcend.nas.common.ProgressDialog;
-import com.transcend.nas.connection.SignInActivity;
+import com.transcend.nas.common.AnalysisFactory;
+import com.transcend.nas.common.ManageFactory;
+import com.transcend.nas.GuideActivity;
+import com.transcend.nas.view.NotificationDialog;
+import com.transcend.nas.view.ProgressDialog;
+import com.transcend.nas.connection.AppSignInActivity;
 import com.transcend.nas.service.AutoBackupService;
 import com.transcend.nas.settings.AboutActivity;
 import com.transcend.nas.NASApp;
@@ -67,18 +66,15 @@ import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.settings.DiskFactory;
 import com.transcend.nas.settings.DiskInfoActivity;
-import com.transcend.nas.settings.NewSettingsActivity;
 import com.transcend.nas.settings.SettingsActivity;
-import com.transcend.nas.utils.FileFactory;
-import com.transcend.nas.utils.MediaFactory;
+import com.transcend.nas.common.FileFactory;
+import com.transcend.nas.common.MediaFactory;
 import com.transcend.nas.viewer.music.MusicActivity;
 import com.transcend.nas.viewer.music.MusicService;
 import com.transcend.nas.viewer.photo.ViewerActivity;
 import com.tutk.IOTC.P2PService;
 import com.tutk.IOTC.P2PTunnelAPIs;
 import com.tutk.IOTC.sP2PTunnelSessionInfo;
-
-import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -176,19 +172,6 @@ public class FileManageActivity extends AppCompatActivity implements
             else
                 startInitialActivity();
         }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Log.w(TAG, "onStart");
-        //doRefresh();
-    }
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        Log.w(TAG, "onRestart");
     }
 
     @Override
@@ -357,7 +340,7 @@ public class FileManageActivity extends AppCompatActivity implements
         isAutoBackupServiceInit = true;
         boolean checked = NASPref.getBackupSetting(this);
         Intent intent = new Intent(this, AutoBackupService.class);
-        boolean isRunning = isMyServiceRunning(AutoBackupService.class);
+        boolean isRunning = ManageFactory.isServiceRunning(this, AutoBackupService.class);
         if (checked) {
             if (!isRunning) {
                 Bundle args = new Bundle();
@@ -366,16 +349,6 @@ public class FileManageActivity extends AppCompatActivity implements
             }
         } else
             stopService(intent);
-        return false;
-    }
-
-    private boolean isMyServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
         return false;
     }
 
@@ -773,21 +746,11 @@ public class FileManageActivity extends AppCompatActivity implements
             mProgressView.setVisibility(View.INVISIBLE);
             return;
         }
-        if (!isOnTop()) {
+        if (!ManageFactory.isTopDirectory(mMode, mRoot, mPath)) {
             String parent = new File(mPath).getParent();
             doLoad(parent);
         } else {
             mDrawer.openDrawer(GravityCompat.START);
-        }
-    }
-
-    private boolean isOnTop() {
-        if (NASApp.MODE_SMB.equals(mMode)) {
-            return mPath.equals(mRoot);
-        } else {
-            File root = new File(mRoot);
-            File file = new File(mPath);
-            return file.equals(root);
         }
     }
 
@@ -1494,8 +1457,16 @@ public class FileManageActivity extends AppCompatActivity implements
 
     private void toggleEditorModeAction(int count) {
         boolean visible = (count == 1);
+        boolean containFolder = false;
+        if(visible){
+            ArrayList<FileInfo> files = getSelectedFiles();
+            for (FileInfo file : files) {
+                if (file.type.equals(FileInfo.TYPE.DIR))
+                    containFolder = true;
+            }
+        }
         mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_rename).setVisible(visible);
-        mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_share).setVisible(visible);
+        mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_share).setVisible(!containFolder & visible);
         mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_new_folder).setVisible(count == 0);
     }
 
@@ -1704,7 +1675,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
     private void startInitialActivity() {
         Intent intent = new Intent();
-        intent.setClass(FileManageActivity.this, InitialActivity.class);
+        intent.setClass(FileManageActivity.this, GuideActivity.class);
         startActivity(intent);
         finish();
     }
@@ -1713,14 +1684,14 @@ public class FileManageActivity extends AppCompatActivity implements
         boolean isRunning = false;
 
         //stop auto backup service
-        isRunning = isMyServiceRunning(AutoBackupService.class);
+        isRunning = ManageFactory.isServiceRunning(this, AutoBackupService.class);
         if (isRunning) {
             Intent intent = new Intent(FileManageActivity.this, AutoBackupService.class);
             stopService(intent);
         }
 
         //stop music service
-        isRunning = isMyServiceRunning(MusicService.class);
+        isRunning = ManageFactory.isServiceRunning(this, MusicService.class);
         if (isRunning) {
             Intent intent = new Intent(FileManageActivity.this, MusicService.class);
             stopService(intent);
@@ -1748,7 +1719,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
         //show SignIn activity
         Intent intent = new Intent();
-        intent.setClass(FileManageActivity.this, SignInActivity.class);
+        intent.setClass(FileManageActivity.this, AppSignInActivity.class);
         startActivity(intent);
         finish();
     }

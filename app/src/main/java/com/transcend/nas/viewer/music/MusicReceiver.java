@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import com.transcend.nas.utils.FileFactory;
+import com.transcend.nas.common.FileFactory;
 
 /**
  * Created by ike_lee on 2016/7/11.

@@ -3,10 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.transcend.nas.WelcomeActivity">
+    tools:context="com.transcend.nas.connection.AutoLinkActivity">
 
     <ImageView
-        android:id="@+id/welcome_string"
+        android:id="@+id/welcome_image"
         android:layout_width="wrap_content"
         android:layout_height="160dp"
         android:layout_centerInParent="true"
@@ -16,7 +16,7 @@
         android:id="@+id/welcome_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/welcome_string"
+        android:layout_below="@+id/welcome_image"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="-10dp"
         android:textColor="@android:color/darker_gray" />

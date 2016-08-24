@@ -1,4 +1,4 @@
-package com.transcend.nas.common;
+package com.transcend.nas.view;
 
 import android.annotation.TargetApi;
 import android.content.Context;

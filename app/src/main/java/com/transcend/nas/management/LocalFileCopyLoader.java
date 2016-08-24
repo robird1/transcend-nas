@@ -12,7 +12,7 @@ import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import com.transcend.nas.R;
-import com.transcend.nas.utils.FileFactory;
+import com.transcend.nas.common.FileFactory;
 import com.transcend.nas.utils.MathUtil;
 
 import org.apache.commons.io.FileUtils;
@@ -23,11 +23,9 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import jcifs.smb.SmbException;
-import jcifs.smb.SmbFile;
 
 /**
  * Created by silverhsu on 16/2/16.

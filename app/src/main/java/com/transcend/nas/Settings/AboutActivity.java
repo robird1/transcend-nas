@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -24,9 +23,7 @@ import android.widget.Toast;
 
 import com.transcend.nas.BuildConfig;
 import com.transcend.nas.R;
-import com.transcend.nas.common.NotificationDialog;
-
-import org.w3c.dom.Text;
+import com.transcend.nas.view.NotificationDialog;
 
 import java.io.BufferedReader;
 import java.io.IOException;

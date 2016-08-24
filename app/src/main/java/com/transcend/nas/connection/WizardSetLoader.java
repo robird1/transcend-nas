@@ -6,16 +6,13 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.realtek.nasfun.api.HttpClientManager;
-import com.realtek.nasfun.api.ServerInfo;
 import com.transcend.nas.R;
 import com.tutk.IOTC.P2PService;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
@@ -33,15 +30,15 @@ import java.util.List;
 /**
  * Created by silverhsu on 16/1/5.
  */
-public class WizardInitLoader extends AsyncTaskLoader<Boolean> {
+public class WizardSetLoader extends AsyncTaskLoader<Boolean> {
 
-    private static final String TAG = WizardInitLoader.class.getSimpleName();
+    private static final String TAG = WizardSetLoader.class.getSimpleName();
     private String mUrl;
     private Bundle mArgs;
     private boolean mRemoteAccess = false;
     private String mError = null;
 
-    public WizardInitLoader(Context context, Bundle args, boolean isRemoteAccess) {
+    public WizardSetLoader(Context context, Bundle args, boolean isRemoteAccess) {
         super(context);
         mRemoteAccess = isRemoteAccess;
         mArgs = args;

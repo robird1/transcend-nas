@@ -5,7 +5,7 @@ import android.os.Build;
 import android.util.Log;
 
 import com.transcend.nas.R;
-import com.transcend.nas.utils.FileFactory;
+import com.transcend.nas.common.FileFactory;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -20,8 +20,6 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;

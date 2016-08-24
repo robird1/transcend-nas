@@ -18,7 +18,22 @@
         android:theme="@style/AppTheme">
 
         <activity
-            android:name=".WelcomeActivity"
+            android:name=".IntroduceActivity"
+            android:screenOrientation="portrait">
+        </activity>
+
+        <activity
+            android:name=".LoginActivity"
+            android:screenOrientation="portrait">
+        </activity>
+
+        <activity
+            android:name=".LoginByEmailActivity"
+            android:screenOrientation="portrait">
+        </activity>
+
+        <activity
+            android:name=".connection.AutoLinkActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,24 +42,24 @@
         </activity>
 
         <activity
-            android:name=".InitialActivity"
+            android:name=".GuideActivity"
             android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 
         <activity
-            android:name=".WizardActivity"
+            android:name=".connection.WizardActivity"
             android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 
         <activity
-            android:name=".connection.NASFinderActivity"
+            android:name=".connection.NASListActivity"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 
         <activity
-            android:name=".connection.SignInActivity"
+            android:name=".connection.AppSignInActivity"
             android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
@@ -61,6 +76,12 @@
             android:configChanges="orientation|keyboardHidden|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+                <data android:mimeType="video/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="image/*" />
                 <data android:mimeType="video/*" />

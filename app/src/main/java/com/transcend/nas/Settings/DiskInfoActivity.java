@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.Loader;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatSpinner;
@@ -27,16 +26,12 @@ import android.widget.Toast;
 
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.formatter.PercentFormatter;
-import com.google.android.gms.cast.CastMediaControlIntent;
 import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
-import com.transcend.nas.utils.FileFactory;
-
-import org.w3c.dom.Text;
+import com.transcend.nas.common.FileFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;

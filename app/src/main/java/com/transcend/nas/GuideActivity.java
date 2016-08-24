@@ -2,7 +2,6 @@ package com.transcend.nas;
 
 import android.app.Activity;
 import android.app.LoaderManager;
-import android.app.Notification;
 import android.content.Intent;
 import android.content.Loader;
 import android.graphics.Bitmap;
@@ -10,26 +9,24 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.transcend.nas.common.LoaderID;
-import com.transcend.nas.connection.NASFinderActivity;
+import com.transcend.nas.common.StyleFactory;
+import com.transcend.nas.connection.AppSignInActivity;
+import com.transcend.nas.connection.NASListActivity;
 import com.transcend.nas.connection.NASListLoader;
-import com.transcend.nas.connection.SignInActivity;
-import com.transcend.nas.utils.StyleFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class InitialActivity extends Activity implements LoaderManager.LoaderCallbacks<Boolean>, View.OnClickListener {
+public class GuideActivity extends Activity implements LoaderManager.LoaderCallbacks<Boolean>, View.OnClickListener {
 
-    private static final String TAG = InitialActivity.class.getSimpleName();
+    private static final String TAG = GuideActivity.class.getSimpleName();
     private TextView mTitle;
     private Button mStart;
     private Button mRemoteAccess;
@@ -114,7 +111,7 @@ public class InitialActivity extends Activity implements LoaderManager.LoaderCal
 
     private void startNASFinderActivity(ArrayList<HashMap<String, String>> list) {
         Intent intent = new Intent();
-        intent.setClass(InitialActivity.this, NASFinderActivity.class);
+        intent.setClass(GuideActivity.this, NASListActivity.class);
         intent.putExtra("NASList", list);
         intent.putExtra("RemoteAccess", false);
         intent.putExtra("Wizard", true);
@@ -124,7 +121,7 @@ public class InitialActivity extends Activity implements LoaderManager.LoaderCal
 
     private void startSignInActivity() {
         Intent intent = new Intent();
-        intent.setClass(InitialActivity.this, SignInActivity.class);
+        intent.setClass(GuideActivity.this, AppSignInActivity.class);
         intent.putExtra("Wizard", true);
         startActivity(intent);
         finish();

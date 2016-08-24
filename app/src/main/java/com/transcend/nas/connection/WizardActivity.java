@@ -1,23 +1,19 @@
-package com.transcend.nas;
+package com.transcend.nas.connection;
 
 import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.Point;
-import android.graphics.drawable.BitmapDrawable;
-import android.media.Image;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -27,27 +23,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.realtek.nasfun.api.Server;
-import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.NASPref;
+import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
-import com.transcend.nas.connection.AutoLinkLoader;
-import com.transcend.nas.connection.LoginLoader;
-import com.transcend.nas.connection.NASFinderActivity;
-import com.transcend.nas.connection.NASListLoader;
-import com.transcend.nas.connection.SignInActivity;
-import com.transcend.nas.connection.WizardInitLoader;
 import com.transcend.nas.management.FileManageActivity;
-import com.transcend.nas.management.TutkForgetPasswordLoader;
-import com.transcend.nas.management.TutkGetNasLoader;
-import com.transcend.nas.management.TutkLinkNasLoader;
-import com.transcend.nas.management.TutkLoginLoader;
-import com.transcend.nas.management.TutkLogoutLoader;
-import com.transcend.nas.utils.StyleFactory;
+import com.transcend.nas.common.StyleFactory;
 
-import org.w3c.dom.Text;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.TimeZone;
 
 public class WizardActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Boolean>, View.OnClickListener {
@@ -149,7 +130,7 @@ public class WizardActivity extends AppCompatActivity implements LoaderManager.L
         mProgressView.setVisibility(View.VISIBLE);
         switch (mLoaderID = id) {
             case LoaderID.WIZARD_INIT:
-                return new WizardInitLoader(this, args, isRemoteAccess);
+                return new WizardSetLoader(this, args, isRemoteAccess);
             case LoaderID.LOGIN:
                 return new LoginLoader(this, args, true);
         }
@@ -158,10 +139,10 @@ public class WizardActivity extends AppCompatActivity implements LoaderManager.L
 
     @Override
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
-        if (loader instanceof WizardInitLoader) {
+        if (loader instanceof WizardSetLoader) {
             if (!success) {
                 mProgressView.setVisibility(View.INVISIBLE);
-                String error = ((WizardInitLoader) loader).getErrorResult();
+                String error = ((WizardSetLoader) loader).getErrorResult();
                 Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
                 if (error.equals(getString(R.string.network_error))) {
                     return;
@@ -172,7 +153,7 @@ public class WizardActivity extends AppCompatActivity implements LoaderManager.L
             }
 
             mProgressView.setVisibility(View.INVISIBLE);
-            mBundle = ((WizardInitLoader) loader).getBundleArgs();
+            mBundle = ((WizardSetLoader) loader).getBundleArgs();
             changeView(true);
         } else if (loader instanceof LoginLoader) {
             if (!success) {
@@ -241,11 +222,6 @@ public class WizardActivity extends AppCompatActivity implements LoaderManager.L
                     WizardActivity.this.setResult(RESULT_OK, intent);
                 }
                 finish();
-
-                //do login
-                //Bundle args = ((WizardInitLoader) loader).getBundleArgs();
-                //args.putString("username", "admin");
-                //getLoaderManager().restartLoader(LoaderID.LOGIN, args, this).forceLoad();
                 break;
             default:
                 break;

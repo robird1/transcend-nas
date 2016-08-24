@@ -1,4 +1,4 @@
-package com.transcend.nas.utils;
+package com.transcend.nas.common;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -12,6 +12,8 @@ import com.google.android.gms.cast.MediaMetadata;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
+import com.transcend.nas.common.FileFactory;
+import com.transcend.nas.utils.MimeUtil;
 import com.transcend.nas.viewer.player.PlayerActivity;
 import com.tutk.IOTC.P2PService;
 

@@ -1,15 +1,13 @@
 package com.transcend.nas.viewer.music;
 
-import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.util.Log;
 
-import com.transcend.nas.utils.MediaFactory;
+import com.transcend.nas.common.MediaFactory;
 
 /**
  * Created by ikelee on 16/7/4.

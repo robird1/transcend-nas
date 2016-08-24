@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.transcend.nas.connection.NASFinderActivity">
+    tools:context="com.transcend.nas.connection.NASListActivity">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/nas_finder_app_bar"

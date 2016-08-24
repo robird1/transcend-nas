@@ -1,27 +1,28 @@
-package com.transcend.nas.common;
+package com.transcend.nas.view;
 
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 
 import com.transcend.nas.R;
 
 /**
  * Created by ikelee on 16/4/1.
  */
-public abstract class NotificationDialog implements View.OnClickListener {
+public abstract class ProgressDialog implements View.OnClickListener {
 
-    private static final String TAG = NotificationDialog.class.getSimpleName();
+    private static final String TAG = ProgressDialog.class.getSimpleName();
 
     public abstract void onConfirm();
     public abstract void onCancel();
     public static String DIALOG_TITLE = "title";
     public static String DIALOG_MESSAGE = "message";
-    public static String DIALOG_LAYOUT = "layout";
 
     private AppCompatActivity mActivity;
     private AlertDialog mDialog;
@@ -29,26 +30,24 @@ public abstract class NotificationDialog implements View.OnClickListener {
     private Button mDlgBtnNeg;
     private String mTitle;
     private String mMessage;
-    private int mLayoutID = 0;
+    private RelativeLayout mProgressView;
+    private int mLayoutID = R.layout.dialog_progress;
 
-    public NotificationDialog(Context context, Bundle args) {
+    public ProgressDialog(Context context, Bundle args) {
         this(context, args, true, true);
     }
 
-    public NotificationDialog(Context context, Bundle args, boolean showPositiveButton, boolean showNegativeButton) {
+    public ProgressDialog(Context context, Bundle args, boolean showPositiveButton, boolean showNegativeButton) {
         mActivity = (AppCompatActivity)context;
         mTitle = args.getString(DIALOG_TITLE);
         mMessage = args.getString(DIALOG_MESSAGE);
-        mLayoutID = args.getInt(DIALOG_LAYOUT);
         initDialog(showPositiveButton, showNegativeButton);
     }
 
     private void initDialog(boolean showPositiveButton, boolean showNegativeButton) {
         AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
         builder.setCancelable(true);
-
-        if(mLayoutID != 0)
-            builder.setView(mLayoutID);
+        builder.setView(mLayoutID);
 
         if(mTitle != null && !mTitle.equals(""))
             builder.setTitle(mTitle);
@@ -64,6 +63,17 @@ public abstract class NotificationDialog implements View.OnClickListener {
             builder.setPositiveButton(R.string.ok, null);
         }
 
+        builder.setOnKeyListener(new DialogInterface.OnKeyListener() {
+            @Override
+            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                if(event.equals(KeyEvent.KEYCODE_BACK)){
+                    onCancel();
+                    return true;
+                }
+                return false;
+            }
+        });
+
         mDialog = builder.show();
         mDlgBtnPos = mDialog.getButton(DialogInterface.BUTTON_POSITIVE);
         if(mDlgBtnPos != null)
@@ -71,19 +81,32 @@ public abstract class NotificationDialog implements View.OnClickListener {
         mDlgBtnNeg = mDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
         if(mDlgBtnNeg != null)
             mDlgBtnNeg.setOnClickListener(this);
+
+        mProgressView = (RelativeLayout) mDialog.findViewById(R.id.dialog_progress_view);
     }
 
     @Override
     public void onClick(View v) {
         if (v.equals(mDlgBtnPos)) {
-            mDialog.dismiss();
+            mDialog.setTitle(null);
+            mDialog.setMessage(null);
+            showProgress();
             onConfirm();
         }
 
         if (v.equals(mDlgBtnNeg)) {
+            hideProgress();
             mDialog.dismiss();
             onCancel();
         }
+    }
+
+    public void showProgress() {
+        mProgressView.setVisibility(View.VISIBLE);
+    }
+
+    public void hideProgress() {
+        mProgressView.setVisibility(View.INVISIBLE);
     }
 
     public void dismiss() {

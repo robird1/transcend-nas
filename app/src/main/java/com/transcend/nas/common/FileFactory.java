@@ -1,4 +1,4 @@
-package com.transcend.nas.utils;
+package com.transcend.nas.common;
 
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
