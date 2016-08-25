@@ -340,6 +340,24 @@ public class NASPref {
 
     /**
      *
+     * Backup source
+     *
+     */
+    public static String getBackupSource(Context context) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_backup_source);
+        String def = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath();
+        return PrefUtil.read(context, name, key, def);
+    }
+
+    public static void setBackupSource(Context context, String path) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_backup_source);
+        PrefUtil.write(context, name, key, path);
+    }
+
+    /**
+     *
      * Backup Error Task
      *
      */

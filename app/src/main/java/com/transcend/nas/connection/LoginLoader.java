@@ -1,5 +1,6 @@
 package com.transcend.nas.connection;
 
+import android.app.Activity;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.os.Bundle;
@@ -8,6 +9,7 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
+import com.transcend.nas.common.AnalysisFactory;
 import com.transcend.nas.common.FileFactory;
 import com.tutk.IOTC.P2PService;
 
@@ -20,9 +22,11 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
     private String mError;
     private Bundle mArgs;
     private boolean mReplace = true;
+    private Context mContext;
 
     public LoginLoader(Context context, Bundle args, boolean replaceServer) {
         super(context);
+        mContext = context;
         mArgs = args;
         mReplace = replaceServer;
         String hostname = args.getString("hostname");
@@ -51,6 +55,7 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
         }
         else{
             mError = mServer.getLoginError();
+            AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.LOGINREMOTE, mError);
         }
         return success;
     }
@@ -65,10 +70,12 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
         String p2pIp = P2PService.getInstance().getP2PIP();
         String hostname = mServer.getHostname();
         if(hostname.contains(p2pIp)) {
+            AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.LOGINREMOTE, true);
             NASPref.setCloudUUID(getContext(), P2PService.getInstance().getTUTKUUID());
             NASPref.setCloudMode(getContext(), true);
         }
         else {
+            AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.LOGINLOCAL, true);
             NASPref.setLocalHostname(getContext(), hostname);
             NASPref.setCloudMode(getContext(), false);
         }

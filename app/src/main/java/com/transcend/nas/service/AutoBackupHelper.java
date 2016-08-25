@@ -169,10 +169,9 @@ public class AutoBackupHelper {
                     fileList.add(item);
                 }
             } else {
-                if(!addVideo && fileInfo.type == FileInfo.TYPE.VIDEO) {
-                    continue;
-                }
-                else {
+                if(fileInfo.type == FileInfo.TYPE.PHOTO) {
+                    fileList.add(fileInfo.path);
+                } else if(fileInfo.type == FileInfo.TYPE.VIDEO && addVideo) {
                     fileList.add(fileInfo.path);
                 }
             }

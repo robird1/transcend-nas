@@ -9,6 +9,7 @@ import android.content.res.TypedArray;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -57,7 +58,7 @@ import com.transcend.nas.common.ManageFactory;
 import com.transcend.nas.GuideActivity;
 import com.transcend.nas.view.NotificationDialog;
 import com.transcend.nas.view.ProgressDialog;
-import com.transcend.nas.connection.AppSignInActivity;
+import com.transcend.nas.connection.StartActivity;
 import com.transcend.nas.service.AutoBackupService;
 import com.transcend.nas.settings.AboutActivity;
 import com.transcend.nas.NASApp;
@@ -148,7 +149,7 @@ public class FileManageActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         Log.w(TAG, "onCreate");
         setContentView(R.layout.activity_file_manage);
-        AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.CATEGORY_VIEW.BROWSERREMOTE);
+        AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.BROWSERREMOTE);
         String password = NASPref.getPassword(this);
         if (password != null && !password.equals("")) {
             init();
@@ -576,17 +577,17 @@ public class FileManageActivity extends AppCompatActivity implements
             case R.id.nav_storage:
                 mDevice = false;
                 doLoad(NASApp.ROOT_SMB);
-                AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.CATEGORY_VIEW.BROWSERREMOTE);
+                AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.BROWSERREMOTE);
                 break;
             case R.id.nav_device:
                 mDevice = true;
                 doLoad(NASApp.ROOT_STG);
-                AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.CATEGORY_VIEW.BROWSERLOCAL);
+                AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.BROWSERLOCAL);
                 break;
             case R.id.nav_downloads:
                 mDevice = false;
                 doLoad(NASPref.getDownloadLocation(this));
-                AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.CATEGORY_VIEW.BROWSERLOCALDOWNLOAD);
+                AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.BROWSERLOCALDOWNLOAD);
                 break;
             case R.id.nav_disk_info:
                 startDiskInfoActivity();
@@ -1709,6 +1710,7 @@ public class FileManageActivity extends AppCompatActivity implements
             NASPref.setBackupScenario(this, scenarios[1]);
             NASPref.setBackupSetting(this, false);
             NASPref.setBackupLocation(this, "/homes/" + Build.MODEL + "/");
+            NASPref.setBackupSource(this, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
         }
 
         //clean disk info
@@ -1719,7 +1721,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
         //show SignIn activity
         Intent intent = new Intent();
-        intent.setClass(FileManageActivity.this, AppSignInActivity.class);
+        intent.setClass(FileManageActivity.this, StartActivity.class);
         startActivity(intent);
         finish();
     }

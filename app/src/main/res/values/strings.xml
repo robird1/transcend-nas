@@ -87,6 +87,8 @@
     <string name="sign_up_by_facebook">Sign in with Facebook</string>
     <string name="or">OR</string>
     <string name="status">Status</string>
+    <string name="backup_source">Backup Source</string>
+    <string name="backup_destination">Backup Destination</string>
 
     <!-- string -->
 
@@ -261,6 +263,7 @@
     <string name="pref_backup_video">BACKUP VIDEO</string>
     <string name="pref_backup_scenario">BACKUP SCENARIO</string>
     <string name="pref_backup_location">BACKUP LOCATION</string>
+    <string name="pref_backup_source">BACKUP SOURCE</string>
     <string name="pref_backup_error_task">BACKUP ERROR TASK</string>
 
     <string name="pref_download_location">DOWNLOAD LOCATION</string>

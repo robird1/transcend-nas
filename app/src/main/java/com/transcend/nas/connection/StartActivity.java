@@ -15,9 +15,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fasterxml.jackson.databind.ser.AnyGetterWriter;
 import com.transcend.nas.GuideActivity;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
+import com.transcend.nas.common.AnalysisFactory;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.common.TutkCodeID;
 import com.transcend.nas.management.FileManageActivity;
@@ -35,10 +37,10 @@ import java.util.HashMap;
 /**
  * Created by silverhsu on 16/2/2.
  */
-public class AppSignInActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Boolean>, View.OnClickListener {
+public class StartActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Boolean>, View.OnClickListener {
 
-    private static final String TAG = AppSignInActivity.class.getSimpleName();
-    public static final int REQUEST_CODE = AppSignInActivity.class.hashCode() & 0xFFFF;
+    private static final String TAG = StartActivity.class.getSimpleName();
+    public static final int REQUEST_CODE = StartActivity.class.hashCode() & 0xFFFF;
 
     private LinearLayout layoutInit;
     private LinearLayout layoutSignIn;
@@ -52,12 +54,13 @@ public class AppSignInActivity extends AppCompatActivity implements LoaderManage
     private RelativeLayout mProgressView;
     private int mLoaderID;
     private ArrayList<HashMap<String, String>> mNASList = new ArrayList<HashMap<String, String>>();
-    private boolean isWizard = false;
+    private boolean isInitial = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
+        AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.START);
         initLayout();
         initInputText();
         initRemoteButton();
@@ -68,8 +71,8 @@ public class AppSignInActivity extends AppCompatActivity implements LoaderManage
 
         Intent intent = getIntent();
         if(intent != null) {
-            isWizard = (boolean) intent.getBooleanExtra("Wizard", false);
-            changeView(!isWizard);
+            isInitial = (boolean) intent.getBooleanExtra("Initial", false);
+            changeView(!isInitial);
         }
     }
 
@@ -113,6 +116,7 @@ public class AppSignInActivity extends AppCompatActivity implements LoaderManage
     @Override
     public void onClick(View v) {
         if(v.equals(bnRemote)){
+            AnalysisFactory.getInstance(this).sendClickEvent(AnalysisFactory.VIEW.START, AnalysisFactory.ACTION.STARTREMOTE);
             changeView(false);
         }
         else if (v.equals(bnSignIn)) {
@@ -138,6 +142,7 @@ public class AppSignInActivity extends AppCompatActivity implements LoaderManage
             args.putString("password", pwd);
             getLoaderManager().restartLoader(LoaderID.TUTK_LOGIN, args, this).forceLoad();
         } else if (v.equals(bnFind)) {
+            AnalysisFactory.getInstance(this).sendClickEvent(AnalysisFactory.VIEW.START, AnalysisFactory.ACTION.STARTLOCAL);
             startNASFinderActivity(null, false);
         } else if (v.equals(tvSignInForget)) {
             showForgetPwdDialog();
@@ -146,14 +151,14 @@ public class AppSignInActivity extends AppCompatActivity implements LoaderManage
 
     private void startFileManageActivity() {
         Intent intent = new Intent();
-        intent.setClass(AppSignInActivity.this, FileManageActivity.class);
+        intent.setClass(StartActivity.this, FileManageActivity.class);
         startActivity(intent);
         finish();
     }
 
     private void startInitialActivity() {
         Intent intent = new Intent();
-        intent.setClass(AppSignInActivity.this, GuideActivity.class);
+        intent.setClass(StartActivity.this, GuideActivity.class);
         intent.putExtra("Retry", true);
         startActivity(intent);
         finish();
@@ -161,14 +166,11 @@ public class AppSignInActivity extends AppCompatActivity implements LoaderManage
 
     private void startNASFinderActivity(ArrayList<HashMap<String, String>> list, boolean isRemoteAccess) {
         Intent intent = new Intent();
-        intent.setClass(AppSignInActivity.this, NASListActivity.class);
+        intent.setClass(StartActivity.this, NASListActivity.class);
         if (isRemoteAccess) {
             intent.putExtra("NASList", list);
             intent.putExtra("RemoteAccess", isRemoteAccess);
         }
-        //startActivity(intent);
-        //finish();
-
         startActivityForResult(intent, NASListActivity.REQUEST_CODE);
     }
 
@@ -303,7 +305,7 @@ public class AppSignInActivity extends AppCompatActivity implements LoaderManage
         Bundle args = new Bundle();
         args.putString("title", getString(R.string.forget_password_title));
         args.putString("email", NASPref.getCloudUsername(this));
-        mForgetDialog = new ForgetPwdDialog(AppSignInActivity.this, args) {
+        mForgetDialog = new ForgetPwdDialog(StartActivity.this, args) {
             @Override
             public void onConfirm(Bundle args) {
                 startForgetPwdLoader(args);
@@ -324,6 +326,7 @@ public class AppSignInActivity extends AppCompatActivity implements LoaderManage
 
     @Override
     public Loader<Boolean> onCreateLoader(int id, Bundle args) {
+        AnalysisFactory.getInstance(this).recordStartTime();
         String server, email, pwd, token;
         switch (mLoaderID = id) {
             case LoaderID.TUTK_FORGET_PASSWORD:
@@ -352,6 +355,7 @@ public class AppSignInActivity extends AppCompatActivity implements LoaderManage
 
     @Override
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
+        AnalysisFactory.getInstance(this).recordEndTime();
         if (!success) {
             checkErrorResult(loader);
             return;
@@ -362,10 +366,13 @@ public class AppSignInActivity extends AppCompatActivity implements LoaderManage
         } else if (loader instanceof TutkLoginLoader) {
             checkLoginNASResult((TutkLoginLoader) loader);
         } else if (loader instanceof TutkGetNasLoader) {
+            AnalysisFactory.getInstance(this).sendTimeEvent(AnalysisFactory.EVENT.CONNECT, AnalysisFactory.ACTION.FINDREMOTE, success);
             checkGetNASResult((TutkGetNasLoader) loader);
         } else if (loader instanceof TutkLinkNasLoader) {
+            AnalysisFactory.getInstance(this).sendTimeEvent(AnalysisFactory.EVENT.CONNECT, AnalysisFactory.ACTION.LINKREMOTE, success);
             checkLinkNASResult((TutkLinkNasLoader) loader);
         } else if (loader instanceof LoginLoader) {
+            AnalysisFactory.getInstance(this).sendTimeEvent(AnalysisFactory.EVENT.CONNECT, AnalysisFactory.ACTION.LOGINREMOTE, success);
             startFileManageActivity();
         } else if (loader instanceof TutkLogoutLoader) {
             mProgressView.setVisibility(View.INVISIBLE);
@@ -389,7 +396,7 @@ public class AppSignInActivity extends AppCompatActivity implements LoaderManage
             mProgressView.setVisibility(View.INVISIBLE);
         } else {
             if(layoutSignIn.getVisibility() == View.VISIBLE) {
-                if(isWizard)
+                if(isInitial)
                     startInitialActivity();
                 else
                     changeView(true);

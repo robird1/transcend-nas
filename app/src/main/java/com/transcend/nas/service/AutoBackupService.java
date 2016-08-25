@@ -47,18 +47,17 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
     private RecursiveFileObserver mLocalFileObserver;
     private Handler mHandler;
     private Thread mThread;
-    private HashSet<String> jbCache = new HashSet();
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "onCreate() executed");
-        mHelper = new AutoBackupHelper(getApplicationContext(), Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
+        String backupSource = NASPref.getBackupSource(getApplicationContext());
 
-        mLocalFileObserver = new RecursiveFileObserver(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
+        mHelper = new AutoBackupHelper(getApplicationContext(), backupSource);
+        mLocalFileObserver = new RecursiveFileObserver(backupSource);
         mLocalFileObserver.addListener(this);
         mLocalFileObserver.startWatching();
-
         mHandler = new Handler();
         IntentFilter mFilter = new IntentFilter();
         mFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -209,12 +208,16 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
                 if (pictureFile.exists() && canAddTaskToQueue()) {
                     boolean addVideo = NASPref.getBackupVideo(getApplicationContext());
                     FileInfo.TYPE type = pictureFile.isFile() ? FileInfo.getType(path) : FileInfo.TYPE.DIR;
-                    if(!addVideo && type == FileInfo.TYPE.VIDEO) {
-                        Log.d(TAG, "Ignore video file : " + path);
-                    } else {
+                    if(type == FileInfo.TYPE.PHOTO) {
                         ArrayList<String> paths = new ArrayList<String>();
                         paths.add(path);
                         addBackupTaskToQueue(paths, 1);
+                    } else if(type == FileInfo.TYPE.VIDEO && addVideo) {
+                        ArrayList<String> paths = new ArrayList<String>();
+                        paths.add(path);
+                        addBackupTaskToQueue(paths, 1);
+                    } else {
+                        Log.d(TAG, "Ignore file name : " + path + ", file type : " + type.toString());
                     }
                 }
                 break;

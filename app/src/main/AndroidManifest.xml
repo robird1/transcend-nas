@@ -59,7 +59,7 @@
         </activity>
 
         <activity
-            android:name=".connection.AppSignInActivity"
+            android:name=".connection.StartActivity"
             android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>

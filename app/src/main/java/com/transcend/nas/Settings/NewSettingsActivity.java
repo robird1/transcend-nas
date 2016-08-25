@@ -304,6 +304,7 @@ public class NewSettingsActivity extends AppCompatActivity implements
             SharedPreferences.OnSharedPreferenceChangeListener {
 
         private Toast mToast;
+        private boolean isDownloadLocation = false;
 
         public SettingsFragment() {
 

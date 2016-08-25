@@ -50,7 +50,13 @@
             android:key="@string/pref_backup_location"
             android:layout="@layout/preference_item"
             android:summary="/"
-            android:title="@string/location" />
+            android:title="@string/backup_destination" />
+
+        <Preference
+            android:key="@string/pref_backup_source"
+            android:layout="@layout/preference_item"
+            android:summary="/"
+            android:title="@string/backup_source" />
 
         <CheckBoxPreference
             android:key="@string/pref_backup_video"

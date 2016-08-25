@@ -12,7 +12,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.transcend.nas.common.StyleFactory;
-import com.transcend.nas.connection.AppSignInActivity;
+import com.transcend.nas.connection.StartActivity;
 
 /**
  * Created by ikelee on 16/8/22.
@@ -76,7 +76,7 @@ public class LoginActivity extends AppCompatActivity implements
 
     private void startAppSignInActivity(){
         Intent intent = new Intent();
-        intent.setClass(LoginActivity.this, AppSignInActivity.class);
+        intent.setClass(LoginActivity.this, StartActivity.class);
         startActivity(intent);
         finish();
     }

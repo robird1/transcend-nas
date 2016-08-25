@@ -1,5 +1,6 @@
 package com.transcend.nas.connection;
 
+import android.app.Activity;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -11,6 +12,7 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
+import com.transcend.nas.common.AnalysisFactory;
 import com.tutk.IOTC.P2PService;
 import com.tutk.IOTC.P2PTunnelAPIs;
 
@@ -41,6 +43,7 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
     private String mModel = "";
     private String mSerialNum = "";
     private LinkType mLinkType = LinkType.NO_LINK;
+    private Context mContext;
 
     public enum LinkType {
         NO_LINK, INTRANET, INTERNET
@@ -48,6 +51,7 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
 
     public AutoLinkLoader(Context context) {
         super(context);
+        mContext = context;
         mConnMgr = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
@@ -60,6 +64,7 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
         if (checkNetworkAvailable()) {
             hostname = NASPref.getLocalHostname(getContext());
             if (hostname.isEmpty() || username.isEmpty() || password.isEmpty()) {
+                AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.AUTOLINKLOCAL, AnalysisFactory.LABEL.EMPTY);
                 Log.d(TAG, "Intranet fail, due to : " + hostname + ", " + username + "," + password);
             } else {
                 if (doWizardCheck(true)) {
@@ -70,6 +75,7 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
                             return true;
                         }
                     } else {
+                        AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.AUTOLINKLOCAL, AnalysisFactory.LABEL.NOWIZARD);
                         mLinkType = LinkType.INTRANET;
                         return true;
                     }
@@ -78,6 +84,7 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
 
             hostname = NASPref.getHostname(getContext());
             if (hostname.isEmpty() || username.isEmpty() || password.isEmpty()) {
+                AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.AUTOLINKREMOTE, AnalysisFactory.LABEL.EMPTY);
                 Log.d(TAG, "Internet fail, due to : " + hostname + ", " + username + "," + password);
             } else {
                 if (doWizardCheck(false)) {
@@ -88,6 +95,7 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
                             return true;
                         }
                     } else {
+                        AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.AUTOLINKREMOTE, AnalysisFactory.LABEL.NOWIZARD);
                         mLinkType = LinkType.INTERNET;
                         return true;
                     }
@@ -228,12 +236,14 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
                 Log.d(TAG, "Internet ip: " + hostname);
                 Log.d(TAG, "Internet username: " + username);
                 Log.d(TAG, "Internet password: " + password);
+                AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.AUTOLINKREMOTE, isConnected);
                 return isConnected;
             } else {
                 P2PService.getInstance().stopP2PConnect();
             }
         }
         Log.d(TAG, "Internet fail, due to : empty uuid");
+        AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.AUTOLINKREMOTE, false);
         return false;
     }
 
@@ -250,6 +260,7 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
         Log.d(TAG, "Intranet ip: " + hostname);
         Log.d(TAG, "Intranet username: " + username);
         Log.d(TAG, "Intranet password: " + password);
+        AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.AUTOLINKLOCAL, isConnected);
         return isConnected;
     }
 

@@ -14,6 +14,7 @@ import com.transcend.nas.IntroduceActivity;
 import com.transcend.nas.LoginActivity;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
+import com.transcend.nas.common.AnalysisFactory;
 import com.transcend.nas.common.AnimFactory;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.management.FileManageActivity;
@@ -52,6 +53,7 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
         } else {
             boolean isInit = NASPref.getInitial(this);
             if (isInit) {
+                AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.AUTOLINK);
                 getLoaderManager().initLoader(LoaderID.AUTO_LINK, null, this).forceLoad();
             } else {
                 startGuideActivity();
@@ -61,6 +63,7 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
 
     @Override
     public Loader onCreateLoader(int id, Bundle args) {
+        AnalysisFactory.getInstance(this).recordStartTime();
         switch (mLoaderID = id) {
             case LoaderID.AUTO_LINK:
                 mTextView.setText(getString(R.string.try_auto_connect));
@@ -79,7 +82,10 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
 
     @Override
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
+        AnalysisFactory.getInstance(this).recordEndTime();
         if (loader instanceof AutoLinkLoader) {
+            AnalysisFactory.getInstance(this).sendConnectEvent(AnalysisFactory.ACTION.AUTOLINK, success);
+            AnalysisFactory.getInstance(this).sendTimeEvent(AnalysisFactory.EVENT.CONNECT, AnalysisFactory.ACTION.AUTOLINK, success);
             if (success) {
                 boolean isWizard = ((AutoLinkLoader) loader).isWizard();
                 if (isWizard)
@@ -92,12 +98,14 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
             Log.w(TAG, "AutoLink " + success);
         }
         if (loader instanceof NASListLoader) {
+            AnalysisFactory.getInstance(this).sendTimeEvent(AnalysisFactory.EVENT.CONNECT, AnalysisFactory.ACTION.FINDLOCAL, success);
             if (success)
                 startNASFinderActivity(((NASListLoader) loader).getList(), false);
             else
                 startRemoteAccessListLoader();
         }
         if (loader instanceof TutkGetNasLoader) {
+            AnalysisFactory.getInstance(this).sendTimeEvent(AnalysisFactory.EVENT.CONNECT, AnalysisFactory.ACTION.FINDREMOTE, success);
             TutkGetNasLoader listLoader = (TutkGetNasLoader) loader;
             String code = listLoader.getCode();
             String status = listLoader.getStatus();
@@ -148,7 +156,7 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
 
     private void startSignInActivity() {
         Intent intent = new Intent();
-        intent.setClass(AutoLinkActivity.this, AppSignInActivity.class);
+        intent.setClass(AutoLinkActivity.this, StartActivity.class);
         startActivity(intent);
         finish();
     }

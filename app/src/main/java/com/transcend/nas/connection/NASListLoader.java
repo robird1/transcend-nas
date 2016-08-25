@@ -1,5 +1,6 @@
 package com.transcend.nas.connection;
 
+import android.app.Activity;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -8,6 +9,7 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
+import com.transcend.nas.common.AnalysisFactory;
 import com.transcend.nas.common.LoaderID;
 
 import java.io.IOException;
@@ -50,6 +52,7 @@ public class NASListLoader extends AsyncTaskLoader<Boolean> {
     private JmDNS mJmDNS;
     private ArrayList<HashMap<String, String>> mNASList;
     private int mRetry = 1;
+    private Context mContext;
 
     public NASListLoader(Context context) {
         super(context);
@@ -60,6 +63,7 @@ public class NASListLoader extends AsyncTaskLoader<Boolean> {
 
     public NASListLoader(Context context, int retry) {
         this(context);
+        mContext = context;
         mRetry = retry;
     }
 
@@ -75,10 +79,13 @@ public class NASListLoader extends AsyncTaskLoader<Boolean> {
                     createJmDNS();
                     loadNASList();
                     //closeJmDNS();
+                    AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.FINDLOCAL,
+                            mNASList.size() > 0 ? AnalysisFactory.LABEL.SUCCESS : AnalysisFactory.LABEL.EMPTY);
                     return mNASList.size() > 0;
             }
         }
 
+        AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.FINDLOCAL, false);
         return false;
     }
 

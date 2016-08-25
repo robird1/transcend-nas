@@ -601,6 +601,7 @@ public class SettingsActivity extends AppCompatActivity implements
             SharedPreferences.OnSharedPreferenceChangeListener {
 
         private Toast mToast;
+        private boolean isDownloadLocation = false;
 
         public SettingsFragment() {
 
@@ -621,6 +622,7 @@ public class SettingsActivity extends AppCompatActivity implements
             refreshColumnBackupVideo(true);
             refreshColumnBackupScenario(true, false);
             refreshColumnBackupLocation(true);
+            refreshColumnBackupSource(true);
             refreshColumnDownloadLocation();
             refreshColumnCacheUseSize();
             getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
@@ -654,10 +656,15 @@ public class SettingsActivity extends AppCompatActivity implements
                     String type = bundle.getString("type");
                     String path = bundle.getString("path");
                     if (NASApp.ACT_DIRECT.equals(type)) {
-                        if (NASApp.MODE_SMB.equals(mode))
+                        if (NASApp.MODE_SMB.equals(mode)) {
                             NASPref.setBackupLocation(getActivity(), path);
-                        else
-                            NASPref.setDownloadLocation(getActivity(), path);
+                        }
+                        else {
+                            if(isDownloadLocation)
+                                NASPref.setDownloadLocation(getActivity(), path);
+                            else
+                                NASPref.setBackupSource(getActivity(), path);
+                        }
                     }
                 }
             }
@@ -666,8 +673,11 @@ public class SettingsActivity extends AppCompatActivity implements
         @Override
         public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
             String key = preference.getKey();
+            Log.d(TAG, key);
             if (key.equals(getString(R.string.pref_backup_location))) {
                 startBackupLocateActivity();
+            } else if (key.equals(getString(R.string.pref_backup_source))) {
+                startBackupSourceActivity();
             } else if (key.equals(getString(R.string.pref_download_location))) {
                 startDownloadLocateActivity();
             } else if (key.equals(getString(R.string.pref_cache_clean))) {
@@ -692,6 +702,8 @@ public class SettingsActivity extends AppCompatActivity implements
                 refreshColumnBackupScenario(false, true);
             } else if (key.equals(getString(R.string.pref_backup_location))) {
                 refreshColumnBackupLocation(false);
+            } else if (key.equals(getString(R.string.pref_backup_source))) {
+                refreshColumnBackupSource(false);
             } else if (key.equals(getString(R.string.pref_download_location))) {
                 refreshColumnDownloadLocation();
             } else if (key.equals(getString(R.string.pref_cache_size))) {
@@ -740,7 +752,21 @@ public class SettingsActivity extends AppCompatActivity implements
             startActivityForResult(intent, FileActionLocateActivity.REQUEST_CODE);
         }
 
+        private void startBackupSourceActivity() {
+            isDownloadLocation = false;
+            Bundle args = new Bundle();
+            args.putString("mode", NASApp.MODE_STG);
+            args.putString("type", NASApp.ACT_DIRECT);
+            args.putString("root", NASApp.ROOT_STG);
+            args.putString("path", NASPref.getBackupSource(getActivity()));
+            Intent intent = new Intent();
+            intent.setClass(getActivity(), FileActionLocateActivity.class);
+            intent.putExtras(args);
+            startActivityForResult(intent, FileActionLocateActivity.REQUEST_CODE);
+        }
+
         private void startDownloadLocateActivity() {
+            isDownloadLocation = true;
             Bundle args = new Bundle();
             args.putString("mode", NASApp.MODE_STG);
             args.putString("type", NASApp.ACT_DIRECT);
@@ -812,6 +838,9 @@ public class SettingsActivity extends AppCompatActivity implements
             Preference pref_backup_location = findPreference(getString(R.string.pref_backup_location));
             pref_backup_location.setEnabled(checked);
             pref_backup_location.setSelectable(checked);
+            Preference pref_backup_source = findPreference(getString(R.string.pref_backup_source));
+            pref_backup_source.setEnabled(checked);
+            pref_backup_source.setSelectable(checked);
         }
 
         private void refreshColumnBackupVideo(boolean init) {
@@ -850,6 +879,16 @@ public class SettingsActivity extends AppCompatActivity implements
         private void refreshColumnBackupLocation(boolean init) {
             String location = NASPref.getBackupLocation(getActivity());
             String key = getString(R.string.pref_backup_location);
+            Preference pref = findPreference(key);
+            pref.setSummary(location);
+            pref.setEnabled(NASPref.getBackupSetting(getActivity()));
+            if(!init)
+                restartService(false);
+        }
+
+        private void refreshColumnBackupSource(boolean init) {
+            String location = NASPref.getBackupSource(getActivity());
+            String key = getString(R.string.pref_backup_source);
             Preference pref = findPreference(key);
             pref.setSummary(location);
             pref.setEnabled(NASPref.getBackupSetting(getActivity()));
