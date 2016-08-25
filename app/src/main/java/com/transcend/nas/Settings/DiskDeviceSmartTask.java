@@ -3,6 +3,7 @@ package com.transcend.nas.settings;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.realtek.nasfun.api.HttpClientManager;
@@ -39,19 +40,21 @@ public class DiskDeviceSmartTask extends AsyncTask<String, String, Boolean> {
     List<DiskStructDevice> mDevices;
     private String mResult = "";
     private TextView mTextView;
+    private ImageView mImageView;
 
-    public DiskDeviceSmartTask(Context context, List<DiskStructDevice> devices, DiskStructDevice device, TextView textView) {
+    public DiskDeviceSmartTask(Context context, List<DiskStructDevice> devices, DiskStructDevice device, TextView textView, ImageView imageView) {
         mContext = context;
         mDevice = device;
         mDevices = devices;
         mTextView = textView;
+        mImageView = imageView;
     }
 
     @Override
     protected void onPostExecute(Boolean result) {
         super.onPostExecute(result);
         DiskFactory.getInstance().setDeviceSmartResult(mResult, mDevice);
-        DiskFactory.getInstance().setDeviceSmartText(mContext, mTextView, mDevice);
+        DiskFactory.getInstance().setDeviceSmartText(mContext, mTextView, mImageView, mDevice);
         Log.d(TAG, "onPostExecute : " + result + ", " + mDevice.infos.get("path") + " : " + mDevice.smart);
     }
 

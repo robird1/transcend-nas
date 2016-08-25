@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.data.PieDataSet;
@@ -383,22 +385,32 @@ public class DiskFactory {
         }
     }
 
-    public void setDeviceSmartText(Context context, TextView textView, DiskStructDevice device) {
+    public void setDeviceSmartText(Context context, TextView textView,ImageView imageView, DiskStructDevice device) {
         if (textView == null || device == null)
             return;
 
         if (DiskStructDevice.SMART_PASSED.equals(device.smart)) {
             textView.setText(context.getString(R.string.smart_passed));
             textView.setTextColor(Color.GREEN);
+            textView.setVisibility(View.INVISIBLE);
+            imageView.setImageResource(R.drawable.icon_ok_24dp);
+            imageView.setVisibility(View.VISIBLE);
         } else if (DiskStructDevice.SMART_FAILED.equals(device.smart)) {
             textView.setText(context.getString(R.string.warning));
             textView.setTextColor(Color.RED);
+            textView.setVisibility(View.INVISIBLE);
+            imageView.setImageResource(R.drawable.icon_error_24dp);
+            imageView.setVisibility(View.VISIBLE);
         } else {
-            if (device.smart != null && !device.smart.equals(""))
+            if (device.smart != null && !device.smart.equals("")) {
                 textView.setText(device.smart);
-            else
+            }
+            else {
                 textView.setText(context.getString(R.string.loading));
+            }
+            textView.setVisibility(View.VISIBLE);
             textView.setTextColor(ContextCompat.getColor(context, R.color.textColorPrimary));
+            imageView.setVisibility(View.GONE);
         }
     }
 

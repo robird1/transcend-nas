@@ -87,8 +87,8 @@
     <string name="sign_up_by_facebook">Sign in with Facebook</string>
     <string name="or">OR</string>
     <string name="status">Status</string>
-    <string name="backup_source">Backup Source</string>
-    <string name="backup_destination">Backup Destination</string>
+    <string name="backup_source">Backup path</string>
+    <string name="backup_destination">Upload path</string>
 
     <!-- string -->
 

@@ -192,6 +192,7 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
                                 //ImageView next = (ImageView) view.findViewById(R.id.listitem_disk_info_next);
                                 ImageView icon = (ImageView) view.findViewById(R.id.listitem_disk_info_icon);
                                 TextView smartText = (TextView) view.findViewById(R.id.listitem_disk_info_smart);
+                                ImageView smartImage = (ImageView) view.findViewById(R.id.listitem_disk_info_smart_image);
                                 if (position == 0) {
                                     //pie chart
                                     chart.setVisibility(View.VISIBLE);
@@ -227,6 +228,7 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
                                     if (isExternal) {
                                         icon.setImageResource(R.drawable.icon_usb_gray_24dp);
                                         smartText.setVisibility(View.GONE);
+                                        smartImage.setVisibility(View.GONE);
                                     } else {
                                         icon.setImageResource(R.drawable.icon_hdd_gray_24dp);
                                         smartText.setVisibility(View.VISIBLE);
@@ -239,19 +241,19 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
                                                     DiskStructDevice tmp = result.get(index);
                                                     Log.d(TAG,"Index : " + index + ", " + tmp.smartCheck);
                                                     if (!tmp.smartCheck)
-                                                        new DiskDeviceSmartTask(getApplicationContext(), mDevices, tmp, smartText).execute();
+                                                        new DiskDeviceSmartTask(getApplicationContext(), mDevices, tmp, smartText, smartImage).execute();
                                                     else
                                                         target = tmp;
                                                 }
                                             }
                                         } else {
                                             if (!device.smartCheck)
-                                                new DiskDeviceSmartTask(getApplicationContext(), mDevices, device, smartText).execute();
+                                                new DiskDeviceSmartTask(getApplicationContext(), mDevices, device, smartText, smartImage).execute();
                                             else
                                                 target = device;
                                         }
 
-                                        DiskFactory.getInstance().setDeviceSmartText(DiskInfoActivity.this, smartText, target);
+                                        DiskFactory.getInstance().setDeviceSmartText(DiskInfoActivity.this, smartText, smartImage, target);
                                     }
                                 }
                                 return view;
@@ -296,7 +298,7 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
         if ("yes".equals(device.infos.get("external"))) {
             title = device.infos.get("model");
         } else {
-            title = "Disk 1";
+            title = getString(R.string.disk) + " 1";
         }
         String path = device.infos.get("path");
         HashMap<String, String> item1 = new HashMap<String, String>();
@@ -333,7 +335,7 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
             for (DiskStructDevice result : results) {
                 HashMap<String, String> item = new HashMap<String, String>();
                 //item.put(ID_TITLE, result.infos.get("model"));
-                item.put(ID_TITLE, "Disk " + (index++));
+                item.put(ID_TITLE, getString(R.string.disk) + " " + (index++));
                 item.put(ID_SUBTITLE, result.infos.get("path"));
                 myListData.add(item);
             }
