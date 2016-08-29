@@ -112,7 +112,7 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
             if (success && code.equals(""))
                 startNASFinderActivity(listLoader.getNasArrayList(), true);
             else
-                startSignInActivity();
+                startStartActivity();
         }
     }
 
@@ -137,7 +137,7 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
             args.putString("token", token);
             getLoaderManager().restartLoader(LoaderID.TUTK_NAS_GET, args, this).forceLoad();
         } else {
-            startSignInActivity();
+            startStartActivity();
         }
     }
 
@@ -154,7 +154,7 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
         finish();
     }
 
-    private void startSignInActivity() {
+    private void startStartActivity() {
         Intent intent = new Intent();
         intent.setClass(AutoLinkActivity.this, StartActivity.class);
         startActivity(intent);
@@ -187,7 +187,11 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
         if (mLoaderID >= 0) {
             getLoaderManager().destroyLoader(mLoaderID);
         }
-        startSignInActivity();
+
+        if(NASPref.useNewLoginFlow)
+            startLoginActivity();
+        else
+            startStartActivity();
     }
 
 }

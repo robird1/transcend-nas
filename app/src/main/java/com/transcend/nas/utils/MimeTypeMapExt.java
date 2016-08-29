@@ -411,7 +411,6 @@ public final class MimeTypeMapExt {
         mimeTypeMapExt.put("text/plain", "po");
         mimeTypeMapExt.put("text/richtext", "rtx");
         mimeTypeMapExt.put("text/rtf", "rtf");
-        mimeTypeMapExt.put("text/texmacs", "ts");
         mimeTypeMapExt.put("text/text", "phps");
         mimeTypeMapExt.put("text/tab-separated-values", "tsv");
         mimeTypeMapExt.put("text/xml", "xml");
@@ -489,7 +488,8 @@ public final class MimeTypeMapExt {
         mimeTypeMapExt.put("application/gxf", "gxf");
         mimeTypeMapExt.put("audio/x-matroska", "mka");
         mimeTypeMapExt.put("video/x-matroska", "mks");
-        mimeTypeMapExt.put("model/vnd.mts", "mts");
+        mimeTypeMapExt.put("video/MP2T", "ts");
+        mimeTypeMapExt.put("video/MP2T", "mts");
         mimeTypeMapExt.put("video/m2p", "m2p");
         mimeTypeMapExt.put("video/unkown", "m2t");
         mimeTypeMapExt.put("video/m2ts", "m2ts");

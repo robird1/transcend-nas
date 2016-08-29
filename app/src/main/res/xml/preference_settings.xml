@@ -44,7 +44,13 @@
             android:key="@string/pref_backup_scenario"
             android:layout="@layout/preference_item"
             android:summary="@string/msg_backup_scenario"
-            android:title="@string/always" />
+            android:title="@string/all_networks" />
+
+        <CheckBoxPreference
+            android:key="@string/pref_backup_video"
+            android:layout="@layout/preference_item"
+            android:title="@string/backup_videos"
+            android:widgetLayout="@layout/switch_button" />
 
         <Preference
             android:key="@string/pref_backup_location"
@@ -57,12 +63,6 @@
             android:layout="@layout/preference_item"
             android:summary="/"
             android:title="@string/backup_source" />
-
-        <CheckBoxPreference
-            android:key="@string/pref_backup_video"
-            android:layout="@layout/preference_item"
-            android:title="@string/backup_videos"
-            android:widgetLayout="@layout/switch_button" />
 
     </PreferenceCategory>
 

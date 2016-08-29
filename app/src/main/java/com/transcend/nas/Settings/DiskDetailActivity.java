@@ -149,7 +149,8 @@ public class DiskDetailActivity extends AppCompatActivity implements LoaderManag
         float totalSize = DiskFactory.getInstance().getDeviceTotalSize(device);
         HashMap<String, String> total = new HashMap<String, String>();
         total.put(ID_TITLE, getString(R.string.capacity));
-        total.put(ID_SUBTITLE, FileFactory.getInstance().getFileSize((long) totalSize) + " (" + new BigDecimal(totalSize).toPlainString() + " bytes)");
+        total.put(ID_SUBTITLE, FileFactory.getInstance().getFileSize((long) totalSize));
+        //total.put(ID_SUBTITLE, FileFactory.getInstance().getFileSize((long) totalSize) + " (" + new BigDecimal(totalSize).toPlainString() + " bytes)");
         myListData.add(total);
 
         String external = device.infos.get("external");

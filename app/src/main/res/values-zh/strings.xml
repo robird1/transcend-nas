@@ -151,6 +151,8 @@
     <string name="unknown_artist">未知作者</string>
     <string name="unknown_album">未知專輯</string>
     <string name="device_offline">離線裝置</string>
+    <string name="online">線上</string>
+    <string name="offline">離線</string>
 
     <!-- Disk -->
     <string name="disk_info">磁碟資訊</string>
@@ -181,5 +183,7 @@
     <string name="status">狀態</string>
     <string name="backup_source">備份路徑</string>
     <string name="backup_destination">上傳路徑</string>
+    <string name="sign_in_with_other">使用不同帳號登入</string>
+    <string name="all_networks">WiFi \u0026 行動網路</string>
 
 </resources>

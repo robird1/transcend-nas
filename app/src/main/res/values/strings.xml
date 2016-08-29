@@ -19,7 +19,7 @@
     </string-array>
 
     <string-array name="backup_scenario_entries">
-        <item>@string/always</item>
+        <item>@string/all_networks</item>
         <item>@string/wifi_only</item>
     </string-array>
 
@@ -89,9 +89,13 @@
     <string name="status">Status</string>
     <string name="backup_source">Backup path</string>
     <string name="backup_destination">Upload path</string>
+    <string name="sign_in_with_other">Sign in with a different account</string>
+    <string name="all_networks">Wi-Fi \u0026 Cellular network</string>
 
     <!-- string -->
 
+    <string name="online">online</string>
+    <string name="offline">offline</string>
     <string name="done">Done</string>
     <string name="about">About</string>
     <string name="account">Account</string>

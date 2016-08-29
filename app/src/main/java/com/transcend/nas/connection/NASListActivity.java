@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.transcend.nas.GuideActivity;
+import com.transcend.nas.LoginActivity;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
@@ -80,10 +81,14 @@ public class NASListActivity extends AppCompatActivity implements LoaderManager.
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                if (isWizard)
-                    startInitialActivity();
-                else
-                    startSignInActivity();
+                if(NASPref.useNewLoginFlow){
+                    startLoginActivity();
+                } else {
+                    if (isWizard)
+                        startInitialActivity();
+                    else
+                        startSignInActivity();
+                }
                 break;
             case R.id.action_refresh_nas_finder:
                 if(!mProgressView.isShown())
@@ -105,10 +110,14 @@ public class NASListActivity extends AppCompatActivity implements LoaderManager.
                 mRecyclerEmtpyView.setVisibility((mNASList != null && mNASList.size() > 0) ? View.GONE : View.VISIBLE);
             }
         } else {
-            if (isWizard)
-                startInitialActivity();
-            else
-                startSignInActivity();
+            if(NASPref.useNewLoginFlow){
+                startLoginActivity();
+            } else {
+                if (isWizard)
+                    startInitialActivity();
+                else
+                    startSignInActivity();
+            }
         }
     }
 
@@ -165,6 +174,19 @@ public class NASListActivity extends AppCompatActivity implements LoaderManager.
         if (getCallingActivity() == null) {
             Intent intent = new Intent();
             intent.setClass(NASListActivity.this, StartActivity.class);
+            startActivity(intent);
+            finish();
+        } else {
+            Intent intent = new Intent();
+            NASListActivity.this.setResult(RESULT_CANCELED, intent);
+            finish();
+        }
+    }
+
+    private void startLoginActivity() {
+        if (getCallingActivity() == null) {
+            Intent intent = new Intent();
+            intent.setClass(NASListActivity.this, LoginActivity.class);
             startActivity(intent);
             finish();
         } else {
@@ -512,10 +534,10 @@ public class NASListActivity extends AppCompatActivity implements LoaderManager.
                 String isOnLine = mNASList.get(position).get("online");
                 if (isOnLine != null && !isOnLine.equals("")) {
                     if (isOnLine.equals("yes")) {
-                        holder.subtitle.setText("On");
+                        holder.subtitle.setText(getString(R.string.online));
                         holder.subtitle.setTextColor(Color.GREEN);
                     } else {
-                        holder.subtitle.setText("Off");
+                        holder.subtitle.setText(getString(R.string.offline));
                         holder.subtitle.setTextColor(ContextCompat.getColor(NASListActivity.this, R.color.textColorSecondary));
                     }
                 } else {
@@ -566,6 +588,11 @@ public class NASListActivity extends AppCompatActivity implements LoaderManager.
                     args.putString("nasId", nas.get("nasId"));
                     showNotificationDialog(args);
                 } else {
+                    String isOnLine = nas.get("online");
+                    if (isRemoteAccess && (isOnLine == null || "no".equals(isOnLine))) {
+                        return;
+                    }
+
                     args.putString("nasId", nas.get("nasId"));
                     String nickname = nas.get("nickname");
                     if (nickname != null && nickname.contains(NASApp.TUTK_NAME_TAG)) {

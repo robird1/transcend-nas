@@ -90,12 +90,13 @@
 
         <TextView
             android:id="@+id/listitem_disk_info_smart"
-            android:layout_width="72dp"
+            android:layout_width="wrap_content"
             android:layout_height="72dp"
             android:layout_marginRight="-16dp"
             android:layout_toLeftOf="@id/listitem_disk_info_next"
             android:gravity="center_vertical|right"
             android:text="@string/loading"
+            android:visibility="visible"
             android:textColor="@color/textColorPrimary"
             android:textSize="16sp" />
 
@@ -104,10 +105,10 @@
             android:layout_width="72dp"
             android:layout_height="72dp"
             android:layout_marginRight="-30dp"
+            android:padding="4dp"
             android:layout_toLeftOf="@id/listitem_disk_info_next"
-            android:padding="12dp"
             android:visibility="gone"
-            android:src="@drawable/ic_sync_gray_24dp" />
+            android:src="@drawable/icon_ok_24dp" />
 
         <LinearLayout
             android:layout_width="match_parent"

@@ -102,6 +102,8 @@ public class P2PService implements IP2PTunnelCallback {
             m_commApis = new P2PTunnelAPIs(this);
             m_nInit = m_commApis.P2PTunnelAgentInitialize(4);
             Log.d(TAG, "P2PTunnel m_nInit=" + m_nInit);
+            if(m_commApis == null)
+                return nStart;
 
             String username = "Tutk.com", password = "P2P Platform";
             //P2P Platform

@@ -29,15 +29,16 @@
     <RelativeLayout
         android:id="@+id/remote_access_login_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/settings_toolbar"
-        android:visibility="visible">
+        android:layout_height="wrap_content"
+        android:layout_below="@id/settings_toolbar"
+        android:visibility="gone">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
+            android:layout_centerInParent="true"
             android:orientation="vertical"
+            android:paddingBottom="50dp"
             android:paddingLeft="30dp"
             android:paddingRight="30dp">
 
@@ -98,30 +99,41 @@
                 android:textColor="@color/colorAccentDialog" />
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="20dp"
-            android:orientation="horizontal">
+            android:background="@drawable/bottom_layout">
 
-            <TextView
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/not_have_account"
-                android:textSize="14sp" />
+                android:layout_centerInParent="true"
+                android:orientation="horizontal"
+                android:paddingBottom="10dp"
+                android:paddingTop="10dp">
 
-            <TextView
-                android:id="@+id/remote_access_login_sign_up"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:text="@string/register"
-                android:textColor="@color/colorAccentDialog"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-        </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="@string/not_have_account"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/remote_access_login_sign_up"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="8dp"
+                    android:text="@string/register"
+                    android:textColor="@color/colorAccentDialog"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+        </RelativeLayout>
+
     </RelativeLayout>
 
     <RelativeLayout
@@ -133,9 +145,10 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="30dp"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
             android:orientation="vertical"
+            android:paddingBottom="50dp"
             android:paddingLeft="30dp"
             android:paddingRight="30dp">
 
@@ -201,30 +214,37 @@
                 android:visibility="visible" />
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="20dp"
-            android:orientation="horizontal">
+            android:background="@drawable/bottom_layout">
 
-            <TextView
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/already_have_account"
-                android:textSize="14sp" />
+                android:layout_centerInParent="true"
+                android:orientation="horizontal"
+                android:paddingBottom="10dp"
+                android:paddingTop="10dp">
 
-            <TextView
-                android:id="@+id/remote_access_login_sign_in"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:text="@string/login"
-                android:textColor="@color/colorAccentDialog"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-        </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/already_have_account"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/remote_access_login_sign_in"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:text="@string/login"
+                    android:textColor="@color/colorAccentDialog"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </RelativeLayout>
     </RelativeLayout>
 
 
@@ -233,45 +253,43 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/settings_toolbar"
-        android:visibility="gone">
-
-        <ImageView
-            android:id="@+id/register_string"
-            android:layout_width="wrap_content"
-            android:layout_height="160dp"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="20dp"
-            android:layout_marginTop="30dp"
-            android:src="@drawable/ic_logo_storejetcloud_big" />
+        android:visibility="visible">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/register_string"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
             android:orientation="vertical"
+            android:paddingBottom="50dp"
             android:paddingLeft="30dp"
             android:paddingRight="30dp">
 
+            <ImageView
+                android:id="@+id/register_string"
+                android:layout_width="wrap_content"
+                android:layout_height="160dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="20dp"
+                android:src="@drawable/ic_logo_storejetcloud_big" />
 
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:orientation="horizontal">
+                android:layout_gravity="center_horizontal"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp">
 
                 <TextView
                     android:id="@+id/remote_access_email_title"
-                    android:layout_width="60dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:text="@string/email"
-                    android:textColor="@android:color/black"
-                    android:textStyle="bold" />
+                    android:textColor="@android:color/black" />
 
                 <TextView
                     android:id="@+id/remote_access_email"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:layout_toRightOf="@id/remote_access_email_title"
@@ -279,22 +297,20 @@
                     android:textColor="@android:color/black" />
 
                 <TextView
-                    android:layout_width="60dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/remote_access_email"
                     android:layout_marginTop="10dp"
                     android:text="@string/status"
-                    android:textColor="@android:color/black"
-                    android:textStyle="bold" />
+                    android:textColor="@android:color/black" />
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignLeft="@id/remote_access_email"
                     android:layout_below="@id/remote_access_email"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="10dp"
                     android:layout_marginTop="10dp"
-                    android:layout_toRightOf="@id/remote_access_email_title"
                     android:text="@string/remote_access_inactive"
                     android:textColor="@android:color/black" />
             </RelativeLayout>
@@ -309,7 +325,6 @@
                 android:gravity="center"
                 android:text="@string/remote_access_send_activate_info"
                 android:textColor="@android:color/holo_red_dark" />
-
 
             <Button
                 android:id="@+id/remote_access_continue_button"
@@ -332,31 +347,38 @@
                 android:textColor="@color/colorPrimary" />
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="20dp"
-            android:orientation="horizontal">
+            android:background="@drawable/bottom_layout">
 
-            <TextView
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/not_receive_active"
-                android:textSize="14sp" />
+                android:layout_centerInParent="true"
+                android:orientation="horizontal"
+                android:paddingBottom="10dp"
+                android:paddingTop="10dp">
 
-            <TextView
-                android:id="@+id/remote_access_resend_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:text="@string/resend"
-                android:textColor="@color/colorAccentDialog"
-                android:textSize="14sp"
-                android:textStyle="bold" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/not_receive_active"
+                    android:textSize="14sp" />
 
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/remote_access_resend_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:text="@string/resend"
+                    android:textColor="@color/colorAccentDialog"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+        </RelativeLayout>
 
     </RelativeLayout>
 

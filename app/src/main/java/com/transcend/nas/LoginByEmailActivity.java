@@ -58,6 +58,7 @@ public class LoginByEmailActivity extends AppCompatActivity implements
     private boolean isRemoteAccessRegister = false;
     private ForgetPwdDialog mForgetDialog;
     private boolean isSignUp = false;
+    private boolean isSignWithOther = false;
 
     private Context mContext;
 
@@ -70,7 +71,7 @@ public class LoginByEmailActivity extends AppCompatActivity implements
         initToolbar();
         initProgressView();
         initView();
-        String email = NASPref.getCloudUsername(mContext);
+        /*String email = NASPref.getCloudUsername(mContext);
         String pwd = NASPref.getCloudPassword(mContext);
         if (!email.equals("") && !pwd.equals("")) {
             Bundle arg = new Bundle();
@@ -78,7 +79,7 @@ public class LoginByEmailActivity extends AppCompatActivity implements
             arg.putString("email", email);
             arg.putString("password", pwd);
             getLoaderManager().restartLoader(LoaderID.TUTK_LOGIN, arg, LoginByEmailActivity.this).forceLoad();
-        }
+        }*/
     }
 
     @Override
@@ -337,6 +338,7 @@ public class LoginByEmailActivity extends AppCompatActivity implements
         Intent intent = getIntent();
         if (intent != null) {
             isSignUp = intent.getBooleanExtra("SignUp", false);
+            isSignWithOther = intent.getBooleanExtra("SignWithOther", false);
         }
     }
 
@@ -358,13 +360,17 @@ public class LoginByEmailActivity extends AppCompatActivity implements
         registerLayout = (RelativeLayout) findViewById(R.id.remote_access_register_layout);
         loginLayout = (RelativeLayout) findViewById(R.id.remote_access_login_layout);
         normalLayout = (RelativeLayout) findViewById(R.id.remote_access_normal_layout);
-        int status = NASPref.getCloudAccountStatus(this);
-        if (status == NASPref.Status.Padding.ordinal()) {
-            isRemoteAccessRegister = true;
-        } else if (status == NASPref.Status.Active.ordinal() || status == NASPref.Status.Bind.ordinal()) {
-            isRemoteAccessRegister = true;
-        } else {
+        if(isSignWithOther) {
             isRemoteAccessRegister = false;
+        } else {
+            int status = NASPref.getCloudAccountStatus(this);
+            if (status == NASPref.Status.Padding.ordinal()) {
+                isRemoteAccessRegister = true;
+            } else if (status == NASPref.Status.Active.ordinal() || status == NASPref.Status.Bind.ordinal()) {
+                isRemoteAccessRegister = true;
+            } else {
+                isRemoteAccessRegister = false;
+            }
         }
         updateView();
     }
@@ -436,6 +442,7 @@ public class LoginByEmailActivity extends AppCompatActivity implements
 
     private void startLoginActivity() {
         Intent intent = new Intent();
+        intent.putExtra("SignWithOther", isSignWithOther);
         intent.setClass(LoginByEmailActivity.this, LoginActivity.class);
         startActivity(intent);
         finish();
