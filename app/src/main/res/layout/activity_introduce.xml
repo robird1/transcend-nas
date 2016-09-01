@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.transcend.nas.IntroduceActivity">
+    tools:context="com.transcend.nas.connection_new.IntroduceActivity">
 
     <ImageView
         android:id="@+id/introduce_bg"
@@ -48,7 +48,7 @@
         android:orientation="horizontal"
         android:paddingTop="24dp" />
 
-    <com.transcend.nas.BasicViewerPager
+    <com.transcend.nas.connection_new.BasicViewerPager
         android:id="@+id/introduce_view_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

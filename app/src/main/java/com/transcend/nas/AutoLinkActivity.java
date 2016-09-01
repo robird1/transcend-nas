@@ -1,4 +1,4 @@
-package com.transcend.nas.connection;
+package com.transcend.nas;
 
 import android.app.Activity;
 import android.app.LoaderManager;
@@ -9,14 +9,18 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.transcend.nas.GuideActivity;
-import com.transcend.nas.IntroduceActivity;
-import com.transcend.nas.LoginActivity;
-import com.transcend.nas.NASPref;
-import com.transcend.nas.R;
+import com.transcend.nas.connection.AutoLinkLoader;
+import com.transcend.nas.connection.GuideActivity;
+import com.transcend.nas.connection.NASListActivity;
+import com.transcend.nas.connection.NASListLoader;
+import com.transcend.nas.connection.StartActivity;
+import com.transcend.nas.connection_new.IntroduceActivity;
+import com.transcend.nas.connection_new.LoginActivity;
 import com.transcend.nas.common.AnalysisFactory;
 import com.transcend.nas.common.AnimFactory;
 import com.transcend.nas.common.LoaderID;
+import com.transcend.nas.connection_new.LoginByEmailActivity;
+import com.transcend.nas.connection_new.LoginListActivity;
 import com.transcend.nas.management.FileManageActivity;
 import com.transcend.nas.management.TutkGetNasLoader;
 
@@ -38,7 +42,7 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
         mTextView = (TextView) findViewById(R.id.welcome_text);
         mTextView.startAnimation(AnimFactory.getInstance().getBlinkAnimation());
 
-        if(NASPref.useNewLoginFlow) {
+        if (NASPref.useNewLoginFlow) {
             boolean isIntroduce = NASPref.getIntroduce(this);
             if (!isIntroduce) {
                 startIntroduceActivity();
@@ -47,7 +51,7 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
                 if (isInit) {
                     getLoaderManager().initLoader(LoaderID.AUTO_LINK, null, this).forceLoad();
                 } else {
-                    startLoginActivity();
+                    startStartActivity();
                 }
             }
         } else {
@@ -111,8 +115,9 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
             String status = listLoader.getStatus();
             if (success && code.equals(""))
                 startNASFinderActivity(listLoader.getNasArrayList(), true);
-            else
+            else {
                 startStartActivity();
+            }
         }
     }
 
@@ -142,23 +147,11 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
     }
 
     private void startNASListLoader() {
-        getLoaderManager().restartLoader(LoaderID.NAS_LIST, null, this).forceLoad();
-    }
-
-    private void startNASFinderActivity(ArrayList<HashMap<String, String>> list, boolean isRemoteAccess) {
-        Intent intent = new Intent();
-        intent.setClass(AutoLinkActivity.this, NASListActivity.class);
-        intent.putExtra("NASList", list);
-        intent.putExtra("RemoteAccess", isRemoteAccess);
-        startActivity(intent);
-        finish();
-    }
-
-    private void startStartActivity() {
-        Intent intent = new Intent();
-        intent.setClass(AutoLinkActivity.this, StartActivity.class);
-        startActivity(intent);
-        finish();
+        if (NASPref.useNewLoginFlow) {
+            startRemoteAccessListLoader();
+        } else {
+            getLoaderManager().restartLoader(LoaderID.NAS_LIST, null, this).forceLoad();
+        }
     }
 
     private void startGuideActivity() {
@@ -168,6 +161,39 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
         finish();
     }
 
+    private void startStartActivity() {
+        if (NASPref.useNewLoginFlow) {
+            startLoginActivity();
+        } else {
+            Intent intent = new Intent();
+            intent.setClass(AutoLinkActivity.this, StartActivity.class);
+            startActivity(intent);
+            finish();
+        }
+    }
+
+    private void startNASFinderActivity(ArrayList<HashMap<String, String>> list, boolean isRemoteAccess) {
+        if (NASPref.useNewLoginFlow) {
+            startLoginListActivity(list, isRemoteAccess);
+        } else {
+            Intent intent = new Intent();
+            intent.setClass(AutoLinkActivity.this, NASListActivity.class);
+            intent.putExtra("NASList", list);
+            intent.putExtra("RemoteAccess", isRemoteAccess);
+            startActivity(intent);
+            finish();
+        }
+    }
+
+    //new page
+    private void startIntroduceActivity() {
+        Intent intent = new Intent();
+        intent.setClass(AutoLinkActivity.this, IntroduceActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    //new page
     private void startLoginActivity() {
         Intent intent = new Intent();
         intent.setClass(AutoLinkActivity.this, LoginActivity.class);
@@ -175,9 +201,12 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
         finish();
     }
 
-    private void startIntroduceActivity() {
+    //new page
+    private void startLoginListActivity(ArrayList<HashMap<String, String>> list, boolean isRemoteAccess) {
         Intent intent = new Intent();
-        intent.setClass(AutoLinkActivity.this, IntroduceActivity.class);
+        intent.setClass(AutoLinkActivity.this, LoginListActivity.class);
+        intent.putExtra("NASList", list);
+        intent.putExtra("RemoteAccess", isRemoteAccess);
         startActivity(intent);
         finish();
     }
@@ -188,10 +217,7 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
             getLoaderManager().destroyLoader(mLoaderID);
         }
 
-        if(NASPref.useNewLoginFlow)
-            startLoginActivity();
-        else
-            startStartActivity();
+        startStartActivity();
     }
 
 }

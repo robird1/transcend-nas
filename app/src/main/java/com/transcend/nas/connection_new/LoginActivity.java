@@ -1,4 +1,4 @@
-package com.transcend.nas;
+package com.transcend.nas.connection_new;
 
 import android.app.LoaderManager;
 import android.content.Context;
@@ -13,10 +13,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.transcend.nas.NASPref;
+import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.common.StyleFactory;
 import com.transcend.nas.common.TutkCodeID;
-import com.transcend.nas.connection.NASListActivity;
 import com.transcend.nas.management.FileManageActivity;
 import com.transcend.nas.management.TutkGetNasLoader;
 import com.transcend.nas.management.TutkLoginLoader;
@@ -187,10 +188,10 @@ public class LoginActivity extends AppCompatActivity implements
         if (code.equals("")) {
             NASPref.setInitial(this, true);
             Intent intent = new Intent();
-            intent.setClass(LoginActivity.this, NASListActivity.class);
+            intent.setClass(LoginActivity.this, LoginListActivity.class);
             intent.putExtra("NASList", loader.getNasArrayList());
             intent.putExtra("RemoteAccess", true);
-            startActivityForResult(intent, NASListActivity.REQUEST_CODE);
+            startActivityForResult(intent, LoginListActivity.REQUEST_CODE);
         } else {
             Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
         }
@@ -217,7 +218,7 @@ public class LoginActivity extends AppCompatActivity implements
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
-            if (requestCode == NASListActivity.REQUEST_CODE) {
+            if (requestCode == LoginListActivity.REQUEST_CODE) {
                 startFileManageActivity();
             }
         }
@@ -225,7 +226,6 @@ public class LoginActivity extends AppCompatActivity implements
 
     @Override
     public void onClick(View v) {
-        Intent intent;
         switch (v.getId()) {
             case R.id.login_by_facebook:
                 //TODO : start facebook login

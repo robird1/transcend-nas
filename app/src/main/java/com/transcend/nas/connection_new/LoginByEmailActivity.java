@@ -1,4 +1,4 @@
-package com.transcend.nas;
+package com.transcend.nas.connection_new;
 
 import android.app.Activity;
 import android.app.LoaderManager;
@@ -18,11 +18,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.transcend.nas.NASPref;
+import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.common.StyleFactory;
 import com.transcend.nas.common.TutkCodeID;
 import com.transcend.nas.connection.ForgetPwdDialog;
-import com.transcend.nas.connection.NASListActivity;
 import com.transcend.nas.management.TutkCreateNasLoader;
 import com.transcend.nas.management.TutkForgetPasswordLoader;
 import com.transcend.nas.management.TutkGetNasLoader;
@@ -30,8 +31,6 @@ import com.transcend.nas.management.TutkLoginLoader;
 import com.transcend.nas.management.TutkRegisterLoader;
 import com.transcend.nas.management.TutkResendActivateLoader;
 import com.transcend.nas.view.NotificationDialog;
-
-import org.w3c.dom.Text;
 
 
 /**
@@ -281,7 +280,7 @@ public class LoginByEmailActivity extends AppCompatActivity implements
         if (code.equals("")) {
             NASPref.setInitial(this, true);
             Intent intent = new Intent();
-            intent.setClass(LoginByEmailActivity.this, NASListActivity.class);
+            intent.setClass(LoginByEmailActivity.this, LoginListActivity.class);
             intent.putExtra("NASList", loader.getNasArrayList());
             intent.putExtra("RemoteAccess", true);
             startActivity(intent);

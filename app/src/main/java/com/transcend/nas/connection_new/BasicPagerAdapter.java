@@ -1,4 +1,4 @@
-package com.transcend.nas;
+package com.transcend.nas.connection_new;
 
 import android.support.v4.view.PagerAdapter;
 import android.view.View;

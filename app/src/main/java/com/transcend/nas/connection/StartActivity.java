@@ -15,8 +15,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fasterxml.jackson.databind.ser.AnyGetterWriter;
-import com.transcend.nas.GuideActivity;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.common.AnalysisFactory;

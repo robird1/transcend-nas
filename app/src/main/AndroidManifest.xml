@@ -18,22 +18,27 @@
         android:theme="@style/AppTheme">
 
         <activity
-            android:name=".IntroduceActivity"
+            android:name=".connection_new.IntroduceActivity"
             android:screenOrientation="portrait">
         </activity>
 
         <activity
-            android:name=".LoginActivity"
+            android:name=".connection_new.LoginActivity"
             android:screenOrientation="portrait">
         </activity>
 
         <activity
-            android:name=".LoginByEmailActivity"
+            android:name=".connection_new.LoginByEmailActivity"
             android:screenOrientation="portrait">
         </activity>
 
         <activity
-            android:name=".connection.AutoLinkActivity"
+            android:name=".connection_new.LoginListActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
+
+        <activity
+            android:name=".AutoLinkActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -42,7 +47,7 @@
         </activity>
 
         <activity
-            android:name=".GuideActivity"
+            android:name=".connection.GuideActivity"
             android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>

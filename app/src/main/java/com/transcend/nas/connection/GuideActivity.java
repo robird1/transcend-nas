@@ -1,4 +1,4 @@
-package com.transcend.nas;
+package com.transcend.nas.connection;
 
 import android.app.Activity;
 import android.app.LoaderManager;
@@ -15,13 +15,10 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.fasterxml.jackson.databind.ser.AnyGetterWriter;
+import com.transcend.nas.R;
 import com.transcend.nas.common.AnalysisFactory;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.common.StyleFactory;
-import com.transcend.nas.connection.StartActivity;
-import com.transcend.nas.connection.NASListActivity;
-import com.transcend.nas.connection.NASListLoader;
 
 import java.util.ArrayList;
 import java.util.HashMap;

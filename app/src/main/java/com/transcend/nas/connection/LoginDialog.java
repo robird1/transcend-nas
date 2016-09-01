@@ -53,7 +53,7 @@ public abstract class LoginDialog implements View.OnClickListener {
         mActivity = (AppCompatActivity) context;
         this.isRemoeteAccess = isRemoteAccess;
         this.isDelete = isDelete;
-        mNasId = args.getString("nasId");
+        mNasId = args.getString("nasId"); // Tutk ID
         mNickname = args.getString("nickname");
         mHostname = args.getString("hostname");
         mUsername = args.getString("username");
@@ -135,6 +135,7 @@ public abstract class LoginDialog implements View.OnClickListener {
             args.putString("hostname", hostname);
             args.putString("username", username);
             args.putString("password", password);
+            args.putBoolean("RemoteAccess", isRemoeteAccess);
             Log.w(TAG, "hostname: " + args.get("hostname"));
             Log.w(TAG, "username: " + args.get("username"));
             Log.w(TAG, "password: " + args.get("password"));

@@ -1,4 +1,4 @@
-package com.transcend.nas;
+package com.transcend.nas.connection_new;
 
 import android.content.Intent;
 import android.graphics.Point;
@@ -13,8 +13,10 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import com.transcend.nas.NASPref;
+import com.transcend.nas.R;
 import com.transcend.nas.common.StyleFactory;
-import com.transcend.nas.connection.AutoLinkActivity;
+import com.transcend.nas.AutoLinkActivity;
 
 import java.util.ArrayList;
 import java.util.List;

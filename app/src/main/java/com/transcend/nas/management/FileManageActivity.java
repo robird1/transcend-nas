@@ -55,7 +55,7 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.common.AnalysisFactory;
 import com.transcend.nas.common.ManageFactory;
-import com.transcend.nas.GuideActivity;
+import com.transcend.nas.connection.GuideActivity;
 import com.transcend.nas.view.NotificationDialog;
 import com.transcend.nas.view.ProgressDialog;
 import com.transcend.nas.connection.StartActivity;

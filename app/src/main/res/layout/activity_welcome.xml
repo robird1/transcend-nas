@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.transcend.nas.connection.AutoLinkActivity">
+    tools:context="com.transcend.nas.AutoLinkActivity">
 
     <ImageView
         android:id="@+id/welcome_image"
