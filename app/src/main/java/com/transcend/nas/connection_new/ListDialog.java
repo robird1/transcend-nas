@@ -59,9 +59,9 @@ public abstract class ListDialog implements View.OnClickListener {
         builder.setTitle(mActivity.getString(R.string.find_nas));
         builder.setView(R.layout.dialog_list);
         builder.setCancelable(true);
-        builder.setPositiveButton(R.string.ok, null);
+        builder.setPositiveButton(R.string.wizard_try, null);
         builder.setNegativeButton(R.string.cancel, null);
-        builder.setNeutralButton(R.string.refresh, null);
+        //builder.setNeutralButton(R.string.wizard_try, null);
         builder.setOnKeyListener(new DialogInterface.OnKeyListener() {
             @Override
             public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
@@ -109,6 +109,7 @@ public abstract class ListDialog implements View.OnClickListener {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     mSelect = position;
+                    onClick(mDlgBtnPos);
                 }
             });
         }
@@ -147,6 +148,10 @@ public abstract class ListDialog implements View.OnClickListener {
                 Bundle args = new Bundle();
                 args.putString("nickname", item.get("nickname"));
                 args.putString("hostname", item.get("hostname"));
+                onConfirm(args);
+            } else {
+                Bundle args = new Bundle();
+                args.putBoolean("refresh", true);
                 onConfirm(args);
             }
         } else if (v.equals(mDlgBtnNeg)) {

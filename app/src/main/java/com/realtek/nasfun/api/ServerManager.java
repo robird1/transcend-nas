@@ -25,6 +25,7 @@ public enum ServerManager {
 	private static final String CONN_SERVER_NAME_TAG = "SERVER_NAME";
 	private static final String CONN_USERNAME_TAG = "USERNAME";	
 	private static final String CONN_PASSWORD_TAG = "PASSWORD";
+	private static final String CONN_TUTKUUID_TAG = "TUTKUUID";
 	private static final String CONN_ENABLE_PASSWORD_SAVED_TAG = "ENABLE_PASSWORD_SAVED";
 	private static final String CONN_ENABLE_FTP_TAG = "ENABLE_FTP";
 	private static final String CONN_ENABLE_CAMERA_TAG = "ENABLE_CAMERA";
@@ -295,6 +296,7 @@ public enum ServerManager {
 			editor.putString(CONN_SERVER_NAME_TAG+"["+i+"]", conn.hostname);
 			editor.putString(CONN_USERNAME_TAG+"["+i+"]", conn.username);
 			editor.putString(CONN_PASSWORD_TAG+"["+i+"]", conn.password);
+			editor.putString(CONN_TUTKUUID_TAG+"["+i+"]", conn.tutkUUID);
 			editor.putInt(CONN_FW_TYPE_TAG+"["+i+"]", conn.firmwareType);
 			editor.putBoolean(CONN_ENABLE_VIDEO_UNKNOWN_TAG+"["+i+"]", conn.isSupportedVideoUnKnown);
  			editor.putBoolean(CONN_ENABLE_FTP_TAG+"["+i+"]", conn.isServiceAvail(Server.Service.FTP));

@@ -50,7 +50,7 @@
                     android:layout_alignBottom="@id/login_by_facebook"
                     android:layout_alignTop="@id/login_by_facebook"
                     android:layout_centerVertical="true"
-                    android:src="@drawable/ic_info_gray_24dp" />
+                    android:src="@drawable/icon_facebook_24dp" />
             </RelativeLayout>
 
             <LinearLayout
@@ -107,7 +107,7 @@
                     android:layout_alignBottom="@id/login_by_email"
                     android:layout_alignTop="@id/login_by_email"
                     android:layout_centerVertical="true"
-                    android:src="@drawable/ic_info_gray_24dp" />
+                    android:src="@drawable/icon_email_24dp" />
             </RelativeLayout>
 
         </LinearLayout>
@@ -120,6 +120,7 @@
             android:background="@drawable/bottom_layout">
 
             <LinearLayout
+                android:id="@+id/login_sign_in_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -180,9 +181,7 @@
                     android:id="@+id/start_account_image"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:background="@drawable/button_normal"
-                    android:padding="8dp"
-                    android:src="@drawable/ic_info_gray_24dp" />
+                    android:src="@drawable/icon_account_24dp" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"

@@ -10,12 +10,15 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
+
+import java.io.LineNumberReader;
 
 /**
  * Created by ikelee on 16/9/1.
@@ -36,6 +39,9 @@ public abstract class WizardDialog implements View.OnClickListener {
     private TextView tvUsername;
     private AppCompatEditText etPassword;
     private AppCompatEditText etConfirmPassword;
+    private LinearLayout mWizardLayout;
+    private LinearLayout mFinishLayout;
+    private boolean isFinish = false;
 
     private Bundle mArgs;
     private String mAccount;
@@ -49,6 +55,7 @@ public abstract class WizardDialog implements View.OnClickListener {
         initFieldPassword();
         initFieldConfirmPassword();
         initProgressView();
+        initView();
     }
 
     private void initDialog() {
@@ -93,31 +100,50 @@ public abstract class WizardDialog implements View.OnClickListener {
         mProgressView = (RelativeLayout) mDialog.findViewById(R.id.dialog_wizard_progress_view);
     }
 
+    private void initView(){
+        mWizardLayout = (LinearLayout) mDialog.findViewById(R.id.dialog_wizard_content);
+        mFinishLayout = (LinearLayout) mDialog.findViewById(R.id.dialog_wizard_finish_layout);
+    }
+
+    public void showFinishView(){
+        hideProgress();
+        mDialog.setTitle(mActivity.getString(R.string.wizard_success));
+        mDlgBtnNeg.setVisibility(View.GONE);
+        mFinishLayout.setVisibility(View.VISIBLE);
+        mWizardLayout.setVisibility(View.GONE);
+        isFinish = true;
+    }
+
     @Override
     public void onClick(View v) {
         if (v.equals(mDlgBtnPos)) {
-            String pwd = etPassword.getText().toString();
-            String confirm = etConfirmPassword.getText().toString();
-            if (pwd.equals("")) {
-                Toast.makeText(mActivity, mActivity.getString(R.string.empty_password), Toast.LENGTH_SHORT).show();
-                return;
-            } else if (pwd.length() < 1 || pwd.length() > 32) {
-                Toast.makeText(mActivity, mActivity.getString(R.string.password_size) + " 1 ~ 32", Toast.LENGTH_SHORT).show();
-                return;
-            } else if (pwd.contains(" ")){
-                Toast.makeText(mActivity, mActivity.getString(R.string.wizard_password_space_error), Toast.LENGTH_SHORT).show();
-                return;
-            }
+            if(!isFinish) {
+                String pwd = etPassword.getText().toString();
+                String confirm = etConfirmPassword.getText().toString();
+                if (pwd.equals("")) {
+                    Toast.makeText(mActivity, mActivity.getString(R.string.empty_password), Toast.LENGTH_SHORT).show();
+                    return;
+                } else if (pwd.length() < 1 || pwd.length() > 32) {
+                    Toast.makeText(mActivity, mActivity.getString(R.string.password_size) + " 1 ~ 32", Toast.LENGTH_SHORT).show();
+                    return;
+                } else if (pwd.contains(" ")) {
+                    Toast.makeText(mActivity, mActivity.getString(R.string.wizard_password_space_error), Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-            if (!pwd.equals(confirm)) {
-                Toast.makeText(mActivity, mActivity.getString(R.string.confirm_password_error), Toast.LENGTH_SHORT).show();
-                return;
-            }
+                if (!pwd.equals(confirm)) {
+                    Toast.makeText(mActivity, mActivity.getString(R.string.confirm_password_error), Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-            showProgress();
-            mArgs.putString("username", mAccount);
-            mArgs.putString("password", pwd);
-            onConfirm(mArgs);
+                showProgress();
+                mArgs.putString("username", mAccount);
+                mArgs.putString("password", pwd);
+                onConfirm(mArgs);
+            } else {
+                mArgs.putBoolean("finish", true);
+                onConfirm(mArgs);
+            }
         } else if (v.equals(mDlgBtnNeg)) {
             hideProgress();
             onCancel();

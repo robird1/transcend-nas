@@ -47,31 +47,20 @@ public class WizardSetLoader extends AsyncTaskLoader<Boolean> {
     @Override
     public Boolean loadInBackground() {
         boolean success = false;
-        if(mRemoteAccess){
-            mUrl = null;
-            String uuid = mArgs.getString("hostname");
-            if (uuid != null && !uuid.equals("")) {
-                P2PService.getInstance().stopP2PConnect();
-                int result = P2PService.getInstance().startP2PConnect(uuid);
-                if (result >= 0) {
-                    mUrl = "http://" + P2PService.getInstance().getP2PIP() + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP) + "/nas/wizard/";
-                } else {
-                    P2PService.getInstance().stopP2PConnect();
-                }
-            }
-        }
-        else{
+        if (mRemoteAccess) {
+            mUrl = "http://" + P2PService.getInstance().getP2PIP() + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP) + "/nas/wizard/";
+        } else {
             mUrl = "http://" + mArgs.getString("hostname") + "/nas/wizard/";
         }
 
-        if(mUrl != null) {
+        if (mUrl != null) {
             success = doSetPass(mUrl) && doSetZone(mUrl) && doSetInit(mUrl);
         }
 
         return success;
     }
 
-    private boolean doSetPass(String url){
+    private boolean doSetPass(String url) {
         boolean success = false;
 
         DefaultHttpClient httpClient = HttpClientManager.getClient();
@@ -79,7 +68,7 @@ public class WizardSetLoader extends AsyncTaskLoader<Boolean> {
         HttpResponse response = null;
         InputStream inputStream = null;
         try {
-            do{
+            do {
                 HttpPost httpPost = new HttpPost(commandURL);
                 List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
                 nameValuePairs.add(new BasicNameValuePair("method", "setpass"));
@@ -87,7 +76,7 @@ public class WizardSetLoader extends AsyncTaskLoader<Boolean> {
                 nameValuePairs.add(new BasicNameValuePair("pass", mArgs.getString("password")));
                 httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
                 response = httpClient.execute(httpPost);
-                if(response == null) {
+                if (response == null) {
                     Log.e(TAG, "response is null");
                     break;
                 }
@@ -112,29 +101,27 @@ public class WizardSetLoader extends AsyncTaskLoader<Boolean> {
 
                 do {
                     String tagName = xpp.getName();
-                    if(eventType == XmlPullParser.START_TAG) {
+                    if (eventType == XmlPullParser.START_TAG) {
                         curTagName = tagName;
-                    }
-                    else if(eventType == XmlPullParser.TEXT) {
-                        if(curTagName != null){
+                    } else if (eventType == XmlPullParser.TEXT) {
+                        if (curTagName != null) {
                             text = xpp.getText();
-                            if(curTagName.equals("detail")){
-                                 if(text.equals("OK"))
-                                     success = true;
+                            if (curTagName.equals("detail")) {
+                                if (text.equals("OK"))
+                                    success = true;
                             }
 
-                            if(curTagName.equals("wizard")){
-                                if(text.equals("NAS has been intialized"))
+                            if (curTagName.equals("wizard")) {
+                                if (text.equals("NAS has been intialized"))
                                     mError = "StoreJet Cloud has been intialized";
                             }
                         }
-                    }
-                    else if(eventType == XmlPullParser.END_TAG) {
+                    } else if (eventType == XmlPullParser.END_TAG) {
                         curTagName = null;
                     }
                     eventType = xpp.next();
                 } while (eventType != XmlPullParser.END_DOCUMENT);
-            }while(false);
+            } while (false);
 
         } catch (XmlPullParserException e) {
             Log.d(TAG, "XML Parser error");
@@ -142,12 +129,12 @@ public class WizardSetLoader extends AsyncTaskLoader<Boolean> {
         } catch (IOException e) {
             Log.d(TAG, "Fail to connect to server");
             e.printStackTrace();
-        } catch(IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             Log.d(TAG, "catch IllegalArgumentException");
             e.printStackTrace();
         } finally {
             try {
-                if(inputStream != null)
+                if (inputStream != null)
                     inputStream.close();
             } catch (IOException e) {
                 success = false;
@@ -159,7 +146,7 @@ public class WizardSetLoader extends AsyncTaskLoader<Boolean> {
         return success;
     }
 
-    private boolean doSetZone(String url){
+    private boolean doSetZone(String url) {
         boolean success = false;
 
         DefaultHttpClient httpClient = HttpClientManager.getClient();
@@ -167,14 +154,14 @@ public class WizardSetLoader extends AsyncTaskLoader<Boolean> {
         HttpResponse response = null;
         InputStream inputStream = null;
         try {
-            do{
+            do {
                 HttpPost httpPost = new HttpPost(commandURL);
                 List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
                 nameValuePairs.add(new BasicNameValuePair("method", "setzone"));
                 nameValuePairs.add(new BasicNameValuePair("zone", mArgs.getString("timezone")));
                 httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
                 response = httpClient.execute(httpPost);
-                if(response == null) {
+                if (response == null) {
                     Log.e(TAG, "response is null");
                     break;
                 }
@@ -199,24 +186,22 @@ public class WizardSetLoader extends AsyncTaskLoader<Boolean> {
 
                 do {
                     String tagName = xpp.getName();
-                    if(eventType == XmlPullParser.START_TAG) {
+                    if (eventType == XmlPullParser.START_TAG) {
                         curTagName = tagName;
-                    }
-                    else if(eventType == XmlPullParser.TEXT) {
-                        if(curTagName != null){
+                    } else if (eventType == XmlPullParser.TEXT) {
+                        if (curTagName != null) {
                             text = xpp.getText();
-                            if(curTagName.equals("date")){
-                                if(text.equals("update time zone"))
+                            if (curTagName.equals("date")) {
+                                if (text.equals("update time zone"))
                                     success = true;
                             }
                         }
-                    }
-                    else if(eventType == XmlPullParser.END_TAG) {
+                    } else if (eventType == XmlPullParser.END_TAG) {
                         curTagName = null;
                     }
                     eventType = xpp.next();
                 } while (eventType != XmlPullParser.END_DOCUMENT);
-            }while(false);
+            } while (false);
 
         } catch (XmlPullParserException e) {
             Log.d(TAG, "XML Parser error");
@@ -224,12 +209,12 @@ public class WizardSetLoader extends AsyncTaskLoader<Boolean> {
         } catch (IOException e) {
             Log.d(TAG, "Fail to connect to server");
             e.printStackTrace();
-        } catch(IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             Log.d(TAG, "catch IllegalArgumentException");
             e.printStackTrace();
         } finally {
             try {
-                if(inputStream != null)
+                if (inputStream != null)
                     inputStream.close();
             } catch (IOException e) {
                 success = false;
@@ -241,7 +226,7 @@ public class WizardSetLoader extends AsyncTaskLoader<Boolean> {
         return success;
     }
 
-    private boolean doSetInit(String url){
+    private boolean doSetInit(String url) {
         boolean success = false;
 
         DefaultHttpClient httpClient = HttpClientManager.getClient();
@@ -249,13 +234,13 @@ public class WizardSetLoader extends AsyncTaskLoader<Boolean> {
         HttpResponse response = null;
         InputStream inputStream = null;
         try {
-            do{
+            do {
                 HttpPost httpPost = new HttpPost(commandURL);
                 List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
                 nameValuePairs.add(new BasicNameValuePair("method", "setinit"));
                 httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
                 response = httpClient.execute(httpPost);
-                if(response == null) {
+                if (response == null) {
                     Log.e(TAG, "response is null");
                     break;
                 }
@@ -280,24 +265,22 @@ public class WizardSetLoader extends AsyncTaskLoader<Boolean> {
 
                 do {
                     String tagName = xpp.getName();
-                    if(eventType == XmlPullParser.START_TAG) {
+                    if (eventType == XmlPullParser.START_TAG) {
                         curTagName = tagName;
-                    }
-                    else if(eventType == XmlPullParser.TEXT) {
-                        if(curTagName != null){
+                    } else if (eventType == XmlPullParser.TEXT) {
+                        if (curTagName != null) {
                             text = xpp.getText();
-                            if(curTagName.equals("detail")){
-                                if(text.equals("OK"))
+                            if (curTagName.equals("detail")) {
+                                if (text.equals("OK"))
                                     success = true;
                             }
                         }
-                    }
-                    else if(eventType == XmlPullParser.END_TAG) {
+                    } else if (eventType == XmlPullParser.END_TAG) {
                         curTagName = null;
                     }
                     eventType = xpp.next();
                 } while (eventType != XmlPullParser.END_DOCUMENT);
-            }while(false);
+            } while (false);
 
         } catch (XmlPullParserException e) {
             Log.d(TAG, "XML Parser error");
@@ -305,12 +288,12 @@ public class WizardSetLoader extends AsyncTaskLoader<Boolean> {
         } catch (IOException e) {
             Log.d(TAG, "Fail to connect to server");
             e.printStackTrace();
-        } catch(IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             Log.d(TAG, "catch IllegalArgumentException");
             e.printStackTrace();
         } finally {
             try {
-                if(inputStream != null)
+                if (inputStream != null)
                     inputStream.close();
             } catch (IOException e) {
                 success = false;
@@ -322,12 +305,12 @@ public class WizardSetLoader extends AsyncTaskLoader<Boolean> {
         return success;
     }
 
-    public Bundle getBundleArgs(){
+    public Bundle getBundleArgs() {
         return mArgs;
     }
 
-    public String getErrorResult(){
-        if(mError != null)
+    public String getErrorResult() {
+        if (mError != null)
             return mError;
         else
             return getContext().getString(R.string.network_error);

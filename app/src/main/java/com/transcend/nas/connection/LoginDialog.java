@@ -73,8 +73,8 @@ public abstract class LoginDialog implements View.OnClickListener {
         builder.setNegativeButton(R.string.cancel, null);
         if(!isDelete)
             builder.setPositiveButton(R.string.login, null);
-        if (isRemoeteAccess)
-            builder.setNeutralButton(R.string.delete, null);
+        //if (isRemoeteAccess)
+        //    builder.setNeutralButton(R.string.delete, null);
         builder.setOnKeyListener(new DialogInterface.OnKeyListener() {
             @Override
             public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
@@ -117,29 +117,31 @@ public abstract class LoginDialog implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         if (v.equals(mDlgBtnPos)) {
-            String hostname = etHostname.getText().toString();
-            String username = tvUsername.getText().toString();
-            String password = etPassword.getText().toString();
-            if(username.equals("")){
-                Toast.makeText(mActivity, mActivity.getString(R.string.empty_account),Toast.LENGTH_SHORT).show();
-                return;
-            }
+            if(!mProgressView.isShown()) {
+                String hostname = etHostname.getText().toString();
+                String username = tvUsername.getText().toString();
+                String password = etPassword.getText().toString();
+                if (username.equals("")) {
+                    Toast.makeText(mActivity, mActivity.getString(R.string.empty_account), Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-            if(password.equals("")){
-                Toast.makeText(mActivity, mActivity.getString(R.string.empty_password),Toast.LENGTH_SHORT).show();
-                return;
-            }
+                if (password.equals("")) {
+                    Toast.makeText(mActivity, mActivity.getString(R.string.empty_password), Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-            showProgress();
-            Bundle args = new Bundle();
-            args.putString("hostname", hostname);
-            args.putString("username", username);
-            args.putString("password", password);
-            args.putBoolean("RemoteAccess", isRemoeteAccess);
-            Log.w(TAG, "hostname: " + args.get("hostname"));
-            Log.w(TAG, "username: " + args.get("username"));
-            Log.w(TAG, "password: " + args.get("password"));
-            onConfirm(args);
+                showProgress();
+                Bundle args = new Bundle();
+                args.putString("hostname", hostname);
+                args.putString("username", username);
+                args.putString("password", password);
+                args.putBoolean("RemoteAccess", isRemoeteAccess);
+                Log.w(TAG, "hostname: " + args.get("hostname"));
+                Log.w(TAG, "username: " + args.get("username"));
+                Log.w(TAG, "password: " + args.get("password"));
+                onConfirm(args);
+            }
         } else if (v.equals(mDlgBtnNeg)) {
             hideProgress();
             mDialog.dismiss();

@@ -234,19 +234,6 @@ public class NASPref {
         PrefUtil.write(context, name, key, token);
     }
 
-    public static boolean getCloudMode(Context context){
-        String name = context.getString(R.string.pref_name);
-        String key = context.getString(R.string.pref_cloud_mode);
-        boolean def = false;
-        return PrefUtil.read(context, name, key, def);
-    }
-
-    public static void setCloudMode(Context context, boolean enable){
-        String name = context.getString(R.string.pref_name);
-        String key = context.getString(R.string.pref_cloud_mode);
-        PrefUtil.write(context, name, key, enable);
-    }
-
     public static String getCloudUUID(Context context){
         String name = context.getString(R.string.pref_name);
         String key = context.getString(R.string.pref_cloud_uuid);

@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -103,9 +104,11 @@ public class LoginActivity extends AppCompatActivity implements
         Button emailLogin = (Button) findViewById(R.id.login_by_email);
         emailLogin.setOnClickListener(this);
         StyleFactory.set_white_button_touch_effect(this, emailLogin);
-        TextView signIn = (TextView) findViewById(R.id.login_sign_in);
-        StyleFactory.set_blue_text_touch_effect(this, signIn);
+        LinearLayout signIn = (LinearLayout) findViewById(R.id.login_sign_in_layout);
         signIn.setOnClickListener(this);
+        TextView signInText = (TextView) findViewById(R.id.login_sign_in);
+        signInText.setOnClickListener(this);
+        StyleFactory.set_blue_text_touch_effect(this, signInText);
 
         //init start layout
         mStartLayout = (RelativeLayout) findViewById(R.id.start_layout);
@@ -244,6 +247,7 @@ public class LoginActivity extends AppCompatActivity implements
                     getLoaderManager().restartLoader(LoaderID.TUTK_LOGIN, arg, LoginActivity.this).forceLoad();
                 }
                 break;
+            case R.id.login_sign_in_layout:
             case R.id.login_sign_in:
                 startLoginByEmailActivity(false, isSignWithOther);
                 break;

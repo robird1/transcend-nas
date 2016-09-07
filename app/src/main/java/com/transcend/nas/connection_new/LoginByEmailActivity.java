@@ -247,6 +247,7 @@ public class LoginByEmailActivity extends AppCompatActivity implements
                 NASPref.setCloudAccountStatus(mContext, NASPref.Status.Padding.ordinal());
                 NASPref.setCloudUsername(mContext, email);
                 NASPref.setCloudPassword(mContext, pwd);
+                NASPref.setCloudAuthToken(mContext, "");
                 updateView();
             } else {
                 isRemoteAccessRegister = false;

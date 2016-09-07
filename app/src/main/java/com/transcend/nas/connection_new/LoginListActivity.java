@@ -1,5 +1,6 @@
 package com.transcend.nas.connection_new;
 
+import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
@@ -17,12 +18,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
@@ -36,6 +40,7 @@ import com.transcend.nas.connection.P2PStautsLoader;
 import com.transcend.nas.connection.WizardCheckLoader;
 import com.transcend.nas.connection.WizardSetLoader;
 import com.transcend.nas.management.FileManageActivity;
+import com.transcend.nas.management.TutkCreateNasLoader;
 import com.transcend.nas.management.TutkDeleteNasLoader;
 import com.transcend.nas.management.TutkGetNasLoader;
 import com.transcend.nas.management.TutkLinkNasLoader;
@@ -55,12 +60,15 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
     private RecyclerView mRecyclerView;
     private RecyclerViewAdapter mAdapter;
     private RelativeLayout mProgressView;
-    private LoginDialog mLoginDialog;
     private int mLoaderID;
+    private ArrayList<HashMap<String, String>> mNASList;
+    private ArrayList<HashMap<String, String>> mLANList;
+
     private ListDialog mListDialog;
     private WizardDialog mWizardDialog;
+    private LoginDialog mLoginDialog;
 
-    private ArrayList<HashMap<String, String>> mNASList;
+    private boolean enableDeviceCheck = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,7 +151,8 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
         if (mNASList == null || mNASList.size() == 0) {
             startNASListLoader(true);
         } else {
-            startP2PStatusLoader();
+            if (enableDeviceCheck)
+                startP2PStatusLoader();
         }
     }
 
@@ -199,8 +208,38 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
     }
 
     private void startLoginLoader(Bundle args) {
-        boolean remoteAccess = args.getBoolean("RemoteAccess", false);
-        getLoaderManager().restartLoader(remoteAccess ? LoaderID.TUTK_NAS_LINK : LoaderID.LOGIN, args, this).forceLoad();
+        getLoaderManager().restartLoader(LoaderID.LOGIN, args, this).forceLoad();
+    }
+
+    private void startTutkCreateNasLoader(Bundle args) {
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        String nasName = server.getServerInfo().hostName;
+        String uuid = server.getTutkUUID();
+        String serialNum = NASPref.getSerialNum(LoginListActivity.this);
+        if (serialNum != null && !serialNum.equals(""))
+            nasName = nasName + NASApp.TUTK_NAME_TAG + serialNum;
+
+        boolean wizard = args.getBoolean("wizard", false);
+        if(!wizard) {
+            for (HashMap<String, String> nas : mNASList) {
+                String hostname = nas.get("hostname");
+                if (hostname.equals(uuid)) {
+                    startFileManageActivity();
+                    return;
+                }
+            }
+        }
+
+        if (uuid != null && !uuid.equals("")) {
+            args.putString("server", NASPref.getCloudServer(LoginListActivity.this));
+            args.putString("token", NASPref.getCloudAuthToken(LoginListActivity.this));
+            args.putString("nasName", nasName);
+            args.putString("nasUUID", uuid);
+            getLoaderManager().restartLoader(LoaderID.TUTK_NAS_CREATE, args, LoginListActivity.this).forceLoad();
+        } else {
+            hideDialog(wizard);
+            Toast.makeText(LoginListActivity.this, getString(R.string.error), Toast.LENGTH_SHORT).show();
+        }
     }
 
     /**
@@ -227,6 +266,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                 nasId = args.getString("nasId");
                 return new TutkDeleteNasLoader(this, server, token, nasId);
             case LoaderID.TUTK_NAS_LINK:
+                mProgressView.setVisibility(View.VISIBLE);
                 return new TutkLinkNasLoader(this, args);
             case LoaderID.NAS_LIST:
                 return new NASListLoader(this);
@@ -238,6 +278,8 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                 return new WizardSetLoader(this, args, false);
             case LoaderID.LOGIN:
                 return new LoginLoader(this, args, true);
+            case LoaderID.TUTK_NAS_CREATE:
+                return new TutkCreateNasLoader(this, args);
         }
         return null;
     }
@@ -265,10 +307,10 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
         } else if (loader instanceof P2PStautsLoader) {
             AnalysisFactory.getInstance(this).sendTimeEvent(AnalysisFactory.EVENT.CONNECT, AnalysisFactory.ACTION.CHECKREMOTE, success);
             checkP2PStatusLoader(success, (P2PStautsLoader) loader);
-        }
-        if (loader instanceof WizardSetLoader) {
-            //TODO : add google analysis
+        } else if (loader instanceof WizardSetLoader) {
             checkWizardSetLoader(success, (WizardSetLoader) loader);
+        } else if (loader instanceof TutkCreateNasLoader) {
+            checkCreateNASResult(success, (TutkCreateNasLoader) loader);
         }
     }
 
@@ -291,7 +333,22 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
         Bundle args = loader.getBundleArgs();
         boolean remoteAccess = args.getBoolean("RemoteAccess", false);
         if (loader.isWizard()) {
-            showLoginDialog(args, remoteAccess, false);
+            LoginHelper loginHelper = new LoginHelper(LoginListActivity.this);
+            LoginHelper.LoginInfo account = new LoginHelper.LoginInfo();
+            account.email = NASPref.getCloudUsername(LoginListActivity.this);
+            account.macAddress = loader.getMacAddress();
+            boolean exist = loginHelper.getAccount(account);
+            loginHelper.onDestroy();
+
+            if (account.username != null && !account.username.equals(""))
+                args.putString("username", account.username);
+            else
+                args.putString("username", NASPref.defaultUserName);
+            args.putString("password", account.password);
+
+            showLoginDialog(args, remoteAccess, exist);
+            if (exist)
+                startLoginLoader(args);
         } else {
             if (remoteAccess)
                 Toast.makeText(this, getString(R.string.wizard_remote_access_error), Toast.LENGTH_SHORT).show();
@@ -301,15 +358,15 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
     }
 
     private void checkLoginLoader(boolean success, LoginLoader loader) {
+        Bundle args = loader.getBundleArgs();
         if (!success) {
-            hideLoginDialog(false);
+            boolean wizard = args.getBoolean("wizard", false);
+            hideDialog(wizard);
             Toast.makeText(this, ((LoginLoader) loader).getLoginError(), Toast.LENGTH_SHORT).show();
             return;
         }
 
-        //TODO : record the nas information next connection
-        hideLoginDialog(true);
-        startFileManageActivity();
+        startTutkCreateNasLoader(args);
     }
 
     private void checkTutkGetNasLoader(boolean success, TutkGetNasLoader loader) {
@@ -352,6 +409,12 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
             for (HashMap<String, String> nas : mNASList) {
                 if (id.equals(nas.get("nasId"))) {
                     mNASList.remove(nas);
+                    LoginHelper loginHelper = new LoginHelper(LoginListActivity.this);
+                    LoginHelper.LoginInfo account = new LoginHelper.LoginInfo();
+                    account.email = NASPref.getCloudUsername(LoginListActivity.this);
+                    account.uuid = nas.get("hostname");
+                    loginHelper.deleteAccount(account);
+                    loginHelper.onDestroy();
                     break;
                 }
             }
@@ -367,16 +430,15 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
 
     private void checkTutkLinkNasLoader(boolean success, TutkLinkNasLoader loader) {
         if (!success) {
-            hideLoginDialog(false);
+            mProgressView.setVisibility(View.INVISIBLE);
             Toast.makeText(this, loader.getError(), Toast.LENGTH_SHORT).show();
             return;
         }
 
         Bundle args = loader.getBundleArgs();
-        String ip = P2PService.getInstance().getP2PIP();
-        int port = P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
-        args.putString("hostname", ip + ":" + port);
-        getLoaderManager().restartLoader(LoaderID.LOGIN, args, this).forceLoad();
+        String hostname = P2PService.getInstance().getP2PIP() + ":" +  P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
+        args.putString("hostname", hostname);
+        getLoaderManager().restartLoader(LoaderID.WIZARD, args, this).forceLoad();
     }
 
     private void checkP2PStatusLoader(boolean success, P2PStautsLoader loader) {
@@ -389,22 +451,40 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
             String error = loader.getErrorResult();
             Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
             if (error.equals(getString(R.string.network_error))) {
-                hideWizardDialog(false);
+                hideDialog(false);
             } else {
-                hideWizardDialog(true);
+                hideDialog(true);
             }
             return;
         }
-        showLoginDialog(loader.getBundleArgs(), false, false);
+
+        Bundle args = loader.getBundleArgs();
+        args.putBoolean("wizard", true);
+        startLoginLoader(args);
     }
 
-    private void hideListDialog(boolean dismiss) {
-        if (mListDialog != null) {
-            if (dismiss) {
-                mListDialog.dismiss();
-                mListDialog = null;
-            } else
-                mListDialog.hideProgress();
+    private void checkCreateNASResult(boolean success, TutkCreateNasLoader loader) {
+        boolean wizard = loader.getBundleArgs().getBoolean("wizard");
+        if(!success) {
+            hideDialog(wizard);
+            Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String status = loader.getStatus();
+        String code = loader.getCode();
+        if (code.equals("") || code.equals(TutkCodeID.SUCCESS) || code.equals(TutkCodeID.UID_ALREADY_TAKEN)) {
+            if(wizard && mWizardDialog != null) {
+                //hide keyboard
+                InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+                mWizardDialog.showFinishView();
+            }
+            else
+                startFileManageActivity();
+        } else {
+            hideDialog(wizard);
+            Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -419,24 +499,21 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                     if (refresh) {
                         startNASListLoader(false);
                     } else {
-                        args.putString("username", NASPref.getUsername(LoginListActivity.this));
-                        args.putString("password", NASPref.getPassword(LoginListActivity.this));
-                        args.putBoolean("RemoteAccess", false);
+                        hideDialog(true);
                         getLoaderManager().restartLoader(LoaderID.WIZARD, args, LoginListActivity.this).forceLoad();
-                        hideListDialog(true);
                     }
                 }
 
                 @Override
                 public void onCancel() {
                     getLoaderManager().destroyLoader(mLoaderID);
-                    hideListDialog(true);
+                    hideDialog(true);
                 }
             };
         }
     }
 
-    private void hideWizardDialog(boolean dismiss) {
+    private void hideDialog(boolean dismiss) {
         if (mWizardDialog != null) {
             if (dismiss) {
                 mWizardDialog.dismiss();
@@ -444,28 +521,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
             } else
                 mWizardDialog.hideProgress();
         }
-    }
 
-    private void showWizardDialog(Bundle args) {
-        mWizardDialog = new WizardDialog(this, args) {
-            @Override
-            public void onConfirm(Bundle args) {
-                //args contain hostname, username, password
-                String timezone = Integer.toString(TimeZone.getDefault().getRawOffset() / 3600000);
-                args.putString("nickname", getString(R.string.wizard_success));
-                args.putString("timezone", timezone);
-                getLoaderManager().restartLoader(LoaderID.WIZARD_INIT, args, LoginListActivity.this).forceLoad();
-            }
-
-            @Override
-            public void onCancel() {
-                getLoaderManager().destroyLoader(mLoaderID);
-                hideWizardDialog(true);
-            }
-        };
-    }
-
-    private void hideLoginDialog(boolean dismiss) {
         if (mLoginDialog != null) {
             P2PService.getInstance().stopP2PConnect();
             if (dismiss) {
@@ -474,10 +530,42 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
             } else
                 mLoginDialog.hideProgress();
         }
+
+        if (mListDialog != null) {
+            if (dismiss) {
+                mListDialog.dismiss();
+                mListDialog = null;
+            } else
+                mListDialog.hideProgress();
+        }
     }
 
-    private void showLoginDialog(Bundle args, boolean remoteAccess, boolean delete) {
-        mLoginDialog = new LoginDialog(LoginListActivity.this, args, remoteAccess, delete) {
+    private void showWizardDialog(Bundle args) {
+        mWizardDialog = new WizardDialog(this, args) {
+            @Override
+            public void onConfirm(Bundle args) {
+                boolean finish = args.getBoolean("finish", false);
+                if (finish) {
+                    startFileManageActivity();
+                } else {
+                    //args already contain hostname, username, password
+                    String timezone = Integer.toString(TimeZone.getDefault().getRawOffset() / 3600000);
+                    args.putString("nickname", getString(R.string.wizard_success));
+                    args.putString("timezone", timezone);
+                    getLoaderManager().restartLoader(LoaderID.WIZARD_INIT, args, LoginListActivity.this).forceLoad();
+                }
+            }
+
+            @Override
+            public void onCancel() {
+                getLoaderManager().destroyLoader(mLoaderID);
+                hideDialog(true);
+            }
+        };
+    }
+
+    private void showLoginDialog(Bundle args, final boolean remoteAccess, boolean startProgress) {
+        mLoginDialog = new LoginDialog(LoginListActivity.this, args, remoteAccess, false) {
             @Override
             public void onConfirm(Bundle args) {
                 startLoginLoader(args);
@@ -491,15 +579,17 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
             @Override
             public void onCancel() {
                 getLoaderManager().destroyLoader(mLoaderID);
-                hideLoginDialog(true);
+                hideDialog(true);
             }
         };
+        if(startProgress)
+            mLoginDialog.showProgress();
     }
 
     private void showNotificationDialog(final Bundle args) {
         Bundle value = new Bundle();
         value.putString(NotificationDialog.DIALOG_MESSAGE, getString(R.string.remote_access_delete_warning));
-        NotificationDialog mNotificationDialog = new NotificationDialog(this, value) {
+        new NotificationDialog(this, value) {
             @Override
             public void onConfirm() {
                 startRemoteAccessDeleteLoader(args);
@@ -551,18 +641,20 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                     holder.subtitle.setText(hostname);
                 }
 
-                String isOnLine = mNASList.get(position).get("online");
-                if (isOnLine != null && !isOnLine.equals("")) {
-                    if (isOnLine.equals("yes")) {
-                        holder.subtitle.setText(getString(R.string.online));
-                        holder.subtitle.setTextColor(Color.GREEN);
+                if (enableDeviceCheck) {
+                    String isOnLine = mNASList.get(position).get("online");
+                    if (isOnLine != null && !isOnLine.equals("")) {
+                        if (isOnLine.equals("yes")) {
+                            holder.subtitle.setText(getString(R.string.online));
+                            holder.subtitle.setTextColor(Color.GREEN);
+                        } else {
+                            holder.subtitle.setText(getString(R.string.offline));
+                            holder.subtitle.setTextColor(ContextCompat.getColor(LoginListActivity.this, R.color.textColorSecondary));
+                        }
                     } else {
-                        holder.subtitle.setText(getString(R.string.offline));
                         holder.subtitle.setTextColor(ContextCompat.getColor(LoginListActivity.this, R.color.textColorSecondary));
+                        holder.subtitle.setText(getString(R.string.loading));
                     }
-                } else {
-                    holder.subtitle.setTextColor(ContextCompat.getColor(LoginListActivity.this, R.color.textColorSecondary));
-                    holder.subtitle.setText(getString(R.string.loading));
                 }
             } else {
                 //this is the 'Add' item
@@ -612,9 +704,11 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                         args.putString("nasId", nas.get("nasId"));
                         showNotificationDialog(args);
                     } else {
-                        String isOnLine = nas.get("online");
-                        if ("no".equals(isOnLine)) {
-                            return;
+                        if(enableDeviceCheck) {
+                            String isOnLine = nas.get("online");
+                            if ("no".equals(isOnLine)) {
+                                return;
+                            }
                         }
 
                         args.putString("nasId", nas.get("nasId"));
@@ -630,7 +724,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                         args.putString("username", NASPref.getUsername(LoginListActivity.this));
                         args.putString("password", NASPref.getPassword(LoginListActivity.this));
                         args.putBoolean("RemoteAccess", true);
-                        getLoaderManager().restartLoader(LoaderID.WIZARD, args, LoginListActivity.this).forceLoad();
+                        getLoaderManager().restartLoader(LoaderID.TUTK_NAS_LINK, args, LoginListActivity.this).forceLoad();
                     }
                 } else {
                     startNASListLoader(false);

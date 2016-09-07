@@ -11,6 +11,7 @@ import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.common.AnalysisFactory;
 import com.transcend.nas.common.FileFactory;
+import com.transcend.nas.connection_new.LoginHelper;
 import com.tutk.IOTC.P2PService;
 
 /**
@@ -23,6 +24,7 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
     private Bundle mArgs;
     private boolean mReplace = true;
     private Context mContext;
+    private LoginHelper mLoginHelper;
 
     public LoginLoader(Context context, Bundle args, boolean replaceServer) {
         super(context);
@@ -72,12 +74,10 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
         if(hostname.contains(p2pIp)) {
             AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.LOGINREMOTE, true);
             NASPref.setCloudUUID(getContext(), P2PService.getInstance().getTUTKUUID());
-            NASPref.setCloudMode(getContext(), true);
         }
         else {
             AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.LOGINLOCAL, true);
             NASPref.setLocalHostname(getContext(), hostname);
-            NASPref.setCloudMode(getContext(), false);
         }
 
         NASPref.setHostname(getContext(), hostname);
@@ -87,6 +87,20 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
         NASPref.setMacAddress(getContext(), mServer.getServerInfo().mac);
 
         FileFactory.getInstance().cleanRealPathMap();
+
+        if(NASPref.useNewLoginFlow){
+            mLoginHelper = new LoginHelper(mContext);
+            LoginHelper.LoginInfo account = new LoginHelper.LoginInfo();
+            account.email = NASPref.getCloudUsername(mContext);
+            account.hostname = hostname;
+            account.username = mServer.getUsername();
+            account.password = mServer.getPassword();
+            account.uuid = mServer.getTutkUUID();
+            account.macAddress = mServer.getServerInfo().mac;
+            account.ip = mServer.getServerInfo().ipAddress;
+            mLoginHelper.setAccount(account);
+            mLoginHelper.onDestroy();
+        }
     }
 
     public String getLoginError(){

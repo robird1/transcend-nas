@@ -56,6 +56,7 @@ import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.common.AnalysisFactory;
 import com.transcend.nas.common.ManageFactory;
 import com.transcend.nas.connection.GuideActivity;
+import com.transcend.nas.connection_new.LoginActivity;
 import com.transcend.nas.view.NotificationDialog;
 import com.transcend.nas.view.ProgressDialog;
 import com.transcend.nas.connection.StartActivity;
@@ -1721,7 +1722,10 @@ public class FileManageActivity extends AppCompatActivity implements
 
         //show SignIn activity
         Intent intent = new Intent();
-        intent.setClass(FileManageActivity.this, StartActivity.class);
+        if(NASPref.useNewLoginFlow)
+            intent.setClass(FileManageActivity.this, LoginActivity.class);
+        else
+            intent.setClass(FileManageActivity.this, StartActivity.class);
         startActivity(intent);
         finish();
     }

@@ -1,6 +1,7 @@
 package com.transcend.nas.management;
 
 import android.content.Context;
+import android.os.Bundle;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,6 +15,12 @@ public class TutkCreateNasLoader extends TutkBasicLoader {
     private String mName;
     private String mUUID;
     private String mNasID;
+    private Bundle mArgs;
+
+    public TutkCreateNasLoader(Context context, Bundle args) {
+        this(context, args.getString("server"), args.getString("token"), args.getString("nasName"), args.getString("nasUUID"));
+        mArgs = args;
+    }
 
     public TutkCreateNasLoader(Context context, String server, String token, String nasName, String nasUUID) {
         super(context, server);
@@ -68,5 +75,9 @@ public class TutkCreateNasLoader extends TutkBasicLoader {
 
     public String getAuthToken(){
         return mToken;
+    }
+
+    public Bundle getBundleArgs(){
+        return mArgs;
     }
 }

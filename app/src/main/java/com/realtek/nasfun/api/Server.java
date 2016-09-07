@@ -1483,6 +1483,7 @@ public class Server {
 				// isSuccess = setFirmwareType();
 				// to get tutk uid
 				if(!checkTutkuid()){
+					isSuccess = false;
 					setTutkUUID(null);
 				}
 				// for StoreJet Cloud, we don't need get server profile

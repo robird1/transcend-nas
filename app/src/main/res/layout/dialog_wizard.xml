@@ -54,6 +54,28 @@
 
     </ScrollView>
 
+    <LinearLayout
+        android:id="@+id/dialog_wizard_finish_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:layout_gravity="center_horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enjoy it."
+            android:layout_marginBottom="20dp"
+            android:layout_gravity="center_horizontal"/>
+
+        <ImageView
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/bg_ready_320"/>
+
+    </LinearLayout>
 
     <RelativeLayout
         android:id="@+id/dialog_wizard_progress_view"

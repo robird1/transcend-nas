@@ -86,6 +86,7 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
 
     @Override
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
+        mLoaderID = -1;
         AnalysisFactory.getInstance(this).recordEndTime();
         if (loader instanceof AutoLinkLoader) {
             AnalysisFactory.getInstance(this).sendConnectEvent(AnalysisFactory.ACTION.AUTOLINK, success);
@@ -213,11 +214,12 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
 
     @Override
     public void onBackPressed() {
-        if (mLoaderID >= 0) {
-            getLoaderManager().destroyLoader(mLoaderID);
+        if(!NASPref.useNewLoginFlow) {
+            if (mLoaderID >= 0) {
+                getLoaderManager().destroyLoader(mLoaderID);
+            }
+            startStartActivity();
         }
-
-        startStartActivity();
     }
 
 }

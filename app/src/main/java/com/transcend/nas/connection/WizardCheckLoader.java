@@ -36,6 +36,8 @@ public class WizardCheckLoader extends AsyncTaskLoader<Boolean> {
     private boolean isWizard = false;
     private String mModel = "";
     private String mSerialNum = "";
+    private String mHwAddr = "";
+    private String mIpAddr = "";
 
     public WizardCheckLoader(Context context, Bundle args, boolean isRemoteAccess) {
         super(context);
@@ -46,24 +48,13 @@ public class WizardCheckLoader extends AsyncTaskLoader<Boolean> {
     @Override
     public Boolean loadInBackground() {
         boolean success = false;
-        if(mRemoteAccess){
-            mUrl = null;
-            String uuid = mArgs.getString("hostname");
-            if (uuid != null && !uuid.equals("")) {
-                P2PService.getInstance().stopP2PConnect();
-                int result = P2PService.getInstance().startP2PConnect(uuid);
-                if (result >= 0) {
-                    mUrl = "http://" + P2PService.getInstance().getP2PIP() + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP) + "/nas/get/register";
-                } else {
-                    P2PService.getInstance().stopP2PConnect();
-                }
-            }
-        }
-        else{
+        if (mRemoteAccess) {
+            mUrl = "http://" + P2PService.getInstance().getP2PIP() + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP) + "/nas/get/register";
+        } else {
             mUrl = "http://" + mArgs.getString("hostname") + "/nas/get/register";
         }
 
-        if(mUrl != null) {
+        if (mUrl != null) {
             try {
                 String commandURL = mUrl;
                 DefaultHttpClient httpClient = HttpClientManager.getClient();
@@ -98,18 +89,26 @@ public class WizardCheckLoader extends AsyncTaskLoader<Boolean> {
                                     if (initialized != null) {
                                         isWizard = initialized.equals("yes");
                                     }
-                                }
-                                if (curTagName.equals("model")) {
+                                } else if (curTagName.equals("model")) {
                                     String model = text;
                                     if (model != null) {
                                         mModel = model;
                                     }
-                                }
-                                if (curTagName.equals("serialnum")) {
+                                } else if (curTagName.equals("serialnum")) {
                                     String serialNum = text;
                                     if (serialNum != null) {
                                         mSerialNum = serialNum;
                                         NASPref.setSerialNum(getContext(), mSerialNum);
+                                    }
+                                } else if (curTagName.equals("hwaddr")) {
+                                    String hwAddr = text;
+                                    if (hwAddr != null) {
+                                        mHwAddr = hwAddr;
+                                    }
+                                } else if (curTagName.equals("ipaddr")) {
+                                    String ipAddr = text;
+                                    if (ipAddr != null) {
+                                        mIpAddr = ipAddr;
                                     }
                                 }
                             }
@@ -137,7 +136,7 @@ public class WizardCheckLoader extends AsyncTaskLoader<Boolean> {
         return success;
     }
 
-    public Bundle getBundleArgs(){
+    public Bundle getBundleArgs() {
         return mArgs;
     }
 
@@ -149,7 +148,15 @@ public class WizardCheckLoader extends AsyncTaskLoader<Boolean> {
         return mSerialNum;
     }
 
-    public boolean isWizard(){
+    public String getMacAddress() {
+        return mHwAddr;
+    }
+
+    public String getIpAddress() {
+        return mIpAddr;
+    }
+
+    public boolean isWizard() {
         return isWizard;
     }
 

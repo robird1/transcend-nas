@@ -228,7 +228,7 @@ public class NASListActivity extends AppCompatActivity implements LoaderManager.
     }
 
     private void startLoginLoader(Bundle args) {
-        getLoaderManager().restartLoader(isRemoteAccess ? LoaderID.TUTK_NAS_LINK : LoaderID.LOGIN, args, this).forceLoad();
+        getLoaderManager().restartLoader(LoaderID.LOGIN, args, this).forceLoad();
     }
 
     @Override
@@ -257,6 +257,7 @@ public class NASListActivity extends AppCompatActivity implements LoaderManager.
             case LoaderID.LOGIN:
                 return new LoginLoader(this, args, true);
             case LoaderID.TUTK_NAS_LINK:
+                mProgressView.setVisibility(View.VISIBLE);
                 return new TutkLinkNasLoader(this, args);
             case LoaderID.TUTK_NAS_GET:
                 mProgressView.setVisibility(View.VISIBLE);
@@ -408,16 +409,15 @@ public class NASListActivity extends AppCompatActivity implements LoaderManager.
 
     private void checkTutkLinkNasLoader(boolean success, TutkLinkNasLoader loader) {
         if (!success) {
-            hideLoginDialog(false);
+            mProgressView.setVisibility(View.INVISIBLE);
             Toast.makeText(this, loader.getError(), Toast.LENGTH_SHORT).show();
             return;
         }
 
         Bundle args = loader.getBundleArgs();
-        String ip = P2PService.getInstance().getP2PIP();
-        int port = P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
-        args.putString("hostname", ip + ":" + port);
-        getLoaderManager().restartLoader(LoaderID.LOGIN, args, this).forceLoad();
+        String hostname = P2PService.getInstance().getP2PIP() + ":" +  P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
+        args.putString("hostname", hostname);
+        getLoaderManager().restartLoader(LoaderID.WIZARD, args, this).forceLoad();
     }
 
     private void checkP2PStatusLoader(boolean success, P2PStautsLoader loader) {
@@ -588,7 +588,8 @@ public class NASListActivity extends AppCompatActivity implements LoaderManager.
                     args.putString("hostname", nas.get("hostname"));
                     args.putString("username", NASPref.getUsername(NASListActivity.this));
                     args.putString("password", NASPref.getPassword(NASListActivity.this));
-                    getLoaderManager().restartLoader(LoaderID.WIZARD, args, NASListActivity.this).forceLoad();
+                    args.putBoolean("RemoteAccess", true);
+                    getLoaderManager().restartLoader(isRemoteAccess ? LoaderID.TUTK_NAS_LINK : LoaderID.WIZARD, args, NASListActivity.this).forceLoad();
                 }
             }
         }

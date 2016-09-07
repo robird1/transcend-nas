@@ -3,6 +3,7 @@ package com.transcend.nas.management;
 import android.app.Activity;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -39,6 +40,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -76,6 +78,11 @@ public abstract class TutkBasicLoader extends AsyncTaskLoader<Boolean> {
 
     public String getSystemLanguage() {
         String language = "en";
+        Locale locale = Resources.getSystem().getConfiguration().locale;
+        Log.d(TAG,"TEST " + locale);
+        if("zh_TW".equals(locale.toString())) {
+            language = "zh-tw";
+        }
         return language;
     }
 

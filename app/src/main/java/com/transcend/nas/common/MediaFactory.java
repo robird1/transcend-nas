@@ -1,11 +1,13 @@
 package com.transcend.nas.common;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
@@ -189,7 +191,11 @@ public class MediaFactory {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(uri, type);
         intent.putExtra("title", title);
-        act.startActivityForResult(intent, 0);
+        try {
+            act.startActivityForResult(intent, 0);
+        } catch(ActivityNotFoundException e) {
+            Toast.makeText(act, "No suitable app", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private static void openLocal(Activity act, Uri uri, String type, String title){
