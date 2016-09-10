@@ -151,8 +151,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
         if (mNASList == null || mNASList.size() == 0) {
             startNASListLoader(true);
         } else {
-            if (enableDeviceCheck)
-                startP2PStatusLoader();
+            startP2PStatusLoader();
         }
     }
 
@@ -200,7 +199,10 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
     }
 
     private void startP2PStatusLoader() {
-        getLoaderManager().restartLoader(LoaderID.TUTK_NAS_ONLINE_CHECK, null, this).forceLoad();
+        if (enableDeviceCheck)
+            getLoaderManager().restartLoader(LoaderID.TUTK_NAS_ONLINE_CHECK, null, this).forceLoad();
+        else
+            mProgressView.setVisibility(View.INVISIBLE);
     }
 
     private void startRemoteAccessDeleteLoader(Bundle args) {
@@ -220,7 +222,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
             nasName = nasName + NASApp.TUTK_NAME_TAG + serialNum;
 
         boolean wizard = args.getBoolean("wizard", false);
-        if(!wizard) {
+        if (!wizard) {
             for (HashMap<String, String> nas : mNASList) {
                 String hostname = nas.get("hostname");
                 if (hostname.equals(uuid)) {
@@ -272,10 +274,9 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                 return new NASListLoader(this);
             case LoaderID.WIZARD:
                 mProgressView.setVisibility(View.VISIBLE);
-                remoteAccess = args.getBoolean("RemoteAccess", false);
-                return new WizardCheckLoader(this, args, remoteAccess);
+                return new WizardCheckLoader(this, args);
             case LoaderID.WIZARD_INIT:
-                return new WizardSetLoader(this, args, false);
+                return new WizardSetLoader(this, args);
             case LoaderID.LOGIN:
                 return new LoginLoader(this, args, true);
             case LoaderID.TUTK_NAS_CREATE:
@@ -320,41 +321,8 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
     }
 
     private void checkNasListLoader(boolean success, NASListLoader loader) {
-        showListDialog(loader.getList());
-    }
-
-    private void checkWizardLoader(boolean success, WizardCheckLoader loader) {
-        mProgressView.setVisibility(View.INVISIBLE);
-        if (!success) {
-            Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        Bundle args = loader.getBundleArgs();
-        boolean remoteAccess = args.getBoolean("RemoteAccess", false);
-        if (loader.isWizard()) {
-            LoginHelper loginHelper = new LoginHelper(LoginListActivity.this);
-            LoginHelper.LoginInfo account = new LoginHelper.LoginInfo();
-            account.email = NASPref.getCloudUsername(LoginListActivity.this);
-            account.macAddress = loader.getMacAddress();
-            boolean exist = loginHelper.getAccount(account);
-            loginHelper.onDestroy();
-
-            if (account.username != null && !account.username.equals(""))
-                args.putString("username", account.username);
-            else
-                args.putString("username", NASPref.defaultUserName);
-            args.putString("password", account.password);
-
-            showLoginDialog(args, remoteAccess, exist);
-            if (exist)
-                startLoginLoader(args);
-        } else {
-            if (remoteAccess)
-                Toast.makeText(this, getString(R.string.wizard_remote_access_error), Toast.LENGTH_SHORT).show();
-            else
-                showWizardDialog(args);
-        }
+        mLANList = loader.getList();
+        showListDialog(mLANList);
     }
 
     private void checkLoginLoader(boolean success, LoginLoader loader) {
@@ -362,11 +330,35 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
         if (!success) {
             boolean wizard = args.getBoolean("wizard", false);
             hideDialog(wizard);
-            Toast.makeText(this, ((LoginLoader) loader).getLoginError(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, loader.getLoginError(), Toast.LENGTH_SHORT).show();
             return;
         }
 
         startTutkCreateNasLoader(args);
+    }
+
+    private void checkCreateNASResult(boolean success, TutkCreateNasLoader loader) {
+        boolean wizard = loader.getBundleArgs().getBoolean("wizard");
+        if (!success) {
+            hideDialog(wizard);
+            Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String status = loader.getStatus();
+        String code = loader.getCode();
+        if (code.equals("") || code.equals(TutkCodeID.SUCCESS) || code.equals(TutkCodeID.UID_ALREADY_TAKEN)) {
+            if (wizard && mWizardDialog != null) {
+                //hide keyboard
+                InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+                mWizardDialog.showFinishView();
+            } else
+                startFileManageActivity();
+        } else {
+            hideDialog(wizard);
+            Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void checkTutkGetNasLoader(boolean success, TutkGetNasLoader loader) {
@@ -382,7 +374,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
             mNASList = loader.getNasArrayList();
             mAdapter.notifyDataSetChanged();
             if (mNASList != null && mNASList.size() > 0) {
-                getLoaderManager().restartLoader(LoaderID.TUTK_NAS_ONLINE_CHECK, null, this).forceLoad();
+                startP2PStatusLoader();
                 return;
             }
         } else {
@@ -436,14 +428,47 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
         }
 
         Bundle args = loader.getBundleArgs();
-        String hostname = P2PService.getInstance().getP2PIP() + ":" +  P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
-        args.putString("hostname", hostname);
+        args.putString("hostname", loader.getP2PHostname());
         getLoaderManager().restartLoader(LoaderID.WIZARD, args, this).forceLoad();
     }
 
     private void checkP2PStatusLoader(boolean success, P2PStautsLoader loader) {
         mProgressView.setVisibility(View.INVISIBLE);
         mAdapter.notifyDataSetChanged();
+    }
+
+    private void checkWizardLoader(boolean success, WizardCheckLoader loader) {
+        mProgressView.setVisibility(View.INVISIBLE);
+        if (!success) {
+            Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Bundle args = loader.getBundleArgs();
+        boolean remoteAccess = args.getBoolean("RemoteAccess", false);
+        if (loader.isWizard()) {
+            LoginHelper loginHelper = new LoginHelper(LoginListActivity.this);
+            LoginHelper.LoginInfo account = new LoginHelper.LoginInfo();
+            account.email = NASPref.getCloudUsername(LoginListActivity.this);
+            account.macAddress = loader.getMacAddress();
+            boolean exist = loginHelper.getAccount(account);
+            loginHelper.onDestroy();
+
+            if (account.username != null && !account.username.equals(""))
+                args.putString("username", account.username);
+            else
+                args.putString("username", NASPref.defaultUserName);
+            args.putString("password", account.password);
+
+            showLoginDialog(args, remoteAccess, exist);
+            if (exist)
+                startLoginLoader(args);
+        } else {
+            if (remoteAccess)
+                Toast.makeText(this, getString(R.string.wizard_remote_access_error), Toast.LENGTH_SHORT).show();
+            else
+                showWizardDialog(args);
+        }
     }
 
     private void checkWizardSetLoader(boolean success, WizardSetLoader loader) {
@@ -461,31 +486,6 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
         Bundle args = loader.getBundleArgs();
         args.putBoolean("wizard", true);
         startLoginLoader(args);
-    }
-
-    private void checkCreateNASResult(boolean success, TutkCreateNasLoader loader) {
-        boolean wizard = loader.getBundleArgs().getBoolean("wizard");
-        if(!success) {
-            hideDialog(wizard);
-            Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        String status = loader.getStatus();
-        String code = loader.getCode();
-        if (code.equals("") || code.equals(TutkCodeID.SUCCESS) || code.equals(TutkCodeID.UID_ALREADY_TAKEN)) {
-            if(wizard && mWizardDialog != null) {
-                //hide keyboard
-                InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-                mWizardDialog.showFinishView();
-            }
-            else
-                startFileManageActivity();
-        } else {
-            hideDialog(wizard);
-            Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
-        }
     }
 
     private void showListDialog(ArrayList<HashMap<String, String>> nasList) {
@@ -582,7 +582,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                 hideDialog(true);
             }
         };
-        if(startProgress)
+        if (startProgress)
             mLoginDialog.showProgress();
     }
 
@@ -704,7 +704,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                         args.putString("nasId", nas.get("nasId"));
                         showNotificationDialog(args);
                     } else {
-                        if(enableDeviceCheck) {
+                        if (enableDeviceCheck) {
                             String isOnLine = nas.get("online");
                             if ("no".equals(isOnLine)) {
                                 return;

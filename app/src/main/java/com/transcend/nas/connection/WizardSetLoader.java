@@ -35,28 +35,17 @@ public class WizardSetLoader extends AsyncTaskLoader<Boolean> {
     private static final String TAG = WizardSetLoader.class.getSimpleName();
     private String mUrl;
     private Bundle mArgs;
-    private boolean mRemoteAccess = false;
     private String mError = null;
 
-    public WizardSetLoader(Context context, Bundle args, boolean isRemoteAccess) {
+    public WizardSetLoader(Context context, Bundle args) {
         super(context);
-        mRemoteAccess = isRemoteAccess;
         mArgs = args;
     }
 
     @Override
     public Boolean loadInBackground() {
-        boolean success = false;
-        if (mRemoteAccess) {
-            mUrl = "http://" + P2PService.getInstance().getP2PIP() + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP) + "/nas/wizard/";
-        } else {
-            mUrl = "http://" + mArgs.getString("hostname") + "/nas/wizard/";
-        }
-
-        if (mUrl != null) {
-            success = doSetPass(mUrl) && doSetZone(mUrl) && doSetInit(mUrl);
-        }
-
+        mUrl = "http://" + mArgs.getString("hostname") + "/nas/wizard/";
+        boolean success = doSetPass(mUrl) && doSetZone(mUrl) && doSetInit(mUrl);
         return success;
     }
 

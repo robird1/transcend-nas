@@ -34,6 +34,7 @@ import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.common.FileFactory;
 import com.transcend.nas.common.MediaFactory;
+import com.transcend.nas.service.LanCheckManager;
 import com.transcend.nas.viewer.music.MusicActivity;
 import com.transcend.nas.viewer.photo.ViewerActivity;
 import com.tutk.IOTC.P2PService;
@@ -224,12 +225,6 @@ public class FileSharedActivity extends AppCompatActivity implements
         mProgressView = (RelativeLayout) findViewById(R.id.main_progress_view);
     }
 
-    private boolean isRemoteAccess() {
-        String hostname = ServerManager.INSTANCE.getCurrentServer().getHostname();
-        String p2pIP = P2PService.getInstance().getP2PIP();
-        return hostname.contains(p2pIP);
-    }
-
     /**
      * DROPDOWN ITEM CONTROL
      */
@@ -385,12 +380,16 @@ public class FileSharedActivity extends AppCompatActivity implements
         }
 
         if (!record) {
-            mPreviousLoaderID = -1;
-            mPreviousLoaderArgs = null;
+            cleanRecordCommand();
         }
 
         Log.w(TAG, "Previous Loader ID: " + id);
         return record;
+    }
+
+    public void cleanRecordCommand() {
+        mPreviousLoaderID = -1;
+        mPreviousLoaderArgs = null;
     }
 
     /**
@@ -454,23 +453,19 @@ public class FileSharedActivity extends AppCompatActivity implements
                 doRefresh();
             }
         } else {
-            if (isRemoteAccess() && mPreviousLoaderID > 0 && mPreviousLoaderArgs != null) {
+            if (!LanCheckManager.getInstance().getLanConnect() && mPreviousLoaderID > 0 && mPreviousLoaderArgs != null) {
                 if (mLoaderID == LoaderID.TUTK_NAS_LINK) {
-                    mPreviousLoaderID = -1;
-                    mPreviousLoaderArgs = null;
+                    cleanRecordCommand();
+                    LanCheckManager.getInstance().startLanCheck();
                     Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
                 } else {
-                    Log.w(TAG, "Remote Access connect fail, try reConnect");
                     Bundle args = new Bundle();
-                    String uuid = P2PService.getInstance().getTUTKUUID();
+                    String uuid = NASPref.getUUID(this);
                     if (uuid == null || "".equals(uuid)) {
-                        uuid = NASPref.getUUID(this);
+                        uuid = NASPref.getCloudUUID(this);
                         if (uuid == null || "".equals(uuid)) {
-                            uuid = NASPref.getCloudUUID(this);
-                            if (uuid == null || "".equals(uuid)) {
-                                finish();
-                                return;
-                            }
+                            finish();
+                            return;
                         }
                     }
                     args.putString("hostname", uuid);
@@ -479,8 +474,10 @@ public class FileSharedActivity extends AppCompatActivity implements
                 }
             } else {
                 checkEmptyView();
-                if (loader instanceof SmbAbstractLoader)
+                if (loader instanceof SmbAbstractLoader) {
+                    LanCheckManager.getInstance().startLanCheck();
                     Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
+                }
                 else
                     Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
             }

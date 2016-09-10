@@ -42,7 +42,7 @@ public class NASApp extends Application {
 
     public static final String TUTK_NAME_TAG     = "@tS#";
 
-    private static Context mContext;
+    public static Context mContext;
     private Tracker mTracker;
 
     @Override

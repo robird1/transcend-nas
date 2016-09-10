@@ -9,6 +9,7 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
+import com.transcend.nas.service.LanCheckManager;
 import com.tutk.IOTC.P2PService;
 
 import org.apache.http.HttpEntity;
@@ -55,12 +56,9 @@ public class DiskDeviceInfoLoader extends AsyncTaskLoader<Boolean> {
             return false;
 
         Server server = ServerManager.INSTANCE.getCurrentServer();
-        String hostname = server.getHostname();
+        String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
         String hash = server.getHash();
-        String p2pIP = P2PService.getInstance().getP2PIP();
-        if (hostname.contains(p2pIP)) {
-            hostname = p2pIP + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
-        }
+
         DefaultHttpClient httpClient = HttpClientManager.getClient();
         String commandURL = "http://" + hostname + "/nas/get/devices";
         HttpResponse response = null;

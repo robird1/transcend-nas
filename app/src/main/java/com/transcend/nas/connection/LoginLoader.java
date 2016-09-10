@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
@@ -69,22 +71,13 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
     }
 
     private void updateLoginPreference() {
-        String p2pIp = P2PService.getInstance().getP2PIP();
-        String hostname = mServer.getHostname();
-        if(hostname.contains(p2pIp)) {
-            AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.LOGINREMOTE, true);
-            NASPref.setCloudUUID(getContext(), P2PService.getInstance().getTUTKUUID());
-        }
-        else {
-            AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.LOGINLOCAL, true);
-            NASPref.setLocalHostname(getContext(), hostname);
-        }
-
-        NASPref.setHostname(getContext(), hostname);
+        NASPref.setHostname(getContext(), mServer.getHostname());
         NASPref.setUsername(getContext(), mServer.getUsername());
         NASPref.setPassword(getContext(), mServer.getPassword());
         NASPref.setUUID(getContext(), mServer.getTutkUUID());
+        NASPref.setCloudUUID(getContext(), mServer.getTutkUUID());
         NASPref.setMacAddress(getContext(), mServer.getServerInfo().mac);
+        NASPref.setLocalHostname(getContext(), mServer.getServerInfo().ipAddress);
 
         FileFactory.getInstance().cleanRealPathMap();
 
@@ -92,12 +85,13 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
             mLoginHelper = new LoginHelper(mContext);
             LoginHelper.LoginInfo account = new LoginHelper.LoginInfo();
             account.email = NASPref.getCloudUsername(mContext);
-            account.hostname = hostname;
+            account.hostname = mServer.getHostname();
             account.username = mServer.getUsername();
             account.password = mServer.getPassword();
             account.uuid = mServer.getTutkUUID();
-            account.macAddress = mServer.getServerInfo().mac;
-            account.ip = mServer.getServerInfo().ipAddress;
+            ServerInfo info = mServer.getServerInfo();
+            account.macAddress = info.mac;
+            account.ip = info.ipAddress;
             mLoginHelper.setAccount(account);
             mLoginHelper.onDestroy();
         }

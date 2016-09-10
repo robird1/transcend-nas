@@ -57,6 +57,7 @@ import com.transcend.nas.common.AnalysisFactory;
 import com.transcend.nas.common.ManageFactory;
 import com.transcend.nas.connection.GuideActivity;
 import com.transcend.nas.connection_new.LoginActivity;
+import com.transcend.nas.service.LanCheckManager;
 import com.transcend.nas.view.NotificationDialog;
 import com.transcend.nas.view.ProgressDialog;
 import com.transcend.nas.connection.StartActivity;
@@ -153,6 +154,7 @@ public class FileManageActivity extends AppCompatActivity implements
         AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.BROWSERREMOTE);
         String password = NASPref.getPassword(this);
         if (password != null && !password.equals("")) {
+            LanCheckManager.getInstance().startLanCheck();
             init();
             initToolbar();
             initDropdown();
@@ -423,7 +425,7 @@ public class FileManageActivity extends AppCompatActivity implements
         mNavHeaderIcon = (ImageView) mNavHeader.findViewById(R.id.drawer_header_icon);
         mNavHeaderTitle.setText(mServer.getUsername());
         String email = NASPref.getCloudUsername(this);
-        if (isRemoteAccess() && !email.equals(""))
+        if (!email.equals(""))
             mNavHeaderSubtitle.setText(String.format("%s", email));
         else
             mNavHeaderSubtitle.setText(String.format("%s@%s", mServer.getUsername(), mServer.getHostname()));
@@ -434,13 +436,6 @@ public class FileManageActivity extends AppCompatActivity implements
         mEditorModeView = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.action_mode_custom, null);
         mEditorModeTitle = (TextView) mEditorModeView.findViewById(R.id.action_mode_custom_title);
     }
-
-    private boolean isRemoteAccess() {
-        String hostname = ServerManager.INSTANCE.getCurrentServer().getHostname();
-        String p2pIP = P2PService.getInstance().getP2PIP();
-        return hostname.contains(p2pIP);
-    }
-
 
     /**
      * DROPDOWN ITEM CONTROL
@@ -809,12 +804,16 @@ public class FileManageActivity extends AppCompatActivity implements
         }
 
         if (!record) {
-            mPreviousLoaderID = -1;
-            mPreviousLoaderArgs = null;
+            cleanRecordCommand();
         }
 
         Log.w(TAG, "Previous Loader ID: " + id);
         return record;
+    }
+
+    public void cleanRecordCommand() {
+        mPreviousLoaderID = -1;
+        mPreviousLoaderArgs = null;
     }
 
     /**
@@ -935,35 +934,31 @@ public class FileManageActivity extends AppCompatActivity implements
                 MediaFactory.open(this, args);
             } else if (loader instanceof SmbFileShareLoader) {
                 ArrayList<FileInfo> files = ((SmbFileShareLoader) loader).getShareList();
-                if(files != null && files.size() > 0)
+                if (files != null && files.size() > 0)
                     doLocalShare(files);
             } else {
                 doRefresh();
-                if(loader instanceof SmbAbstractLoader){
-                    String type = ((SmbAbstractLoader)loader).getType();
-                    if(type != null && !type.equals("")){
-                        Toast.makeText(FileManageActivity.this, type + " - " + getString(R.string.done),Toast.LENGTH_SHORT).show();
+                if (loader instanceof SmbAbstractLoader) {
+                    String type = ((SmbAbstractLoader) loader).getType();
+                    if (type != null && !type.equals("")) {
+                        Toast.makeText(FileManageActivity.this, type + " - " + getString(R.string.done), Toast.LENGTH_SHORT).show();
                     }
                 }
             }
         } else {
-            if (isRemoteAccess() && mPreviousLoaderID > 0 && mPreviousLoaderArgs != null) {
+            if (!LanCheckManager.getInstance().getLanConnect() && mPreviousLoaderID > 0 && mPreviousLoaderArgs != null) {
                 if (mLoaderID == LoaderID.TUTK_NAS_LINK) {
-                    mPreviousLoaderID = -1;
-                    mPreviousLoaderArgs = null;
+                    cleanRecordCommand();
+                    LanCheckManager.getInstance().startLanCheck();
                     Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
                 } else {
-                    Log.w(TAG, "Remote Access connect fail, try reConnect");
                     Bundle args = new Bundle();
-                    String uuid = P2PService.getInstance().getTUTKUUID();
+                    String uuid = NASPref.getUUID(this);
                     if (uuid == null || "".equals(uuid)) {
-                        uuid = NASPref.getUUID(this);
+                        uuid = NASPref.getCloudUUID(this);
                         if (uuid == null || "".equals(uuid)) {
-                            uuid = NASPref.getCloudUUID(this);
-                            if (uuid == null || "".equals(uuid)) {
-                                startSignInActivity(false);
-                                return;
-                            }
+                            startSignInActivity(false);
+                            return;
                         }
                     }
                     args.putString("hostname", uuid);
@@ -972,9 +967,10 @@ public class FileManageActivity extends AppCompatActivity implements
                 }
             } else {
                 checkEmptyView();
-                if (loader instanceof SmbAbstractLoader)
+                if (loader instanceof SmbAbstractLoader) {
+                    LanCheckManager.getInstance().startLanCheck();
                     Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
-                else
+                } else
                     Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
             }
         }
@@ -1139,7 +1135,7 @@ public class FileManageActivity extends AppCompatActivity implements
         final String path = target.path;
         final String name = target.name;
         boolean ignoreType = target.type.equals(FileInfo.TYPE.DIR);
-        new FileActionRenameDialog(this,ignoreType , name, names) {
+        new FileActionRenameDialog(this, ignoreType, name, names) {
             @Override
             public void onConfirm(String newName) {
                 if (newName.equals(name))
@@ -1182,7 +1178,7 @@ public class FileManageActivity extends AppCompatActivity implements
                 @Override
                 public void onCancel() {
                     getLoaderManager().destroyLoader(id);
-                    if(mSmbFileShareLoader != null){
+                    if (mSmbFileShareLoader != null) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                             mSmbFileShareLoader.cancelLoad();
                         }
@@ -1460,7 +1456,7 @@ public class FileManageActivity extends AppCompatActivity implements
     private void toggleEditorModeAction(int count) {
         boolean visible = (count == 1);
         boolean containFolder = false;
-        if(visible){
+        if (visible) {
             ArrayList<FileInfo> files = getSelectedFiles();
             for (FileInfo file : files) {
                 if (file.type.equals(FileInfo.TYPE.DIR))
@@ -1610,17 +1606,6 @@ public class FileManageActivity extends AppCompatActivity implements
             mCastManager.startVideoCastControllerActivity(this, info, 0, true);
         } else {
             MediaFactory.open(this, fileInfo.path);
-            /*Server server = ServerManager.INSTANCE.getCurrentServer();
-            if(!fileInfo.path.startsWith(NASApp.ROOT_STG) && isRemoteAccess()) {
-                Bundle args = new Bundle();
-                args.putString("path", MediaFactory.createTranslatePath(fileInfo.path));
-                args.putString("name", MediaFactory.parseName(fileInfo.name));
-                args.putString("type", MimeUtil.getMimeType(fileInfo.path));
-                getLoaderManager().restartLoader(LoaderID.MEDIA_PLAYER, args, this).forceLoad();
-            }
-            else{
-                MediaFactory.open(this, fileInfo.path);
-            }*/
         }
     }
 
@@ -1720,9 +1705,12 @@ public class FileManageActivity extends AppCompatActivity implements
         //clean path map
         FileFactory.getInstance().cleanRealPathMap();
 
+        //clean lan check
+        LanCheckManager.getInstance().setLanConnect(false);
+
         //show SignIn activity
         Intent intent = new Intent();
-        if(NASPref.useNewLoginFlow)
+        if (NASPref.useNewLoginFlow)
             intent.setClass(FileManageActivity.this, LoginActivity.class);
         else
             intent.setClass(FileManageActivity.this, StartActivity.class);

@@ -126,11 +126,7 @@ public class FileFactory {
             url = "file://" + path;
         } else {
             Server server = ServerManager.INSTANCE.getCurrentServer();
-            String hostname = server.getHostname();
-            String p2pIp = P2PService.getInstance().getP2PIP();
-            if (hostname.contains(p2pIp)) {
-                hostname = p2pIp + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
-            }
+            String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
             String username = server.getUsername();
             String hash = server.getHash();
             String filepath;

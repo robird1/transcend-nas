@@ -130,11 +130,7 @@ public class AutoBackupTask extends AsyncTask<String, String, Boolean>
             builder.append(mPassword);
             builder.append("@");
         }
-        String hostname = mHostname;
-        String p2pIP = P2PService.getInstance().getP2PIP();
-        if(hostname.contains(p2pIP)){
-            hostname = p2pIP + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.SMB);
-        }
+        String hostname = P2PService.getInstance().getIP(mHostname, P2PService.P2PProtocalType.SMB);
         builder.append(hostname);
         if (isValid(path))
             builder.append(path);

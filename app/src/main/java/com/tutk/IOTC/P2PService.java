@@ -3,6 +3,7 @@ package com.tutk.IOTC;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.transcend.nas.service.LanCheckManager;
 import com.tutk.IOTC.P2PTunnelAPIs.IP2PTunnelCallback;
 
 import android.util.Log;
@@ -85,7 +86,7 @@ public class P2PService implements IP2PTunnelCallback {
         Log.d(TAG, "P2PTunnelAgent_Connect(.)=" + start);
         Log.d(TAG, "P2PTunnelAgent_Connect(.) Error Message=" + pnErrFromDeviceCB[0]);
 
-        if(start >= 0)
+        if (start >= 0)
             commApis.P2PTunnelAgent_Disconnect(start);
         commApis.P2PTunnelAgentDeInitialize();
         return start >= 0;
@@ -102,7 +103,7 @@ public class P2PService implements IP2PTunnelCallback {
             m_commApis = new P2PTunnelAPIs(this);
             m_nInit = m_commApis.P2PTunnelAgentInitialize(4);
             Log.d(TAG, "P2PTunnel m_nInit=" + m_nInit);
-            if(m_commApis == null)
+            if (m_commApis == null)
                 return nStart;
 
             String username = "Tutk.com", password = "P2P Platform";
@@ -156,12 +157,6 @@ public class P2PService implements IP2PTunnelCallback {
         return nStart;
     }
 
-    public int reStartP2PConnect() {
-        Log.d(TAG, "P2PTunnel start reConnect");
-        stopP2PConnect();
-        return startP2PConnect(mUUID);
-    }
-
     public String getTUTKUUID() {
         return mUUID;
     }
@@ -183,6 +178,15 @@ public class P2PService implements IP2PTunnelCallback {
 
     public String getP2PIP() {
         return mLocalHost;
+    }
+
+    public String getIP(String hostname, P2PProtocalType type) {
+        if (LanCheckManager.getInstance().getLanConnect()) {
+            hostname = LanCheckManager.getInstance().getLanIP();
+        } else {
+            hostname = mLocalHost + ":" + getP2PPort(type);
+        }
+        return hostname;
     }
 
     public void stopP2PConnect() {

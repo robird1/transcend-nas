@@ -107,12 +107,8 @@ public class SmbFileListLoader extends SmbAbstractLoader {
     private boolean getSharedList() {
         boolean isSuccess = false;
         Server server = ServerManager.INSTANCE.getCurrentServer();
-        String hostname = server.getHostname();
+        String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
         String hash = server.getHash();
-        String p2pIP = P2PService.getInstance().getP2PIP();
-        if (hostname.contains(p2pIP)) {
-            hostname = p2pIP + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
-        }
         DefaultHttpClient httpClient = HttpClientManager.getClient();
         String commandURL = "http://" + hostname + "/nas/get/sharelist";
         HttpResponse response = null;

@@ -85,6 +85,7 @@ public class LoginHelper {
             c = db.rawQuery(url, null);
             if (c.moveToFirst()) {
                 exist = true;
+                item.ip = c.getString(c.getColumnIndex(MyDBHelper.TUTK_IP));
                 item.username = c.getString(c.getColumnIndex(MyDBHelper.TUTK_USERNAME));
                 item.password = c.getString(c.getColumnIndex(MyDBHelper.TUTK_PASSWORD));
             }

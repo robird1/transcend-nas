@@ -77,4 +77,8 @@ public class TutkLinkNasLoader extends TutkBasicLoader {
     public String getError(){
         return mError;
     }
+
+    public String getP2PHostname(){
+        return P2PService.getInstance().getP2PIP() + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
+    }
 }

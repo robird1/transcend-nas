@@ -1,20 +1,17 @@
 package com.transcend.nas.connection;
 
-import android.app.Activity;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Bundle;
 import android.util.Log;
 
 import com.realtek.nasfun.api.HttpClientManager;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
-import com.transcend.nas.R;
 import com.transcend.nas.common.AnalysisFactory;
-import com.tutk.IOTC.P2PService;
-import com.tutk.IOTC.P2PTunnelAPIs;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -40,70 +37,40 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
     private ConnectivityManager mConnMgr;
     private Server mServer;
     private boolean isWizard = false;
-    private String mModel = "";
-    private String mSerialNum = "";
-    private LinkType mLinkType = LinkType.NO_LINK;
+    private boolean isRemote = false;
     private Context mContext;
+    private String mHostname;
+    private String mUsername;
+    private String mPassword;
 
     public enum LinkType {
         NO_LINK, INTRANET, INTERNET
     }
 
-    public AutoLinkLoader(Context context) {
+    public AutoLinkLoader(Context context, Bundle args) {
         super(context);
         mContext = context;
         mConnMgr = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        mHostname = args.getString("hostname");
+        mUsername = args.getString("username");
+        mPassword = args.getString("password");
+        isRemote = args.getBoolean("RemoteAccess");
     }
 
     @Override
     public Boolean loadInBackground() {
-        String username = NASPref.getUsername(getContext());
-        String password = NASPref.getPassword(getContext());
-        String hostname = "";
-
+        Log.d(TAG, "AutoLink : " + mHostname + ", " + mUsername + "," + mPassword);
         if (checkNetworkAvailable()) {
-            hostname = NASPref.getLocalHostname(getContext());
-            if (hostname.isEmpty() || username.isEmpty() || password.isEmpty()) {
+            if (mHostname.isEmpty() || mUsername.isEmpty() || mPassword.isEmpty()) {
                 AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.AUTOLINKLOCAL, AnalysisFactory.LABEL.EMPTY);
-                Log.d(TAG, "Intranet fail, due to : " + hostname + ", " + username + "," + password);
             } else {
-                if (doWizardCheck(true)) {
-                    Log.d(TAG, "Intranet Wizard : " + isWizard);
+                if (doWizardCheck(mHostname)) {
                     if (isWizard) {
-                        if (loginThroughIntranet(hostname, username, password)) {
-                            mLinkType = LinkType.INTRANET;
-                            return true;
-                        }
-                    } else {
-                        AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.AUTOLINKLOCAL, AnalysisFactory.LABEL.NOWIZARD);
-                        mLinkType = LinkType.INTRANET;
-                        return true;
-                    }
-                }
-            }
-
-            hostname = NASPref.getHostname(getContext());
-            if (hostname.isEmpty() || username.isEmpty() || password.isEmpty()) {
-                AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.AUTOLINKREMOTE, AnalysisFactory.LABEL.EMPTY);
-                Log.d(TAG, "Internet fail, due to : " + hostname + ", " + username + "," + password);
-            } else {
-                if (doWizardCheck(false)) {
-                    Log.d(TAG, "Internet Wizard : " + isWizard);
-                    if (isWizard) {
-                        if (signInThroughInternet(hostname, username, password)) {
-                            mLinkType = LinkType.INTERNET;
-                            return true;
-                        }
-                    } else {
-                        AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.AUTOLINKREMOTE, AnalysisFactory.LABEL.NOWIZARD);
-                        mLinkType = LinkType.INTERNET;
-                        return true;
+                        return login(mHostname, mUsername, mPassword);
                     }
                 }
             }
         }
-
-        mLinkType = LinkType.NO_LINK;
         return false;
     }
 
@@ -118,149 +85,85 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
         return (isWiFi || isMobile);
     }
 
-    private boolean doWizardCheck(boolean isIntranet) {
+    private boolean doWizardCheck(String hostname) {
         isWizard = false;
         boolean success = false;
-        String commandURL = null;
-        if (isIntranet) {
-            Log.d(TAG, "Wizard check : Intranet");
-            String local = NASPref.getLocalHostname(getContext());
-            if (local != null && !local.equals(""))
-                commandURL = "http://" + local + "/nas/get/register";
-        } else {
-            Log.d(TAG, "Wizard check : Internet");
-            String uuid = NASPref.getCloudUUID(getContext());
-            if (!uuid.equals("")) {
-                P2PService.getInstance().stopP2PConnect();
-                int result = P2PService.getInstance().startP2PConnect(uuid);
-                if (result >= 0) {
-                    commandURL = "http://" + P2PService.getInstance().getP2PIP() + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP) + "/nas/get/register";
-                } else {
-                    P2PService.getInstance().stopP2PConnect();
-                }
+        String commandURL = "http://" + hostname + "/nas/get/register";
+        Log.d(TAG, "Wizard check : " + commandURL);
+
+        try {
+            DefaultHttpClient httpClient = HttpClientManager.getClient();
+            HttpGet httpGet = new HttpGet(commandURL);
+            HttpResponse httpResponse;
+            httpResponse = httpClient.execute(httpGet);
+            HttpEntity httpEntity = httpResponse.getEntity();
+            InputStream inputStream = httpEntity.getContent();
+            String inputEncoding = EntityUtils.getContentCharSet(httpEntity);
+            if (inputEncoding == null) {
+                inputEncoding = HTTP.DEFAULT_CONTENT_CHARSET;
             }
-        }
 
-        if (commandURL != null) {
             try {
-                DefaultHttpClient httpClient = HttpClientManager.getClient();
-                HttpGet httpGet = new HttpGet(commandURL);
-                HttpResponse httpResponse;
-                httpResponse = httpClient.execute(httpGet);
-                HttpEntity httpEntity = httpResponse.getEntity();
-                InputStream inputStream = httpEntity.getContent();
-                String inputEncoding = EntityUtils.getContentCharSet(httpEntity);
-                if (inputEncoding == null) {
-                    inputEncoding = HTTP.DEFAULT_CONTENT_CHARSET;
-                }
+                XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+                factory.setNamespaceAware(true);
+                XmlPullParser xpp = factory.newPullParser();
+                xpp.setInput(inputStream, inputEncoding);
+                int eventType = xpp.getEventType();
+                String curTagName = null;
+                String text = null;
 
-                try {
-                    XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-                    factory.setNamespaceAware(true);
-                    XmlPullParser xpp = factory.newPullParser();
-                    xpp.setInput(inputStream, inputEncoding);
-                    int eventType = xpp.getEventType();
-                    String curTagName = null;
-                    String text = null;
-
-                    do {
-                        String tagName = xpp.getName();
-                        if (eventType == XmlPullParser.START_TAG) {
-                            curTagName = tagName;
-                        } else if (eventType == XmlPullParser.TEXT) {
-                            if (curTagName != null) {
-                                text = xpp.getText();
-                                if (curTagName.equals("initialized")) {
-                                    String initialized = text;
-                                    if (initialized != null) {
-                                        isWizard = initialized.equals("yes");
-                                        break;
-                                    }
-                                }
-                                if (curTagName.equals("model")) {
-                                    String model = text;
-                                    if (model != null) {
-                                        mModel = model;
-                                    }
-                                }
-                                if (curTagName.equals("serialnum")) {
-                                    String serialNum = text;
-                                    if (serialNum != null) {
-                                        mSerialNum = serialNum;
-                                        NASPref.setSerialNum(getContext(), mSerialNum);
-                                    }
+                do {
+                    String tagName = xpp.getName();
+                    if (eventType == XmlPullParser.START_TAG) {
+                        curTagName = tagName;
+                    } else if (eventType == XmlPullParser.TEXT) {
+                        if (curTagName != null) {
+                            text = xpp.getText();
+                            if (curTagName.equals("initialized")) {
+                                String initialized = text;
+                                if (initialized != null) {
+                                    isWizard = initialized.equals("yes");
+                                    break;
                                 }
                             }
                         }
+                    }
 
-                        eventType = xpp.next();
+                    eventType = xpp.next();
 
-                    } while (eventType != XmlPullParser.END_DOCUMENT);
-                    success = true;
-                } catch (XmlPullParserException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-            } catch (ClientProtocolException e) {
+                } while (eventType != XmlPullParser.END_DOCUMENT);
+                success = true;
+            } catch (XmlPullParserException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
             }
+
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
         }
+
 
         Log.d(TAG, "Wizard check : " + success + ", isWizard : " + isWizard);
         return success;
     }
 
-    private boolean signInThroughInternet(String hostname, String username, String password) {
-        Log.d(TAG, "Internet: start");
-        String uuid = NASPref.getCloudUUID(getContext());
-        if (!uuid.equals("")) {
-            P2PService.getInstance().stopP2PConnect();
-            int result = P2PService.getInstance().startP2PConnect(uuid);
-            if (result >= 0) {
-                hostname = P2PService.getInstance().getP2PIP() + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
-                mServer = new Server(hostname, username, password);
-                boolean isConnected = mServer.connect();
-                if (isConnected) {
-                    updateServerManager();
-                    NASPref.setHostname(getContext(), hostname);
-                } else {
-                    P2PService.getInstance().stopP2PConnect();
-                }
-                Log.d(TAG, "Internet: " + isConnected);
-                Log.d(TAG, "Internet ip: " + hostname);
-                Log.d(TAG, "Internet username: " + username);
-                Log.d(TAG, "Internet password: " + password);
-                AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.AUTOLINKREMOTE, isConnected);
-                return isConnected;
-            } else {
-                P2PService.getInstance().stopP2PConnect();
-            }
-        }
-        Log.d(TAG, "Internet fail, due to : empty uuid");
-        AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.AUTOLINKREMOTE, false);
-        return false;
-    }
-
-    private boolean loginThroughIntranet(String hostname, String username, String password) {
-        Log.d(TAG, "Intranet: start");
-
+    private boolean login(String hostname, String username, String password) {
         mServer = new Server(hostname, username, password);
         boolean isConnected = mServer.connect();
         if (isConnected) {
             updateServerManager();
             NASPref.setHostname(getContext(), hostname);
         }
-        Log.d(TAG, "Intranet: " + isConnected);
-        Log.d(TAG, "Intranet ip: " + hostname);
-        Log.d(TAG, "Intranet username: " + username);
-        Log.d(TAG, "Intranet password: " + password);
-        AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.AUTOLINKLOCAL, isConnected);
+
+        Log.d(TAG, "AutoLink : " + isConnected);
+        Log.d(TAG, "AutoLink ip: " + hostname);
+        Log.d(TAG, "AutoLink username: " + username);
+        Log.d(TAG, "AutoLink password: " + password);
         return isConnected;
     }
 
@@ -270,20 +173,12 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
         NASPref.setSessionVerifiedTime(getContext(), Long.toString(System.currentTimeMillis()));
     }
 
-    public LinkType getLinkType() {
-        return mLinkType;
-    }
-
-    public String getModel() {
-        return mModel;
-    }
-
-    public String getSerialNum() {
-        return mSerialNum;
-    }
-
     public boolean isWizard() {
         return isWizard;
+    }
+
+    public boolean isRemote(){
+        return isRemote;
     }
 
 }

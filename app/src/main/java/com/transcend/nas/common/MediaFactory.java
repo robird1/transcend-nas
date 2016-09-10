@@ -33,13 +33,9 @@ public class MediaFactory {
         String url = args.getString("path");
         String[] paths = url.split("/");
         Server server = ServerManager.INSTANCE.getCurrentServer();
-        String hostname = server.getHostname();
-        String p2pIP = P2PService.getInstance().getP2PIP();
-        if (hostname.contains(p2pIP)) {
-            String newHostname = p2pIP + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
-            if(paths.length > 0){
-                url = "http://" + newHostname + "/hls/" + paths[paths.length-1];
-            }
+        String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
+        if(paths.length > 0){
+            url = "http://" + hostname + "/hls/" + paths[paths.length-1];
         }
         Uri uri = Uri.parse(url);
         String type = args.getString("type");
@@ -74,11 +70,7 @@ public class MediaFactory {
         if (!path.startsWith(NASApp.ROOT_STG)) {
             // remote
             Server server = ServerManager.INSTANCE.getCurrentServer();
-            String hostname = server.getHostname();
-            String p2pIP = P2PService.getInstance().getP2PIP();
-            if (P2PService.getInstance().isConnected() && hostname.contains(p2pIP)) {
-                hostname = p2pIP + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
-            }
+            String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
             String hash = server.getHash();
             String folder = parseFolder(path);
             String file = parseFile(path);
@@ -96,11 +88,7 @@ public class MediaFactory {
         }
         else {
             Server server = ServerManager.INSTANCE.getCurrentServer();
-            String hostname = server.getHostname();
-            String p2pIP = P2PService.getInstance().getP2PIP();
-            if (P2PService.getInstance().isConnected() && hostname.contains(p2pIP)) {
-                hostname = p2pIP + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
-            }
+            String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
             String username = server.getUsername();
             String hash = server.getHash();
             String url;

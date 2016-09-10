@@ -288,9 +288,7 @@ public class StartActivity extends AppCompatActivity implements LoaderManager.Lo
 
     private void checkLinkNASResult(TutkLinkNasLoader loader) {
         Bundle args = loader.getBundleArgs();
-        String ip = P2PService.getInstance().getP2PIP();
-        int port = P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
-        args.putString("hostname", ip + ":" + port);
+        args.putString("hostname", loader.getP2PHostname());
         getLoaderManager().restartLoader(LoaderID.LOGIN, args, this).forceLoad();
     }
 

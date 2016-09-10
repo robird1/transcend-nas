@@ -45,7 +45,6 @@ public class WizardActivity extends AppCompatActivity implements LoaderManager.L
     private RelativeLayout mReadyLayout;
     private SwitchCompat mCameraBackupSwitch;
     private String mHostname = null;
-    private boolean isRemoteAccess = false;
     private String mModel = "";
     private Bundle mBundle = null;
     private int mLoaderID = -1;
@@ -63,8 +62,6 @@ public class WizardActivity extends AppCompatActivity implements LoaderManager.L
 
         Intent intent = getIntent();
         mHostname = (String) intent.getExtras().getString("Hostname", null);
-        isRemoteAccess = (boolean) intent.getBooleanExtra("RemoteAccess", false);
-        isRemoteAccess = (boolean) intent.getBooleanExtra("Wizard", false);
         mModel = (String) intent.getExtras().getString("Model", null);
         initWizardLayout();
         initReadyLayout();
@@ -130,7 +127,7 @@ public class WizardActivity extends AppCompatActivity implements LoaderManager.L
         mProgressView.setVisibility(View.VISIBLE);
         switch (mLoaderID = id) {
             case LoaderID.WIZARD_INIT:
-                return new WizardSetLoader(this, args, isRemoteAccess);
+                return new WizardSetLoader(this, args);
             case LoaderID.LOGIN:
                 return new LoginLoader(this, args, true);
         }
@@ -208,7 +205,7 @@ public class WizardActivity extends AppCompatActivity implements LoaderManager.L
                 Bundle args = new Bundle();
                 args.putString("nickname", getString(R.string.wizard_success));
                 args.putString("hostname", mHostname);
-                args.putString("username", "admin");
+                args.putString("username", NASPref.defaultUserName);
                 args.putString("password", pwd);
                 args.putString("timezone", timezone);
                 getLoaderManager().restartLoader(LoaderID.WIZARD_INIT, args, this).forceLoad();

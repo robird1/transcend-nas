@@ -132,11 +132,7 @@ public class DiskFactory {
 
         boolean startParser = false;
         Server server = ServerManager.INSTANCE.getCurrentServer();
-        String hostname = server.getHostname();
-        String p2pIP = P2PService.getInstance().getP2PIP();
-        if (hostname.contains(p2pIP)) {
-            hostname = p2pIP + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
-        }
+        String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
         DefaultHttpClient httpClient = HttpClientManager.getClient();
         String commandURL = "http://" + hostname + "/nas/get/info";
         HttpResponse response = null;

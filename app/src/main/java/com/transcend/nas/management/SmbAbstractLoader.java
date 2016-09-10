@@ -16,6 +16,7 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.R;
 import com.transcend.nas.common.FileFactory;
+import com.transcend.nas.service.LanCheckManager;
 import com.transcend.nas.utils.MathUtil;
 import com.tutk.IOTC.P2PService;
 
@@ -91,10 +92,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
             builder.append(mPassword);
             builder.append("@");
         }
-        String hostname = mHostname;
-        String p2pIP = P2PService.getInstance().getP2PIP();
-        if (hostname.contains(p2pIP))
-            hostname = p2pIP + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.SMB);
+        String hostname = P2PService.getInstance().getIP(mHostname, P2PService.P2PProtocalType.SMB);
         builder.append(hostname);
         if (isValid(path))
             builder.append(path);

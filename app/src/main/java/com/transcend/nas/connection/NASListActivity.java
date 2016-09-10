@@ -273,7 +273,7 @@ public class NASListActivity extends AppCompatActivity implements LoaderManager.
                 return new TutkDeleteNasLoader(this, server, token, nasId);
             case LoaderID.WIZARD:
                 mProgressView.setVisibility(View.VISIBLE);
-                return new WizardCheckLoader(this, args, isRemoteAccess);
+                return new WizardCheckLoader(this, args);
             case LoaderID.TUTK_NAS_ONLINE_CHECK:
                 mProgressView.setVisibility(View.VISIBLE);
                 return new P2PStautsLoader(NASListActivity.this, mNASList);
@@ -415,8 +415,7 @@ public class NASListActivity extends AppCompatActivity implements LoaderManager.
         }
 
         Bundle args = loader.getBundleArgs();
-        String hostname = P2PService.getInstance().getP2PIP() + ":" +  P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
-        args.putString("hostname", hostname);
+        args.putString("hostname", loader.getP2PHostname());
         getLoaderManager().restartLoader(LoaderID.WIZARD, args, this).forceLoad();
     }
 

@@ -32,105 +32,96 @@ public class WizardCheckLoader extends AsyncTaskLoader<Boolean> {
 
     private String mUrl;
     private Bundle mArgs;
-    private boolean mRemoteAccess = false;
     private boolean isWizard = false;
     private String mModel = "";
     private String mSerialNum = "";
     private String mHwAddr = "";
     private String mIpAddr = "";
 
-    public WizardCheckLoader(Context context, Bundle args, boolean isRemoteAccess) {
+    public WizardCheckLoader(Context context, Bundle args) {
         super(context);
-        mRemoteAccess = isRemoteAccess;
         mArgs = args;
     }
 
     @Override
     public Boolean loadInBackground() {
         boolean success = false;
-        if (mRemoteAccess) {
-            mUrl = "http://" + P2PService.getInstance().getP2PIP() + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP) + "/nas/get/register";
-        } else {
-            mUrl = "http://" + mArgs.getString("hostname") + "/nas/get/register";
-        }
+        mUrl = "http://" + mArgs.getString("hostname") + "/nas/get/register";
+        try {
+            String commandURL = mUrl;
+            DefaultHttpClient httpClient = HttpClientManager.getClient();
+            HttpGet httpGet = new HttpGet(commandURL);
+            HttpResponse httpResponse;
+            httpResponse = httpClient.execute(httpGet);
+            HttpEntity httpEntity = httpResponse.getEntity();
+            InputStream inputStream = httpEntity.getContent();
+            String inputEncoding = EntityUtils.getContentCharSet(httpEntity);
+            if (inputEncoding == null) {
+                inputEncoding = HTTP.DEFAULT_CONTENT_CHARSET;
+            }
 
-        if (mUrl != null) {
             try {
-                String commandURL = mUrl;
-                DefaultHttpClient httpClient = HttpClientManager.getClient();
-                HttpGet httpGet = new HttpGet(commandURL);
-                HttpResponse httpResponse;
-                httpResponse = httpClient.execute(httpGet);
-                HttpEntity httpEntity = httpResponse.getEntity();
-                InputStream inputStream = httpEntity.getContent();
-                String inputEncoding = EntityUtils.getContentCharSet(httpEntity);
-                if (inputEncoding == null) {
-                    inputEncoding = HTTP.DEFAULT_CONTENT_CHARSET;
-                }
+                XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+                factory.setNamespaceAware(true);
+                XmlPullParser xpp = factory.newPullParser();
+                xpp.setInput(inputStream, inputEncoding);
+                int eventType = xpp.getEventType();
+                String curTagName = null;
+                String text = null;
 
-                try {
-                    XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-                    factory.setNamespaceAware(true);
-                    XmlPullParser xpp = factory.newPullParser();
-                    xpp.setInput(inputStream, inputEncoding);
-                    int eventType = xpp.getEventType();
-                    String curTagName = null;
-                    String text = null;
-
-                    do {
-                        String tagName = xpp.getName();
-                        if (eventType == XmlPullParser.START_TAG) {
-                            curTagName = tagName;
-                        } else if (eventType == XmlPullParser.TEXT) {
-                            if (curTagName != null) {
-                                text = xpp.getText();
-                                if (curTagName.equals("initialized")) {
-                                    String initialized = text;
-                                    if (initialized != null) {
-                                        isWizard = initialized.equals("yes");
-                                    }
-                                } else if (curTagName.equals("model")) {
-                                    String model = text;
-                                    if (model != null) {
-                                        mModel = model;
-                                    }
-                                } else if (curTagName.equals("serialnum")) {
-                                    String serialNum = text;
-                                    if (serialNum != null) {
-                                        mSerialNum = serialNum;
-                                        NASPref.setSerialNum(getContext(), mSerialNum);
-                                    }
-                                } else if (curTagName.equals("hwaddr")) {
-                                    String hwAddr = text;
-                                    if (hwAddr != null) {
-                                        mHwAddr = hwAddr;
-                                    }
-                                } else if (curTagName.equals("ipaddr")) {
-                                    String ipAddr = text;
-                                    if (ipAddr != null) {
-                                        mIpAddr = ipAddr;
-                                    }
+                do {
+                    String tagName = xpp.getName();
+                    if (eventType == XmlPullParser.START_TAG) {
+                        curTagName = tagName;
+                    } else if (eventType == XmlPullParser.TEXT) {
+                        if (curTagName != null) {
+                            text = xpp.getText();
+                            if (curTagName.equals("initialized")) {
+                                String initialized = text;
+                                if (initialized != null) {
+                                    isWizard = initialized.equals("yes");
+                                }
+                            } else if (curTagName.equals("model")) {
+                                String model = text;
+                                if (model != null) {
+                                    mModel = model;
+                                }
+                            } else if (curTagName.equals("serialnum")) {
+                                String serialNum = text;
+                                if (serialNum != null) {
+                                    mSerialNum = serialNum;
+                                    NASPref.setSerialNum(getContext(), mSerialNum);
+                                }
+                            } else if (curTagName.equals("hwaddr")) {
+                                String hwAddr = text;
+                                if (hwAddr != null) {
+                                    mHwAddr = hwAddr;
+                                }
+                            } else if (curTagName.equals("ipaddr")) {
+                                String ipAddr = text;
+                                if (ipAddr != null) {
+                                    mIpAddr = ipAddr;
                                 }
                             }
                         }
+                    }
 
-                        eventType = xpp.next();
+                    eventType = xpp.next();
 
-                    } while (eventType != XmlPullParser.END_DOCUMENT);
-                    success = true;
-                } catch (XmlPullParserException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-            } catch (ClientProtocolException e) {
+                } while (eventType != XmlPullParser.END_DOCUMENT);
+                success = true;
+            } catch (XmlPullParserException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
             }
+
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
         }
 
         return success;
