@@ -12,6 +12,7 @@ import android.os.Message;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
+import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.support.v7.app.AppCompatActivity;
@@ -43,6 +44,7 @@ import com.transcend.nas.common.FileFactory;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.prefs.Preferences;
 
 /**
  * Created by silverhsu on 16/3/2.
@@ -77,9 +79,9 @@ public class NewSettingsActivity extends AppCompatActivity implements
             Bundle arg = new Bundle();
             arg.putString("path", path);
             getLoaderManager().restartLoader(LoaderID.SMB_NEW_FOLDER, arg, this).forceLoad();
-        } else {
-            doRemoteAccessCheck(false);
-        }
+        } //else {
+          //  doRemoteAccessCheck(false);
+        //}
     }
 
     @Override
@@ -139,8 +141,8 @@ public class NewSettingsActivity extends AppCompatActivity implements
                 getLoaderManager().restartLoader(LoaderID.AUTO_BACKUP, arg, this).forceLoad();
                 isStartService = false;
             } else {
-                if(!doRemoteAccessCheck(false))
-                    mProgressView.setVisibility(View.INVISIBLE);
+                //if(!doRemoteAccessCheck(false))
+                mProgressView.setVisibility(View.INVISIBLE);
             }
             return;
         }
@@ -322,11 +324,15 @@ public class NewSettingsActivity extends AppCompatActivity implements
             getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
             refreshColumnRemoteAccessSetting();
             refreshColumnBackupSetting(false);
+            refreshColumnBackupVideo(true);
             refreshColumnBackupScenario(true, false);
             refreshColumnBackupLocation(true);
+            refreshColumnBackupSource(true);
             refreshColumnDownloadLocation();
             refreshColumnCacheUseSize();
             getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+            if(NASPref.useNewLoginFlow)
+                getPreferenceScreen().removePreference((PreferenceCategory) findPreference(getString(R.string.pref_remote_access_category)));
         }
 
         @Override
@@ -347,10 +353,15 @@ public class NewSettingsActivity extends AppCompatActivity implements
                     String type = bundle.getString("type");
                     String path = bundle.getString("path");
                     if (NASApp.ACT_DIRECT.equals(type)) {
-                        if (NASApp.MODE_SMB.equals(mode))
+                        if (NASApp.MODE_SMB.equals(mode)) {
                             NASPref.setBackupLocation(getActivity(), path);
-                        else
-                            NASPref.setDownloadLocation(getActivity(), path);
+                        }
+                        else {
+                            if(isDownloadLocation)
+                                NASPref.setDownloadLocation(getActivity(), path);
+                            else
+                                NASPref.setBackupSource(getActivity(), path);
+                        }
                     }
                 }
             } else if (requestCode == RemoteAccessActivity.REQUEST_CODE){
@@ -364,6 +375,8 @@ public class NewSettingsActivity extends AppCompatActivity implements
             String key = preference.getKey();
             if (key.equals(getString(R.string.pref_backup_location))) {
                 startBackupLocateActivity();
+            } else if (key.equals(getString(R.string.pref_backup_source))) {
+                startBackupSourceActivity();
             } else if (key.equals(getString(R.string.pref_download_location))) {
                 startDownloadLocateActivity();
             } else if (key.equals(getString(R.string.pref_cache_clean))) {
@@ -382,10 +395,14 @@ public class NewSettingsActivity extends AppCompatActivity implements
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             if (key.equals(getString(R.string.pref_auto_backup))) {
                 refreshColumnBackupSetting(true);
+            } else if (key.equals(getString(R.string.pref_backup_video))) {
+                refreshColumnBackupVideo(false);
             } else if (key.equals(getString(R.string.pref_backup_scenario))) {
                 refreshColumnBackupScenario(false, true);
             } else if (key.equals(getString(R.string.pref_backup_location))) {
                 refreshColumnBackupLocation(false);
+            } else if (key.equals(getString(R.string.pref_backup_source))) {
+                refreshColumnBackupSource(false);
             } else if (key.equals(getString(R.string.pref_download_location))) {
                 refreshColumnDownloadLocation();
             } else if (key.equals(getString(R.string.pref_cache_size))) {
@@ -412,7 +429,21 @@ public class NewSettingsActivity extends AppCompatActivity implements
             startActivityForResult(intent, FileActionLocateActivity.REQUEST_CODE);
         }
 
+        private void startBackupSourceActivity() {
+            isDownloadLocation = false;
+            Bundle args = new Bundle();
+            args.putString("mode", NASApp.MODE_STG);
+            args.putString("type", NASApp.ACT_DIRECT);
+            args.putString("root", NASApp.ROOT_STG);
+            args.putString("path", NASPref.getBackupSource(getActivity()));
+            Intent intent = new Intent();
+            intent.setClass(getActivity(), FileActionLocateActivity.class);
+            intent.putExtras(args);
+            startActivityForResult(intent, FileActionLocateActivity.REQUEST_CODE);
+        }
+
         private void startDownloadLocateActivity() {
+            isDownloadLocation = true;
             Bundle args = new Bundle();
             args.putString("mode", NASApp.MODE_STG);
             args.putString("type", NASApp.ACT_DIRECT);
@@ -444,6 +475,9 @@ public class NewSettingsActivity extends AppCompatActivity implements
         }
 
         private void refreshColumnRemoteAccessSetting() {
+            if(NASPref.useNewLoginFlow)
+                return;
+
             String key = getString(R.string.pref_remote_access);
             Preference pref = findPreference(key);
             int status = NASPref.getCloudAccountStatus(mContext);
@@ -474,23 +508,38 @@ public class NewSettingsActivity extends AppCompatActivity implements
                     mContext.stopService(intent);
             }
 
+            CheckBoxPreference pref_backup_video = (CheckBoxPreference) findPreference(getString(R.string.pref_backup_video));
+            pref_backup_video.setEnabled(checked);
+            pref_backup_video.setSelectable(checked);
             ListPreference pref_backup_scenario = (ListPreference) findPreference(getString(R.string.pref_backup_scenario));
             pref_backup_scenario.setEnabled(checked);
             pref_backup_scenario.setSelectable(checked);
             Preference pref_backup_location = findPreference(getString(R.string.pref_backup_location));
             pref_backup_location.setEnabled(checked);
             pref_backup_location.setSelectable(checked);
+            Preference pref_backup_source = findPreference(getString(R.string.pref_backup_source));
+            pref_backup_source.setEnabled(checked);
+            pref_backup_source.setSelectable(checked);
+        }
+
+        private void refreshColumnBackupVideo(boolean init) {
+            String key = getString(R.string.pref_backup_video);
+            boolean checked = NASPref.getBackupVideo(getActivity());
+            CheckBoxPreference pref = (CheckBoxPreference) findPreference(key);
+            pref.setChecked(checked);
+            if(!init)
+                restartService(false);
         }
 
         public void refreshColumnBackupScenario(boolean init, boolean check) {
             String scenario = NASPref.getBackupScenario(getActivity());
             String[] scenarios = getActivity().getResources().getStringArray(R.array.backup_scenario_values);
             int idx = Arrays.asList(scenarios).indexOf(scenario);
-            if (check && idx == 0) {
-                //"Always" Auto Backup, we need to check remote access set or not
-                doRemoteAccessCheck(true);
-                return;
-            }
+            //if (check && idx == 0) {
+            //    //"Always" Auto Backup, we need to check remote access set or not
+            //    doRemoteAccessCheck(true);
+            //    return;
+            //}
 
             String title = getActivity().getResources().getStringArray(R.array.backup_scenario_entries)[idx];
             String key = getString(R.string.pref_backup_scenario);
@@ -511,6 +560,16 @@ public class NewSettingsActivity extends AppCompatActivity implements
             pref.setSummary(location);
             pref.setEnabled(NASPref.getBackupSetting(getActivity()));
             if (!init)
+                restartService(false);
+        }
+
+        private void refreshColumnBackupSource(boolean init) {
+            String location = NASPref.getBackupSource(getActivity());
+            String key = getString(R.string.pref_backup_source);
+            Preference pref = findPreference(key);
+            pref.setSummary(location);
+            pref.setEnabled(NASPref.getBackupSetting(getActivity()));
+            if(!init)
                 restartService(false);
         }
 

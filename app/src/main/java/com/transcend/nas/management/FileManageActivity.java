@@ -58,6 +58,7 @@ import com.transcend.nas.common.ManageFactory;
 import com.transcend.nas.connection.GuideActivity;
 import com.transcend.nas.connection_new.LoginActivity;
 import com.transcend.nas.service.LanCheckManager;
+import com.transcend.nas.settings.NewSettingsActivity;
 import com.transcend.nas.view.NotificationDialog;
 import com.transcend.nas.view.ProgressDialog;
 import com.transcend.nas.connection.StartActivity;
@@ -154,7 +155,6 @@ public class FileManageActivity extends AppCompatActivity implements
         AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.BROWSERREMOTE);
         String password = NASPref.getPassword(this);
         if (password != null && !password.equals("")) {
-            LanCheckManager.getInstance().startLanCheck();
             init();
             initToolbar();
             initDropdown();
@@ -338,6 +338,12 @@ public class FileManageActivity extends AppCompatActivity implements
         };
 
         isNeedEventNotify = false;
+
+        String hostname = mServer.getHostname();
+        if(hostname.contains(P2PService.getInstance().getP2PIP()))
+            LanCheckManager.getInstance().setLanConnect(false, "");
+        else
+            LanCheckManager.getInstance().setLanConnect(true, hostname);
     }
 
     private boolean initAutoBackUpService() {
@@ -1644,8 +1650,13 @@ public class FileManageActivity extends AppCompatActivity implements
 
     private void startSettingsActivity() {
         Intent intent = new Intent();
-        intent.setClass(FileManageActivity.this, SettingsActivity.class);
-        startActivityForResult(intent, SettingsActivity.REQUEST_CODE);
+        if(NASPref.useNewLoginFlow) {
+            intent.setClass(FileManageActivity.this, NewSettingsActivity.class);
+            startActivityForResult(intent, NewSettingsActivity.REQUEST_CODE);
+        } else {
+            intent.setClass(FileManageActivity.this, SettingsActivity.class);
+            startActivityForResult(intent, SettingsActivity.REQUEST_CODE);
+        }
     }
 
     private void startAboutActivity() {
@@ -1706,7 +1717,7 @@ public class FileManageActivity extends AppCompatActivity implements
         FileFactory.getInstance().cleanRealPathMap();
 
         //clean lan check
-        LanCheckManager.getInstance().setLanConnect(false);
+        LanCheckManager.getInstance().setLanConnect(false, "");
 
         //show SignIn activity
         Intent intent = new Intent();

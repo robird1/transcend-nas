@@ -15,6 +15,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:key="@string/pref_remote_access_category"
         android:layout="@layout/preference_category_widget"
         android:title="@string/remote_access">
 

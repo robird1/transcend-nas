@@ -1,7 +1,12 @@
 package com.transcend.nas.service;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Handler;
 import android.util.Log;
+
+import com.transcend.nas.NASApp;
 
 public class LanCheckManager implements LanCheckTask.LanCheckCallback {
     private String TAG = "LanCheckManager";
@@ -28,9 +33,15 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
         return mLanCheckManager;
     }
 
+    public void setLanConnect(boolean connect, String ip){
+        setLanIP(ip);
+        setLanConnect(connect);
+    }
+
     public void setLanConnect(boolean connect){
-        Log.d(TAG, "setLanConnect : " + connect);
+        Log.d(TAG, "LanConnect : " + connect);
         mLanConnect = connect;
+        isReady = true;
     }
 
     public boolean getLanConnect(){
@@ -46,6 +57,7 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
     }
 
     public void stopLanCheck(){
+        isReady = false;
         if(mTask != null && !mTask.isCancelled())
             mTask.cancel(true);
         mTask = null;
@@ -56,16 +68,28 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
     }
 
     public void startLanCheck(){
-        isReady = false;
+        boolean check = false;
         stopLanCheck();
-        mTask = new LanCheckTask();
-        mTask.addListener(LanCheckManager.this);
-        mThread = new Thread() {
-            public void run() {
-                mHandler.post(runnable);
-            }
-        };
-        mThread.start();
+
+        ConnectivityManager connectivityManager = (ConnectivityManager) NASApp.mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = connectivityManager.getActiveNetworkInfo();
+        if (info != null && info.isAvailable()) {
+            int type = info.getType();
+            check = type == ConnectivityManager.TYPE_WIFI;
+        }
+
+        if(check) {
+            mTask = new LanCheckTask();
+            mTask.addListener(LanCheckManager.this);
+            mThread = new Thread() {
+                public void run() {
+                    mHandler.post(runnable);
+                }
+            };
+            mThread.start();
+        } else {
+            setLanConnect(false, "");
+        }
     }
 
     private Runnable runnable = new Runnable() {
@@ -76,8 +100,6 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
 
     @Override
     public void onLanCheckFinished(boolean success, String ip) {
-        setLanConnect(success);
-        setLanIP(ip);
-        isReady = true;
+        setLanConnect(success, ip);
     }
 }

@@ -262,6 +262,7 @@
 
     <string name="pref_name">NAS PREFERENCE</string>
 
+    <string name="pref_remote_access_category">REMOTE ACCESS CATEGORY</string>
     <string name="pref_remote_access">REMOTE ACCESS</string>
     <string name="pref_auto_backup">AUTO BACKUP</string>
     <string name="pref_backup_video">BACKUP VIDEO</string>

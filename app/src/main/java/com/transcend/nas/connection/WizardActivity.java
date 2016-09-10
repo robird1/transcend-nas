@@ -26,7 +26,6 @@ import android.widget.Toast;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
-import com.transcend.nas.management.FileManageActivity;
 import com.transcend.nas.common.StyleFactory;
 
 import java.util.TimeZone;
@@ -128,8 +127,6 @@ public class WizardActivity extends AppCompatActivity implements LoaderManager.L
         switch (mLoaderID = id) {
             case LoaderID.WIZARD_INIT:
                 return new WizardSetLoader(this, args);
-            case LoaderID.LOGIN:
-                return new LoginLoader(this, args, true);
         }
         return null;
     }
@@ -152,27 +149,12 @@ public class WizardActivity extends AppCompatActivity implements LoaderManager.L
             mProgressView.setVisibility(View.INVISIBLE);
             mBundle = ((WizardSetLoader) loader).getBundleArgs();
             changeView(true);
-        } else if (loader instanceof LoginLoader) {
-            if (!success) {
-                Toast.makeText(this, ((LoginLoader) loader).getLoginError(), Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            mProgressView.setVisibility(View.INVISIBLE);
-            startFileManageActivity();
         }
     }
 
     @Override
     public void onLoaderReset(Loader loader) {
 
-    }
-
-    private void startFileManageActivity() {
-        Intent intent = new Intent();
-        intent.setClass(WizardActivity.this, FileManageActivity.class);
-        startActivity(intent);
-        finish();
     }
 
     @Override
