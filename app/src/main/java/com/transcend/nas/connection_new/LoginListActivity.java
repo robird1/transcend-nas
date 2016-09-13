@@ -2,9 +2,12 @@ package com.transcend.nas.connection_new;
 
 import android.app.Activity;
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -422,8 +425,34 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
 
     private void checkTutkLinkNasLoader(boolean success, TutkLinkNasLoader loader) {
         if (!success) {
-            mProgressView.setVisibility(View.INVISIBLE);
-            Toast.makeText(this, loader.getError(), Toast.LENGTH_SHORT).show();
+            //get account info from db
+            LoginHelper loginHelper = new LoginHelper(this);
+            LoginHelper.LoginInfo account = new LoginHelper.LoginInfo();
+            account.email = NASPref.getCloudUsername(this);
+            account.uuid = loader.getNasUUID();
+            boolean exist = loginHelper.getAccount(account);
+            loginHelper.onDestroy();
+
+            //get network status
+            boolean isWiFi = false;
+            ConnectivityManager mConnMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo info = mConnMgr.getActiveNetworkInfo();
+            if (info != null)
+                isWiFi = (info.getType() == ConnectivityManager.TYPE_WIFI);
+
+            if(exist && isWiFi) {
+                //Link nas's tutk server fail, try lan connect
+                Bundle args = loader.getBundleArgs();
+                args.putString("hostname", account.ip);
+                args.putBoolean("RemoteAccess", false);
+                getLoaderManager().restartLoader(LoaderID.WIZARD, args, LoginListActivity.this).forceLoad();
+            } else {
+                mProgressView.setVisibility(View.INVISIBLE);
+                if(isWiFi)
+                    startNASListLoader(false);
+                else
+                    Toast.makeText(this, loader.getError(), Toast.LENGTH_SHORT).show();
+            }
             return;
         }
 
@@ -464,10 +493,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
             if (exist)
                 startLoginLoader(args);
         } else {
-            if (remoteAccess)
-                Toast.makeText(this, getString(R.string.wizard_remote_access_error), Toast.LENGTH_SHORT).show();
-            else
-                showWizardDialog(args);
+            showWizardDialog(args);
         }
     }
 

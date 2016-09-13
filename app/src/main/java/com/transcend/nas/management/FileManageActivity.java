@@ -340,10 +340,12 @@ public class FileManageActivity extends AppCompatActivity implements
         isNeedEventNotify = false;
 
         String hostname = mServer.getHostname();
-        if(hostname.contains(P2PService.getInstance().getP2PIP()))
+        if(hostname.contains(P2PService.getInstance().getP2PIP())) {
             LanCheckManager.getInstance().setLanConnect(false, "");
-        else
+            LanCheckManager.getInstance().startLanCheck();
+        } else {
             LanCheckManager.getInstance().setLanConnect(true, hostname);
+        }
     }
 
     private boolean initAutoBackUpService() {

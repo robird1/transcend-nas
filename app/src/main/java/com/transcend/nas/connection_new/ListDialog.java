@@ -132,7 +132,7 @@ public abstract class ListDialog implements View.OnClickListener {
         } else {
             mList = list;
             isEmpty = mList.size() == 0;
-            mDialog.setTitle(isEmpty ? mActivity.getString(R.string.wizard_setup_found_error) : "Add new StoreJet Cloud");
+            mDialog.setTitle(mActivity.getString(isEmpty ? R.string.wizard_setup_found_error : R.string.add_device));
             initListView();
             initEmptyView();
             hideProgress();

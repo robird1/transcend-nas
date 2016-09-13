@@ -16,7 +16,6 @@ import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.common.FileFactory;
 import com.transcend.nas.utils.MimeUtil;
-import com.transcend.nas.viewer.player.PlayerActivity;
 import com.tutk.IOTC.P2PService;
 
 import java.io.File;
@@ -185,14 +184,4 @@ public class MediaFactory {
             Toast.makeText(act, "No suitable app", Toast.LENGTH_SHORT).show();
         }
     }
-
-    private static void openLocal(Activity act, Uri uri, String type, String title){
-        Intent mpdIntent = new Intent(act, PlayerActivity.class)
-                .setData(uri)
-                .putExtra(PlayerActivity.CONTENT_ID_EXTRA, "")
-                .putExtra(PlayerActivity.CONTENT_TYPE_EXTRA, type)
-                .putExtra(PlayerActivity.PROVIDER_EXTRA, title);
-        act.startActivity(mpdIntent);
-    }
-
 }

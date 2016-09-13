@@ -10,31 +10,13 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string-array name="sort_items">
-        <item>@string/type</item>
-        <item>@string/date</item>
-        <item>@string/reverse_date</item>
-        <item>@string/name</item>
-        <item>@string/reverse_name</item>
-    </string-array>
+    <!-- realtek -->
+    <string name="title_nas_display_name_default">RTK - Nas</string>
+    <string name="title_nas_display_name_jupiter_media">RTK - Jupiter Media Nas</string>
+    <string name="title_nas_display_name_jupiter_pure">RTK - Jupiter Pure Nas</string>
+    <string name="title_nas_display_name_pheonix_media">RTK - Pheonix Media Nas</string>
+    <string name="title_nas_display_name_pheonix_pure">RTK - Pheonix Pure Nas</string>
 
-    <string-array name="backup_scenario_entries">
-        <item>@string/all_networks</item>
-        <item>@string/wifi_only</item>
-    </string-array>
-
-    <string-array name="backup_scenario_values">
-        <item>ALWAYS</item>
-        <item>WIFI_ONLY</item>
-    </string-array>
-
-    <string-array name="cache_size_entries">
-        <item>100MB</item>
-        <item>200MB</item>
-        <item>500MB</item>
-    </string-array>
-
-    <!-- wizard -->
     <string name="wizard">Wizard</string>
     <string name="wizard_setup_start">Let\'s Setup StoreJet Cloud</string>
     <string name="wizard_ethernet_info">Connect ethernet cable to router</string>
@@ -59,8 +41,6 @@
     <string name="unknown_artist">Unknown Artist</string>
     <string name="unknown_album">Unknown Album</string>
     <string name="device_offline">Device is offline</string>
-
-    <!-- Disk -->
     <string name="disk_info">Disk Information</string>
     <string name="disk">Disk</string>
     <string name="available">Available</string>
@@ -77,8 +57,6 @@
     <string name="warning">Warning</string>
     <string name="smart_unknown">Unknown</string>
     <string name="backup_videos">Video backup</string>
-
-    <!-- String v2 -->
     <string name="login_not">Not Login</string>
     <string name="already_have_account">Already have an account?</string>
     <string name="not_have_account">Don\'t have an account?</string>
@@ -91,8 +69,6 @@
     <string name="backup_destination">Upload path</string>
     <string name="sign_in_with_other">Sign in with a different account</string>
     <string name="all_networks">Wi-Fi \u0026 Cellular network</string>
-
-    <!-- string -->
 
     <string name="online">online</string>
     <string name="offline">offline</string>
@@ -220,9 +196,6 @@
     <string name="backup_fail_no_space">No enough disk space</string>
     <string name="backup_fail_network_unreachable">StoreJet Cloud unreachable</string>
 
-
-    <!-- msg -->
-
     <string name="msg_conj_deleted">%1$d item(s) will be deleted.</string>
     <string name="msg_exit_app">Are you sure you want to exit the app?</string>
 
@@ -234,29 +207,8 @@
     <string name="msg_auto_backup">Auto upload your camera photos and video to StoreJet Cloud.</string>
     <string name="msg_backup_scenario">Choose a scenario to backup your camera photos and video.</string>
     <string name="msg_cache_cleared">Cache cleared</string>
-
-    <!-- about -->
     <string name="rights_reserved">\u00A92016 Transcend Information Inc.\nAll rights reserved.</string>
-
-
-
-    <string name="enable_background_audio">Play in background</string>
-    <string name="audio">Audio</string>
-    <string name="text">Text</string>
-    <string name="logging">Logging</string>
-    <string name="logging_normal">Normal</string>
-    <string name="logging_verbose">Verbose</string>
-    <string name="retry">Retry</string>
-    <string name="off">[off]</string>
-    <string name="error_drm_not_supported">Protected content not supported on API levels below 18</string>
-    <string name="error_drm_unsupported_scheme">This device does not support the required DRM scheme</string>
-    <string name="error_drm_unknown">An unknown DRM error occurred</string>
-    <string name="error_no_decoder">This device does not provide a decoder</string>
-    <string name="error_no_secure_decoder">This device does not provide a secure decoder for</string>
-    <string name="error_querying_decoders">Unable to query device decoders</string>
-    <string name="error_instantiating_decoder">Unable to instantiate decoder</string>
-    <string name="storage_permission_denied">Permission to access storage was denied</string>
-
+    <string name="add_device">Add new StoreJet Cloud</string>
 
     <!-- preference -->
 
@@ -288,7 +240,6 @@
     <string name="pref_introduce">INTRODUCE SETUP</string>
 
     <string name="pref_local_hostname">LOCAL HOSTNAME</string>
-
     <string name="pref_cloud_username">CLOUD USERNAME</string>
     <string name="pref_cloud_password">CLOUD PASSWORD</string>
     <string name="pref_cloud_status">CLOUD STATUS</string>
@@ -309,21 +260,35 @@
     <string name="pref_about_license">ABOUT LICENSE</string>
     <string name="pref_about_contact">ABOUT CONTACT OF US</string>
 
-    <!-- information -->
-
     <string name="pref_info_path">INFO PATH</string>
     <string name="pref_info_name">INFO NAME</string>
     <string name="pref_info_type">INFO TYPE</string>
     <string name="pref_info_time">INFO TIME</string>
     <string name="pref_info_size">INFO SIZE</string>
 
+    <!-- preference array -->
+    <string-array name="sort_items">
+        <item>@string/type</item>
+        <item>@string/date</item>
+        <item>@string/reverse_date</item>
+        <item>@string/name</item>
+        <item>@string/reverse_name</item>
+    </string-array>
 
-    <!-- realtek -->
+    <string-array name="backup_scenario_entries">
+        <item>@string/all_networks</item>
+        <item>@string/wifi_only</item>
+    </string-array>
 
-    <string name="title_nas_display_name_default">RTK - Nas</string>
-    <string name="title_nas_display_name_jupiter_media">RTK - Jupiter Media Nas</string>
-    <string name="title_nas_display_name_jupiter_pure">RTK - Jupiter Pure Nas</string>
-    <string name="title_nas_display_name_pheonix_media">RTK - Pheonix Media Nas</string>
-    <string name="title_nas_display_name_pheonix_pure">RTK - Pheonix Pure Nas</string>
+    <string-array name="backup_scenario_values">
+        <item>ALWAYS</item>
+        <item>WIFI_ONLY</item>
+    </string-array>
+
+    <string-array name="cache_size_entries">
+        <item>100MB</item>
+        <item>200MB</item>
+        <item>500MB</item>
+    </string-array>
 
 </resources>

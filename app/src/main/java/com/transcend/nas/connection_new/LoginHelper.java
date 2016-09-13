@@ -77,10 +77,15 @@ public class LoginHelper {
 
     public boolean getAccount(LoginInfo item){
         boolean exist = false;
-        String url;
+        String url = "select * from " + MyDBHelper.TABLE_TUTK + " WHERE " + MyDBHelper.TUTK_EMAIL + "='" + item.email + "'";
         Cursor c = null;
-        url = "select * from " + MyDBHelper.TABLE_TUTK + " WHERE " + MyDBHelper.TUTK_EMAIL + "='" + item.email
-                + "' AND " + MyDBHelper.TUTK_MACADDRESS + "='" + item.macAddress + "'";
+        if(item.macAddress != null && !item.macAddress.equals(""))
+            url +=  " AND " + MyDBHelper.TUTK_MACADDRESS + "='" + item.macAddress + "'";
+        else if(item.uuid != null && !item.uuid.equals(""))
+            url +=  " AND " + MyDBHelper.TUTK_UUID + "='" + item.uuid + "'";
+        else
+            return false;
+
         try {
             c = db.rawQuery(url, null);
             if (c.moveToFirst()) {
