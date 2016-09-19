@@ -51,27 +51,27 @@
 
     </LinearLayout>
 
-
     <TextView
         android:id="@+id/initial_title"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="8dp"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="40dp"
         android:gravity="center"
         android:text="@string/wizard_setup_start"
+        android:textColor="@android:color/black"
         android:textSize="24dp"
         android:textStyle="bold" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_above="@id/initial_started_layout"
         android:layout_below="@id/initial_title"
-        android:layout_marginLeft="24dp"
-        android:layout_marginRight="24dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
         android:orientation="vertical">
 
         <LinearLayout
@@ -83,7 +83,7 @@
             <ImageView
                 android:layout_width="56dp"
                 android:layout_height="match_parent"
-                android:src="@drawable/wizard_ethernet" />
+                android:src="@drawable/guide_icon_cable" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -104,7 +104,7 @@
             <ImageView
                 android:layout_width="56dp"
                 android:layout_height="match_parent"
-                android:src="@drawable/wizard_plug" />
+                android:src="@drawable/guide_icon_adapter" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -125,7 +125,7 @@
             <ImageView
                 android:layout_width="56dp"
                 android:layout_height="match_parent"
-                android:src="@drawable/wizard_power" />
+                android:src="@drawable/guide_icon_power" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -146,7 +146,7 @@
             <ImageView
                 android:layout_width="56dp"
                 android:layout_height="match_parent"
-                android:src="@drawable/wizard_wifi" />
+                android:src="@drawable/guide_icon_wifi" />
 
             <TextView
                 android:layout_width="match_parent"

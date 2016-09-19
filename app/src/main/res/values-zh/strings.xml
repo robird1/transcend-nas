@@ -180,4 +180,12 @@
     <string name="wizard_success">StoreJet Cloud 已準備完成</string>
     <string name="wizard_try">重試</string>
     <string name="wizard_wifi_info">將手機Wi-Fi連線到路由器網路</string>
+
+    <string name="introduce_welcome">歡迎使用StoreJet Cloud</string>
+    <string name="introduce_remote_access_info">自由存取StoreJet Cloud的檔案</string>
+    <string name="introduce_auto_backup_info">自動備份手機的照片與影片</string>
+    <string name="introduce_mirror_media">媒體串流</string>
+    <string name="introduce_mirror_media_info">同步串流多媒體檔案,隨時享受娛樂</string>
+    <string name="next">下一頁</string>
+
 </resources>

@@ -1,18 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <ImageView
+        android:id="@+id/introduce_image"
+        android:layout_width="wrap_content"
+        android:layout_height="360dp"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_info_gray_24dp" />
 
     <TextView
         android:id="@+id/introduce_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="50dp"
         android:gravity="center"
         android:text="TITLE"
+        android:textColor="@android:color/black"
         android:textSize="@dimen/wizard_title_text_size"
         android:textStyle="bold" />
 
@@ -20,21 +27,10 @@
         android:id="@+id/introduce_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="20dp"
-        android:layout_marginLeft="30dp"
-        android:layout_marginRight="30dp"
+        android:layout_marginTop="20dp"
         android:gravity="center"
         android:text="INFO"
         android:textSize="@dimen/wizard_info_text_size" />
 
-    <ImageView
-        android:id="@+id/introduce_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/introduce_info"
-        android:layout_below="@id/introduce_title"
-        android:layout_centerHorizontal="true"
-        android:src="@drawable/ic_info_gray_24dp" />
 
-</RelativeLayout>
+</LinearLayout>

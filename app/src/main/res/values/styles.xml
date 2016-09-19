@@ -47,4 +47,9 @@
         <item name="colorAccent">#FFFFFF</item>
     </style>
 
+    <style name="MyRadioButton" parent="Theme.AppCompat.Light">
+        <item name="colorControlNormal">@color/colorRadioButtonUnCheck</item>
+        <item name="colorControlActivated">@color/colorRadioButtonCheck</item>
+    </style>
+
 </resources>

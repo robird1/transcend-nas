@@ -644,6 +644,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             if (mNASList != null && position < mNASList.size()) {
+                holder.split.setVisibility(View.VISIBLE);
                 holder.listItem.setVisibility(View.VISIBLE);
                 holder.addItem.setVisibility(View.GONE);
 
@@ -686,6 +687,11 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                 //this is the 'Add' item
                 holder.listItem.setVisibility(View.GONE);
                 holder.addItem.setVisibility(View.VISIBLE);
+                if(mNASList == null || mNASList.size() == 0){
+                    holder.split.setVisibility(View.GONE);
+                } else {
+                    holder.split.setVisibility(View.VISIBLE);
+                }
             }
         }
 
@@ -699,6 +705,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
 
         class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
+            View split;
             ImageView icon;
             TextView title;
             TextView subtitle;
@@ -708,6 +715,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
 
             public ViewHolder(View itemView) {
                 super(itemView);
+                split = (View) itemView.findViewById(R.id.listitem_split);
                 icon = (ImageView) itemView.findViewById(R.id.listitem_nas_finder_icon);
                 title = (TextView) itemView.findViewById(R.id.listitem_nas_finder_title);
                 subtitle = (TextView) itemView.findViewById(R.id.listitem_nas_finder_subtitle);

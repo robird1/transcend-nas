@@ -123,6 +123,23 @@ public class StyleFactory {
         });
     }
 
+    public static void set_lt_gray_button_touch_effect(final Context context, final Button button){
+        button.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch(event.getAction()){
+                    case MotionEvent.ACTION_DOWN:
+                        button.setBackgroundResource(R.drawable.button_gray_press);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        button.setBackgroundResource(R.drawable.button_gray);
+                        break;
+                }
+                return false;
+            }
+        });
+    }
+
     public static void set_blue_text_touch_effect(final Context context, final TextView textView){
         textView.setOnTouchListener(new View.OnTouchListener() {
             @Override

@@ -210,6 +210,13 @@
     <string name="rights_reserved">\u00A92016 Transcend Information Inc.\nAll rights reserved.</string>
     <string name="add_device">Add new StoreJet Cloud</string>
 
+    <string name="introduce_welcome">Welcome to StoreJet Cloud</string>
+    <string name="introduce_remote_access_info">Remote access StoreJet Cloud files</string>
+    <string name="introduce_auto_backup_info">Auto backup photo and video</string>
+    <string name="introduce_mirror_media">Mirror Multimedia</string>
+    <string name="introduce_mirror_media_info">Cast photo and video. Make easy and fun</string>
+    <string name="next">Next</string>
+
     <!-- preference -->
 
     <string name="pref_name">NAS PREFERENCE</string>

@@ -18,6 +18,7 @@ public class NASPref {
     private static final String TAG = NASPref.class.getSimpleName();
     public static final boolean useDefaultDownloadFolder = true;
     public static final boolean useNewLoginFlow = true;
+    public static final boolean useTwonkyServer = false;
     public static final String defaultUserName = "admin";
 
     public enum Sort {

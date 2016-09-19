@@ -3,6 +3,7 @@ package com.tutk.IOTC;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.transcend.nas.NASPref;
 import com.transcend.nas.service.LanCheckManager;
 import com.tutk.IOTC.P2PTunnelAPIs.IP2PTunnelCallback;
 
@@ -27,6 +28,8 @@ public class P2PService implements IP2PTunnelCallback {
         mProtocal = new ArrayList<P2PProtocal>();
         addP2PProtocal(P2PProtocalType.HTTP, 8000, 80);
         addP2PProtocal(P2PProtocalType.SMB, 9000, 445);
+        if(NASPref.useTwonkyServer)
+            addP2PProtocal(P2PProtocalType.TWONKY, 10000, 9000);
     }
 
     public static P2PService getInstance() {
@@ -182,7 +185,10 @@ public class P2PService implements IP2PTunnelCallback {
 
     public String getIP(String hostname, P2PProtocalType type) {
         if (LanCheckManager.getInstance().getLanConnect()) {
-            hostname = LanCheckManager.getInstance().getLanIP();
+            if(type == P2PProtocalType.TWONKY)
+                hostname = LanCheckManager.getInstance().getLanIP() + ":9000";
+            else
+                hostname = LanCheckManager.getInstance().getLanIP();
         } else {
             hostname = mLocalHost + ":" + getP2PPort(type);
         }
@@ -263,7 +269,7 @@ public class P2PService implements IP2PTunnelCallback {
     }
 
     public enum P2PProtocalType {
-        HTTP, SMB
+        HTTP, SMB, TWONKY
     }
 
     private class P2PProtocal {

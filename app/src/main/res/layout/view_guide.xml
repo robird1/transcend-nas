@@ -17,19 +17,18 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <ImageView
                 android:layout_width="56dp"
-                android:layout_height="match_parent"
-                android:src="@drawable/wizard_ethernet" />
+                android:layout_height="100dp"
+                android:src="@drawable/guide_icon_cable" />
 
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
                 android:paddingLeft="12dp"
                 android:text="@string/wizard_ethernet_info"
                 android:textSize="16dp"
@@ -38,19 +37,18 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <ImageView
                 android:layout_width="56dp"
-                android:layout_height="match_parent"
-                android:src="@drawable/wizard_plug" />
+                android:layout_height="100dp"
+                android:src="@drawable/guide_icon_adapter" />
 
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
                 android:paddingLeft="12dp"
                 android:text="@string/wizard_plug_info"
                 android:textSize="16dp"
@@ -59,19 +57,18 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <ImageView
                 android:layout_width="56dp"
-                android:layout_height="match_parent"
-                android:src="@drawable/wizard_power" />
+                android:layout_height="100dp"
+                android:src="@drawable/guide_icon_power" />
 
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
                 android:paddingLeft="12dp"
                 android:text="@string/wizard_power_info"
                 android:textSize="16dp"
@@ -80,19 +77,18 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <ImageView
                 android:layout_width="56dp"
-                android:layout_height="match_parent"
-                android:src="@drawable/wizard_wifi" />
+                android:layout_height="100dp"
+                android:src="@drawable/guide_icon_wifi" />
 
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
                 android:paddingLeft="12dp"
                 android:text="@string/wizard_wifi_info"
                 android:textSize="16dp"
