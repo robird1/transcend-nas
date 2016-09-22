@@ -94,7 +94,11 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
 
     private Runnable runnable = new Runnable() {
         public void run() {
-            mTask.execute();
+            try {
+                mTask.execute();
+            } catch (Exception e){
+                e.printStackTrace();
+            }
         }
     };
 

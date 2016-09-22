@@ -58,6 +58,7 @@ import com.transcend.nas.common.ManageFactory;
 import com.transcend.nas.connection.GuideActivity;
 import com.transcend.nas.connection_new.LoginActivity;
 import com.transcend.nas.service.LanCheckManager;
+import com.transcend.nas.service.TwonkyManager;
 import com.transcend.nas.settings.NewSettingsActivity;
 import com.transcend.nas.view.NotificationDialog;
 import com.transcend.nas.view.ProgressDialog;
@@ -978,8 +979,11 @@ public class FileManageActivity extends AppCompatActivity implements
                 if (loader instanceof SmbAbstractLoader) {
                     LanCheckManager.getInstance().startLanCheck();
                     Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
-                } else
+                } else {
+                    if(loader instanceof EventNotifyLoader)
+                        LanCheckManager.getInstance().startLanCheck();
                     Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+                }
             }
         }
 

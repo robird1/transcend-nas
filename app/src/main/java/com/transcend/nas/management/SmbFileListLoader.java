@@ -8,7 +8,9 @@ import com.realtek.nasfun.api.HttpClientManager;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
+import com.transcend.nas.NASPref;
 import com.transcend.nas.common.FileFactory;
+import com.transcend.nas.service.TwonkyManager;
 import com.tutk.IOTC.P2PService;
 
 import org.apache.http.HttpEntity;
@@ -32,7 +34,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.net.HttpURLConnection;
@@ -91,7 +92,7 @@ public class SmbFileListLoader extends SmbAbstractLoader {
         Log.w(TAG, "mFileList size: " + mFileList.size());
 
         //get shared folder mapping path for admin user
-        if (mPath.equals(NASApp.ROOT_SMB)  && "admin".equals(mUsername)) {
+        if (mPath.equals(NASApp.ROOT_SMB) && "admin".equals(mUsername)) {
             int size = FileFactory.getInstance().getRealPathMapSize();
             int shardFolderSize = 0;
             for (FileInfo file : mFileList) {
@@ -99,17 +100,31 @@ public class SmbFileListLoader extends SmbAbstractLoader {
                     shardFolderSize++;
             }
             Log.w(TAG, "ShardFolderSize : " + shardFolderSize + ", RealPathMapSize : " + size);
-            if(shardFolderSize > 0) {
+            if (shardFolderSize > 0) {
                 if (shardFolderSize != size || !FileFactory.getInstance().checkRealPathMapLifeCycle()) {
                     FileFactory.getInstance().cleanRealPathMap();
                     getSharedList();
                     Log.d(TAG, "folder mapping size : " + FileFactory.getInstance().getRealPathMapSize());
-                    //Server server = ServerManager.INSTANCE.getCurrentServer();
-                    //String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.TWONKY);
-                    //String value = "http://" + hostname + "/nmc/rss/server?start=0&fmt=json";
-                    //parserTwonky(doGetRequest(value));
                 }
             }
+        }
+
+        if(NASPref.useTwonkyServer) {
+            if (mPath.equals(NASApp.ROOT_SMB)) {
+                TwonkyManager.getInstance().doTwonkyRescan();
+            }
+
+            int photoSize = 0;
+            for(FileInfo info : mFileList) {
+                if(info.type == FileInfo.TYPE.PHOTO){
+                    photoSize++;
+                }
+            }
+            boolean parser = false;
+            if(photoSize > 0)
+                parser = TwonkyManager.getInstance().startTwonkyParser(mPath, 0, photoSize);
+            else
+                parser = TwonkyManager.getInstance().startTwonkyParser(mPath);
         }
 
         return true;
@@ -210,82 +225,6 @@ public class SmbFileListLoader extends SmbAbstractLoader {
         }
 
         return isSuccess;
-    }
-
-    public String doGetRequest(String url) {
-        HttpURLConnection conn = null;
-        String result = "";
-        try {
-            URL realUrl = new URL(url);
-            conn = (HttpURLConnection) realUrl.openConnection();
-            conn.setRequestProperty("content-type", "application/json");
-            conn.setReadTimeout(10000);
-            conn.setConnectTimeout(10000);
-
-            int responseCode = conn.getResponseCode();
-            Log.i(TAG, "url " + url);
-            Log.i(TAG, "responseCode: " + responseCode);
-            if (responseCode == 200 || responseCode == 201) {
-                InputStream is = conn.getInputStream();
-                result = getStringFromInputStream(is);
-            } else {
-                Log.i(TAG, "error " + responseCode);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        finally {
-            if (conn != null) {
-                conn.disconnect();
-            }
-        }
-
-        return result;
-    }
-
-    public void parserTwonky(String result){
-        try {
-            JSONObject obj = new JSONObject(result);
-            JSONArray items = new JSONArray(obj.optString("item"));
-            for(int i=0 ;i<items.length(); i++) {
-                JSONObject item = items.optJSONObject(i);
-                JSONObject serverJson = new JSONObject(item.optString("server"));
-                String[] baseURLs = serverJson.optString("baseURL").split("/");
-                String baseURL = "";
-                for(String base : baseURLs) {
-                    if(base.contains("9000")) {
-                        baseURL = base;
-                        break;
-                    }
-                }
-
-                JSONObject enclosureJson = new JSONObject(item.optString("enclosure"));
-                String url = enclosureJson.optString("url");
-                if(url.contains(baseURL)) {
-                    //target device
-                    Log.d(TAG, url);
-                    break;
-                }
-
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    private String getStringFromInputStream(InputStream is)
-            throws IOException {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int len = -1;
-        while ((len = is.read(buffer)) != -1) {
-            os.write(buffer, 0, len);
-        }
-        is.close();
-        String state = os.toString();
-        os.close();
-        return state;
     }
 
     public String getPath() {

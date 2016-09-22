@@ -2,13 +2,18 @@ package com.transcend.nas.common;
 
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.util.Log;
 
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
+import com.transcend.nas.NASPref;
 import com.transcend.nas.management.FileInfo;
+import com.transcend.nas.service.TwonkyManager;
 import com.tutk.IOTC.P2PService;
+
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.text.DecimalFormat;
@@ -157,10 +162,22 @@ public class FileFactory {
                 }
             }
 
-            if (thumbnail)
-                url = "http://" + hostname + filepath + "?session=" + hash + "&thumbnail";
-            else
-                url = "http://" + hostname + filepath + "?session=" + hash + "&webview";
+            String[] paths = path.split("/");
+            String name = paths[paths.length-1];
+            String twonkyUrl = TwonkyManager.getInstance().getImageUrlFromMap(FilenameUtils.getBaseName(name));
+            //Log.d(TAG,"path : " + path + ", name :" + name + ", twonky url : " + twonkyUrl);
+            if(NASPref.useTwonkyServer && twonkyUrl != null && !twonkyUrl.equals("")) {
+                if (thumbnail)
+                    url = twonkyUrl + "?scale=192x192";
+                else
+                    url = twonkyUrl;
+            } else {
+                if (thumbnail)
+                    url = "http://" + hostname + filepath + "?session=" + hash + "&thumbnail";
+                else
+                    url = "http://" + hostname + filepath + "?session=" + hash + "&webview";
+            }
+            Log.d(TAG,"path : " + path + ", url : " + url);
         }
         return url;
     }
