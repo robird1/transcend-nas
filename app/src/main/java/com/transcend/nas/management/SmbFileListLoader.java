@@ -109,22 +109,12 @@ public class SmbFileListLoader extends SmbAbstractLoader {
             }
         }
 
-        if(NASPref.useTwonkyServer) {
+        if (NASPref.useTwonkyServer) {
             if (mPath.equals(NASApp.ROOT_SMB)) {
                 TwonkyManager.getInstance().doTwonkyRescan();
             }
 
-            int photoSize = 0;
-            for(FileInfo info : mFileList) {
-                if(info.type == FileInfo.TYPE.PHOTO){
-                    photoSize++;
-                }
-            }
-            boolean parser = false;
-            if(photoSize > 0)
-                parser = TwonkyManager.getInstance().startTwonkyParser(mPath, 0, photoSize);
-            else
-                parser = TwonkyManager.getInstance().startTwonkyParser(mPath);
+            boolean parser = TwonkyManager.getInstance().startTwonkyParser(mPath, 0, 50);
         }
 
         return true;

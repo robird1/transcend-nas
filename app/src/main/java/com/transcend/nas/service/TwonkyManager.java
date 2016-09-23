@@ -43,24 +43,17 @@ public class TwonkyManager {
         return mTwonkyManager;
     }
 
-    public boolean startTwonkyParser(String path){
-        return startTwonkyParser(path, 0, mSize);
-    }
-
-    public boolean startTwonkyParser(String path, int startIndex, int size) {
-        String[] paths = path.split("/");
-        int length = paths.length;
+    public boolean startTwonkyParser(String path, int start, int count) {
+        int length = path.split("/").length;
         if (length == 0) {
-            //get twonky server
+            //root folder, get twonky server
             String server = parserTwonkyServer();
-            Log.d(TAG, "twonky server " + server);
             if (server != null && !server.equals("")) {
                 //get twonky category "Photo"
-                String photos = parserTwonkyCategory(server, "Photos", "?start="+startIndex+"&fmt=json");
-                Log.d(TAG, "twonky photos " + photos);
+                String photos = parserTwonkyCategory(server, "Photos", "?start=" + start + "&fmt=json");
                 if (photos != null && !photos.equals("")) {
                     //get twonky category "By Folder"
-                    String byFolder = parserTwonkyCategory(photos, "By Folder", "?start="+startIndex+"&fmt=json");
+                    String byFolder = parserTwonkyCategory(photos, "By Folder", "?start=" + start + "&fmt=json");
                     Log.d(TAG, "twonky byFolder " + byFolder);
                     if (byFolder != null && !byFolder.equals("")) {
                         mFolderMap.put(KEYWORD_FOLDER, byFolder);
@@ -69,24 +62,26 @@ public class TwonkyManager {
                 }
             }
         } else if (0 < length && length <= 2) {
-            return parserTwonkyFolder(getFolderUrlFromMap(KEYWORD_FOLDER), "?start="+startIndex+"&count="+size+"&fmt=json");
+            //admin, public folder
+            return parserTwonkyFolder(path, start, count, getFolderUrlFromMap(KEYWORD_FOLDER));
         } else {
-            return parserTwonkyFolder(getFolderUrlFromMap(paths[length-1]), "?start="+startIndex+"&count="+size+"&fmt=json");
+            //other folder
+            return parserTwonkyFolder(path, start, count, getFolderUrlFromMap(path));
         }
 
         return false;
     }
 
-    public String getFolderUrlFromMap(String path){
+    public String getFolderUrlFromMap(String path) {
         String result = "";
-        if(mFolderMap != null)
+        if (mFolderMap != null)
             result = mFolderMap.get(path);
         return result;
     }
 
-    public String getImageUrlFromMap(String path){
+    public String getImageUrlFromMap(String path) {
         String result = "";
-        if(mImageMap != null)
+        if (mImageMap != null)
             result = mImageMap.get(path);
         return result;
     }
@@ -205,23 +200,7 @@ public class TwonkyManager {
     }
 
     public String parserTwonkyCategory(String url, String keyword, String param) {
-        Server server = ServerManager.INSTANCE.getCurrentServer();
-        String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.TWONKY);
-        String[] splits = url.split("/");
-        String newUrl = "";
-        boolean start = false;
-
-        for (String split : splits) {
-            if (start) {
-                newUrl = newUrl + "/" + split;
-            } else {
-                if (split.contains(":9000")) {
-                    newUrl = "http://" + hostname;
-                    start = true;
-                }
-            }
-        }
-        newUrl += param;
+        String newUrl = convertUrlByLink(url) + param;
         String result = doGetRequest(newUrl);
 
         String target = "";
@@ -243,67 +222,77 @@ public class TwonkyManager {
         return target;
     }
 
-    public boolean parserTwonkyFolder(String url, String param) {
-        if(url != null && !url.equals("")) {
-            Server server = ServerManager.INSTANCE.getCurrentServer();
-            String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.TWONKY);
-            String[] splits = url.split("/");
-            String newUrl = "";
-            boolean start = false;
-
-            for (String split : splits) {
-                if (start) {
-                    newUrl = newUrl + "/" + split;
-                } else {
-                    if (split.contains(":9000")) {
-                        newUrl = "http://" + hostname;
-                        start = true;
-                    }
-                }
-            }
-            newUrl += param;
+    public boolean parserTwonkyFolder(String path, int start, int count, String url) {
+        if (url != null && !url.equals("")) {
+            String newUrl = convertUrlByLink(url) + "?start=" + start + "&count=" + count + "&fmt=json";
             Log.d(TAG, newUrl);
             String result = doGetRequest(newUrl);
             String target = "";
             try {
                 JSONObject obj = new JSONObject(result);
+                String folderChildCount = obj.optString("childCount");
                 JSONArray items = new JSONArray(obj.optString("item"));
                 for (int i = 0; i < items.length(); i++) {
                     JSONObject item = items.optJSONObject(i);
                     String title = item.optString("title");
                     String metaString = item.optString("meta");
-                    if(metaString != null && !metaString.equals("")) {
+                    if (metaString != null && !metaString.equals("")) {
                         JSONObject meta = new JSONObject(metaString);
                         String childCount = meta.optString("childCount");
                         if (childCount != null && !childCount.equals("")) {
                             //folder item, record it to folder hash map
                             JSONObject enclosure = new JSONObject(item.optString("enclosure"));
                             target = enclosure.optString("url");
-                            mFolderMap.put(title, target);
+                            mFolderMap.put(path + title + "/", target);
+                            //Log.d(TAG, "key: " + path+title  + "/, value: " + target);
                         } else {
                             //image item, record it to image hash map
+                            String extension = meta.optString("pv:extension");
                             JSONArray res = new JSONArray(meta.optString("res"));
                             for (int j = 0; j < res.length(); j++) {
                                 JSONObject tmp = res.optJSONObject(j);
-                                String size = tmp.optString("size");
                                 target = tmp.optString("value");
                                 if (target.contains("?"))
                                     target = target.substring(0, target.indexOf('?'));
-                                mImageMap.put(title, target);
+                                mImageMap.put(path + title, target);
+                                //Log.d(TAG, "key: " + path + title + ", value: " + target);
                             }
                         }
                     }
                 }
+                Log.d(TAG, "twonky folder size : " + mFolderMap.size());
+                Log.d(TAG, "twonky image size : " + mImageMap.size());
+                int nextStart = start + count;
+                if (Integer.parseInt(folderChildCount) > nextStart)
+                    return parserTwonkyFolder(path, nextStart, count, url);
+                else
+                    return true;
             } catch (JSONException e) {
                 e.printStackTrace();
-            }
 
-            Log.d(TAG, "twonky folder size : " + mFolderMap.size());
-            Log.d(TAG, "twonky image size : " + mImageMap.size());
-            return true;
+            }
         }
 
         return false;
+    }
 
+    public String convertUrlByLink(String url){
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.TWONKY);
+        String[] splits = url.split("/");
+        String newUrl = "";
+        boolean add = false;
+
+        for (String split : splits) {
+            if (add) {
+                newUrl = newUrl + "/" + split;
+            } else {
+                if (split.contains(":9000")) {
+                    newUrl = "http://" + hostname;
+                    add = true;
+                }
+            }
+        }
+        return newUrl;
     }
 }

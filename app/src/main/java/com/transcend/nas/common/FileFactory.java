@@ -130,48 +130,47 @@ public class FileFactory {
         if (path.startsWith(NASApp.ROOT_STG)) {
             url = "file://" + path;
         } else {
-            Server server = ServerManager.INSTANCE.getCurrentServer();
-            String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
-            String username = server.getUsername();
-            String hash = server.getHash();
-            String filepath;
-            if (path.startsWith(Server.HOME))
-                filepath = Server.USER_DAV_HOME + path.replaceFirst(Server.HOME, "/");
-            else if (path.startsWith("/" + username + "/"))
-                filepath = Server.USER_DAV_HOME + path.replaceFirst("/" + username + "/", "/");
-            else {
-                if (username.equals("admin")) {
-                    for (String key : mRealPathMap.keySet()) {
-                        if (path.startsWith(key)) {
-                            path = path.replaceFirst(key, mRealPathMap.get(key));
-                            break;
-                        }
-                    }
-                    filepath = Server.DEVICE_DAV_HOME + path.replaceFirst("/home/", "/");
-                } else {
-                    String newPath = "";
-                    String[] paths = path.replaceFirst("/", "").split("/");
-                    int length = paths.length;
-                    for (int i = 0; i < length; i++) {
-                        if (i == 0)
-                            newPath = "/" + paths[i].toLowerCase();
-                        else
-                            newPath = newPath + "/" + paths[i];
-                    }
-                    filepath = "/dav" + newPath;
-                }
-            }
-
-            String[] paths = path.split("/");
-            String name = paths[paths.length-1];
-            String twonkyUrl = TwonkyManager.getInstance().getImageUrlFromMap(FilenameUtils.getBaseName(name));
-            //Log.d(TAG,"path : " + path + ", name :" + name + ", twonky url : " + twonkyUrl);
+            String extension = FilenameUtils.getExtension(path);
+            String twonkyUrl = TwonkyManager.getInstance().getImageUrlFromMap(path.replaceFirst("." + extension, ""));
             if(NASPref.useTwonkyServer && twonkyUrl != null && !twonkyUrl.equals("")) {
+                String newUrl = TwonkyManager.getInstance().convertUrlByLink(twonkyUrl);
                 if (thumbnail)
-                    url = twonkyUrl + "?scale=192x192";
+                    url = newUrl + "?scale=192x192";
                 else
-                    url = twonkyUrl;
+                    url = newUrl;
             } else {
+                Server server = ServerManager.INSTANCE.getCurrentServer();
+                String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
+                String username = server.getUsername();
+                String hash = server.getHash();
+                String filepath;
+                if (path.startsWith(Server.HOME))
+                    filepath = Server.USER_DAV_HOME + path.replaceFirst(Server.HOME, "/");
+                else if (path.startsWith("/" + username + "/"))
+                    filepath = Server.USER_DAV_HOME + path.replaceFirst("/" + username + "/", "/");
+                else {
+                    if (username.equals("admin")) {
+                        for (String key : mRealPathMap.keySet()) {
+                            if (path.startsWith(key)) {
+                                path = path.replaceFirst(key, mRealPathMap.get(key));
+                                break;
+                            }
+                        }
+                        filepath = Server.DEVICE_DAV_HOME + path.replaceFirst("/home/", "/");
+                    } else {
+                        String newPath = "";
+                        String[] paths = path.replaceFirst("/", "").split("/");
+                        int length = paths.length;
+                        for (int i = 0; i < length; i++) {
+                            if (i == 0)
+                                newPath = "/" + paths[i].toLowerCase();
+                            else
+                                newPath = newPath + "/" + paths[i];
+                        }
+                        filepath = "/dav" + newPath;
+                    }
+                }
+
                 if (thumbnail)
                     url = "http://" + hostname + filepath + "?session=" + hash + "&thumbnail";
                 else

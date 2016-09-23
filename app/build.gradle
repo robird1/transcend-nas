@@ -10,8 +10,8 @@ android {
         applicationId "com.transcend.nas"
         minSdkVersion 14
         targetSdkVersion 14
-        versionCode 13
-        versionName "1.3"
+        versionCode 15
+        versionName "1.3.2"
     }
 
     buildTypes {
