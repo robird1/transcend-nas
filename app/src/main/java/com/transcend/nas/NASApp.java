@@ -4,8 +4,10 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
+import android.support.multidex.MultiDexApplication;
 import android.util.Log;
 
+import com.facebook.FacebookSdk;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.cast.CastMediaControlIntent;
@@ -22,7 +24,7 @@ import java.util.Locale;
 /**
  * Created by silverhsu on 16/1/6.
  */
-public class NASApp extends Application {
+public class NASApp extends MultiDexApplication {
 
     private static final String TAG = NASApp.class.getSimpleName();
 

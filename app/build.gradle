@@ -1,17 +1,22 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
+
+    compileSdkVersion 24
     buildToolsVersion '23.0.3'
 
     useLibrary 'org.apache.http.legacy'
 
     defaultConfig {
         applicationId "com.transcend.nas"
-        minSdkVersion 14
-        targetSdkVersion 14
+
+        minSdkVersion 15
+        targetSdkVersion 15
+
         versionCode 15
         versionName "1.3.2"
+
+        multiDexEnabled true
     }
 
     buildTypes {
@@ -32,8 +37,10 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:design:23.3.0'
-    compile 'com.android.support:recyclerview-v7:23.3.0'
+
+    compile 'com.android.support:design:24.2.0'
+    compile 'com.android.support:recyclerview-v7:24.2.0'
+    compile 'com.android.support:cardview-v7:24.2.0'
     compile 'javax.jmdns:jmdns:3.4.1'
     compile 'commons-io:commons-io:2.4'
     compile 'jcifs:jcifs:1.3.17'
@@ -41,6 +48,8 @@ dependencies {
     compile 'com.github.chrisbanes.photoview:library:1.2.3'
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
     compile project(':CastCompanionLibrary')
+    compile project(':facebook-android-sdk-4.15.0')
+    compile 'com.android.support:multidex:1.0.1'
     compile 'com.google.android.exoplayer:exoplayer:r1.5.8'
     compile 'com.github.PhilJay:MPAndroidChart:v3.0.0-beta1'
     compile 'com.google.android.gms:play-services-analytics:9.0.0'

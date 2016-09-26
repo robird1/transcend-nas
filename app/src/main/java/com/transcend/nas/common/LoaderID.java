@@ -42,5 +42,6 @@ public class LoaderID {
     public static final int TUTK_NAS_ONLINE_CHECK = 34;
     public static final int SMB_FILE_SHARE = 35;
     public static final int LOCAL_FILE_SHARE = 36;
+    public static final int TUTK_FB_LOGIN = 37;
 
 }

@@ -298,4 +298,6 @@
         <item>500MB</item>
     </string-array>
 
+    <string name="facebook_app_id">167909376980819</string>
+
 </resources>
