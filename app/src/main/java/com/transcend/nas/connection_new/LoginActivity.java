@@ -22,6 +22,7 @@ import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
+import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.transcend.nas.NASPref;
@@ -37,8 +38,10 @@ import com.transcend.nas.management.TutkLoginLoader;
 import org.json.JSONObject;
 
 import java.util.Arrays;
+import java.util.Set;
 
 import static com.facebook.AccessToken.getCurrentAccessToken;
+import static com.transcend.nas.R.string.email;
 
 /**
  * Created by ikelee on 16/8/22.
@@ -272,30 +275,43 @@ public class LoginActivity extends AppCompatActivity implements
     {
         Log.d(TAG,"[Enter] loginFBAccount()");
 
-
-        if (callbackManager == null)
-        {
-            registerFBLoginCallback();
-        }
+        registerFBLoginCallback();
 
         accessToken = AccessToken.getCurrentAccessToken();
 
         Log.d(TAG,"accessToken: "+ accessToken);
 
-
         if (accessToken != null && accessToken.isExpired() == false)
         {
             Log.d(TAG, "FB has been login... AccessToken.getCurrentAccessToken(): " + getCurrentAccessToken());
 
-            requestFBUserInfo();
+            Set<String> deniedPermissions = accessToken.getDeclinedPermissions();
+
+            if (deniedPermissions.contains("email")) {
+
+                Log.d(TAG,"[Enter] deniedPermissions contains email...");
+
+                loginWithReadPermission();
+
+            }
+            else
+            {
+                requestFBUserInfo();
+            }
+
         }
         else
         {
-            Log.d(TAG,"[Enter] logInWithReadPermissions()");
-
-            LoginManager.getInstance().logInWithReadPermissions(LoginActivity.this, Arrays.asList("public_profile", "user_friends", "email"));
+            loginWithReadPermission();
         }
 
+    }
+
+    private void loginWithReadPermission()
+    {
+        Log.d(TAG,"[Enter] logInWithReadPermission()");
+
+        LoginManager.getInstance().logInWithReadPermissions(LoginActivity.this, Arrays.asList("public_profile", "email"));
     }
 
     private void registerFBLoginCallback()
@@ -313,13 +329,30 @@ public class LoginActivity extends AppCompatActivity implements
 
                 accessToken = loginResult.getAccessToken();
 
-                requestFBUserInfo();
+                Log.d(TAG,"accessToken: "+ accessToken);
+
+                Set<String> deniedPermissions = loginResult.getRecentlyDeniedPermissions();
+
+                if (deniedPermissions.contains("email")) {
+
+                    Log.d(TAG,"[Enter] deniedPermissions contains email...");
+
+                    loginWithReadPermission();
+
+                    Toast.makeText(LoginActivity.this, "Please provide Facebook email address for Facebook login...", Toast.LENGTH_LONG).show();
+
+                }
+                else {
+
+                    requestFBUserInfo();
+                }
             }
 
             @Override
             public void onCancel() {
 
                 Log.d(TAG,"[Enter] onCancel()");
+
             }
 
             @Override
@@ -356,6 +389,7 @@ public class LoginActivity extends AppCompatActivity implements
                         arg.putString("token", accessToken.getToken());
 
                         Log.d(TAG, "getLoaderManager().restartLoader()...");
+
                         getLoaderManager().restartLoader(LoaderID.TUTK_FB_LOGIN, arg, LoginActivity.this).forceLoad();
 
                     }
@@ -380,12 +414,27 @@ public class LoginActivity extends AppCompatActivity implements
 
         Log.d(TAG,"[Enter] onActivityResult()");
 
-        callbackManager.onActivityResult(requestCode, resultCode, data);
-
         if (resultCode == RESULT_OK) {
+
+            Log.d(TAG,"resultCode == RESULT_OK");
+
+            int fbRequestCode = CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode();
+
+            Log.d(TAG, "fbRequestCode: " + fbRequestCode);
+
             if (requestCode == LoginListActivity.REQUEST_CODE) {
                 startFileManageActivity();
             }
+            else if (requestCode == fbRequestCode)
+            {
+                if (callbackManager != null && FacebookSdk.isInitialized() == true) {
+                    callbackManager.onActivityResult(requestCode, resultCode, data);
+                }
+            }
+        }
+        else
+        {
+            Log.d(TAG,"resultCode != RESULT_OK");
         }
     }
 
