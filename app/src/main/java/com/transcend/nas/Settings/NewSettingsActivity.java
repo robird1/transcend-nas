@@ -212,13 +212,9 @@ public class NewSettingsActivity extends AppCompatActivity implements
         boolean isBind = false;
         if (code.equals("")) {
             List<TutkGetNasLoader.TutkNasNode> naslist = loader.getNasList();
-            //check nas uuid and record it
-            Server mServer = ServerManager.INSTANCE.getCurrentServer();
-            String uuid = mServer.getTutkUUID();
-            if (uuid == null) {
-                uuid = NASPref.getUUID(mContext);
-            }
+            String uuid = NASPref.getUUID(mContext);
 
+            //check nas uuid and record it
             for (TutkGetNasLoader.TutkNasNode nas : naslist) {
                 if (nas.nasUUID.equals(uuid)) {
                     NASPref.setCloudUUID(mContext, uuid);

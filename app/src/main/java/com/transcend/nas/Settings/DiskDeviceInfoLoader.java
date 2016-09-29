@@ -133,7 +133,7 @@ public class DiskDeviceInfoLoader extends AsyncTaskLoader<Boolean> {
                                 device.infos.put(curTagName, text);
                             } else if (curTagName.equals("reason")) {
                                 if ("No Permission".equals(text)) {
-                                    boolean success = server.connect();
+                                    boolean success = server.connect(false);
                                     if (success) {
                                         ServerManager.INSTANCE.saveServer(server);
                                         ServerManager.INSTANCE.setCurrentServer(server);

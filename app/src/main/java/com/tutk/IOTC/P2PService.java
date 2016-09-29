@@ -28,8 +28,7 @@ public class P2PService implements IP2PTunnelCallback {
         mProtocal = new ArrayList<P2PProtocal>();
         addP2PProtocal(P2PProtocalType.HTTP, 8000, 80);
         addP2PProtocal(P2PProtocalType.SMB, 9000, 445);
-        if(NASPref.useTwonkyServer)
-            addP2PProtocal(P2PProtocalType.TWONKY, 10000, 9000);
+        addP2PProtocal(P2PProtocalType.TWONKY, 10000, 9000);
     }
 
     public static P2PService getInstance() {

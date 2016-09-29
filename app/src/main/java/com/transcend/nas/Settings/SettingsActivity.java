@@ -439,13 +439,9 @@ public class SettingsActivity extends AppCompatActivity implements
 
         if (code.equals("")) {
             naslist = loader.getNasList();
-            //check nas uuid and record it
-            Server mServer = ServerManager.INSTANCE.getCurrentServer();
-            String uuid = mServer.getTutkUUID();
-            if(uuid == null){
-                uuid = NASPref.getUUID(mContext);
-            }
+            String uuid = NASPref.getUUID(mContext);
 
+            //check nas uuid and record it
             boolean isBind = false;
             for(TutkGetNasLoader.TutkNasNode nas : naslist){
                 if(nas.nasUUID.equals(uuid)){
@@ -970,9 +966,7 @@ public class SettingsActivity extends AppCompatActivity implements
                     boolean isBind = false;
                     if (naslist != null) {
                         Server mServer = ServerManager.INSTANCE.getCurrentServer();
-                        String uuid = mServer.getTutkUUID();
-                        if(uuid == null)
-                            uuid = NASPref.getUUID(getActivity());
+                        String uuid = NASPref.getUUID(getActivity());
                         String serialNum = NASPref.getSerialNum(getActivity());
                         Log.d(TAG, "Current user: " + mServer.getUsername());
                         Log.d(TAG, "Current UUID: " + uuid);
@@ -1089,9 +1083,7 @@ public class SettingsActivity extends AppCompatActivity implements
                     if(serialNum != null && !serialNum.equals(""))
                         nasName = nasName + NASApp.TUTK_NAME_TAG + serialNum;
                     arg.putString("nasName", nasName);
-                    String uuid = server.getTutkUUID();
-                    if(uuid == null)
-                        uuid = NASPref.getUUID(getActivity());
+                    String uuid = NASPref.getUUID(getActivity());
                     if(uuid != null && !uuid.equals("")){
                         arg.putString("nasUUID", uuid);
                         getLoaderManager().restartLoader(LoaderID.TUTK_NAS_CREATE, arg, SettingsActivity.this).forceLoad();
@@ -1169,10 +1161,7 @@ public class SettingsActivity extends AppCompatActivity implements
                     if(serial != null && !serial.equals(""))
                         name = name + NASApp.TUTK_NAME_TAG + serial;
                     arg.putString("nasName", name);
-                    String id = mServer.getTutkUUID();
-                    if(id == null)
-                        id = NASPref.getUUID(getActivity());
-                    arg.putString("nasUUID", id);
+                    arg.putString("nasUUID", NASPref.getUUID(getActivity()));
                     getLoaderManager().restartLoader(LoaderID.TUTK_REGISTER, arg, SettingsActivity.this).forceLoad();
                     break;
                 case R.id.remote_access_login_forget:

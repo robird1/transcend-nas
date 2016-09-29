@@ -8,6 +8,7 @@ import com.realtek.nasfun.HttpHelper;
 
 import com.realtek.nasfun.api.CGIResponse.Item;
 import com.transcend.nas.R;
+import com.tutk.IOTC.P2PService;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpEntity;
@@ -224,9 +225,12 @@ public class Server {
 	 * 
 	 * @return successful or not
 	 */
-	public boolean connect(){
+	public boolean connect(boolean checkTutk){
 		Log.d(TAG, "Connecting to server:"+hostname);
+
 		isConnected = (doGenHash() && doLogin() && doGetServerInfo());
+		if(isConnected && checkTutk)
+			isConnected = isConnected && checkTutkuid();
 
 		if(isConnected){
 			Log.i(TAG, "Login to " + hostname + " success");
@@ -498,7 +502,6 @@ public class Server {
 	 */
 	public boolean checkTutkuid(){
 		boolean isTutkNas = false;
-
 		try {
 			String commandURL = "http://"+hostname+NAS_GET_TUTK_PATH+"?session="+hash;
 			Log.d(TAG, "Get "+commandURL);
@@ -528,24 +531,27 @@ public class Server {
 						curTagName = tagName;
 					}
 					else if(eventType == XmlPullParser.TEXT) {
-						if(curTagName != null){
+						if(curTagName != null) {
 							text = xpp.getText();
-							if(curTagName.equals("tutkuid")){
+							if (curTagName.equals("tutkuid")) {
 								String enable = text;
-
-								if(enable != null){
-									if(enable.equals("")) {
-										isTutkNas = false;
-									}
-									else {
+								if (enable != null) {
+									if (!enable.equals("")) {
 										isTutkNas = true;
 										setTutkUUID(enable);
 									}
-									Log.d(TAG,"tutkuid = "+enable);
+									Log.d(TAG, "tutkuid = " + enable);
 									break;
-								}else{
-									Log.d(TAG, "Can't get tutkuid");
 								}
+							} else if (curTagName.equals("reason")) {
+								setTutkUUID(null);
+								if ("No Permission".equals(text)) {
+									loginError = "Please update StoreJet Cloud firmware";
+								} else {
+									loginError = text;
+								}
+								Log.d(TAG, "get device info fail due to : " + loginError);
+								return false;
 							}
 						}
 					}
@@ -1481,11 +1487,6 @@ public class Server {
 				// use ServerInfo to set firmware
 				// but for StoreJet Cloud, we don't need to check firmwareType
 				// isSuccess = setFirmwareType();
-				// to get tutk uid
-				if(!checkTutkuid()){
-					isSuccess = false;
-					setTutkUUID(null);
-				}
 				// for StoreJet Cloud, we don't need get server profile
 				//getServerProfile();
 			} catch (ClientProtocolException e) {

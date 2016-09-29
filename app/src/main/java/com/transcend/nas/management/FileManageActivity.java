@@ -347,6 +347,14 @@ public class FileManageActivity extends AppCompatActivity implements
         } else {
             LanCheckManager.getInstance().setLanConnect(true, hostname);
         }
+
+        String firmware = mServer.getServerInfo().firmwareVer;
+        if(firmware != null && !firmware.equals("")){
+            int version = Integer.parseInt(firmware);
+            NASPref.useTwonkyServer = version >= NASPref.useTwonkyMinFirmwareVersion;
+        } else {
+            NASPref.useTwonkyServer = false;
+        }
     }
 
     private boolean initAutoBackUpService() {
@@ -1708,6 +1716,9 @@ public class FileManageActivity extends AppCompatActivity implements
             NASPref.setUUID(this, "");
             NASPref.setMacAddress(this, "");
             NASPref.setSerialNum(this, "");
+            NASPref.setCloudPassword(this, "");
+            NASPref.setCloudAuthToken(this, "");
+            NASPref.setCloudAccountStatus(this, NASPref.Status.Inactive.ordinal());
             NASPref.setCloudUUID(this, "");
             String[] scenarios = getResources().getStringArray(R.array.backup_scenario_values);
             NASPref.setBackupScenario(this, scenarios[1]);
@@ -1721,6 +1732,9 @@ public class FileManageActivity extends AppCompatActivity implements
 
         //clean path map
         FileFactory.getInstance().cleanRealPathMap();
+
+        //clean twonky map
+        TwonkyManager.getInstance().cleanTwonkyMap();
 
         //clean lan check
         LanCheckManager.getInstance().setLanConnect(false, "");

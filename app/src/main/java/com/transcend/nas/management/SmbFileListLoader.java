@@ -13,6 +13,7 @@ import com.transcend.nas.common.FileFactory;
 import com.transcend.nas.service.TwonkyManager;
 import com.tutk.IOTC.P2PService;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -30,6 +31,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -110,11 +112,9 @@ public class SmbFileListLoader extends SmbAbstractLoader {
         }
 
         if (NASPref.useTwonkyServer) {
-            if (mPath.equals(NASApp.ROOT_SMB)) {
-                TwonkyManager.getInstance().doTwonkyRescan();
-            }
-
-            boolean parser = TwonkyManager.getInstance().startTwonkyParser(mPath, 0, 50);
+            if (mPath.equals(NASApp.ROOT_SMB))
+                TwonkyManager.getInstance().doTwonkyRescan(false);
+            TwonkyManager.getInstance().startTwonkyParser(mPath, 0, 100);
         }
 
         return true;

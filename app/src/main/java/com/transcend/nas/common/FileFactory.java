@@ -131,13 +131,12 @@ public class FileFactory {
             url = "file://" + path;
         } else {
             String extension = FilenameUtils.getExtension(path);
-            String twonkyUrl = TwonkyManager.getInstance().getImageUrlFromMap(path.replaceFirst("." + extension, ""));
+            String twonkyUrl = TwonkyManager.getInstance().getUrlFromMap(true, FileInfo.TYPE.PHOTO, path.replaceFirst("." + extension, ""));
             if(NASPref.useTwonkyServer && twonkyUrl != null && !twonkyUrl.equals("")) {
-                String newUrl = TwonkyManager.getInstance().convertUrlByLink(twonkyUrl);
                 if (thumbnail)
-                    url = newUrl + "?scale=192x192";
+                    url = twonkyUrl + "?scale=192x192";
                 else
-                    url = newUrl;
+                    url = twonkyUrl;
             } else {
                 Server server = ServerManager.INSTANCE.getCurrentServer();
                 String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);

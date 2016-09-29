@@ -154,7 +154,7 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
 
     private boolean login(String hostname, String username, String password) {
         mServer = new Server(hostname, username, password);
-        boolean isConnected = mServer.connect();
+        boolean isConnected = mServer.connect(false);
         if (isConnected) {
             updateServerManager();
             NASPref.setHostname(getContext(), hostname);

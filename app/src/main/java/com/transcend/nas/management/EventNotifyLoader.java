@@ -131,7 +131,7 @@ public class EventNotifyLoader extends AsyncTaskLoader<Boolean> {
         if (!isSuccess) {
             Log.w(TAG, "hash key not valid, start login again");
             Server mServer = ServerManager.INSTANCE.getCurrentServer();
-            isSuccess = mServer.connect();
+            isSuccess = mServer.connect(false);
             if (isSuccess) {
                 ServerManager.INSTANCE.saveServer(mServer);
                 ServerManager.INSTANCE.setCurrentServer(mServer);

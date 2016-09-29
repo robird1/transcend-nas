@@ -41,7 +41,7 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
 
     @Override
     public Boolean loadInBackground() {
-        boolean success = mServer.connect();
+        boolean success = mServer.connect(true);
         if (success) {
             if(mReplace) {
                 updateServerManager();

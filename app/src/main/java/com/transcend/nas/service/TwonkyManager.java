@@ -5,6 +5,8 @@ import android.util.Log;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
+import com.transcend.nas.NASPref;
+import com.transcend.nas.management.FileInfo;
 import com.tutk.IOTC.P2PService;
 
 import org.json.JSONArray;
@@ -12,11 +14,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class TwonkyManager {
     private static final String TAG = "TwonkyManager";
@@ -24,15 +29,15 @@ public class TwonkyManager {
     private static TwonkyManager mTwonkyManager;
 
     private String KEYWORD_FOLDER = "TWONKY_FOLDER";
-    private String mFolderUrl = "";
     private HashMap<String, String> mImageMap;
     private HashMap<String, String> mFolderMap;
-    private final int mSize = 50;
+    private Set<String> mCacheMap;
     //TODO : check the size
 
     public TwonkyManager() {
         mImageMap = new HashMap<>();
         mFolderMap = new HashMap<>();
+        mCacheMap = new HashSet<>();
     }
 
     public static TwonkyManager getInstance() {
@@ -43,7 +48,21 @@ public class TwonkyManager {
         return mTwonkyManager;
     }
 
+    public void cleanTwonkyMap(){
+        if(mCacheMap != null)
+            mCacheMap.clear();
+        if(mFolderMap != null)
+            mFolderMap.clear();
+        if(mImageMap != null)
+            mImageMap.clear();
+    }
+
     public boolean startTwonkyParser(String path, int start, int count) {
+        if(mCacheMap.contains(path)) {
+            Log.d(TAG, "twonky cache contain : " + path);
+            return true;
+        }
+
         int length = path.split("/").length;
         if (length == 0) {
             //root folder, get twonky server
@@ -57,32 +76,49 @@ public class TwonkyManager {
                     Log.d(TAG, "twonky byFolder " + byFolder);
                     if (byFolder != null && !byFolder.equals("")) {
                         mFolderMap.put(KEYWORD_FOLDER, byFolder);
+                        mCacheMap.add(path);
                         return true;
                     }
                 }
             }
         } else if (0 < length && length <= 2) {
-            //admin, public folder
-            return parserTwonkyFolder(path, start, count, getFolderUrlFromMap(KEYWORD_FOLDER));
+            //TODO : share folder
+            //home, public folder
+            return parserTwonkyFolder(path, start, count, getFolderUrlFromMap(false, KEYWORD_FOLDER));
         } else {
             //other folder
-            return parserTwonkyFolder(path, start, count, getFolderUrlFromMap(path));
+            return parserTwonkyFolder(path, start, count, getFolderUrlFromMap(false, path));
         }
 
         return false;
     }
 
-    public String getFolderUrlFromMap(String path) {
+    public String getUrlFromMap(boolean convertLink, FileInfo.TYPE type, String path){
+        if(type.equals(FileInfo.TYPE.DIR))
+            return getFolderUrlFromMap(convertLink, path);
+        else if(type.equals(FileInfo.TYPE.PHOTO))
+            return getImageUrlFromMap(convertLink, path);
+        else
+            return null;
+    }
+
+    private String getFolderUrlFromMap(boolean convertLink, String path) {
         String result = "";
-        if (mFolderMap != null)
+        if (mFolderMap != null) {
             result = mFolderMap.get(path);
+            if(convertLink && result != null && !result.equals(""))
+                result = convertUrlByLink(result);
+        }
         return result;
     }
 
-    public String getImageUrlFromMap(String path) {
+    private String getImageUrlFromMap(boolean convertLink, String path) {
         String result = "";
-        if (mImageMap != null)
+        if (mImageMap != null) {
             result = mImageMap.get(path);
+            if(convertLink && result != null && !result.equals(""))
+                result = convertUrlByLink(result);
+        }
         return result;
     }
 
@@ -130,7 +166,11 @@ public class TwonkyManager {
         return state;
     }
 
-    public String doTwonkyRescan() {
+    public String doTwonkyRescan(boolean force) {
+        //TODO: add lifecycle check
+        if(!force && mCacheMap.contains(NASApp.ROOT_SMB))
+            return null;
+
         Server server = ServerManager.INSTANCE.getCurrentServer();
         String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.TWONKY);
         String value = "http://" + hostname + "/rpc/rescan";
@@ -265,8 +305,10 @@ public class TwonkyManager {
                 int nextStart = start + count;
                 if (Integer.parseInt(folderChildCount) > nextStart)
                     return parserTwonkyFolder(path, nextStart, count, url);
-                else
+                else {
+                    mCacheMap.add(path);
                     return true;
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
 
