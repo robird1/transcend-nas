@@ -493,4 +493,21 @@ public class NASPref {
         PrefUtil.write(context, name, key, mode.ordinal());
     }
 
+    public static void clearDataAfterLogout(Context context)
+    {
+        NASPref.setHostname(context, "");
+        NASPref.setPassword(context, "");
+        NASPref.setUUID(context, "");
+        NASPref.setMacAddress(context, "");
+        NASPref.setSerialNum(context, "");
+        NASPref.setCloudPassword(context, "");
+        NASPref.setCloudAuthToken(context, "");
+        NASPref.setCloudAccountStatus(context, NASPref.Status.Inactive.ordinal());
+        NASPref.setCloudUUID(context, "");
+        String[] scenarios = context.getResources().getStringArray(R.array.backup_scenario_values);
+        NASPref.setBackupScenario(context, scenarios[1]);
+        NASPref.setBackupSetting(context, false);
+        NASPref.setBackupLocation(context, "/homes/" + Build.MODEL + "/");
+        NASPref.setBackupSource(context, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
+    }
 }

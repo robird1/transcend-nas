@@ -460,6 +460,9 @@ public class LoginActivity extends AppCompatActivity implements
                 break;
             case R.id.login_sign_in_layout:
             case R.id.login_sign_in:
+                LoginManager.getInstance().logOut();
+                NASPref.clearDataAfterLogout(this);
+
                 startLoginByEmailActivity(false, isSignWithOther);
                 break;
             case R.id.start_sign_in_with_other:

@@ -42,6 +42,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.login.LoginManager;
 import com.google.android.gms.cast.ApplicationMetadata;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
@@ -1711,20 +1712,9 @@ public class FileManageActivity extends AppCompatActivity implements
 
         //clean hostname, account, password, token
         if (clear) {
-            NASPref.setHostname(this, "");
-            NASPref.setPassword(this, "");
-            NASPref.setUUID(this, "");
-            NASPref.setMacAddress(this, "");
-            NASPref.setSerialNum(this, "");
-            NASPref.setCloudPassword(this, "");
-            NASPref.setCloudAuthToken(this, "");
-            NASPref.setCloudAccountStatus(this, NASPref.Status.Inactive.ordinal());
-            NASPref.setCloudUUID(this, "");
-            String[] scenarios = getResources().getStringArray(R.array.backup_scenario_values);
-            NASPref.setBackupScenario(this, scenarios[1]);
-            NASPref.setBackupSetting(this, false);
-            NASPref.setBackupLocation(this, "/homes/" + Build.MODEL + "/");
-            NASPref.setBackupSource(this, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
+            LoginManager.getInstance().logOut();
+
+            NASPref.clearDataAfterLogout(this);
         }
 
         //clean disk info
