@@ -279,7 +279,6 @@ public class LoginByEmailActivity extends AppCompatActivity implements
         NASPref.setCloudAccountStatus(mContext, NASPref.Status.Active.ordinal());
 
         if (code.equals("")) {
-            NASPref.setInitial(this, true);
             Intent intent = new Intent();
             intent.setClass(LoginByEmailActivity.this, LoginListActivity.class);
             intent.putExtra("NASList", loader.getNasArrayList());
@@ -442,7 +441,6 @@ public class LoginByEmailActivity extends AppCompatActivity implements
 
     private void startLoginActivity() {
         Intent intent = new Intent();
-        intent.putExtra("SignWithOther", isSignWithOther);
         intent.setClass(LoginByEmailActivity.this, LoginActivity.class);
         startActivity(intent);
         finish();

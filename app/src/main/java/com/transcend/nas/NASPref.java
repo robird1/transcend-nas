@@ -18,6 +18,7 @@ public class NASPref {
     private static final String TAG = NASPref.class.getSimpleName();
     public static final boolean useDefaultDownloadFolder = true;
     public static final boolean useNewLoginFlow = true;
+    public static final boolean useFacebookLogin = false;
     public static final String defaultUserName = "admin";
     public static final int useTwonkyMinFirmwareVersion = 20160101;
     public static boolean useTwonkyServer = false;
@@ -38,9 +39,7 @@ public class NASPref {
     }
 
     /**
-     *
      * Init
-     *
      */
     public static boolean getIntroduce(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
@@ -69,9 +68,7 @@ public class NASPref {
     }
 
     /**
-     *
      * Login
-     *
      */
     public static String getHostname(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
@@ -178,18 +175,30 @@ public class NASPref {
     }
 
     /**
-     *
      * Sign In
-     *
      */
-    public static int getCloudAccountStatus(Context context){
+    public static boolean getFBAccountStatus(Context context) {
+        String name = context.getString(R.string.pref_name);
+        String key = context.getString(R.string.pref_fb_account_status);
+        boolean def = false;
+        return PrefUtil.read(context, name, key, def);
+    }
+
+    public static void setFBAccountStatus(Context context, boolean enable) {
+        String name = context.getString(R.string.pref_name);
+        String key = context.getString(R.string.pref_fb_account_status);
+        PrefUtil.write(context, name, key, enable);
+    }
+
+
+    public static int getCloudAccountStatus(Context context) {
         String name = context.getString(R.string.pref_name);
         String key = context.getString(R.string.pref_cloud_account_status);
         int def = Status.Inactive.ordinal();
         return PrefUtil.read(context, name, key, def);
     }
 
-    public static void setCloudAccountStatus(Context context, int type){
+    public static void setCloudAccountStatus(Context context, int type) {
         String name = context.getString(R.string.pref_name);
         String key = context.getString(R.string.pref_cloud_account_status);
         PrefUtil.write(context, name, key, type);
@@ -223,33 +232,33 @@ public class NASPref {
         PrefUtil.write(context, name, key, password);
     }
 
-    public static String getCloudAuthToken(Context context){
+    public static String getCloudAuthToken(Context context) {
         String name = context.getString(R.string.pref_name);
         String key = context.getString(R.string.pref_cloud_token);
         String def = "";
         return PrefUtil.read(context, name, key, def);
     }
 
-    public static void setCloudAuthToken(Context context, String token){
+    public static void setCloudAuthToken(Context context, String token) {
         String name = context.getString(R.string.pref_name);
         String key = context.getString(R.string.pref_cloud_token);
         PrefUtil.write(context, name, key, token);
     }
 
-    public static String getCloudUUID(Context context){
+    public static String getCloudUUID(Context context) {
         String name = context.getString(R.string.pref_name);
         String key = context.getString(R.string.pref_cloud_uuid);
         String def = "";
         return PrefUtil.read(context, name, key, def);
     }
 
-    public static void setCloudUUID(Context context, String UUID){
+    public static void setCloudUUID(Context context, String UUID) {
         String name = context.getString(R.string.pref_name);
         String key = context.getString(R.string.pref_cloud_uuid);
         PrefUtil.write(context, name, key, UUID);
     }
 
-    public static String getCloudServer(Context context){
+    public static String getCloudServer(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
         String key = context.getResources().getString(R.string.pref_cloud_ip);
         String def = "https://www.storejetcloud.com/1";
@@ -257,9 +266,7 @@ public class NASPref {
     }
 
     /**
-     *
      * Backup setting
-     *
      */
     public static void setBackupSetting(Context context, boolean backup) {
         String name = context.getResources().getString(R.string.pref_name);
@@ -275,9 +282,7 @@ public class NASPref {
     }
 
     /**
-     *
      * Backup video
-     *
      */
     public static void setBackupVideo(Context context, boolean backup) {
         String name = context.getResources().getString(R.string.pref_name);
@@ -293,11 +298,9 @@ public class NASPref {
     }
 
     /**
-     *
      * Backup scenario
-     *
      */
-    public static void setBackupScenario(Context context, String scenario){
+    public static void setBackupScenario(Context context, String scenario) {
         String name = context.getResources().getString(R.string.pref_name);
         String key = context.getResources().getString(R.string.pref_backup_scenario);
         PrefUtil.write(context, name, key, scenario);
@@ -311,9 +314,7 @@ public class NASPref {
     }
 
     /**
-     *
      * Backup location
-     *
      */
     public static String getBackupLocation(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
@@ -329,9 +330,7 @@ public class NASPref {
     }
 
     /**
-     *
      * Backup source
-     *
      */
     public static String getBackupSource(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
@@ -347,9 +346,7 @@ public class NASPref {
     }
 
     /**
-     *
      * Backup Error Task
-     *
      */
     public static void setBackupErrorTask(Context context, String errorTask) {
         String name = context.getResources().getString(R.string.pref_name);
@@ -365,9 +362,7 @@ public class NASPref {
     }
 
     /**
-     *
      * Download location
-     *
      */
     public static String getDownloadLocation(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
@@ -410,9 +405,7 @@ public class NASPref {
     }
 
     /**
-     *
      * Cache Size
-     *
      */
     public static String getCacheSize(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
@@ -422,9 +415,7 @@ public class NASPref {
     }
 
     /**
-     *
      * File Sort Type
-     *
      */
     public static Sort getFileSortType(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
@@ -440,9 +431,7 @@ public class NASPref {
     }
 
     /**
-     *
      * File View
-     *
      */
     public static FileManageRecyclerAdapter.LayoutType getFileViewType(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
@@ -458,9 +447,7 @@ public class NASPref {
     }
 
     /**
-     *
      * Picker File View
-     *
      */
     public static FileManageRecyclerAdapter.LayoutType getFilePickerViewType(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
@@ -476,9 +463,7 @@ public class NASPref {
     }
 
     /**
-     *
      * Music Type
-     *
      */
     public static MusicActivity.MUSIC_MODE getMusicType(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
@@ -493,21 +478,25 @@ public class NASPref {
         PrefUtil.write(context, name, key, mode.ordinal());
     }
 
-    public static void clearDataAfterLogout(Context context)
-    {
-        NASPref.setHostname(context, "");
-        NASPref.setPassword(context, "");
-        NASPref.setUUID(context, "");
-        NASPref.setMacAddress(context, "");
-        NASPref.setSerialNum(context, "");
-        NASPref.setCloudPassword(context, "");
-        NASPref.setCloudAuthToken(context, "");
-        NASPref.setCloudAccountStatus(context, NASPref.Status.Inactive.ordinal());
-        NASPref.setCloudUUID(context, "");
+    public static void clearDataAfterLogout(Context context) {
+        if (getFBAccountStatus(context)) {
+            setCloudUsername(context, "");
+            setFBAccountStatus(context, false);
+        }
+
+        setHostname(context, "");
+        setPassword(context, "");
+        setUUID(context, "");
+        setMacAddress(context, "");
+        setSerialNum(context, "");
+        setCloudPassword(context, "");
+        setCloudAuthToken(context, "");
+        setCloudAccountStatus(context, Status.Inactive.ordinal());
+        setCloudUUID(context, "");
         String[] scenarios = context.getResources().getStringArray(R.array.backup_scenario_values);
-        NASPref.setBackupScenario(context, scenarios[1]);
-        NASPref.setBackupSetting(context, false);
-        NASPref.setBackupLocation(context, "/homes/" + Build.MODEL + "/");
-        NASPref.setBackupSource(context, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
+        setBackupScenario(context, scenarios[1]);
+        setBackupSetting(context, false);
+        setBackupLocation(context, "/homes/" + Build.MODEL + "/");
+        setBackupSource(context, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
     }
 }

@@ -30,18 +30,19 @@ import com.transcend.nas.R;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.common.StyleFactory;
 import com.transcend.nas.common.TutkCodeID;
-import com.transcend.nas.management.FileManageActivity;
 import com.transcend.nas.management.TutkFBLoginLoader;
 import com.transcend.nas.management.TutkGetNasLoader;
 import com.transcend.nas.management.TutkLoginLoader;
+import com.transcend.nas.view.NotificationDialog;
 
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Set;
 
 import static com.facebook.AccessToken.getCurrentAccessToken;
-import static com.transcend.nas.R.string.email;
 
 /**
  * Created by ikelee on 16/8/22.
@@ -57,13 +58,11 @@ public class LoginActivity extends AppCompatActivity implements
     private RelativeLayout mStartLayout;
     private RelativeLayout mProgressView;
     private int mLoaderID;
-    private boolean isSignWithOther = false;
 
     private Context mContext;
 
     private CallbackManager callbackManager;
     private AccessToken accessToken;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,14 +72,11 @@ public class LoginActivity extends AppCompatActivity implements
 
         mContext = this;
         setContentView(R.layout.activity_login);
-        init();
         initView();
     }
 
     @Override
     public Loader<Boolean> onCreateLoader(int id, Bundle args) {
-        Log.d(TAG,"[Enter] onCreateLoader()");
-
         mProgressView.setVisibility(View.VISIBLE);
         String server, email, pwd, token;
         switch (mLoaderID = id) {
@@ -90,17 +86,12 @@ public class LoginActivity extends AppCompatActivity implements
                 pwd = args.getString("password");
                 return new TutkLoginLoader(this, server, email, pwd);
             case LoaderID.TUTK_NAS_GET:
-                Log.d(TAG,"new TutkGetNasLoader()");
-
                 server = args.getString("server");
                 token = args.getString("token");
                 return new TutkGetNasLoader(this, server, token);
             case LoaderID.TUTK_FB_LOGIN:
-                Log.d(TAG,"new TutkFBLoginLoader()");
-
                 server = args.getString("server");
                 email = args.getString("email");
-
                 return new TutkFBLoginLoader(this, server, email, args.getString("name"), args.getString("uid"), args.getString("token"));
         }
         return null;
@@ -108,22 +99,18 @@ public class LoginActivity extends AppCompatActivity implements
 
     @Override
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
-        Log.d(TAG,"[Enter] onLoadFinished()");
-
         if (!success) {
             mProgressView.setVisibility(View.INVISIBLE);
             Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (loader instanceof TutkLoginLoader) {
+        if (loader instanceof TutkFBLoginLoader) {
+            checkFBLoginNASResult((TutkFBLoginLoader) loader);
+        } else if (loader instanceof TutkLoginLoader) {
             checkLoginNASResult((TutkLoginLoader) loader);
         } else if (loader instanceof TutkGetNasLoader) {
             checkGetNASResult((TutkGetNasLoader) loader);
-        }
-        else if (loader instanceof TutkFBLoginLoader)
-        {
-            checkLoginNASResult((TutkFBLoginLoader) loader);
         }
     }
 
@@ -132,16 +119,9 @@ public class LoginActivity extends AppCompatActivity implements
 
     }
 
-    private void init(){
-        Intent intent = getIntent();
-        if(intent != null) {
-            isSignWithOther = intent.getBooleanExtra("SignWithOther", false);
-        }
-    }
-
     private void initView() {
-
-        Log.d(TAG, "[Enter] initView()");
+        //init progress view
+        mProgressView = (RelativeLayout) findViewById(R.id.login_progress_view);
 
         //init login layout
         mLoginLayout = (RelativeLayout) findViewById(R.id.login_layout);
@@ -156,6 +136,12 @@ public class LoginActivity extends AppCompatActivity implements
         TextView signInText = (TextView) findViewById(R.id.login_sign_in);
         signInText.setOnClickListener(this);
         StyleFactory.set_blue_text_touch_effect(this, signInText);
+        if(!NASPref.useFacebookLogin){
+            RelativeLayout fbLayout = (RelativeLayout) findViewById(R.id.login_fb_layout);
+            fbLayout.setVisibility(View.GONE);
+            LinearLayout orLayout = (LinearLayout) findViewById(R.id.login_or_layout);
+            orLayout.setVisibility(View.INVISIBLE);
+        }
 
         //init start layout
         mStartLayout = (RelativeLayout) findViewById(R.id.start_layout);
@@ -175,16 +161,10 @@ public class LoginActivity extends AppCompatActivity implements
             accountContent.setText(email);
             String title = email.split("@")[0];
             accountTitle.setText(title);
-            if(isSignWithOther)
-                showLoginView();
-            else
-                showStartView();
+            showStartView();
         } else {
             showLoginView();
         }
-
-        //init progress view
-        mProgressView = (RelativeLayout) findViewById(R.id.login_progress_view);
     }
 
     private void showLoginView() {
@@ -198,37 +178,30 @@ public class LoginActivity extends AppCompatActivity implements
     }
 
     private void checkLoginNASResult(TutkLoginLoader loader) {
-        Log.d(TAG,"[Enter] checkLoginNASResult()");
-
-        String code = loader.getCode();
-        String status = loader.getStatus();
         String token = loader.getAuthToke();
         String email = loader.getEmail();
         String pwd = loader.getPassword();
 
-        Log.d(TAG,"code: "+ code);
-        Log.d(TAG,"status: "+ status);
-        Log.d(TAG,"token: "+ token);
-        Log.d(TAG,"email: "+ email);
-        Log.d(TAG,"pwd: "+ pwd);
-        Log.d(TAG,"server: "+ loader.getServer());
-
         if (!token.equals("")) {
             //token not null mean login success
+            NASPref.setFBAccountStatus(mContext, false);
             NASPref.setCloudUsername(mContext, email);
             NASPref.setCloudPassword(mContext, pwd);
-            NASPref.setCloudAuthToken(mContext, loader.getAuthToke());
+            NASPref.setCloudAuthToken(mContext, token);
             Bundle arg = new Bundle();
             arg.putString("server", loader.getServer());
-            arg.putString("token", loader.getAuthToke());
+            arg.putString("token", token);
             getLoaderManager().restartLoader(LoaderID.TUTK_NAS_GET, arg, LoginActivity.this).forceLoad();
         } else {
             mProgressView.setVisibility(View.INVISIBLE);
+            String code = loader.getCode();
+            String status = loader.getStatus();
             if (code.equals(TutkCodeID.NOT_VERIFIED)) {
                 //account not verified
-                NASPref.setCloudAccountStatus(mContext, NASPref.Status.Padding.ordinal());
+                NASPref.setFBAccountStatus(mContext, false);
                 NASPref.setCloudUsername(mContext, email);
                 NASPref.setCloudPassword(mContext, pwd);
+                NASPref.setCloudAuthToken(mContext, "");
                 startLoginByEmailActivity(false, false);
             } else {
                 if (!code.equals(""))
@@ -239,27 +212,48 @@ public class LoginActivity extends AppCompatActivity implements
         }
     }
 
-    private void checkGetNASResult(TutkGetNasLoader loader) {
-        Log.d(TAG,"[Enter] checkGetNASResult()");
+    private void checkFBLoginNASResult(TutkFBLoginLoader loader) {
+        String token = loader.getAuthToke();
 
+        if (!token.equals("")) {
+            //token not null mean login success
+            NASPref.setFBAccountStatus(mContext, true);
+            NASPref.setCloudUsername(mContext, loader.getEmail());
+            NASPref.setCloudPassword(mContext, loader.getPassword());
+            NASPref.setCloudAuthToken(mContext, token);
+            Bundle arg = new Bundle();
+            arg.putString("server", loader.getServer());
+            arg.putString("token", token);
+            getLoaderManager().restartLoader(LoaderID.TUTK_NAS_GET, arg, LoginActivity.this).forceLoad();
+        } else {
+            mProgressView.setVisibility(View.INVISIBLE);
+            String code = loader.getCode();
+            String status = loader.getStatus();
+            if (!code.equals(""))
+                Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(this, getString(R.string.error_format), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void checkGetNASResult(TutkGetNasLoader loader) {
+        mProgressView.setVisibility(View.INVISIBLE);
         String status = loader.getStatus();
         String code = loader.getCode();
-        NASPref.setCloudAccountStatus(mContext, NASPref.Status.Active.ordinal());
-
-        Log.d(TAG,"code: "+ code);
-        Log.d(TAG,"status: "+ status);
-
         if (code.equals("")) {
-            NASPref.setInitial(this, true);
-            Intent intent = new Intent();
-            intent.setClass(LoginActivity.this, LoginListActivity.class);
-            intent.putExtra("NASList", loader.getNasArrayList());
-            intent.putExtra("RemoteAccess", true);
-            startActivityForResult(intent, LoginListActivity.REQUEST_CODE);
+            startLoginListActivity(loader.getNasArrayList());
         } else {
             Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
         }
-        mProgressView.setVisibility(View.INVISIBLE);
+    }
+
+    private void startLoginListActivity(ArrayList<HashMap<String, String>> arrayList) {
+        Intent intent = new Intent();
+        intent.setClass(LoginActivity.this, LoginListActivity.class);
+        intent.putExtra("NASList", arrayList);
+        intent.putExtra("RemoteAccess", true);
+        startActivity(intent);
+        finish();
     }
 
     private void startLoginByEmailActivity(boolean signUp, boolean signWithOther) {
@@ -271,53 +265,44 @@ public class LoginActivity extends AppCompatActivity implements
         finish();
     }
 
-    private void loginFBAccount()
-    {
-        Log.d(TAG,"[Enter] loginFBAccount()");
+    private void loginFBAccount() {
+        mProgressView.setVisibility(View.VISIBLE);
+        Log.d(TAG, "[Enter] loginFBAccount()");
 
         registerFBLoginCallback();
 
         accessToken = AccessToken.getCurrentAccessToken();
 
-        Log.d(TAG,"accessToken: "+ accessToken);
+        Log.d(TAG, "accessToken: " + accessToken);
 
-        if (accessToken != null && accessToken.isExpired() == false)
-        {
+        if (accessToken != null && accessToken.isExpired() == false) {
             Log.d(TAG, "FB has been login... AccessToken.getCurrentAccessToken(): " + getCurrentAccessToken());
 
             Set<String> deniedPermissions = accessToken.getDeclinedPermissions();
 
             if (deniedPermissions.contains("email")) {
 
-                Log.d(TAG,"[Enter] deniedPermissions contains email...");
+                Log.d(TAG, "[Enter] deniedPermissions contains email...");
 
                 loginWithReadPermission();
 
-            }
-            else
-            {
+            } else {
                 requestFBUserInfo();
             }
 
-        }
-        else
-        {
+        } else {
             loginWithReadPermission();
         }
 
     }
 
-    private void loginWithReadPermission()
-    {
-        Log.d(TAG,"[Enter] logInWithReadPermission()");
-
+    private void loginWithReadPermission() {
+        Log.d(TAG, "[Enter] logInWithReadPermission()");
         LoginManager.getInstance().logInWithReadPermissions(LoginActivity.this, Arrays.asList("public_profile", "email"));
     }
 
-    private void registerFBLoginCallback()
-    {
+    private void registerFBLoginCallback() {
         Log.d(TAG, "[Enter] registerFBLoginCallback()");
-
         callbackManager = CallbackManager.Factory.create();
 
         LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
@@ -325,24 +310,23 @@ public class LoginActivity extends AppCompatActivity implements
             @Override
             public void onSuccess(LoginResult loginResult) {
 
-                Log.d(TAG,"[Enter] onSuccess()");
+                Log.d(TAG, "[Enter] onSuccess()");
 
                 accessToken = loginResult.getAccessToken();
 
-                Log.d(TAG,"accessToken: "+ accessToken);
+                Log.d(TAG, "accessToken: " + accessToken);
 
                 Set<String> deniedPermissions = loginResult.getRecentlyDeniedPermissions();
 
                 if (deniedPermissions.contains("email")) {
 
-                    Log.d(TAG,"[Enter] deniedPermissions contains email...");
+                    Log.d(TAG, "[Enter] deniedPermissions contains email...");
 
                     loginWithReadPermission();
 
                     Toast.makeText(LoginActivity.this, "Please provide Facebook email address for Facebook login...", Toast.LENGTH_LONG).show();
 
-                }
-                else {
+                } else {
 
                     requestFBUserInfo();
                 }
@@ -350,23 +334,21 @@ public class LoginActivity extends AppCompatActivity implements
 
             @Override
             public void onCancel() {
-
-                Log.d(TAG,"[Enter] onCancel()");
-
+                Log.d(TAG, "[Enter] onCancel()");
+                mProgressView.setVisibility(View.INVISIBLE);
             }
 
             @Override
             public void onError(FacebookException exception) {
-
-                Log.d(TAG,"[Enter] onError()");
-
-                Log.d(TAG,exception.toString());
+                Log.d(TAG, "[Enter] onError()");
+                Log.d(TAG, exception.toString());
+                mProgressView.setVisibility(View.INVISIBLE);
             }
         });
     }
 
     private void requestFBUserInfo() {
-        Log.d(TAG,"[Enter] requestFBUserInfo()");
+        Log.d(TAG, "[Enter] requestFBUserInfo()");
 
         GraphRequest request = GraphRequest.newMeRequest(
                 accessToken,
@@ -376,22 +358,22 @@ public class LoginActivity extends AppCompatActivity implements
                     public void onCompleted(JSONObject object, GraphResponse response) {
 
                         Log.d(TAG, "[Enter] onCompleted");
-                        Log.d(TAG, "name: " + object.optString("name"));
-                        Log.d(TAG, "email: " + object.optString("email"));
-                        Log.d(TAG,"user id: "+ accessToken.getUserId());
-                        Log.d(TAG,"token: "+ accessToken.getToken());
+                        if(object != null) {
+                            Log.d(TAG, "name: " + object.optString("name"));
+                            Log.d(TAG, "email: " + object.optString("email"));
+                            Log.d(TAG, "user id: " + accessToken.getUserId());
+                            Log.d(TAG, "token: " + accessToken.getToken());
 
-                        Bundle arg = new Bundle();
-                        arg.putString("server", NASPref.getCloudServer(mContext));
-                        arg.putString("name", object.optString("name"));
-                        arg.putString("email", object.optString("email"));
-                        arg.putString("uid", accessToken.getUserId());
-                        arg.putString("token", accessToken.getToken());
-
-                        Log.d(TAG, "getLoaderManager().restartLoader()...");
-
-                        getLoaderManager().restartLoader(LoaderID.TUTK_FB_LOGIN, arg, LoginActivity.this).forceLoad();
-
+                            Bundle arg = new Bundle();
+                            arg.putString("server", NASPref.getCloudServer(mContext));
+                            arg.putString("name", object.optString("name"));
+                            arg.putString("email", object.optString("email"));
+                            arg.putString("uid", accessToken.getUserId());
+                            arg.putString("token", accessToken.getToken());
+                            getLoaderManager().restartLoader(LoaderID.TUTK_FB_LOGIN, arg, LoginActivity.this).forceLoad();
+                        } else {
+                            Log.d(TAG, "[Enter] onCompleted Error");
+                        }
                     }
                 });
 
@@ -401,41 +383,22 @@ public class LoginActivity extends AppCompatActivity implements
         request.executeAsync();
     }
 
-    private void startFileManageActivity() {
-        Intent intent = new Intent();
-        intent.setClass(LoginActivity.this, FileManageActivity.class);
-        startActivity(intent);
-        finish();
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        Log.d(TAG,"[Enter] onActivityResult()");
-
+        Log.d(TAG, "[Enter] onActivityResult()");
         if (resultCode == RESULT_OK) {
-
-            Log.d(TAG,"resultCode == RESULT_OK");
-
+            Log.d(TAG, "resultCode == RESULT_OK");
             int fbRequestCode = CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode();
-
-            Log.d(TAG, "fbRequestCode: " + fbRequestCode);
-
-            if (requestCode == LoginListActivity.REQUEST_CODE) {
-                startFileManageActivity();
-            }
-            else if (requestCode == fbRequestCode)
-            {
+            if (requestCode == fbRequestCode) {
                 if (callbackManager != null && FacebookSdk.isInitialized() == true) {
                     callbackManager.onActivityResult(requestCode, resultCode, data);
+                    return;
                 }
             }
         }
-        else
-        {
-            Log.d(TAG,"resultCode != RESULT_OK");
-        }
+
+        mProgressView.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -445,29 +408,40 @@ public class LoginActivity extends AppCompatActivity implements
                 loginFBAccount();
                 break;
             case R.id.login_by_email:
-                startLoginByEmailActivity(true, isSignWithOther);
-                break;
-            case R.id.start_login_button:
-                String email = NASPref.getCloudUsername(mContext);
-                String pwd = NASPref.getCloudPassword(mContext);
-                if (!email.equals("") && !pwd.equals("")) {
-                    Bundle arg = new Bundle();
-                    arg.putString("server", NASPref.getCloudServer(mContext));
-                    arg.putString("email", email);
-                    arg.putString("password", pwd);
-                    getLoaderManager().restartLoader(LoaderID.TUTK_LOGIN, arg, LoginActivity.this).forceLoad();
-                }
+                startLoginByEmailActivity(true, false);
                 break;
             case R.id.login_sign_in_layout:
             case R.id.login_sign_in:
-                LoginManager.getInstance().logOut();
-                NASPref.clearDataAfterLogout(this);
-
-                startLoginByEmailActivity(false, isSignWithOther);
+                startLoginByEmailActivity(false, true);
+                break;
+            case R.id.start_login_button:
+                boolean isFacebook = NASPref.getFBAccountStatus(mContext);
+                if (isFacebook) {
+                    loginFBAccount();
+                } else {
+                    Bundle arg = new Bundle();
+                    arg.putString("server", NASPref.getCloudServer(mContext));
+                    arg.putString("email", NASPref.getCloudUsername(mContext));
+                    arg.putString("password", NASPref.getCloudPassword(mContext));
+                    getLoaderManager().restartLoader(LoaderID.TUTK_LOGIN, arg, LoginActivity.this).forceLoad();
+                }
                 break;
             case R.id.start_sign_in_with_other:
-                isSignWithOther = true;
-                showLoginView();
+                Bundle value = new Bundle();
+                value.putString(NotificationDialog.DIALOG_MESSAGE, getString(R.string.remote_access_logout));
+                NotificationDialog mNotificationDialog = new NotificationDialog(this, value) {
+                    @Override
+                    public void onConfirm() {
+                        LoginManager.getInstance().logOut();
+                        NASPref.clearDataAfterLogout(mContext);
+                        showLoginView();
+                    }
+
+                    @Override
+                    public void onCancel() {
+
+                    }
+                };
                 break;
             default:
                 break;
@@ -476,17 +450,13 @@ public class LoginActivity extends AppCompatActivity implements
 
     @Override
     public void onBackPressed() {
-        if(mProgressView.isShown()){
+        if (mProgressView.isShown()) {
             getLoaderManager().destroyLoader(mLoaderID);
             mProgressView.setVisibility(View.INVISIBLE);
             return;
         }
 
-        if (isSignWithOther) {
-            isSignWithOther = false;
-            showStartView();
-        } else
-            super.onBackPressed();
+        super.onBackPressed();
     }
 
 }

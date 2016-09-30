@@ -26,20 +26,13 @@
                 android:src="@drawable/ic_logo_storejetcloud_big" />
 
             <RelativeLayout
+                android:id="@+id/login_fb_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="24dp"
                 android:layout_marginRight="24dp"
                 android:layout_marginTop="60dp"
                 android:background="@drawable/button_normal">
-
-                <!--<com.facebook.login.widget.LoginButton-->
-                    <!--android:id="@+id/login_button"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:layout_gravity="center_horizontal"-->
-                    <!--android:layout_marginTop="30dp"-->
-                    <!--android:layout_marginBottom="30dp" />-->
 
                 <Button
                     android:id="@+id/login_by_facebook"
@@ -62,6 +55,7 @@
             </RelativeLayout>
 
             <LinearLayout
+                android:id="@+id/login_or_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"

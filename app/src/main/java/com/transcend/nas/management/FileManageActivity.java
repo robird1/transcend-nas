@@ -172,11 +172,7 @@ public class FileManageActivity extends AppCompatActivity implements
             Intent intent = getIntent();
             onReceiveIntent(intent);
         } else {
-            boolean isInit = NASPref.getInitial(this);
-            if (isInit)
-                startSignInActivity(true);
-            else
-                startInitialActivity();
+            startSignInActivity(true);
         }
     }
 
@@ -1355,7 +1351,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
     private void showLogoutDialog() {
         Bundle value = new Bundle();
-        value.putString(NotificationDialog.DIALOG_MESSAGE, getString(R.string.nas_logout));
+        value.putString(NotificationDialog.DIALOG_MESSAGE, getString(R.string.remote_access_logout));
         NotificationDialog mNotificationDialog = new NotificationDialog(this, value) {
             @Override
             public void onConfirm() {
@@ -1696,6 +1692,12 @@ public class FileManageActivity extends AppCompatActivity implements
     private void startSignInActivity(boolean clear) {
         boolean isRunning = false;
 
+        //clean email and account information
+        if (clear) {
+            LoginManager.getInstance().logOut();
+            NASPref.clearDataAfterLogout(this);
+        }
+
         //stop auto backup service
         isRunning = ManageFactory.isServiceRunning(this, AutoBackupService.class);
         if (isRunning) {
@@ -1708,13 +1710,6 @@ public class FileManageActivity extends AppCompatActivity implements
         if (isRunning) {
             Intent intent = new Intent(FileManageActivity.this, MusicService.class);
             stopService(intent);
-        }
-
-        //clean hostname, account, password, token
-        if (clear) {
-            LoginManager.getInstance().logOut();
-
-            NASPref.clearDataAfterLogout(this);
         }
 
         //clean disk info
