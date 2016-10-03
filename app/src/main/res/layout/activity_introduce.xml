@@ -36,15 +36,15 @@
         android:id="@+id/introduce_next_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_marginTop="16dp"
-        android:layout_marginRight="8dp"
-        android:text="Next"
-        android:visibility="invisible"
-        android:gravity="center_vertical"
-        android:layout_alignTop="@id/introduce_started_layout"
         android:layout_alignBottom="@id/introduce_started_layout"
-        android:textSize="18sp" />
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@id/introduce_started_layout"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center_vertical"
+        android:text="Next"
+        android:textSize="18sp"
+        android:visibility="invisible" />
 
     <RadioGroup
         android:id="@+id/introduce_indicator"
@@ -58,26 +58,31 @@
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:clickable="false"
             android:theme="@style/MyRadioButton" />
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:clickable="false"
             android:theme="@style/MyRadioButton" />
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:clickable="false"
             android:theme="@style/MyRadioButton" />
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:clickable="false"
             android:theme="@style/MyRadioButton" />
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:clickable="false"
             android:theme="@style/MyRadioButton" />
     </RadioGroup>
 

@@ -19,7 +19,7 @@
         android:layout_marginTop="16dp"
         android:layout_centerHorizontal="true"
         android:gravity="center"
-        android:text="@string/introduce_welcome"
+        android:text="@string/welcome_to_storejet_cloud"
         android:textColor="@android:color/black"
         android:textSize="@dimen/wizard_title_text_size"
         android:textStyle="bold" />

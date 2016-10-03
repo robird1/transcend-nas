@@ -6,6 +6,7 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
+import com.transcend.nas.common.FileFactory;
 import com.transcend.nas.management.FileInfo;
 import com.tutk.IOTC.P2PService;
 
@@ -48,22 +49,31 @@ public class TwonkyManager {
         return mTwonkyManager;
     }
 
-    public void cleanTwonkyMap(){
-        if(mCacheMap != null)
+    public void cleanTwonkyMap() {
+        if (mCacheMap != null)
             mCacheMap.clear();
-        if(mFolderMap != null)
+        if (mFolderMap != null)
             mFolderMap.clear();
-        if(mImageMap != null)
+        if (mImageMap != null)
             mImageMap.clear();
     }
 
     public boolean startTwonkyParser(String path, int start, int count) {
-        if(mCacheMap.contains(path)) {
+        String key = FileFactory.getInstance().getRealPathKeyFromMap(path);
+        String realPath = FileFactory.getInstance().getRealPathFromMap(path);
+        if (key != null && !key.equals(""))
+            path = path.replaceFirst(key, realPath);
+        path = path.replaceFirst("/home/", "/");
+        Log.d(TAG, "twonky origin path : " + path);
+
+        if (mCacheMap.contains(path)) {
             Log.d(TAG, "twonky cache contain : " + path);
             return true;
         }
 
-        int length = path.split("/").length;
+        String[] paths = path.split("/");
+        int length = paths.length;
+        Log.d(TAG, "twonky origin path length : " + length);
         if (length == 0) {
             //root folder, get twonky server
             String server = parserTwonkyServer();
@@ -82,21 +92,44 @@ public class TwonkyManager {
                 }
             }
         } else if (0 < length && length <= 2) {
-            //TODO : share folder
-            //home, public folder
             return parserTwonkyFolder(path, start, count, getFolderUrlFromMap(false, KEYWORD_FOLDER));
         } else {
             //other folder
+            String currentUrl = "";
+            String tmp = "/" + paths[1] + "/";
+            if(!mCacheMap.contains(tmp))
+                parserTwonkyFolder(tmp, start, count, getFolderUrlFromMap(false, KEYWORD_FOLDER));
+
+            //loop check the folder
+            for (int i = 2; i < length; i++) {
+                tmp += paths[i] + "/";
+                Log.d(TAG, "twonky folder path : " + tmp);
+
+                String nextUrl = getFolderUrlFromMap(false, tmp);
+                if (nextUrl == null || nextUrl.equals("")) {
+                    parserTwonkyFolder(tmp.replaceFirst(paths[i]+"/" , ""), start, count, currentUrl);
+                    nextUrl = getFolderUrlFromMap(false, tmp);
+                }
+
+                Log.d(TAG, "twonky folder url : " + nextUrl);
+
+                if (nextUrl != null && !"".equals(nextUrl)) {
+                    currentUrl = nextUrl;
+                } else {
+                    return false;
+                }
+            }
+
             return parserTwonkyFolder(path, start, count, getFolderUrlFromMap(false, path));
         }
 
         return false;
     }
 
-    public String getUrlFromMap(boolean convertLink, FileInfo.TYPE type, String path){
-        if(type.equals(FileInfo.TYPE.DIR))
+    public String getUrlFromMap(boolean convertLink, FileInfo.TYPE type, String path) {
+        if (type.equals(FileInfo.TYPE.DIR))
             return getFolderUrlFromMap(convertLink, path);
-        else if(type.equals(FileInfo.TYPE.PHOTO))
+        else if (type.equals(FileInfo.TYPE.PHOTO))
             return getImageUrlFromMap(convertLink, path);
         else
             return null;
@@ -106,17 +139,23 @@ public class TwonkyManager {
         String result = "";
         if (mFolderMap != null) {
             result = mFolderMap.get(path);
-            if(convertLink && result != null && !result.equals(""))
+            if (convertLink && result != null && !result.equals(""))
                 result = convertUrlByLink(result);
         }
         return result;
     }
 
     private String getImageUrlFromMap(boolean convertLink, String path) {
+        String key = FileFactory.getInstance().getRealPathKeyFromMap(path);
+        String realPath = FileFactory.getInstance().getRealPathFromMap(path);
+        if (key != null && !key.equals(""))
+            path = path.replaceFirst(key, realPath);
+        path = path.replaceFirst("/home/", "/");
+
         String result = "";
         if (mImageMap != null) {
             result = mImageMap.get(path);
-            if(convertLink && result != null && !result.equals(""))
+            if (convertLink && result != null && !result.equals(""))
                 result = convertUrlByLink(result);
         }
         return result;
@@ -168,7 +207,7 @@ public class TwonkyManager {
 
     public String doTwonkyRescan(boolean force) {
         //TODO: add lifecycle check
-        if(!force && mCacheMap.contains(NASApp.ROOT_SMB))
+        if (!force && mCacheMap.contains(NASApp.ROOT_SMB))
             return null;
 
         Server server = ServerManager.INSTANCE.getCurrentServer();
@@ -284,7 +323,7 @@ public class TwonkyManager {
                             JSONObject enclosure = new JSONObject(item.optString("enclosure"));
                             target = enclosure.optString("url");
                             mFolderMap.put(path + title + "/", target);
-                            //Log.d(TAG, "key: " + path+title  + "/, value: " + target);
+                            //Log.d(TAG, "key: " + path + title + "/, value: " + target);
                         } else {
                             //image item, record it to image hash map
                             String extension = meta.optString("pv:extension");
@@ -318,7 +357,7 @@ public class TwonkyManager {
         return false;
     }
 
-    public String convertUrlByLink(String url){
+    public String convertUrlByLink(String url) {
         Server server = ServerManager.INSTANCE.getCurrentServer();
         String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.TWONKY);
         String[] splits = url.split("/");

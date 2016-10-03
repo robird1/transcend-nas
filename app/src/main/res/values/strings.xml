@@ -210,11 +210,12 @@
     <string name="rights_reserved">\u00A92016 Transcend Information Inc.\nAll rights reserved.</string>
     <string name="add_device">Add new StoreJet Cloud</string>
 
-    <string name="introduce_welcome">Welcome to StoreJet Cloud</string>
-    <string name="introduce_remote_access_info">Remote access StoreJet Cloud files</string>
-    <string name="introduce_auto_backup_info">Auto backup photo and video</string>
-    <string name="introduce_mirror_media">Mirror Multimedia</string>
-    <string name="introduce_mirror_media_info">Cast photo and video. Make easy and fun</string>
+    <string name="welcome_to_storejet_cloud">Welcome to StoreJet Cloud</string>
+    <string name="appwizard1_remote_access">Remote Access</string>
+    <string name="appwizard1_freely_access">Freely access all your files stored on StoreJet Cloud anywhere through mobile APP.</string>
+    <string name="appwizard2_storejet_cloud_can_automatically_back_u">StoreJet Cloud can automatically back up new photos and videos taken today on your mobile devices.</string>
+    <string name="appwizard3_media_streaming">Media streaming</string>
+    <string name="appwizard3_storejet_cloud_airplay_casting_your_vid">StoreJet Cloud AirPlay/casting your videos, films and music to Apple TV or Chromecast.</string>
     <string name="next">Next</string>
 
     <!-- preference -->

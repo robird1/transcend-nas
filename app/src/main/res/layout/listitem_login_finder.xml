@@ -25,7 +25,7 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="72dp"
-            android:layout_weight="5"
+            android:layout_weight="2"
             android:padding="8dp"
             android:src="@drawable/ic_search_gray_24dp" />
 
@@ -34,7 +34,7 @@
             android:layout_height="match_parent"
             android:ellipsize="marquee"
             android:gravity="center_vertical"
-            android:layout_weight="3"
+            android:layout_weight="1"
             android:text="Add StoreJet Cloud"
             android:textColor="@color/textColorPrimary"
             android:textSize="16sp" />
@@ -58,7 +58,7 @@
             android:layout_width="72dp"
             android:layout_height="72dp"
             android:padding="8dp"
-            android:src="@drawable/ic_storage_2b_gray_24dp" />
+            android:src="@drawable/icon_1bay" />
 
         <ImageView
             android:id="@+id/listitem_nas_delete_icon"
