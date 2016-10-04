@@ -61,14 +61,12 @@ public class LoginActivity extends AppCompatActivity implements
 
     private Context mContext;
 
-    private CallbackManager callbackManager;
-    private AccessToken accessToken;
+    private CallbackManager mCallbackManager;
+    private AccessToken mAccessToken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        FacebookSdk.sdkInitialize(getApplicationContext());
 
         mContext = this;
         setContentView(R.layout.activity_login);
@@ -269,16 +267,18 @@ public class LoginActivity extends AppCompatActivity implements
         mProgressView.setVisibility(View.VISIBLE);
         Log.d(TAG, "[Enter] loginFBAccount()");
 
-        registerFBLoginCallback();
+        if (mCallbackManager ==  null) {
+            registerFBLoginCallback();
+        }
 
-        accessToken = AccessToken.getCurrentAccessToken();
+        mAccessToken = AccessToken.getCurrentAccessToken();
 
-        Log.d(TAG, "accessToken: " + accessToken);
+        Log.d(TAG, "accessToken: " + mAccessToken);
 
-        if (accessToken != null && accessToken.isExpired() == false) {
+        if (mAccessToken != null && mAccessToken.isExpired() == false) {
             Log.d(TAG, "FB has been login... AccessToken.getCurrentAccessToken(): " + getCurrentAccessToken());
 
-            Set<String> deniedPermissions = accessToken.getDeclinedPermissions();
+            Set<String> deniedPermissions = mAccessToken.getDeclinedPermissions();
 
             if (deniedPermissions.contains("email")) {
 
@@ -303,18 +303,18 @@ public class LoginActivity extends AppCompatActivity implements
 
     private void registerFBLoginCallback() {
         Log.d(TAG, "[Enter] registerFBLoginCallback()");
-        callbackManager = CallbackManager.Factory.create();
+        mCallbackManager = CallbackManager.Factory.create();
 
-        LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+        LoginManager.getInstance().registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
 
             @Override
             public void onSuccess(LoginResult loginResult) {
 
                 Log.d(TAG, "[Enter] onSuccess()");
 
-                accessToken = loginResult.getAccessToken();
+                mAccessToken = loginResult.getAccessToken();
 
-                Log.d(TAG, "accessToken: " + accessToken);
+                Log.d(TAG, "accessToken: " + mAccessToken);
 
                 Set<String> deniedPermissions = loginResult.getRecentlyDeniedPermissions();
 
@@ -351,7 +351,7 @@ public class LoginActivity extends AppCompatActivity implements
         Log.d(TAG, "[Enter] requestFBUserInfo()");
 
         GraphRequest request = GraphRequest.newMeRequest(
-                accessToken,
+                mAccessToken,
                 new GraphRequest.GraphJSONObjectCallback() {
 
                     @Override
@@ -361,15 +361,15 @@ public class LoginActivity extends AppCompatActivity implements
                         if(object != null) {
                             Log.d(TAG, "name: " + object.optString("name"));
                             Log.d(TAG, "email: " + object.optString("email"));
-                            Log.d(TAG, "user id: " + accessToken.getUserId());
-                            Log.d(TAG, "token: " + accessToken.getToken());
+                            Log.d(TAG, "user id: " + mAccessToken.getUserId());
+                            Log.d(TAG, "token: " + mAccessToken.getToken());
 
                             Bundle arg = new Bundle();
                             arg.putString("server", NASPref.getCloudServer(mContext));
                             arg.putString("name", object.optString("name"));
                             arg.putString("email", object.optString("email"));
-                            arg.putString("uid", accessToken.getUserId());
-                            arg.putString("token", accessToken.getToken());
+                            arg.putString("uid", mAccessToken.getUserId());
+                            arg.putString("token", mAccessToken.getToken());
                             getLoaderManager().restartLoader(LoaderID.TUTK_FB_LOGIN, arg, LoginActivity.this).forceLoad();
                         } else {
                             Log.d(TAG, "[Enter] onCompleted Error");
@@ -391,8 +391,10 @@ public class LoginActivity extends AppCompatActivity implements
             Log.d(TAG, "resultCode == RESULT_OK");
             int fbRequestCode = CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode();
             if (requestCode == fbRequestCode) {
-                if (callbackManager != null && FacebookSdk.isInitialized() == true) {
-                    callbackManager.onActivityResult(requestCode, resultCode, data);
+                if (mCallbackManager != null && FacebookSdk.isInitialized() == true) {
+                    Log.d(TAG, "callbackManager.onActivityResult()");
+                    mCallbackManager.onActivityResult(requestCode, resultCode, data);
+
                     return;
                 }
             }

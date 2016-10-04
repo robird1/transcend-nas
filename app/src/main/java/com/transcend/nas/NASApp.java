@@ -2,7 +2,6 @@ package com.transcend.nas;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Environment;
 import android.support.multidex.MultiDexApplication;
 import android.util.Log;
@@ -10,7 +9,6 @@ import android.util.Log;
 import com.facebook.FacebookSdk;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
-import com.google.android.gms.cast.CastMediaControlIntent;
 import com.google.android.libraries.cast.companionlibrary.cast.CastConfiguration;
 import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -56,6 +54,8 @@ public class NASApp extends MultiDexApplication {
         createDownloadsDirectory();
         createSharesDirectory();
         initChromeCastManager();
+
+        FacebookSdk.sdkInitialize(getApplicationContext());
     }
 
     @Override
