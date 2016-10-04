@@ -346,12 +346,13 @@ public class FileManageActivity extends AppCompatActivity implements
         }
 
         String firmware = mServer.getServerInfo().firmwareVer;
-        if(firmware != null && !firmware.equals("")){
+        if(NASPref.useTwonkyServer && firmware != null && !firmware.equals("")){
             int version = Integer.parseInt(firmware);
             NASPref.useTwonkyServer = version >= NASPref.useTwonkyMinFirmwareVersion;
         } else {
             NASPref.useTwonkyServer = false;
         }
+        Log.d(TAG,"Use Twonky Thumbnail : " + NASPref.useTwonkyServer);
     }
 
     private boolean initAutoBackUpService() {
@@ -1694,7 +1695,8 @@ public class FileManageActivity extends AppCompatActivity implements
 
         //clean email and account information
         if (clear) {
-            LoginManager.getInstance().logOut();
+            if(NASPref.useFacebookLogin && NASPref.getFBAccountStatus(this))
+                LoginManager.getInstance().logOut();
             NASPref.clearDataAfterLogout(this);
         }
 

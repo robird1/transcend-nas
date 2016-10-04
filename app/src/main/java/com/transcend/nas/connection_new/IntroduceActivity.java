@@ -98,14 +98,12 @@ public class IntroduceActivity extends AppCompatActivity {
     }
 
     private void initViewContent(){
-        String[] titles = new String[]{getString(R.string.introduce_welcome), getString(R.string.remote_access),
-                getString(R.string.auto_backup),getString(R.string.introduce_mirror_media)};
-        String[] infos = new String[]{"",getString(R.string.introduce_remote_access_info),
-                getString(R.string.introduce_auto_backup_info), getString(R.string.introduce_mirror_media_info)};
+        String[] titles = new String[]{getString(R.string.welcome_to_storejet_cloud), getString(R.string.appwizard1_remote_access),
+                getString(R.string.auto_backup),getString(R.string.appwizard3_media_streaming)};
+        String[] infos = new String[]{"",getString(R.string.appwizard1_freely_access),
+                getString(R.string.appwizard2_storejet_cloud_can_automatically_back_u), getString(R.string.appwizard3_storejet_cloud_airplay_casting_your_vid)};
         int[] images = new int[] {R.drawable.ic_logo_storejetcloud_big, R.drawable.guide_image1_small,
                 R.drawable.guide_image2_small, R.drawable.guide_image3_small};
-        Point p = new Point();
-        getWindowManager().getDefaultDisplay().getSize(p);
         List<View> views = new ArrayList<>();
         LayoutInflater mInflater = getLayoutInflater().from(this);
         for(int i = 0; i < mTotal;i++){

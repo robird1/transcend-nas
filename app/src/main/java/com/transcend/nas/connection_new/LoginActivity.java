@@ -434,7 +434,8 @@ public class LoginActivity extends AppCompatActivity implements
                 NotificationDialog mNotificationDialog = new NotificationDialog(this, value) {
                     @Override
                     public void onConfirm() {
-                        LoginManager.getInstance().logOut();
+                        if(NASPref.useFacebookLogin && NASPref.getFBAccountStatus(mContext))
+                            LoginManager.getInstance().logOut();
                         NASPref.clearDataAfterLogout(mContext);
                         showLoginView();
                     }

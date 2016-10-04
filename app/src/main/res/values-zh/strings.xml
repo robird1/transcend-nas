@@ -181,11 +181,12 @@
     <string name="wizard_try">重試</string>
     <string name="wizard_wifi_info">將手機Wi-Fi連線到路由器網路</string>
 
-    <string name="introduce_welcome">歡迎使用StoreJet Cloud</string>
-    <string name="introduce_remote_access_info">自由存取StoreJet Cloud的檔案</string>
-    <string name="introduce_auto_backup_info">自動備份手機的照片與影片</string>
-    <string name="introduce_mirror_media">媒體串流</string>
-    <string name="introduce_mirror_media_info">同步串流多媒體檔案,隨時享受娛樂</string>
+    <string name="welcome_to_storejet_cloud">歡迎使用StoreJet Cloud</string>
+    <string name="appwizard1_remote_access">遠端存取</string>
+    <string name="appwizard1_freely_access">無論你身在何處，都可以透過行動裝置APP，自由存取StoreJet Cloud內的檔案。</string>
+    <string name="appwizard2_storejet_cloud_can_automatically_back_u">StoreJet Cloud可以即刻同步行動裝置內的最新照片與影片。</string>
+    <string name="appwizard3_media_streaming">媒體串流，影音娛樂</string>
+    <string name="appwizard3_storejet_cloud_airplay_casting_your_vid">StoreJet Cloud支援AirPlay與Chromecast，可將喜愛的影片、電影或音樂投放到Apple TV或Chromecast.</string>
     <string name="next">下一頁</string>
 
 </resources>
