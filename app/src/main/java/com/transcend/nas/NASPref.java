@@ -6,6 +6,11 @@ import android.os.Environment;
 import android.os.storage.StorageManager;
 import android.util.Log;
 
+import com.facebook.AccessToken;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
+import com.facebook.login.LoginManager;
 import com.transcend.nas.management.FileManageRecyclerAdapter;
 import com.transcend.nas.utils.PrefUtil;
 import com.transcend.nas.viewer.music.MusicActivity;
@@ -499,4 +504,21 @@ public class NASPref {
         setBackupLocation(context, "/homes/" + Build.MODEL + "/");
         setBackupSource(context, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
     }
+
+    public static void logOutFB() {
+        if (AccessToken.getCurrentAccessToken() != null) {
+            new GraphRequest(AccessToken.getCurrentAccessToken(), "/me/permissions/", null, HttpMethod.DELETE, new GraphRequest
+                    .Callback() {
+                @Override
+                public void onCompleted(GraphResponse graphResponse) {
+
+                    LoginManager.getInstance().logOut();
+
+                    Log.d(TAG, "LoginManager.getInstance().logOut()");
+
+                }
+            }).executeAsync();
+        }
+    }
+
 }

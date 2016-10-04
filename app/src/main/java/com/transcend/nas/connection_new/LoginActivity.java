@@ -435,7 +435,7 @@ public class LoginActivity extends AppCompatActivity implements
                     @Override
                     public void onConfirm() {
                         if(NASPref.useFacebookLogin && NASPref.getFBAccountStatus(mContext))
-                            LoginManager.getInstance().logOut();
+                            NASPref.logOutFB();
                         NASPref.clearDataAfterLogout(mContext);
                         showLoginView();
                     }

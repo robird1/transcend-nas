@@ -42,7 +42,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.facebook.login.LoginManager;
 import com.google.android.gms.cast.ApplicationMetadata;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
@@ -1696,7 +1695,7 @@ public class FileManageActivity extends AppCompatActivity implements
         //clean email and account information
         if (clear) {
             if(NASPref.useFacebookLogin && NASPref.getFBAccountStatus(this))
-                LoginManager.getInstance().logOut();
+                NASPref.logOutFB();
             NASPref.clearDataAfterLogout(this);
         }
 
@@ -1735,7 +1734,6 @@ public class FileManageActivity extends AppCompatActivity implements
         startActivity(intent);
         finish();
     }
-
 
     /**
      * GRID LAYOUT MANAGER SPAN SIZE LOOKUP
