@@ -152,6 +152,8 @@ public class LoginActivity extends AppCompatActivity implements
         TextView accountTitle = (TextView) findViewById(R.id.start_account_title);
         TextView accountContent = (TextView) findViewById(R.id.start_account_content);
         ImageView accountImage = (ImageView) findViewById(R.id.start_account_image);
+        if(NASPref.getFBAccountStatus(mContext))
+            accountImage.setImageResource(R.drawable.icon_facebook_24dp);
 
         String email = NASPref.getCloudUsername(mContext);
         String pwd = NASPref.getCloudPassword(mContext);

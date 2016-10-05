@@ -51,9 +51,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@id/introduce_started_layout"
+        android:background="@android:color/transparent"
         android:layout_centerHorizontal="true"
-        android:orientation="horizontal"
-        android:paddingTop="24dp">
+        android:orientation="horizontal">
 
         <RadioButton
             android:layout_width="wrap_content"
@@ -90,6 +90,7 @@
         android:id="@+id/introduce_view_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/introduce_indicator" />
+        android:layout_above="@id/introduce_indicator"
+        android:layout_marginBottom="16dp"/>
 
 </RelativeLayout>
