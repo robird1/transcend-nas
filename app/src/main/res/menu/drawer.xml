@@ -48,6 +48,11 @@
             android:title="@string/about" />
 
         <item
+            android:id="@+id/nav_switch"
+            android:icon="@drawable/ic_logout_gray_24dp"
+            android:title="Login to other StoreJet Cloud" />
+
+        <item
             android:id="@+id/nav_logout"
             android:icon="@drawable/ic_logout_gray_24dp"
             android:title="@string/logout" />

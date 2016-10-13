@@ -64,6 +64,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
     private RecyclerViewAdapter mAdapter;
     private RelativeLayout mProgressView;
     private int mLoaderID;
+    private String mTutkUUID = "";
     private ArrayList<HashMap<String, String>> mNASList;
     private ArrayList<HashMap<String, String>> mLANList;
 
@@ -123,6 +124,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
      */
     private void initData() {
         Intent intent = getIntent();
+        mTutkUUID = intent.getStringExtra("uuid");
         mNASList = (ArrayList<HashMap<String, String>>) intent.getSerializableExtra("NASList");
         if (mNASList == null)
             mNASList = new ArrayList<HashMap<String, String>>();
@@ -254,7 +256,6 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
     public Loader<Boolean> onCreateLoader(int id, Bundle args) {
         AnalysisFactory.getInstance(this).recordStartTime();
         String server, token, nasId;
-        boolean remoteAccess = false;
         switch (mLoaderID = id) {
             case LoaderID.TUTK_NAS_GET:
                 mProgressView.setVisibility(View.VISIBLE);
@@ -647,7 +648,6 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                 holder.split.setVisibility(View.VISIBLE);
                 holder.listItem.setVisibility(View.VISIBLE);
                 holder.addItem.setVisibility(View.GONE);
-
                 String nickname = mNASList.get(position).get("nickname");
                 String hostname = mNASList.get(position).get("hostname");
                 if (nickname != null && nickname.contains(NASApp.TUTK_NAME_TAG)) {
@@ -667,6 +667,9 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                     holder.title.setText(nickname);
                     holder.subtitle.setText(hostname);
                 }
+
+                if(mTutkUUID != null && !mTutkUUID.equals(""))
+                    holder.delete.setVisibility(mTutkUUID.equals(hostname) ? View.INVISIBLE : View.VISIBLE);
 
                 if (enableDeviceCheck) {
                     String isOnLine = mNASList.get(position).get("online");
@@ -738,6 +741,14 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                         args.putString("nasId", nas.get("nasId"));
                         showNotificationDialog(args);
                     } else {
+                        String nickname = nas.get("nickname");
+                        String hostname = nas.get("hostname");
+
+                        if(mTutkUUID != null && mTutkUUID.equals(hostname)) {
+                            startFileManageActivity();
+                            return;
+                        }
+
                         if (enableDeviceCheck) {
                             String isOnLine = nas.get("online");
                             if ("no".equals(isOnLine)) {
@@ -745,16 +756,16 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                             }
                         }
 
-                        args.putString("nasId", nas.get("nasId"));
-                        String nickname = nas.get("nickname");
                         if (nickname != null && nickname.contains(NASApp.TUTK_NAME_TAG)) {
                             String[] splitname = nickname.split(NASApp.TUTK_NAME_TAG);
                             if (splitname.length >= 1) {
                                 nickname = splitname[0];
                             }
                         }
+
+                        args.putString("nasId", nas.get("nasId"));
                         args.putString("nickname", nickname);
-                        args.putString("hostname", nas.get("hostname"));
+                        args.putString("hostname", hostname);
                         args.putString("username", NASPref.getUsername(LoginListActivity.this));
                         args.putString("password", NASPref.getPassword(LoginListActivity.this));
                         args.putBoolean("RemoteAccess", true);

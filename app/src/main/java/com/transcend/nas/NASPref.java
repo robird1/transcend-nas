@@ -23,10 +23,10 @@ public class NASPref {
     private static final String TAG = NASPref.class.getSimpleName();
     public static final boolean useDefaultDownloadFolder = true;
     public static final boolean useNewLoginFlow = true;
-    public static final boolean useFacebookLogin = false;
+    public static final boolean useFacebookLogin = true;
     public static final String defaultUserName = "admin";
     public static final int useTwonkyMinFirmwareVersion = 20160101;
-    public static boolean useTwonkyServer = false;
+    public static boolean useTwonkyServer = true;
 
     public enum Sort {
         TYPE,
@@ -498,6 +498,14 @@ public class NASPref {
         setCloudAuthToken(context, "");
         setCloudAccountStatus(context, Status.Inactive.ordinal());
         setCloudUUID(context, "");
+        String[] scenarios = context.getResources().getStringArray(R.array.backup_scenario_values);
+        setBackupScenario(context, scenarios[1]);
+        setBackupSetting(context, false);
+        setBackupLocation(context, "/homes/" + Build.MODEL + "/");
+        setBackupSource(context, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
+    }
+
+    public static void clearDataAfterSwitch(Context context){
         String[] scenarios = context.getResources().getStringArray(R.array.backup_scenario_values);
         setBackupScenario(context, scenarios[1]);
         setBackupSetting(context, false);

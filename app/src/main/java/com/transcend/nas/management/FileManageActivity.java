@@ -57,6 +57,7 @@ import com.transcend.nas.common.AnalysisFactory;
 import com.transcend.nas.common.ManageFactory;
 import com.transcend.nas.connection.GuideActivity;
 import com.transcend.nas.connection_new.LoginActivity;
+import com.transcend.nas.connection_new.LoginListActivity;
 import com.transcend.nas.service.LanCheckManager;
 import com.transcend.nas.service.TwonkyManager;
 import com.transcend.nas.settings.NewSettingsActivity;
@@ -269,6 +270,48 @@ public class FileManageActivity extends AppCompatActivity implements
                     doDownload(mPath, paths);
                 }
             }
+        } else if (requestCode == LoginListActivity.REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                boolean isRunning = false;
+
+                //clean email and account information
+                NASPref.clearDataAfterSwitch(this);
+
+                //stop auto backup service
+                isRunning = ManageFactory.isServiceRunning(this, AutoBackupService.class);
+                if (isRunning) {
+                    Intent intent = new Intent(FileManageActivity.this, AutoBackupService.class);
+                    stopService(intent);
+                }
+
+                //stop music service
+                isRunning = ManageFactory.isServiceRunning(this, MusicService.class);
+                if (isRunning) {
+                    Intent intent = new Intent(FileManageActivity.this, MusicService.class);
+                    stopService(intent);
+                }
+
+                //clean disk info
+                DiskFactory.getInstance().cleanDiskDevices();
+
+                //clean path map
+                FileFactory.getInstance().cleanRealPathMap();
+
+                //clean twonky map
+                TwonkyManager.getInstance().cleanTwonkyMap();
+
+                //clean lan check
+                LanCheckManager.getInstance().setLanConnect(false, "");
+
+                if (Build.VERSION.SDK_INT >= 11) {
+                    recreate();
+                } else {
+                    Intent intent = getIntent();
+                    finish();
+                    startActivity(intent);
+                }
+                return;
+            }
         }
 
         isNeedEventNotify = false;
@@ -443,7 +486,7 @@ public class FileManageActivity extends AppCompatActivity implements
             mNavHeaderSubtitle.setText(String.format("%s", email));
         else
             mNavHeaderSubtitle.setText(String.format("%s@%s", mServer.getUsername(), mServer.getHostname()));
-        mNavView.getMenu().findItem(R.id.nav_disk_info).setVisible("admin".equals(mServer.getUsername()));
+        mNavView.getMenu().findItem(R.id.nav_disk_info).setVisible(NASPref.defaultUserName.equals(mServer.getUsername()));
     }
 
     private void initActionModeView() {
@@ -611,6 +654,9 @@ public class FileManageActivity extends AppCompatActivity implements
             //case R.id.nav_help:
             //    startHelpActivity();
             //    break;
+            case R.id.nav_switch:
+                startLoginListActivity();
+                break;
             case R.id.nav_logout:
                 showLogoutDialog();
                 break;
@@ -1681,12 +1727,11 @@ public class FileManageActivity extends AppCompatActivity implements
         startActivity(i);
     }
 
-
-    private void startInitialActivity() {
+    private void startLoginListActivity() {
         Intent intent = new Intent();
-        intent.setClass(FileManageActivity.this, GuideActivity.class);
-        startActivity(intent);
-        finish();
+        intent.putExtra("uuid", NASPref.getCloudUUID(this));
+        intent.setClass(FileManageActivity.this, LoginListActivity.class);
+        startActivityForResult(intent, LoginListActivity.REQUEST_CODE);
     }
 
     private void startSignInActivity(boolean clear) {
