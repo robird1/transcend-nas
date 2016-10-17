@@ -26,7 +26,8 @@ public class NASPref {
     public static final boolean useFacebookLogin = true;
     public static final String defaultUserName = "admin";
     public static final int useTwonkyMinFirmwareVersion = 20160101;
-    public static boolean useTwonkyServer = true;
+    public static boolean useTwonkyServer = false;
+    public static boolean useSwitchNas = false;
 
     public enum Sort {
         TYPE,

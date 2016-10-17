@@ -487,6 +487,7 @@ public class FileManageActivity extends AppCompatActivity implements
         else
             mNavHeaderSubtitle.setText(String.format("%s@%s", mServer.getUsername(), mServer.getHostname()));
         mNavView.getMenu().findItem(R.id.nav_disk_info).setVisible(NASPref.defaultUserName.equals(mServer.getUsername()));
+        mNavView.getMenu().findItem(R.id.nav_switch).setVisible(NASPref.useSwitchNas);
     }
 
     private void initActionModeView() {
