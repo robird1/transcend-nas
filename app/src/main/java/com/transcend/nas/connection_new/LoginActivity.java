@@ -233,6 +233,10 @@ public class LoginActivity extends AppCompatActivity implements
                 Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
             else
                 Toast.makeText(this, getString(R.string.error_format), Toast.LENGTH_SHORT).show();
+
+            // remove the FB authentication if the email address is already taken
+            NASPref.logOutFB();
+
         }
     }
 
