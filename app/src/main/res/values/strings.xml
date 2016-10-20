@@ -301,5 +301,6 @@
     </string-array>
 
     <string name="facebook_app_id">1672519146397506</string>
+    <string name="fb_request_email_permission">Please grant the email address permission for Facebook login</string>
 
 </resources>

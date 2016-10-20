@@ -326,7 +326,7 @@ public class LoginActivity extends AppCompatActivity implements
 
                     loginWithReadPermission();
 
-                    Toast.makeText(LoginActivity.this, "Please provide Facebook email address for Facebook login...", Toast.LENGTH_LONG).show();
+                    Toast.makeText(LoginActivity.this, R.string.fb_request_email_permission, Toast.LENGTH_LONG).show();
 
                 } else {
 
