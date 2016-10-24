@@ -52,6 +52,7 @@ import com.google.android.libraries.cast.companionlibrary.cast.exceptions.NoConn
 import com.google.android.libraries.cast.companionlibrary.cast.exceptions.TransientNetworkDisconnectionException;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.common.AnalysisFactory;
 import com.transcend.nas.common.ManageFactory;
@@ -387,14 +388,17 @@ public class FileManageActivity extends AppCompatActivity implements
             LanCheckManager.getInstance().setLanConnect(true, hostname);
         }
 
-        String firmware = mServer.getServerInfo().firmwareVer;
+        String firmware = NASPref.defaultFirmwareVersion;
+        ServerInfo info = mServer.getServerInfo();
+        if(info != null)
+            firmware = info.firmwareVer;
         if(NASPref.useTwonkyServer && firmware != null && !firmware.equals("")){
             int version = Integer.parseInt(firmware);
             NASPref.useTwonkyServer = version >= NASPref.useTwonkyMinFirmwareVersion;
         } else {
             NASPref.useTwonkyServer = false;
         }
-        Log.d(TAG,"Use Twonky Thumbnail : " + NASPref.useTwonkyServer);
+        Log.d(TAG,"Firmware version : " + firmware + ", Use Twonky Thumbnail : " + NASPref.useTwonkyServer);
     }
 
     private boolean initAutoBackUpService() {

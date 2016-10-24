@@ -202,7 +202,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="16dp"
             android:background="@color/colorAccentDialogButton"
-            android:text="@string/submitStr"
+            android:text="@string/submit"
             android:textColor="@color/colorPrimary"
             android:visibility="visible" />
     </LinearLayout>

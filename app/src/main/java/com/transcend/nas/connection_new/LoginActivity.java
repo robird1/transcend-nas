@@ -129,9 +129,9 @@ public class LoginActivity extends AppCompatActivity implements
         Button emailLogin = (Button) findViewById(R.id.login_by_email);
         emailLogin.setOnClickListener(this);
         StyleFactory.set_white_button_touch_effect(this, emailLogin);
-        LinearLayout signIn = (LinearLayout) findViewById(R.id.login_sign_in_layout);
-        signIn.setOnClickListener(this);
-        TextView signInText = (TextView) findViewById(R.id.login_sign_in);
+        LinearLayout signUp = (LinearLayout) findViewById(R.id.login_sign_up_layout);
+        signUp.setOnClickListener(this);
+        TextView signInText = (TextView) findViewById(R.id.login_sign_up);
         signInText.setOnClickListener(this);
         StyleFactory.set_blue_text_touch_effect(this, signInText);
         if(!NASPref.useFacebookLogin){
@@ -416,11 +416,11 @@ public class LoginActivity extends AppCompatActivity implements
                 loginFBAccount();
                 break;
             case R.id.login_by_email:
-                startLoginByEmailActivity(true, false);
-                break;
-            case R.id.login_sign_in_layout:
-            case R.id.login_sign_in:
                 startLoginByEmailActivity(false, true);
+                break;
+            case R.id.login_sign_up_layout:
+            case R.id.login_sign_up:
+                startLoginByEmailActivity(true, false);
                 break;
             case R.id.start_login_button:
                 boolean isFacebook = NASPref.getFBAccountStatus(mContext);

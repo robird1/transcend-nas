@@ -99,7 +99,7 @@
                     android:layout_gravity="center_horizontal"
                     android:layout_marginLeft="48dp"
                     android:background="@drawable/button_normal"
-                    android:text="@string/sign_up_by_email"
+                    android:text="@string/sign_in_by_email"
                     android:textAllCaps="false"
                     android:textSize="18sp" />
 
@@ -122,7 +122,7 @@
             android:background="@drawable/bottom_layout">
 
             <LinearLayout
-                android:id="@+id/login_sign_in_layout"
+                android:id="@+id/login_sign_up_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -134,16 +134,16 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:text="@string/already_have_account"
+                    android:text="@string/not_have_account"
                     android:textSize="14sp" />
 
                 <TextView
-                    android:id="@+id/login_sign_in"
+                    android:id="@+id/login_sign_up"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="8dp"
-                    android:text="@string/login"
+                    android:text="@string/sign_up"
                     android:textColor="@color/colorAccentDialog"
                     android:textSize="14sp"
                     android:textStyle="bold" />

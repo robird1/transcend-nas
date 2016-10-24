@@ -85,7 +85,7 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="16dp"
                 android:background="@color/colorAccentDialogButton"
-                android:text="@string/login"
+                android:text="@string/sign_in"
                 android:textColor="@color/colorPrimary" />
 
             <TextView
@@ -126,7 +126,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="8dp"
-                    android:text="@string/register"
+                    android:text="@string/sign_up"
                     android:textColor="@color/colorAccentDialog"
                     android:textSize="14sp"
                     android:textStyle="bold" />
@@ -209,7 +209,7 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="16dp"
                 android:background="@color/colorAccentDialogButton"
-                android:text="@string/submitStr"
+                android:text="@string/submit"
                 android:textColor="@color/colorPrimary"
                 android:visibility="visible" />
         </LinearLayout>
@@ -239,7 +239,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
-                    android:text="@string/login"
+                    android:text="@string/sign_in"
                     android:textColor="@color/colorAccentDialog"
                     android:textSize="14sp"
                     android:textStyle="bold" />

@@ -378,7 +378,7 @@ public class LoginByEmailActivity extends AppCompatActivity implements
         registerLayout.setVisibility(View.GONE);
         loginLayout.setVisibility(View.VISIBLE);
         normalLayout.setVisibility(View.GONE);
-        mTitle.setText(getString(R.string.login));
+        mTitle.setText(getString(R.string.sign_in));
         tlEmail = (TextInputLayout) findViewById(R.id.remote_access_login_email);
         tlEmail.getEditText().setText(NASPref.getCloudUsername(mContext));
         tlPwd = (TextInputLayout) findViewById(R.id.remote_access_login_password);
@@ -397,7 +397,7 @@ public class LoginByEmailActivity extends AppCompatActivity implements
         registerLayout.setVisibility(View.VISIBLE);
         loginLayout.setVisibility(View.GONE);
         normalLayout.setVisibility(View.GONE);
-        mTitle.setText(getString(R.string.register));
+        mTitle.setText(getString(R.string.sign_up));
         tlEmail = (TextInputLayout) findViewById(R.id.remote_access_register_email);
         tlEmail.getEditText().setText(NASPref.getCloudUsername(mContext));
         tlPwd = (TextInputLayout) findViewById(R.id.remote_access_register_password);
