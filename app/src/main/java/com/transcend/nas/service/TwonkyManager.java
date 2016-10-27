@@ -1,6 +1,7 @@
 package com.transcend.nas.service;
 
 import android.util.Log;
+import android.widget.ImageView;
 
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
@@ -10,6 +11,7 @@ import com.transcend.nas.common.FileFactory;
 import com.transcend.nas.management.FileInfo;
 import com.tutk.IOTC.P2PService;
 
+import org.apache.commons.io.FilenameUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -97,7 +99,7 @@ public class TwonkyManager {
             //other folder
             String currentUrl = "";
             String tmp = "/" + paths[1] + "/";
-            if(!mCacheMap.contains(tmp))
+            if (!mCacheMap.contains(tmp))
                 parserTwonkyFolder(tmp, start, count, getFolderUrlFromMap(false, KEYWORD_FOLDER));
 
             //loop check the folder
@@ -107,7 +109,7 @@ public class TwonkyManager {
 
                 String nextUrl = getFolderUrlFromMap(false, tmp);
                 if (nextUrl == null || nextUrl.equals("")) {
-                    parserTwonkyFolder(tmp.replaceFirst(paths[i]+"/" , ""), start, count, currentUrl);
+                    parserTwonkyFolder(tmp.replaceFirst(paths[i] + "/", ""), start, count, currentUrl);
                     nextUrl = getFolderUrlFromMap(false, tmp);
                 }
 
@@ -375,5 +377,31 @@ public class TwonkyManager {
             }
         }
         return newUrl;
+    }
+
+    private String getPhotoPath(boolean thumbnail, String path) {
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        String username = server.getUsername();
+        String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.TWONKY);
+        String filepath = "";
+
+        if (path.startsWith(Server.HOME))
+            filepath = path.replaceFirst(Server.HOME, "/home/" + username + "/");
+        else if (path.startsWith("/" + username + "/"))
+            filepath = path.replaceFirst("/" + username + "/", "/home/" + username + "/");
+        else {
+            String key = FileFactory.getInstance().getRealPathKeyFromMap(path);
+            String realPath = FileFactory.getInstance().getRealPathFromMap(path);
+            if (key != null && !key.equals(""))
+                filepath = path.replaceFirst(key, realPath);
+        }
+
+        String url = "http://" + hostname + "/rpc/get_thumbnail_url?path=" + filepath.replace(" ", "%20");
+        return url;
+    }
+
+    public void displayImage(String path, ImageView imageView) {
+        TwonkyThumbnailTask task = new TwonkyThumbnailTask(getPhotoPath(true, path), imageView);
+        task.execute();
     }
 }

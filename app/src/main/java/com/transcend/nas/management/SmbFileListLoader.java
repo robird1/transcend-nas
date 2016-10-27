@@ -177,6 +177,23 @@ public class SmbFileListLoader extends SmbAbstractLoader {
                                     isSuccess = true;
                                     if (add) {
                                         FileFactory.getInstance().addRealPathToMap(name, path);
+                                        boolean addToSmbList = true;
+                                        for (FileInfo info : mFileList) {
+                                            if (name.equals(info.name)) {
+                                                addToSmbList = false;
+                                                break;
+                                            }
+                                        }
+
+                                        if(addToSmbList) {
+                                            FileInfo fileInfo = new FileInfo();
+                                            fileInfo.path = TextUtils.concat(mPath, name + "/").toString();
+                                            fileInfo.name = name;
+                                            fileInfo.time = "1970/01/01";
+                                            fileInfo.type = FileInfo.TYPE.DIR;
+                                            fileInfo.size = Long.valueOf(0);
+                                            mFileList.add(fileInfo);
+                                        }
                                     }
                                     name = null;
                                     path = null;
