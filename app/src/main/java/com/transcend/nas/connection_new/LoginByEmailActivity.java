@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
+import com.transcend.nas.common.AnalysisFactory;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.common.StyleFactory;
 import com.transcend.nas.common.TutkCodeID;
@@ -66,6 +67,7 @@ public class LoginByEmailActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         mContext = this;
         setContentView(R.layout.activity_login_by_email);
+        AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.START_EMAIL_LOGIN);
         init();
         initToolbar();
         initProgressView();
@@ -319,8 +321,10 @@ public class LoginByEmailActivity extends AppCompatActivity implements
                     NASPref.setBackupScenario(mContext, scenarios[1]);
                     isRemoteAccessRegister = false;
                     updateView();
-                } else
+                } else {
+                    AnalysisFactory.getInstance(mContext).sendEvent(AnalysisFactory.VIEW.START_EMAIL_LOGIN, AnalysisFactory.ACTION.Click, AnalysisFactory.LABEL.ResendEmail);
                     getLoaderManager().restartLoader(loaderID, args, LoginByEmailActivity.this).forceLoad();
+                }
             }
 
             @Override
@@ -494,6 +498,7 @@ public class LoginByEmailActivity extends AppCompatActivity implements
                     return;
                 }
 
+                AnalysisFactory.getInstance(this).sendEvent(AnalysisFactory.VIEW.START_EMAIL_LOGIN, AnalysisFactory.ACTION.Click, AnalysisFactory.LABEL.LoginByEmail);
                 arg = new Bundle();
                 arg.putString("server", NASPref.getCloudServer(mContext));
                 arg.putString("email", email);
@@ -524,6 +529,7 @@ public class LoginByEmailActivity extends AppCompatActivity implements
                     return;
                 }
 
+                AnalysisFactory.getInstance(this).sendEvent(AnalysisFactory.VIEW.START_EMAIL_LOGIN, AnalysisFactory.ACTION.Click, AnalysisFactory.LABEL.RegisterEmail);
                 arg = new Bundle();
                 arg.putString("server", NASPref.getCloudServer(mContext));
                 arg.putString("email", email);
@@ -537,6 +543,7 @@ public class LoginByEmailActivity extends AppCompatActivity implements
                 mForgetDialog = new ForgetPwdDialog(mContext, arg) {
                     @Override
                     public void onConfirm(Bundle args) {
+                        AnalysisFactory.getInstance(mContext).sendEvent(AnalysisFactory.VIEW.START_EMAIL_LOGIN, AnalysisFactory.ACTION.Click, AnalysisFactory.LABEL.ForgetPassword);
                         args.putString("server", NASPref.getCloudServer(mContext));
                         getLoaderManager().restartLoader(LoaderID.TUTK_FORGET_PASSWORD, args, LoginByEmailActivity.this).forceLoad();
                     }

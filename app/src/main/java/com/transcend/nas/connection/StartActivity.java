@@ -17,7 +17,6 @@ import android.widget.Toast;
 
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
-import com.transcend.nas.common.AnalysisFactory;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.common.TutkCodeID;
 import com.transcend.nas.management.FileManageActivity;
@@ -58,7 +57,6 @@ public class StartActivity extends AppCompatActivity implements LoaderManager.Lo
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
-        AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.START);
         initLayout();
         initInputText();
         initRemoteButton();
@@ -114,7 +112,6 @@ public class StartActivity extends AppCompatActivity implements LoaderManager.Lo
     @Override
     public void onClick(View v) {
         if(v.equals(bnRemote)){
-            AnalysisFactory.getInstance(this).sendClickEvent(AnalysisFactory.VIEW.START, AnalysisFactory.ACTION.STARTREMOTE);
             changeView(false);
         }
         else if (v.equals(bnSignIn)) {
@@ -140,7 +137,6 @@ public class StartActivity extends AppCompatActivity implements LoaderManager.Lo
             args.putString("password", pwd);
             getLoaderManager().restartLoader(LoaderID.TUTK_LOGIN, args, this).forceLoad();
         } else if (v.equals(bnFind)) {
-            AnalysisFactory.getInstance(this).sendClickEvent(AnalysisFactory.VIEW.START, AnalysisFactory.ACTION.STARTLOCAL);
             startNASFinderActivity(null, false);
         } else if (v.equals(tvSignInForget)) {
             showForgetPwdDialog();
@@ -322,7 +318,6 @@ public class StartActivity extends AppCompatActivity implements LoaderManager.Lo
 
     @Override
     public Loader<Boolean> onCreateLoader(int id, Bundle args) {
-        AnalysisFactory.getInstance(this).recordStartTime();
         String server, email, pwd, token;
         switch (mLoaderID = id) {
             case LoaderID.TUTK_FORGET_PASSWORD:
@@ -351,7 +346,6 @@ public class StartActivity extends AppCompatActivity implements LoaderManager.Lo
 
     @Override
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
-        AnalysisFactory.getInstance(this).recordEndTime();
         if (!success) {
             checkErrorResult(loader);
             return;
@@ -362,13 +356,10 @@ public class StartActivity extends AppCompatActivity implements LoaderManager.Lo
         } else if (loader instanceof TutkLoginLoader) {
             checkLoginNASResult((TutkLoginLoader) loader);
         } else if (loader instanceof TutkGetNasLoader) {
-            AnalysisFactory.getInstance(this).sendTimeEvent(AnalysisFactory.EVENT.CONNECT, AnalysisFactory.ACTION.FINDREMOTE, success);
             checkGetNASResult((TutkGetNasLoader) loader);
         } else if (loader instanceof TutkLinkNasLoader) {
-            AnalysisFactory.getInstance(this).sendTimeEvent(AnalysisFactory.EVENT.CONNECT, AnalysisFactory.ACTION.LINKREMOTE, success);
             checkLinkNASResult((TutkLinkNasLoader) loader);
         } else if (loader instanceof LoginLoader) {
-            AnalysisFactory.getInstance(this).sendTimeEvent(AnalysisFactory.EVENT.CONNECT, AnalysisFactory.ACTION.LOGINREMOTE, success);
             startFileManageActivity();
         } else if (loader instanceof TutkLogoutLoader) {
             mProgressView.setVisibility(View.INVISIBLE);

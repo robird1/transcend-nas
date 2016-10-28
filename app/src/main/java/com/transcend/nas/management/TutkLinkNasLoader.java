@@ -1,14 +1,11 @@
 package com.transcend.nas.management;
 
-import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 
-import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
-import com.transcend.nas.common.AnalysisFactory;
 import com.tutk.IOTC.P2PService;
 import com.tutk.IOTC.P2PTunnelAPIs;
 
@@ -46,12 +43,10 @@ public class TutkLinkNasLoader extends TutkBasicLoader {
                 mError = "Sorry, this UID is illegal";
             else
                 mError = mActivity.getString(R.string.network_error);;
-            AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.LINKREMOTE, result >= 0 ? AnalysisFactory.LABEL.SUCCESS : mError);
             return result >= 0;
         }
         else {
             mError = mActivity.getString(R.string.network_error);
-            AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.LINKREMOTE, mError);
             return false;
         }
     }

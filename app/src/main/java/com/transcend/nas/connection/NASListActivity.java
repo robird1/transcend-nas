@@ -27,7 +27,6 @@ import com.transcend.nas.connection_new.LoginActivity;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
-import com.transcend.nas.common.AnalysisFactory;
 import com.transcend.nas.view.DividerItemDecoration;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.view.NotificationDialog;
@@ -124,7 +123,6 @@ public class NASListActivity extends AppCompatActivity implements LoaderManager.
         mNASList = (ArrayList<HashMap<String, String>>) intent.getSerializableExtra("NASList");
         if (mNASList == null)
             mNASList = new ArrayList<HashMap<String, String>>();
-        AnalysisFactory.getInstance(this).sendScreen(isRemoteAccess ? AnalysisFactory.VIEW.NASLISTREMOTE : AnalysisFactory.VIEW.NASLISTLOCAL);
     }
 
     private void initToolbar() {
@@ -248,7 +246,6 @@ public class NASListActivity extends AppCompatActivity implements LoaderManager.
      */
     @Override
     public Loader<Boolean> onCreateLoader(int id, Bundle args) {
-        AnalysisFactory.getInstance(this).recordStartTime();
         String server, token, nasId;
         switch (mLoaderID = id) {
             case LoaderID.NAS_LIST:
@@ -283,25 +280,19 @@ public class NASListActivity extends AppCompatActivity implements LoaderManager.
 
     @Override
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
-        AnalysisFactory.getInstance(this).recordEndTime();
         if (loader instanceof NASListLoader) {
-            AnalysisFactory.getInstance(this).sendTimeEvent(AnalysisFactory.EVENT.CONNECT, AnalysisFactory.ACTION.FINDLOCAL, success);
             checkNasListLoader(success, (NASListLoader) loader);
         } else if (loader instanceof WizardCheckLoader) {
             checkWizardLoader(success, (WizardCheckLoader) loader);
         } else if (loader instanceof LoginLoader) {
-            AnalysisFactory.getInstance(this).sendTimeEvent(AnalysisFactory.EVENT.CONNECT, isRemoteAccess ? AnalysisFactory.ACTION.LOGINREMOTE : AnalysisFactory.ACTION.LOGINLOCAL, success);
             checkLoginLoader(success, (LoginLoader) loader);
         } else if (loader instanceof TutkGetNasLoader) {
-            AnalysisFactory.getInstance(this).sendTimeEvent(AnalysisFactory.EVENT.CONNECT, AnalysisFactory.ACTION.FINDREMOTE, success);
             checkTutkGetNasLoader(success, (TutkGetNasLoader) loader);
         } else if (loader instanceof TutkDeleteNasLoader) {
             checkTutkDeleteNasLoader(success, (TutkDeleteNasLoader) loader);
         } else if (loader instanceof TutkLinkNasLoader) {
-            AnalysisFactory.getInstance(this).sendTimeEvent(AnalysisFactory.EVENT.CONNECT, AnalysisFactory.ACTION.LINKREMOTE, success);
             checkTutkLinkNasLoader(success, (TutkLinkNasLoader) loader);
         } else if (loader instanceof P2PStautsLoader) {
-            AnalysisFactory.getInstance(this).sendTimeEvent(AnalysisFactory.EVENT.CONNECT, AnalysisFactory.ACTION.CHECKREMOTE, success);
             checkP2PStatusLoader(success, (P2PStautsLoader) loader);
         }
     }

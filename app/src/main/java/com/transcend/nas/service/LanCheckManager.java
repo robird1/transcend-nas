@@ -20,6 +20,7 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
     private Thread mThread;
     private LanCheckTask mTask;
     private boolean isReady = false;
+    private boolean isInit = false;
 
     public LanCheckManager() {
         mHandler = new Handler();
@@ -31,6 +32,10 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
                 mLanCheckManager = new LanCheckManager();
         }
         return mLanCheckManager;
+    }
+
+    public void setInit(boolean init){
+        isInit = init;
     }
 
     public void setLanConnect(boolean connect, String ip){
@@ -68,6 +73,11 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
     }
 
     public void startLanCheck(){
+        if(!isInit) {
+            Log.d(TAG, "Ignore the command");
+            return;
+        }
+
         boolean check = false;
         stopLanCheck();
 

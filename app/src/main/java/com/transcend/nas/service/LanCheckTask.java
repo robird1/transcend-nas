@@ -73,6 +73,8 @@ public class LanCheckTask extends AsyncTask<String, String, Boolean> {
                 case ConnectivityManager.TYPE_WIFI:
                     createJmDNS();
                     loadNASList();
+                    if(mLock != null)
+                        mLock.release();
                     //closeJmDNS();
                     tryLink();
                     return tryLink();

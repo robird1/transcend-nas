@@ -11,7 +11,6 @@ import com.realtek.nasfun.api.HttpClientManager;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
-import com.transcend.nas.common.AnalysisFactory;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -62,7 +61,6 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
         Log.d(TAG, "AutoLink : " + mHostname + ", " + mUsername + "," + mPassword);
         if (checkNetworkAvailable()) {
             if (mHostname.isEmpty() || mUsername.isEmpty() || mPassword.isEmpty()) {
-                AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.AUTOLINKLOCAL, AnalysisFactory.LABEL.EMPTY);
             } else {
                 if (doWizardCheck(mHostname)) {
                     if (isWizard) {

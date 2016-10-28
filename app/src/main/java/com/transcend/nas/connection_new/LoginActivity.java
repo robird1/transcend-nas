@@ -27,6 +27,7 @@ import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
+import com.transcend.nas.common.AnalysisFactory;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.common.StyleFactory;
 import com.transcend.nas.common.TutkCodeID;
@@ -67,9 +68,10 @@ public class LoginActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         mContext = this;
         setContentView(R.layout.activity_login);
+        AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.START);
+
         initView();
     }
 
@@ -184,6 +186,8 @@ public class LoginActivity extends AppCompatActivity implements
 
         if (!token.equals("")) {
             //token not null mean login success
+            AnalysisFactory.getInstance(this).sendEvent(AnalysisFactory.VIEW.START, AnalysisFactory.ACTION.LoginTutk,
+                    AnalysisFactory.LABEL.LoginByEmail + "_" + AnalysisFactory.SUCCESS);
             NASPref.setFBAccountStatus(mContext, false);
             NASPref.setCloudUsername(mContext, email);
             NASPref.setCloudPassword(mContext, pwd);
@@ -208,6 +212,9 @@ public class LoginActivity extends AppCompatActivity implements
                     Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
                 else
                     Toast.makeText(this, getString(R.string.error_format), Toast.LENGTH_SHORT).show();
+
+                AnalysisFactory.getInstance(this).sendEvent(AnalysisFactory.VIEW.START, AnalysisFactory.ACTION.LoginTutk,
+                        AnalysisFactory.LABEL.LoginByEmail + "_" + status);
             }
         }
     }
@@ -217,6 +224,8 @@ public class LoginActivity extends AppCompatActivity implements
 
         if (!token.equals("")) {
             //token not null mean login success
+            AnalysisFactory.getInstance(this).sendEvent(AnalysisFactory.VIEW.START, AnalysisFactory.ACTION.LoginTutk,
+                    AnalysisFactory.LABEL.LoginByFacebook + "_" + AnalysisFactory.SUCCESS);
             NASPref.setFBAccountStatus(mContext, true);
             NASPref.setCloudUsername(mContext, loader.getEmail());
             NASPref.setCloudPassword(mContext, loader.getPassword());
@@ -233,10 +242,10 @@ public class LoginActivity extends AppCompatActivity implements
                 Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
             else
                 Toast.makeText(this, getString(R.string.error_format), Toast.LENGTH_SHORT).show();
-
             // remove the FB authentication if the email address is already taken
             NASPref.logOutFB();
-
+            AnalysisFactory.getInstance(this).sendEvent(AnalysisFactory.VIEW.START, AnalysisFactory.ACTION.LoginTutk,
+                    AnalysisFactory.LABEL.LoginByFacebook + "_" + status);
         }
     }
 
@@ -413,16 +422,20 @@ public class LoginActivity extends AppCompatActivity implements
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.login_by_facebook:
+                AnalysisFactory.getInstance(this).sendEvent(AnalysisFactory.VIEW.START, AnalysisFactory.ACTION.Click, AnalysisFactory.LABEL.LoginByFacebook);
                 loginFBAccount();
                 break;
             case R.id.login_by_email:
+                AnalysisFactory.getInstance(this).sendEvent(AnalysisFactory.VIEW.START, AnalysisFactory.ACTION.Click, AnalysisFactory.LABEL.LoginByEmail);
                 startLoginByEmailActivity(false, true);
                 break;
             case R.id.login_sign_up_layout:
             case R.id.login_sign_up:
+                AnalysisFactory.getInstance(this).sendEvent(AnalysisFactory.VIEW.START, AnalysisFactory.ACTION.Click, AnalysisFactory.LABEL.RegisterEmail);
                 startLoginByEmailActivity(true, false);
                 break;
             case R.id.start_login_button:
+                AnalysisFactory.getInstance(this).sendEvent(AnalysisFactory.VIEW.START, AnalysisFactory.ACTION.Click, AnalysisFactory.LABEL.LoginByStart);
                 boolean isFacebook = NASPref.getFBAccountStatus(mContext);
                 if (isFacebook) {
                     loginFBAccount();
@@ -440,6 +453,7 @@ public class LoginActivity extends AppCompatActivity implements
                 NotificationDialog mNotificationDialog = new NotificationDialog(this, value) {
                     @Override
                     public void onConfirm() {
+                        AnalysisFactory.getInstance(mContext).sendEvent(AnalysisFactory.VIEW.START, AnalysisFactory.ACTION.Click, AnalysisFactory.LABEL.Logout);
                         if(NASPref.useFacebookLogin && NASPref.getFBAccountStatus(mContext))
                             NASPref.logOutFB();
                         NASPref.clearDataAfterLogout(mContext);

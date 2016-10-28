@@ -16,7 +16,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.transcend.nas.R;
-import com.transcend.nas.common.AnalysisFactory;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.common.StyleFactory;
 
@@ -37,7 +36,6 @@ public class GuideActivity extends Activity implements LoaderManager.LoaderCallb
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_initial);
-        AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.GUIDE);
         mTitle = (TextView) findViewById(R.id.initial_title);
 
         mStart = (Button) findViewById(R.id.initial_started_button);
@@ -77,7 +75,6 @@ public class GuideActivity extends Activity implements LoaderManager.LoaderCallb
 
     @Override
     public Loader onCreateLoader(int id, Bundle args) {
-        AnalysisFactory.getInstance(this).recordStartTime();
         mProgressView.setVisibility(View.VISIBLE);
         switch (mLoaderID = id) {
             case LoaderID.NAS_LIST:
@@ -89,10 +86,8 @@ public class GuideActivity extends Activity implements LoaderManager.LoaderCallb
 
     @Override
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
-        AnalysisFactory.getInstance(this).recordEndTime();
         mProgressView.setVisibility(View.INVISIBLE);
         if (loader instanceof NASListLoader) {
-            AnalysisFactory.getInstance(this).sendTimeEvent(AnalysisFactory.EVENT.CONNECT ,AnalysisFactory.ACTION.FINDLOCAL, success);
             if (success)
                 startNASFinderActivity(((NASListLoader) loader).getList());
             else
@@ -134,11 +129,9 @@ public class GuideActivity extends Activity implements LoaderManager.LoaderCallb
         int id = v.getId();
         switch (id){
             case R.id.initial_started_button:
-                AnalysisFactory.getInstance(this).sendClickEvent(AnalysisFactory.VIEW.GUIDE, AnalysisFactory.ACTION.FINDLOCAL);
                 getLoaderManager().restartLoader(LoaderID.NAS_LIST, null, this).forceLoad();
                 break;
             case R.id.initial_remote_access_button:
-                AnalysisFactory.getInstance(this).sendClickEvent(AnalysisFactory.VIEW.GUIDE, AnalysisFactory.ACTION.STARTREMOTE);
                 startSignInActivity();
                 break;
             default:

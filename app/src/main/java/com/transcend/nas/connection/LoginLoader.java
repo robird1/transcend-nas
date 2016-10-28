@@ -59,7 +59,6 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
         }
         else{
             mError = mServer.getLoginError();
-            AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.LOGINREMOTE, mError);
         }
         return success;
     }

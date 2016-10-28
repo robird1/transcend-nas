@@ -1,13 +1,9 @@
 package com.transcend.nas.management;
 
-import android.app.Activity;
 import android.content.Context;
-
-import com.transcend.nas.common.AnalysisFactory;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,7 +35,6 @@ public class TutkGetNasLoader extends TutkBasicLoader {
         String url = doGenerateUrl();
         String result = doGetRequest(url, mToken);
         boolean success = doParserResult(result);
-        AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.FINDREMOTE, success);
         return success;
     }
 

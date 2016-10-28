@@ -1,16 +1,11 @@
 package com.transcend.nas.connection;
 
-import android.app.Activity;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.net.Network;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
-
-import com.transcend.nas.common.AnalysisFactory;
-import com.transcend.nas.common.LoaderID;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -78,14 +73,13 @@ public class NASListLoader extends AsyncTaskLoader<Boolean> {
                 case ConnectivityManager.TYPE_WIFI:
                     createJmDNS();
                     loadNASList();
+                    if(mLock != null)
+                        mLock.release();
                     //closeJmDNS();
-                    AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.FINDLOCAL,
-                            mNASList.size() > 0 ? AnalysisFactory.LABEL.SUCCESS : AnalysisFactory.LABEL.EMPTY);
                     return mNASList.size() > 0;
             }
         }
 
-        AnalysisFactory.getInstance(mContext).sendConnectEvent(AnalysisFactory.ACTION.FINDLOCAL, false);
         return false;
     }
 

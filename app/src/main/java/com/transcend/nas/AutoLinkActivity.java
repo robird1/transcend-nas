@@ -5,10 +5,10 @@ import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.transcend.nas.common.AnalysisFactory;
 import com.transcend.nas.connection.AutoLinkLoader;
 import com.transcend.nas.connection.GuideActivity;
 import com.transcend.nas.connection.NASListActivity;
@@ -16,7 +16,6 @@ import com.transcend.nas.connection.NASListLoader;
 import com.transcend.nas.connection.StartActivity;
 import com.transcend.nas.connection_new.IntroduceActivity;
 import com.transcend.nas.connection_new.LoginActivity;
-import com.transcend.nas.common.AnalysisFactory;
 import com.transcend.nas.common.AnimFactory;
 import com.transcend.nas.common.LoaderID;
 import com.transcend.nas.connection_new.LoginHelper;
@@ -24,7 +23,6 @@ import com.transcend.nas.connection_new.LoginListActivity;
 import com.transcend.nas.management.FileManageActivity;
 import com.transcend.nas.management.TutkGetNasLoader;
 import com.transcend.nas.management.TutkLinkNasLoader;
-import com.transcend.nas.service.LanCheckManager;
 import com.tutk.IOTC.P2PService;
 
 import java.util.ArrayList;
@@ -57,6 +55,7 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
                 if (isInit && !email.equals("") && !pwd.equals("") && !token.equals("")) {
                     Bundle args = getAccountInfo(false);
                     if (args != null) {
+                        AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.AUTO_LINK);
                         getLoaderManager().initLoader(LoaderID.AUTO_LINK, args, this).forceLoad();
                         return;
                     }
@@ -77,7 +76,6 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
 
     @Override
     public Loader onCreateLoader(int id, Bundle args) {
-        AnalysisFactory.getInstance(this).recordStartTime();
         switch (mLoaderID = id) {
             case LoaderID.AUTO_LINK:
                 mTextView.setText(getString(R.string.try_auto_connect));
@@ -98,15 +96,16 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
 
     @Override
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
-        AnalysisFactory.getInstance(this).recordEndTime();
         if (loader instanceof AutoLinkLoader) {
-            AnalysisFactory.getInstance(this).sendConnectEvent(AnalysisFactory.ACTION.AUTOLINK, success);
-            AnalysisFactory.getInstance(this).sendTimeEvent(AnalysisFactory.EVENT.CONNECT, AnalysisFactory.ACTION.AUTOLINK, success);
             boolean isWizard = ((AutoLinkLoader) loader).isWizard();
             boolean isRemote = ((AutoLinkLoader) loader).isRemote();
             if (success && isWizard) {
+                AnalysisFactory.getInstance(this).sendEvent(AnalysisFactory.VIEW.AUTO_LINK, AnalysisFactory.ACTION.LoginNas,
+                        (isRemote ? AnalysisFactory.LABEL.AutoLinkRemote : AnalysisFactory.LABEL.AutoLinkLan ) + "_" + AnalysisFactory.SUCCESS);
                 startFileManageActivity();
             } else {
+                AnalysisFactory.getInstance(this).sendEvent(AnalysisFactory.VIEW.AUTO_LINK, AnalysisFactory.ACTION.LoginNas,
+                        (isRemote ? AnalysisFactory.LABEL.AutoLinkRemote : AnalysisFactory.LABEL.AutoLinkLan ) + "_" + AnalysisFactory.FAIL);
                 if (isRemote) {
                     if (NASPref.useNewLoginFlow)
                         startRemoteAccessListLoader();
@@ -130,13 +129,11 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
                     startNASListLoader();
             }
         } else if (loader instanceof NASListLoader) {
-            AnalysisFactory.getInstance(this).sendTimeEvent(AnalysisFactory.EVENT.CONNECT, AnalysisFactory.ACTION.FINDLOCAL, success);
             if (success)
                 startNASFinderActivity(((NASListLoader) loader).getList(), false);
             else
                 startRemoteAccessListLoader();
         } else if (loader instanceof TutkGetNasLoader) {
-            AnalysisFactory.getInstance(this).sendTimeEvent(AnalysisFactory.EVENT.CONNECT, AnalysisFactory.ACTION.FINDREMOTE, success);
             TutkGetNasLoader listLoader = (TutkGetNasLoader) loader;
             String code = listLoader.getCode();
             String status = listLoader.getStatus();

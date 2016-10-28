@@ -78,6 +78,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nas_finder);
+        AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.START_NAS_LIST);
         initData();
         initToolbar();
         initRecyclerView();
@@ -128,7 +129,6 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
         mNASList = (ArrayList<HashMap<String, String>>) intent.getSerializableExtra("NASList");
         if (mNASList == null)
             mNASList = new ArrayList<HashMap<String, String>>();
-        AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.NASLISTREMOTE);
     }
 
     private void initToolbar() {
@@ -254,7 +254,6 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
      */
     @Override
     public Loader<Boolean> onCreateLoader(int id, Bundle args) {
-        AnalysisFactory.getInstance(this).recordStartTime();
         String server, token, nasId;
         switch (mLoaderID = id) {
             case LoaderID.TUTK_NAS_GET:
@@ -291,26 +290,19 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
 
     @Override
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
-        AnalysisFactory.getInstance(this).recordEndTime();
         if (loader instanceof NASListLoader) {
-            AnalysisFactory.getInstance(this).sendTimeEvent(AnalysisFactory.EVENT.CONNECT, AnalysisFactory.ACTION.FINDLOCAL, success);
             checkNasListLoader(success, (NASListLoader) loader);
         } else if (loader instanceof WizardCheckLoader) {
             checkWizardLoader(success, (WizardCheckLoader) loader);
         } else if (loader instanceof LoginLoader) {
-            //TODO : add google analysis
-            //AnalysisFactory.getInstance(this).sendTimeEvent(AnalysisFactory.EVENT.CONNECT,AnalysisFactory.ACTION.LOGINREMOTE : AnalysisFactory.ACTION.LOGINLOCAL, success);
             checkLoginLoader(success, (LoginLoader) loader);
         } else if (loader instanceof TutkGetNasLoader) {
-            AnalysisFactory.getInstance(this).sendTimeEvent(AnalysisFactory.EVENT.CONNECT, AnalysisFactory.ACTION.FINDREMOTE, success);
             checkTutkGetNasLoader(success, (TutkGetNasLoader) loader);
         } else if (loader instanceof TutkDeleteNasLoader) {
             checkTutkDeleteNasLoader(success, (TutkDeleteNasLoader) loader);
         } else if (loader instanceof TutkLinkNasLoader) {
-            AnalysisFactory.getInstance(this).sendTimeEvent(AnalysisFactory.EVENT.CONNECT, AnalysisFactory.ACTION.LINKREMOTE, success);
             checkTutkLinkNasLoader(success, (TutkLinkNasLoader) loader);
         } else if (loader instanceof P2PStautsLoader) {
-            AnalysisFactory.getInstance(this).sendTimeEvent(AnalysisFactory.EVENT.CONNECT, AnalysisFactory.ACTION.CHECKREMOTE, success);
             checkP2PStatusLoader(success, (P2PStautsLoader) loader);
         } else if (loader instanceof WizardSetLoader) {
             checkWizardSetLoader(success, (WizardSetLoader) loader);
@@ -595,6 +587,12 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
         mLoginDialog = new LoginDialog(LoginListActivity.this, args, remoteAccess, false) {
             @Override
             public void onConfirm(Bundle args) {
+                if(args != null) {
+                    String username = args.getString("username");
+                    AnalysisFactory.getInstance(LoginListActivity.this).
+                            sendEvent(AnalysisFactory.VIEW.START_NAS_LIST, AnalysisFactory.ACTION.LoginNas,
+                            NASPref.defaultUserName.equals(username) ? AnalysisFactory.LABEL.LoginByAdmin : AnalysisFactory.LABEL.LoginByNonAdmin);
+                }
                 startLoginLoader(args);
             }
 

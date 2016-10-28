@@ -155,7 +155,7 @@ public class FileManageActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         Log.w(TAG, "onCreate");
         setContentView(R.layout.activity_file_manage);
-        AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.BROWSERREMOTE);
+        AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.BROWSER_REMOTE);
         String password = NASPref.getPassword(this);
         if (password != null && !password.equals("")) {
             init();
@@ -303,6 +303,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
                 //clean lan check
                 LanCheckManager.getInstance().setLanConnect(false, "");
+                LanCheckManager.getInstance().setInit(false);
 
                 if (Build.VERSION.SDK_INT >= 11) {
                     recreate();
@@ -312,6 +313,8 @@ public class FileManageActivity extends AppCompatActivity implements
                     startActivity(intent);
                 }
                 return;
+            } else {
+                LanCheckManager.getInstance().setInit(true);
             }
         }
 
@@ -381,6 +384,7 @@ public class FileManageActivity extends AppCompatActivity implements
         isNeedEventNotify = false;
 
         String hostname = mServer.getHostname();
+        LanCheckManager.getInstance().setInit(true);
         if(hostname.contains(P2PService.getInstance().getP2PIP())) {
             LanCheckManager.getInstance().setLanConnect(false, "");
             LanCheckManager.getInstance().startLanCheck();
@@ -635,17 +639,17 @@ public class FileManageActivity extends AppCompatActivity implements
             case R.id.nav_storage:
                 mDevice = false;
                 doLoad(NASApp.ROOT_SMB);
-                AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.BROWSERREMOTE);
+                AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.BROWSER_REMOTE);
                 break;
             case R.id.nav_device:
                 mDevice = true;
                 doLoad(NASApp.ROOT_STG);
-                AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.BROWSERLOCAL);
+                AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.BROWSER_LOCAL);
                 break;
             case R.id.nav_downloads:
                 mDevice = false;
                 doLoad(NASPref.getDownloadLocation(this));
-                AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.BROWSERLOCALDOWNLOAD);
+                AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.BROWSER_LOCAL_DOWNLOAD);
                 break;
             case R.id.nav_disk_info:
                 startDiskInfoActivity();
@@ -1733,6 +1737,7 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void startLoginListActivity() {
+        LanCheckManager.getInstance().setInit(false);
         Intent intent = new Intent();
         intent.putExtra("uuid", NASPref.getCloudUUID(this));
         intent.setClass(FileManageActivity.this, LoginListActivity.class);
@@ -1774,6 +1779,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
         //clean lan check
         LanCheckManager.getInstance().setLanConnect(false, "");
+        LanCheckManager.getInstance().setInit(false);
 
         //show SignIn activity
         Intent intent = new Intent();
