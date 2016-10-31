@@ -306,4 +306,11 @@
     <string name="wizard_success">StoreJet Cloud is Ready</string>
     <string name="wizard_try">Try Again</string>
     <string name="wizard_wifi_info">Connect device Wi-Fi to router network</string>
+
+    <string name="open_with">Open with</string>
+    <string name="file_format_document">Document format</string>
+    <string name="file_format_image">Image format</string>
+    <string name="file_format_video">Video format</string>
+    <string name="file_format_audio">Audio format</string>
+
 </resources>

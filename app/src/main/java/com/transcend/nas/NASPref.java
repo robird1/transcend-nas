@@ -1,19 +1,37 @@
 package com.transcend.nas;
 
+import android.app.AlertDialog;
+import android.app.DownloadManager;
+import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
-import android.os.storage.StorageManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.View;
+import android.webkit.MimeTypeMap;
+import android.widget.RelativeLayout;
 
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
+import com.transcend.nas.common.MediaFactory;
+import com.transcend.nas.management.FileInfo;
 import com.transcend.nas.management.FileManageRecyclerAdapter;
 import com.transcend.nas.utils.PrefUtil;
 import com.transcend.nas.viewer.music.MusicActivity;
+
+import java.io.File;
+
+import static javax.jmdns.JmDNS.create;
 
 /**
  * Created by silverhsu on 16/1/15.
@@ -29,6 +47,10 @@ public class NASPref {
     public static final int useTwonkyMinFirmwareVersion = 20160101;
     public static boolean useTwonkyServer = false;
     public static boolean useSwitchNas = false;
+    private static DownloadManager mDownloadManager;
+    private static long mDownloadId;
+
+
 
     public enum Sort {
         TYPE,
@@ -411,6 +433,10 @@ public class NASPref {
         return buf.toString();
     }
 
+    public static String getCacheFilesLocation(Context context) {
+        return context.getExternalCacheDir().getPath();
+    }
+
     /**
      * Cache Size
      */
@@ -529,6 +555,140 @@ public class NASPref {
                 }
             }).executeAsync();
         }
+    }
+
+    public static void initDownloadManager(Context context, final RelativeLayout mProgressView) {
+        mDownloadManager = (DownloadManager) context.getSystemService(context.DOWNLOAD_SERVICE);
+
+        context.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d(TAG, "[Enter] onReceive()");
+
+                DownloadManager.Query query = new DownloadManager.Query();
+                query.setFilterById(mDownloadId);
+                Cursor c = mDownloadManager.query(query);
+                if (c.moveToFirst()) {
+                    if (DownloadManager.STATUS_SUCCESSFUL == c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))) {
+
+                        if (mProgressView != null) {
+                            mProgressView.setVisibility(View.INVISIBLE);
+                        }
+
+                        String localUri = c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
+                        NASPref.showAppChooser(context, Uri.parse(localUri));
+                    }
+                }
+            }
+        }, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+
+    }
+
+    public static void resetDownloadManager()
+    {
+        mDownloadManager = null;
+        mDownloadId = 0L;
+    }
+
+    public static void openFileBy3rdApp(Context context, FileInfo fileInfo) {
+        if (isLocalFile(fileInfo)) {
+            openLocalFile(context, fileInfo);
+        } else {
+            openRemoteFile(context, fileInfo);
+        }
+    }
+
+    private static boolean isLocalFile(FileInfo fileInfo)
+    {
+        if (fileInfo.path != null);
+        {
+            return fileInfo.path.startsWith(Environment.getExternalStorageDirectory().getPath());
+        }
+    }
+
+    private static void openLocalFile(Context context, FileInfo fileInfo) {
+
+        Uri fileUri = Uri.fromFile(new File(fileInfo.path));
+        NASPref.showAppChooser(context, fileUri);
+    }
+
+    private static void openRemoteFile(Context context, FileInfo fileInfo) {
+        Uri downloadUri = MediaFactory.createUri(fileInfo.path);
+        DownloadManager.Request request = new DownloadManager.Request(downloadUri);
+        File dirFile = new File(NASPref.getCacheFilesLocation(context));
+
+        setRequestDestinationUri(request, dirFile, downloadUri);
+//                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_HIDDEN);
+        mDownloadId = mDownloadManager.enqueue(request);
+    }
+
+    private static void setRequestDestinationUri(DownloadManager.Request request, File dirFile, Uri downloadUri) {
+        Log.d(TAG, "[Enter] setRequestDestinationUri()");
+
+        String filePath = dirFile.toString().concat("/").concat(downloadUri.getLastPathSegment());
+        Log.d(TAG, "filePath: " + filePath);
+
+        Uri fileUri = Uri.fromFile(new File(filePath));
+        Log.d(TAG, "fileUri: " + fileUri);
+
+        request.setDestinationUri(fileUri);
+    }
+
+    private static void showAppChooser(final Context context, final Uri fileUri) {
+
+        final Intent intent = new Intent(Intent.ACTION_VIEW);
+        String extension = MimeTypeMap.getFileExtensionFromUrl(fileUri.toString());
+        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+        Log.d(TAG, "extension: " + extension);
+        Log.d(TAG, "mimeType: " + mimeType);
+
+        intent.setDataAndType(fileUri, mimeType);
+
+        try {
+            context.startActivity(intent);
+
+        } catch (ActivityNotFoundException e) {
+
+            new AlertDialog.Builder(context).setTitle(R.string.open_with).setItems(getItemList(context),
+                    getClickListener(context, fileUri, intent)).create().show();
+        }
+    }
+
+    @NonNull
+    private static String[] getItemList(Context context) {
+        return new String[]{context.getResources().getString(R.string.file_format_document),
+                        context.getResources().getString(R.string.file_format_image),
+                        context.getResources().getString(R.string.file_format_video),
+                                context.getResources().getString(R.string.file_format_audio)};
+    }
+
+    @NonNull
+    private static DialogInterface.OnClickListener getClickListener(final Context context, final Uri fileUri, final Intent intent) {
+        return new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which)
+                {
+                    case 0:
+                        intent.setDataAndType(fileUri, "text/*");
+                        break;
+                    case 1:
+                        intent.setDataAndType(fileUri, "image/*");
+                        break;
+                    case 2:
+                        intent.setDataAndType(fileUri, "video/*");
+                        break;
+                    case 3:
+                        intent.setDataAndType(fileUri, "audio/*");
+                        break;
+                    default:
+                        intent.setDataAndType(fileUri, "text/*");
+                        break;
+                }
+
+                context.startActivity(intent);
+
+            }
+        };
     }
 
 }

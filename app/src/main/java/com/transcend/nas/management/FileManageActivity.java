@@ -9,31 +9,30 @@ import android.content.res.TypedArray;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.View;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -54,28 +53,27 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
-import com.transcend.nas.common.AnalysisFactory;
-import com.transcend.nas.common.ManageFactory;
-import com.transcend.nas.connection.GuideActivity;
-import com.transcend.nas.connection_new.LoginActivity;
-import com.transcend.nas.connection_new.LoginListActivity;
-import com.transcend.nas.service.LanCheckManager;
-import com.transcend.nas.service.TwonkyManager;
-import com.transcend.nas.settings.NewSettingsActivity;
-import com.transcend.nas.view.NotificationDialog;
-import com.transcend.nas.view.ProgressDialog;
-import com.transcend.nas.connection.StartActivity;
-import com.transcend.nas.service.AutoBackupService;
-import com.transcend.nas.settings.AboutActivity;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
+import com.transcend.nas.common.AnalysisFactory;
+import com.transcend.nas.common.FileFactory;
 import com.transcend.nas.common.LoaderID;
+import com.transcend.nas.common.ManageFactory;
+import com.transcend.nas.common.MediaFactory;
+import com.transcend.nas.connection.StartActivity;
+import com.transcend.nas.connection_new.LoginActivity;
+import com.transcend.nas.connection_new.LoginListActivity;
+import com.transcend.nas.service.AutoBackupService;
+import com.transcend.nas.service.LanCheckManager;
+import com.transcend.nas.service.TwonkyManager;
+import com.transcend.nas.settings.AboutActivity;
 import com.transcend.nas.settings.DiskFactory;
 import com.transcend.nas.settings.DiskInfoActivity;
+import com.transcend.nas.settings.NewSettingsActivity;
 import com.transcend.nas.settings.SettingsActivity;
-import com.transcend.nas.common.FileFactory;
-import com.transcend.nas.common.MediaFactory;
+import com.transcend.nas.view.NotificationDialog;
+import com.transcend.nas.view.ProgressDialog;
 import com.transcend.nas.viewer.music.MusicActivity;
 import com.transcend.nas.viewer.music.MusicService;
 import com.transcend.nas.viewer.photo.ViewerActivity;
@@ -166,6 +164,7 @@ public class FileManageActivity extends AppCompatActivity implements
             initProgressView();
             initDrawer();
             initActionModeView();
+            NASPref.initDownloadManager(this, mProgressView);
             doRefresh();
             NASPref.setInitial(this, true);
 
@@ -224,6 +223,7 @@ public class FileManageActivity extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
         P2PService.getInstance().removeP2PListener(this);
+        NASPref.resetDownloadManager();
         super.onDestroy();
         Log.w(TAG, "onDestroy");
 
@@ -381,7 +381,7 @@ public class FileManageActivity extends AppCompatActivity implements
         isNeedEventNotify = false;
 
         String hostname = mServer.getHostname();
-        if(hostname.contains(P2PService.getInstance().getP2PIP())) {
+        if (hostname.contains(P2PService.getInstance().getP2PIP())) {
             LanCheckManager.getInstance().setLanConnect(false, "");
             LanCheckManager.getInstance().startLanCheck();
         } else {
@@ -390,15 +390,15 @@ public class FileManageActivity extends AppCompatActivity implements
 
         String firmware = NASPref.defaultFirmwareVersion;
         ServerInfo info = mServer.getServerInfo();
-        if(info != null)
+        if (info != null)
             firmware = info.firmwareVer;
-        if(NASPref.useTwonkyServer && firmware != null && !firmware.equals("")){
+        if (NASPref.useTwonkyServer && firmware != null && !firmware.equals("")) {
             int version = Integer.parseInt(firmware);
             NASPref.useTwonkyServer = version >= NASPref.useTwonkyMinFirmwareVersion;
         } else {
             NASPref.useTwonkyServer = false;
         }
-        Log.d(TAG,"Firmware version : " + firmware + ", Use Twonky Thumbnail : " + NASPref.useTwonkyServer);
+        Log.d(TAG, "Firmware version : " + firmware + ", Use Twonky Thumbnail : " + NASPref.useTwonkyServer);
     }
 
     private boolean initAutoBackUpService() {
@@ -577,7 +577,10 @@ public class FileManageActivity extends AppCompatActivity implements
             } else if (FileInfo.TYPE.MUSIC.equals(fileInfo.type)) {
                 startMusicActivity(mMode, mRoot, fileInfo);
             } else {
-                toast(R.string.unknown_format);
+                Log.d(TAG, "class name: " + this.getClass().getSimpleName());
+
+                mProgressView.setVisibility(View.VISIBLE);
+                NASPref.openFileBy3rdApp(this, fileInfo);
             }
         } else {
             // editor
@@ -1036,7 +1039,7 @@ public class FileManageActivity extends AppCompatActivity implements
                     LanCheckManager.getInstance().startLanCheck();
                     Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
                 } else {
-                    if(loader instanceof EventNotifyLoader)
+                    if (loader instanceof EventNotifyLoader)
                         LanCheckManager.getInstance().startLanCheck();
                     Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
                 }
@@ -1712,7 +1715,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
     private void startSettingsActivity() {
         Intent intent = new Intent();
-        if(NASPref.useNewLoginFlow) {
+        if (NASPref.useNewLoginFlow) {
             intent.setClass(FileManageActivity.this, NewSettingsActivity.class);
             startActivityForResult(intent, NewSettingsActivity.REQUEST_CODE);
         } else {
@@ -1744,7 +1747,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
         //clean email and account information
         if (clear) {
-            if(NASPref.useFacebookLogin && NASPref.getFBAccountStatus(this))
+            if (NASPref.useFacebookLogin && NASPref.getFBAccountStatus(this))
                 NASPref.logOutFB();
             NASPref.clearDataAfterLogout(this);
         }
@@ -1803,3 +1806,4 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
 }
+
