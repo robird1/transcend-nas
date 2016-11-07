@@ -312,5 +312,8 @@
     <string name="file_format_image">Image format</string>
     <string name="file_format_video">Video format</string>
     <string name="file_format_audio">Audio format</string>
+    <string name="upload_modified_file">Do you want to upload the modified file?</string>
+    <string name="dialog_button_yes">YES</string>
+    <string name="dialog_button_no">NO</string>
 
 </resources>

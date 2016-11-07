@@ -1,5 +1,7 @@
 package com.transcend.nas.management;
 
+import android.os.Environment;
+
 import com.transcend.nas.utils.MimeUtil;
 
 import java.io.Serializable;
@@ -55,5 +57,14 @@ public class FileInfo implements Serializable {
         }
         return new Date();
     }
+
+    public boolean isLocalFile()
+    {
+        if (path != null);
+        {
+            return path.startsWith(Environment.getExternalStorageDirectory().getPath());
+        }
+    }
+
 
 }

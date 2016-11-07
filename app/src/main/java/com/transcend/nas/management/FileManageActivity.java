@@ -1,11 +1,13 @@
 package com.transcend.nas.management;
 
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -33,6 +35,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -148,6 +151,11 @@ public class FileManageActivity extends AppCompatActivity implements
 
     private SmbFileShareLoader mSmbFileShareLoader;
 
+    private  DocumentDownloadManager mDownloadManager;
+    private FileInfo mFileInfo;
+    private String mDownloadFilePath;
+    private FileStateListener mFileStateListener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -164,7 +172,7 @@ public class FileManageActivity extends AppCompatActivity implements
             initProgressView();
             initDrawer();
             initActionModeView();
-            NASPref.initDownloadManager(this, mProgressView);
+            initDownloadManager();
             doRefresh();
             NASPref.setInitial(this, true);
 
@@ -199,6 +207,8 @@ public class FileManageActivity extends AppCompatActivity implements
             }
         }
 
+        checkFileState();
+
         super.onResume();
         Log.w(TAG, "onResume");
     }
@@ -223,7 +233,6 @@ public class FileManageActivity extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
         P2PService.getInstance().removeP2PListener(this);
-        NASPref.resetDownloadManager();
         super.onDestroy();
         Log.w(TAG, "onDestroy");
 
@@ -579,8 +588,7 @@ public class FileManageActivity extends AppCompatActivity implements
             } else {
                 Log.d(TAG, "class name: " + this.getClass().getSimpleName());
 
-                mProgressView.setVisibility(View.VISIBLE);
-                NASPref.openFileBy3rdApp(this, fileInfo);
+                openFileBy3rdApp(this, mFileInfo = fileInfo);
             }
         } else {
             // editor
@@ -1176,12 +1184,26 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void doUpload(String dest, ArrayList<String> paths) {
+        Log.d(TAG, "[Enter] doUpload()");
+
         int id = LoaderID.LOCAL_FILE_UPLOAD;
         Bundle args = new Bundle();
         args.putStringArrayList("paths", paths);
         args.putString("path", dest);
         getLoaderManager().restartLoader(id, args, FileManageActivity.this).forceLoad();
         Log.w(TAG, "doUpload: " + paths.size() + " item(s) to " + dest);
+
+        Log.d(TAG, "source file path: "+ paths.get(0));
+        Log.d(TAG, "destination file path: "+ dest);
+
+    }
+
+    private void doUpload(String dest, String localPath) {
+
+        ArrayList sourceFilesList = new ArrayList();
+        sourceFilesList.add(localPath);
+
+        doUpload(dest, sourceFilesList);
     }
 
     private void doDownload(String dest, ArrayList<String> paths) {
@@ -1786,6 +1808,141 @@ public class FileManageActivity extends AppCompatActivity implements
             intent.setClass(FileManageActivity.this, StartActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    private void initDownloadManager() {
+        mDownloadManager = new DocumentDownloadManager();
+        mDownloadManager.initialize(this);
+        mDownloadManager.setOnFinishLisener(new DocumentDownloadManager.OnFinishLisener() {
+            @Override
+            public void onComplete(FileStateListener listener) {
+                mDownloadFilePath = listener.getPath();
+                mFileStateListener = listener;
+
+                if (mProgressView != null) {
+                    mProgressView.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+    }
+
+    public void openFileBy3rdApp(Context context, FileInfo fileInfo) {
+        if (fileInfo.isLocalFile()) {
+            openLocalFile(context, fileInfo);
+        } else {
+            if (mProgressView != null) {
+                mProgressView.setVisibility(View.VISIBLE);
+            }
+
+            mDownloadManager.downloadRemoteFile(context, fileInfo);
+        }
+    }
+
+    private void openLocalFile(Context context, FileInfo fileInfo) {
+
+        Uri fileUri = Uri.fromFile(new File(fileInfo.path));
+        NASPref.showAppChooser(context, fileUri);
+    }
+
+    private void checkFileState() {
+        Log.d(TAG, "[Enter] checkFileState() ");
+
+        if (mFileStateListener != null && mFileStateListener.isFileModified())
+        {
+            if (mFileInfo != null && !mFileInfo.isLocalFile()) {
+                showDialog();
+                mFileStateListener.resetMonitoringFlag();
+            }
+        }
+    }
+
+//    private void showDialog() {
+//        Log.d(TAG, "[Enter] showDialog() ");
+//
+//        String[] message = {"Do you want to upload the modified file?"};
+//        String[] message2 = {"Remember this setting"};
+//
+//        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+//        dialog.setTitle("Upload to StoreJet Cloud").setItems(message, null).setPositiveButton("Yes",
+//                new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        Log.d(TAG, "mDownloadFilePath: "+ mDownloadFilePath);
+//
+//                        mIsUserConfirmed = true;
+//
+//                        doUpload(getRemoteFileDirPath(), mDownloadFilePath);
+//                    }
+//                }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//
+//                mIsUserConfirmed = true;
+//            }
+//        }).setCancelable(false).create().show();
+//
+//    }
+
+    private void showDialog()
+    {
+        Log.d(TAG, "[Enter] showDialog() ");
+
+        WindowManager windowManager = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
+        final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+        params.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+        params.format = PixelFormat.TRANSLUCENT;
+        params.gravity = Gravity.CENTER;
+        LayoutInflater inflater = LayoutInflater.from(getApplication());
+        LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.dialog_upload, null);
+        setupClickListener(layout, windowManager);
+        windowManager.addView(layout, params);
+
+    }
+
+    private void setupClickListener(final LinearLayout layout, final WindowManager windowManager)
+    {
+        View yesButton = layout.findViewById(R.id.button_yes);
+        View noButton = layout.findViewById(R.id.button_no);
+        if (yesButton != null)
+        {
+            yesButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    doUpload(getRemoteFileDirPath(), mDownloadFilePath);
+                    windowManager.removeView(layout);
+
+                    Log.d(TAG, "doUpload()");
+                }
+            });
+        }
+        if (noButton != null)
+        {
+            noButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    windowManager.removeView(layout);
+                }
+            });
+        }
+
+    }
+
+    private String getRemoteFileDirPath()
+    {
+        Log.d(TAG, "[Enter] getRemoteFileDirPath()");
+
+        String path = null;
+        if (mFileInfo != null)
+        {
+            if (mFileInfo.path != null) {
+                int index = mFileInfo.path.lastIndexOf("/");
+                path = mFileInfo.path.subSequence(0, index + 1).toString();
+
+                Log.d(TAG, "remote file dir: " + path);
+            }
+        }
+
+        return path;
     }
 
     /**
