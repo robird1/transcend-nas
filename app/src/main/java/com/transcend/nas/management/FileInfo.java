@@ -27,6 +27,7 @@ public class FileInfo implements Serializable {
     public String time;
     public TYPE type;
     public Long size;
+    private String lastModifiedTime;
     public boolean checked;
 
     public FileInfo() {
@@ -56,6 +57,16 @@ public class FileInfo implements Serializable {
             e.printStackTrace();
         }
         return new Date();
+    }
+
+    public void setLastModifiedTime(String time)
+    {
+        lastModifiedTime = time;
+    }
+
+    public String getLastModifiedTime()
+    {
+        return lastModifiedTime;
     }
 
     public boolean isLocalFile()

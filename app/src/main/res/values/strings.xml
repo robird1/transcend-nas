@@ -315,5 +315,8 @@
     <string name="upload_modified_file">Do you want to upload the modified file?</string>
     <string name="dialog_button_yes">YES</string>
     <string name="dialog_button_no">NO</string>
+    <string name="dialog_remote_file_changed">"This file has been remotely modified. Do you want to replace it or save to local device?"</string>
+    <string name="dialog_button_replace">"Replace"</string>
+    <string name="dialog_button_save">"Save"</string>
 
 </resources>

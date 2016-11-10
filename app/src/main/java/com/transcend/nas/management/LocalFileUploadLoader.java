@@ -43,6 +43,9 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
     private OutputStream mOS;
     private InputStream mIS;
 
+    private String mUniqueName;
+    private boolean mIsOpenWithUpload = false;
+
     public LocalFileUploadLoader(Context context, List<String> srcs, String dest) {
         super(context);
         mSrcs = srcs;
@@ -51,6 +54,11 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
         mType = getContext().getString(R.string.upload);
         mTotal = mSrcs.size();
         mCurrent = 0;
+    }
+
+    public LocalFileUploadLoader(Context context, List<String> srcs, String dest, boolean isOpenWithUpload) {
+        this(context, srcs, dest);
+        mIsOpenWithUpload = isOpenWithUpload;
     }
 
     @Override
@@ -111,21 +119,21 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
     private void uploadFile(File source, String destination) throws IOException {
         int total = (int)source.length();
         int count = 0;
-        String name = createUniqueName(source, destination);
-        SmbFile target = new SmbFile(destination, name);
+        mUniqueName = createUniqueName(source, destination);
+        SmbFile target = new SmbFile(destination, mUniqueName);
         mOS = new BufferedOutputStream(target.getOutputStream());
         mIS = new BufferedInputStream(new FileInputStream(source));
-        updateProgress(mType, name, count, total);
+        updateProgress(mType, mUniqueName, count, total);
         byte[] buffer = new byte[BUFFER_SIZE];
         int length = 0;
         while ((length = mIS.read(buffer)) != -1) {
             mOS.write(buffer, 0, length);
             count += length;
-            updateProgressPerSecond(name, count, total);
+            updateProgressPerSecond(mUniqueName, count, total);
         }
         mOS.close();
         mIS.close();
-        updateProgressPerSecond(name, count, total);
+        updateProgressPerSecond(mUniqueName, count, total);
     }
 
     private String createUniqueName(File source, String destination) throws MalformedURLException, SmbException {
@@ -166,6 +174,16 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
                 mForbidden = false;
             }
         }, 1000);
+    }
+
+    String getUniqueFileName()
+    {
+        return mUniqueName;
+    }
+
+    boolean isOpenWithUpload()
+    {
+        return mIsOpenWithUpload;
     }
 
 }

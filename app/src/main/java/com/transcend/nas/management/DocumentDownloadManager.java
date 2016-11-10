@@ -28,7 +28,7 @@ public class DocumentDownloadManager {
 
     public interface OnFinishLisener
     {
-        void onComplete(FileStateListener listener);
+        void onComplete(String destPath);
     }
 
     public void initialize(Context context) {
@@ -47,7 +47,7 @@ public class DocumentDownloadManager {
 
                         String localUri = c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
 
-                        mDownloadListener.onComplete(initFileObserver(Uri.parse(localUri)));
+                        mDownloadListener.onComplete(Uri.parse(localUri).getPath());
 
                         NASPref.showAppChooser(context, Uri.parse(localUri));
                     }
@@ -98,12 +98,6 @@ public class DocumentDownloadManager {
     private void start(Request request)
     {
         mDownloadId = mDownloadManager.enqueue(request);
-    }
-
-    private FileStateListener initFileObserver(Uri fileUri) {
-        FileStateListener listener = new FileStateListener(fileUri.getPath());
-        listener.startWatching();
-        return listener;
     }
 
 }

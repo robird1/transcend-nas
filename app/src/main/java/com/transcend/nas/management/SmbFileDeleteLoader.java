@@ -18,10 +18,16 @@ public class SmbFileDeleteLoader extends SmbAbstractLoader {
     private static final String TAG = SmbFileDeleteLoader.class.getSimpleName();
 
     private List<String> mPaths;
+    private boolean mIsDeleteAfterUpload = false;
 
     public SmbFileDeleteLoader(Context context, List<String> paths) {
         super(context);
         mPaths = paths;
+    }
+
+    public SmbFileDeleteLoader(Context context, List<String> paths, boolean isDeleteAfterUpload) {
+        this(context, paths);
+        mIsDeleteAfterUpload = isDeleteAfterUpload;
     }
 
     @Override
@@ -42,6 +48,11 @@ public class SmbFileDeleteLoader extends SmbAbstractLoader {
             target.delete();
         }
         return true;
+    }
+
+    boolean isDeleteAfterUpload()
+    {
+        return mIsDeleteAfterUpload;
     }
 
 }

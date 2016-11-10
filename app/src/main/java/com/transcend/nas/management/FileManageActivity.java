@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.Loader;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
-import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -35,7 +34,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -85,6 +83,9 @@ import com.tutk.IOTC.P2PTunnelAPIs;
 import com.tutk.IOTC.sP2PTunnelSessionInfo;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -154,7 +155,9 @@ public class FileManageActivity extends AppCompatActivity implements
     private  DocumentDownloadManager mDownloadManager;
     private FileInfo mFileInfo;
     private String mDownloadFilePath;
-    private FileStateListener mFileStateListener;
+    private OpenWithUploadHandler mOpenWithUploadHandler;
+    private SmbFileListLoader mSmbFileListLoader;
+    private String mLastMD5CheckSum;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -904,7 +907,7 @@ public class FileManageActivity extends AppCompatActivity implements
         switch (mLoaderID = id) {
             case LoaderID.SMB_FILE_LIST:
                 mProgressView.setVisibility(View.VISIBLE);
-                return new SmbFileListLoader(this, path);
+                return mSmbFileListLoader = new SmbFileListLoader(this, path);
             case LoaderID.LOCAL_FILE_LIST:
                 mProgressView.setVisibility(View.VISIBLE);
                 return new LocalFileListLoader(this, path);
@@ -923,6 +926,9 @@ public class FileManageActivity extends AppCompatActivity implements
             case LoaderID.SMB_FILE_DELETE:
                 mProgressView.setVisibility(View.VISIBLE);
                 return new SmbFileDeleteLoader(this, paths);
+            case LoaderID.SMB_FILE_DELETE_AFTER_UPLOAD:
+                mProgressView.setVisibility(View.VISIBLE);
+                return new SmbFileDeleteLoader(this, paths, true);
             case LoaderID.LOCAL_FILE_DELETE:
                 mProgressView.setVisibility(View.VISIBLE);
                 return new LocalFileDeleteLoader(this, paths);
@@ -938,6 +944,8 @@ public class FileManageActivity extends AppCompatActivity implements
                 return new SmbFileDownloadLoader(this, paths, path);
             case LoaderID.LOCAL_FILE_UPLOAD:
                 return new LocalFileUploadLoader(this, paths, path);
+            case LoaderID.LOCAL_FILE_UPLOAD_OPEN_WITH:
+                return new LocalFileUploadLoader(this, paths, path, true);
             case LoaderID.TUTK_NAS_LINK:
                 return new TutkLinkNasLoader(this, args);
             case LoaderID.TUTK_LOGOUT:
@@ -1012,6 +1020,36 @@ public class FileManageActivity extends AppCompatActivity implements
                 ArrayList<FileInfo> files = ((SmbFileShareLoader) loader).getShareList();
                 if (files != null && files.size() > 0)
                     doLocalShare(files);
+            } else if ((loader instanceof LocalFileUploadLoader)) {
+
+                if (((LocalFileUploadLoader) loader).isOpenWithUpload()) {
+                    Bundle args = new Bundle();
+                    ArrayList pathList = new ArrayList();
+                    pathList.add(mFileInfo.path);
+                    args.putStringArrayList("paths", pathList);
+
+                    String fileName = ((LocalFileUploadLoader) loader).getUniqueFileName();
+                    mOpenWithUploadHandler.setTempFilePath(mOpenWithUploadHandler.getRemoteFileDirPath().concat(fileName));
+
+                    getLoaderManager().restartLoader(LoaderID.SMB_FILE_DELETE_AFTER_UPLOAD, args, this).forceLoad();
+                }
+
+            } else if ((loader instanceof SmbFileDeleteLoader)) {
+
+                if (((SmbFileDeleteLoader) loader).isDeleteAfterUpload()) {
+                    Log.d(TAG, "[Enter] (loader instanceof SmbFileDeleteLoader)");
+
+                    Bundle args = new Bundle();
+                    args.putString("path", mOpenWithUploadHandler.getTempFilePath());
+                    args.putString("name", mFileInfo.name);
+                    getLoaderManager().restartLoader(LoaderID.SMB_FILE_RENAME, args, this).forceLoad();
+                }
+
+            } else if ((loader instanceof SmbFileRenameLoader)) {
+                Log.d(TAG, "[Enter] (loader instanceof SmbFileRenameLoader)");
+
+                doRefresh();
+
             } else {
                 doRefresh();
                 if (loader instanceof SmbAbstractLoader) {
@@ -1196,14 +1234,6 @@ public class FileManageActivity extends AppCompatActivity implements
         Log.d(TAG, "source file path: "+ paths.get(0));
         Log.d(TAG, "destination file path: "+ dest);
 
-    }
-
-    private void doUpload(String dest, String localPath) {
-
-        ArrayList sourceFilesList = new ArrayList();
-        sourceFilesList.add(localPath);
-
-        doUpload(dest, sourceFilesList);
     }
 
     private void doDownload(String dest, ArrayList<String> paths) {
@@ -1815,9 +1845,10 @@ public class FileManageActivity extends AppCompatActivity implements
         mDownloadManager.initialize(this);
         mDownloadManager.setOnFinishLisener(new DocumentDownloadManager.OnFinishLisener() {
             @Override
-            public void onComplete(FileStateListener listener) {
-                mDownloadFilePath = listener.getPath();
-                mFileStateListener = listener;
+            public void onComplete(String destPath) {
+                mDownloadFilePath = destPath;
+                mLastMD5CheckSum = getMD5Checksum();
+                Log.d(TAG, "mLastMD5CheckSum: "+ mLastMD5CheckSum);
 
                 if (mProgressView != null) {
                     mProgressView.setVisibility(View.INVISIBLE);
@@ -1847,102 +1878,64 @@ public class FileManageActivity extends AppCompatActivity implements
     private void checkFileState() {
         Log.d(TAG, "[Enter] checkFileState() ");
 
-        if (mFileStateListener != null && mFileStateListener.isFileModified())
+        if (mLastMD5CheckSum != null && !mLastMD5CheckSum.equals(getMD5Checksum()))
         {
-            if (mFileInfo != null && !mFileInfo.isLocalFile()) {
-                showDialog();
-                mFileStateListener.resetMonitoringFlag();
-            }
+            mOpenWithUploadHandler = new OpenWithUploadHandler(this, mFileInfo, mDownloadFilePath, mSmbFileListLoader);
+            mOpenWithUploadHandler.showDialog();
+
+            mLastMD5CheckSum = null;
         }
     }
 
-//    private void showDialog() {
-//        Log.d(TAG, "[Enter] showDialog() ");
-//
-//        String[] message = {"Do you want to upload the modified file?"};
-//        String[] message2 = {"Remember this setting"};
-//
-//        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-//        dialog.setTitle("Upload to StoreJet Cloud").setItems(message, null).setPositiveButton("Yes",
-//                new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which) {
-//                        Log.d(TAG, "mDownloadFilePath: "+ mDownloadFilePath);
-//
-//                        mIsUserConfirmed = true;
-//
-//                        doUpload(getRemoteFileDirPath(), mDownloadFilePath);
-//                    }
-//                }).setNegativeButton("No", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//
-//                mIsUserConfirmed = true;
-//            }
-//        }).setCancelable(false).create().show();
-//
-//    }
-
-    private void showDialog()
+    private String getMD5Checksum()
     {
-        Log.d(TAG, "[Enter] showDialog() ");
+        Log.d(TAG, "[Enter] getMD5Checksum()");
 
-        WindowManager windowManager = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
-        final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
-        params.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
-        params.format = PixelFormat.TRANSLUCENT;
-        params.gravity = Gravity.CENTER;
-        LayoutInflater inflater = LayoutInflater.from(getApplication());
-        LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.dialog_upload, null);
-        setupClickListener(layout, windowManager);
-        windowManager.addView(layout, params);
+        String checksum = null;
+        try {
+            MessageDigest md5Digest = MessageDigest.getInstance("MD5");
+            checksum = getFileChecksum(md5Digest, new File(mDownloadFilePath));
+            Log.d(TAG, "checksum: "+ checksum);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return checksum;
 
     }
 
-    private void setupClickListener(final LinearLayout layout, final WindowManager windowManager)
+    private String getFileChecksum(MessageDigest digest, File file) throws IOException
     {
-        View yesButton = layout.findViewById(R.id.button_yes);
-        View noButton = layout.findViewById(R.id.button_no);
-        if (yesButton != null)
+        //Get file input stream for reading the file content
+        FileInputStream fis = new FileInputStream(file);
+
+        //Create byte array to read data in chunks
+        byte[] byteArray = new byte[1024];
+        int bytesCount = 0;
+
+        //Read file data and update in message digest
+        while ((bytesCount = fis.read(byteArray)) != -1) {
+            digest.update(byteArray, 0, bytesCount);
+        };
+
+        //close the stream; We don't need it now.
+        fis.close();
+
+        //Get the hash's bytes
+        byte[] bytes = digest.digest();
+
+        //This bytes[] has bytes in decimal format;
+        //Convert it to hexadecimal format
+        StringBuilder sb = new StringBuilder();
+        for(int i=0; i< bytes.length ;i++)
         {
-            yesButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    doUpload(getRemoteFileDirPath(), mDownloadFilePath);
-                    windowManager.removeView(layout);
-
-                    Log.d(TAG, "doUpload()");
-                }
-            });
-        }
-        if (noButton != null)
-        {
-            noButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    windowManager.removeView(layout);
-                }
-            });
-        }
-
-    }
-
-    private String getRemoteFileDirPath()
-    {
-        Log.d(TAG, "[Enter] getRemoteFileDirPath()");
-
-        String path = null;
-        if (mFileInfo != null)
-        {
-            if (mFileInfo.path != null) {
-                int index = mFileInfo.path.lastIndexOf("/");
-                path = mFileInfo.path.subSequence(0, index + 1).toString();
-
-                Log.d(TAG, "remote file dir: " + path);
-            }
+            sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
         }
 
-        return path;
+        //return complete hash
+        return sb.toString();
     }
 
     /**
