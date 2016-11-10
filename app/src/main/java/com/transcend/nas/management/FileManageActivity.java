@@ -6,34 +6,37 @@ import android.content.Intent;
 import android.content.Loader;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.View;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -54,28 +57,27 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
-import com.transcend.nas.common.AnalysisFactory;
-import com.transcend.nas.common.ManageFactory;
-import com.transcend.nas.connection.GuideActivity;
-import com.transcend.nas.connection_new.LoginActivity;
-import com.transcend.nas.connection_new.LoginListActivity;
-import com.transcend.nas.service.LanCheckManager;
-import com.transcend.nas.service.TwonkyManager;
-import com.transcend.nas.settings.NewSettingsActivity;
-import com.transcend.nas.view.NotificationDialog;
-import com.transcend.nas.view.ProgressDialog;
-import com.transcend.nas.connection.StartActivity;
-import com.transcend.nas.service.AutoBackupService;
-import com.transcend.nas.settings.AboutActivity;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
+import com.transcend.nas.common.AnalysisFactory;
+import com.transcend.nas.common.FileFactory;
 import com.transcend.nas.common.LoaderID;
+import com.transcend.nas.common.ManageFactory;
+import com.transcend.nas.common.MediaFactory;
+import com.transcend.nas.connection.StartActivity;
+import com.transcend.nas.connection_new.LoginActivity;
+import com.transcend.nas.connection_new.LoginListActivity;
+import com.transcend.nas.service.AutoBackupService;
+import com.transcend.nas.service.LanCheckManager;
+import com.transcend.nas.service.TwonkyManager;
+import com.transcend.nas.settings.AboutActivity;
 import com.transcend.nas.settings.DiskFactory;
 import com.transcend.nas.settings.DiskInfoActivity;
+import com.transcend.nas.settings.NewSettingsActivity;
 import com.transcend.nas.settings.SettingsActivity;
-import com.transcend.nas.common.FileFactory;
-import com.transcend.nas.common.MediaFactory;
+import com.transcend.nas.view.NotificationDialog;
+import com.transcend.nas.view.ProgressDialog;
 import com.transcend.nas.viewer.music.MusicActivity;
 import com.transcend.nas.viewer.music.MusicService;
 import com.transcend.nas.viewer.photo.ViewerActivity;
@@ -84,9 +86,14 @@ import com.tutk.IOTC.P2PTunnelAPIs;
 import com.tutk.IOTC.sP2PTunnelSessionInfo;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class FileManageActivity extends AppCompatActivity implements
         FileManageDropdownAdapter.OnDropdownItemSelectedListener,
@@ -98,6 +105,7 @@ public class FileManageActivity extends AppCompatActivity implements
         ActionMode.Callback {
 
     private static final String TAG = FileManageActivity.class.getSimpleName();
+    private static final int FB_PROFILE_PHOTO = 999;
 
     private static final int GRID_PORTRAIT = 3;
     private static final int GRID_LANDSCAPE = 5;
@@ -149,6 +157,18 @@ public class FileManageActivity extends AppCompatActivity implements
     private MenuItem mMediaRouteMenuItem;
 
     private SmbFileShareLoader mSmbFileShareLoader;
+
+    private Bitmap mPhotoBitmap;
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch(msg.what){
+                case FB_PROFILE_PHOTO:
+                    mNavHeaderIcon.setImageBitmap(mPhotoBitmap);
+                    break;
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -488,6 +508,8 @@ public class FileManageActivity extends AppCompatActivity implements
         mNavHeaderTitle = (TextView) mNavHeader.findViewById(R.id.drawer_header_title);
         mNavHeaderSubtitle = (TextView) mNavHeader.findViewById(R.id.drawer_header_subtitle);
         mNavHeaderIcon = (ImageView) mNavHeader.findViewById(R.id.drawer_header_icon);
+
+        setDrawerHeaderIcon();
         mNavHeaderTitle.setText(mServer.getUsername());
         String email = NASPref.getCloudUsername(this);
         if (!email.equals(""))
@@ -496,6 +518,35 @@ public class FileManageActivity extends AppCompatActivity implements
             mNavHeaderSubtitle.setText(String.format("%s@%s", mServer.getUsername(), mServer.getHostname()));
         mNavView.getMenu().findItem(R.id.nav_disk_info).setVisible(NASPref.defaultUserName.equals(mServer.getUsername()));
         mNavView.getMenu().findItem(R.id.nav_switch).setVisible(NASPref.useSwitchNas);
+    }
+
+    private void setDrawerHeaderIcon()
+    {
+        if (NASPref.getFBProfilePhotoUrl() != null) {
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        URL url = new URL(NASPref.getFBProfilePhotoUrl());
+                        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+                        HttpsURLConnection.setFollowRedirects(true);
+                        connection.setInstanceFollowRedirects(true);
+                        mPhotoBitmap = BitmapFactory.decodeStream(connection.getInputStream());
+                        if (mPhotoBitmap != null) {
+                            Message msg = new Message();
+                            msg.what = FB_PROFILE_PHOTO;
+                            mHandler.sendMessage(msg);
+                        }
+
+                    } catch (MalformedURLException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        }
     }
 
     private void initActionModeView() {

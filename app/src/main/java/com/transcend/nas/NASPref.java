@@ -3,7 +3,6 @@ package com.transcend.nas;
 import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
-import android.os.storage.StorageManager;
 import android.util.Log;
 
 import com.facebook.AccessToken;
@@ -29,6 +28,8 @@ public class NASPref {
     public static final int useTwonkyMinFirmwareVersion = 20160101;
     public static boolean useTwonkyServer = false;
     public static boolean useSwitchNas = false;
+
+    private static String mFBPhotoRequestUrl;
 
     public enum Sort {
         TYPE,
@@ -529,6 +530,18 @@ public class NASPref {
                 }
             }).executeAsync();
         }
+
+        setFBProfilePhotoUrl(null);
+    }
+
+    public static void setFBProfilePhotoUrl(String url)
+    {
+        mFBPhotoRequestUrl = url;
+    }
+
+    public static String getFBProfilePhotoUrl()
+    {
+        return mFBPhotoRequestUrl;
     }
 
 }

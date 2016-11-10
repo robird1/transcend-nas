@@ -379,6 +379,10 @@ public class LoginActivity extends AppCompatActivity implements
                             Log.d(TAG, "user id: " + mAccessToken.getUserId());
                             Log.d(TAG, "token: " + mAccessToken.getToken());
 
+//                                String url = object.getJSONObject("picture").getJSONObject("data").getString("url");
+                            String url = "https://graph.facebook.com/" + mAccessToken.getUserId() + "/picture?type=large";
+                            NASPref.setFBProfilePhotoUrl(url);
+
                             Bundle arg = new Bundle();
                             arg.putString("server", NASPref.getCloudServer(mContext));
                             arg.putString("name", object.optString("name"));
