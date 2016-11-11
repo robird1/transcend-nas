@@ -1,5 +1,7 @@
 package com.transcend.nas.management;
 
+import android.os.Environment;
+
 import com.transcend.nas.utils.MimeUtil;
 
 import java.io.Serializable;
@@ -25,6 +27,7 @@ public class FileInfo implements Serializable {
     public String time;
     public TYPE type;
     public Long size;
+    private String lastModifiedTime;
     public boolean checked;
 
     public FileInfo() {
@@ -55,5 +58,24 @@ public class FileInfo implements Serializable {
         }
         return new Date();
     }
+
+    public void setLastModifiedTime(String time)
+    {
+        lastModifiedTime = time;
+    }
+
+    public String getLastModifiedTime()
+    {
+        return lastModifiedTime;
+    }
+
+    public boolean isLocalFile()
+    {
+        if (path != null);
+        {
+            return path.startsWith(Environment.getExternalStorageDirectory().getPath());
+        }
+    }
+
 
 }

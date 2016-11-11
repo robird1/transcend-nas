@@ -1,6 +1,7 @@
 package com.transcend.nas.management;
 
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
@@ -86,8 +87,10 @@ import com.tutk.IOTC.P2PTunnelAPIs;
 import com.tutk.IOTC.sP2PTunnelSessionInfo;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.security.MessageDigest;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -158,6 +161,13 @@ public class FileManageActivity extends AppCompatActivity implements
 
     private SmbFileShareLoader mSmbFileShareLoader;
 
+    private DocumentDownloadManager mDownloadManager;
+    private FileInfo mFileInfo;
+    private String mDownloadFilePath;
+    private OpenWithUploadHandler mOpenWithUploadHandler;
+    private SmbFileListLoader mSmbFileListLoader;
+    private String mOriginMD5Checksum;
+
     private Bitmap mPhotoBitmap;
     private Handler mHandler = new Handler() {
         @Override
@@ -186,6 +196,7 @@ public class FileManageActivity extends AppCompatActivity implements
             initProgressView();
             initDrawer();
             initActionModeView();
+            initDownloadManager();
             doRefresh();
             NASPref.setInitial(this, true);
 
@@ -219,6 +230,8 @@ public class FileManageActivity extends AppCompatActivity implements
                 doEventNotify(false, mPath);
             }
         }
+
+        checkCacheFileState();
 
         super.onResume();
         Log.w(TAG, "onResume");
@@ -404,6 +417,7 @@ public class FileManageActivity extends AppCompatActivity implements
         isNeedEventNotify = false;
 
         String hostname = mServer.getHostname();
+
         LanCheckManager.getInstance().setInit(true);
         if(hostname.contains(P2PService.getInstance().getP2PIP())) {
             LanCheckManager.getInstance().setLanConnect(false, "");
@@ -414,15 +428,15 @@ public class FileManageActivity extends AppCompatActivity implements
 
         String firmware = NASPref.defaultFirmwareVersion;
         ServerInfo info = mServer.getServerInfo();
-        if(info != null)
+        if (info != null)
             firmware = info.firmwareVer;
-        if(NASPref.useTwonkyServer && firmware != null && !firmware.equals("")){
+        if (NASPref.useTwonkyServer && firmware != null && !firmware.equals("")) {
             int version = Integer.parseInt(firmware);
             NASPref.useTwonkyServer = version >= NASPref.useTwonkyMinFirmwareVersion;
         } else {
             NASPref.useTwonkyServer = false;
         }
-        Log.d(TAG,"Firmware version : " + firmware + ", Use Twonky Thumbnail : " + NASPref.useTwonkyServer);
+        Log.d(TAG, "Firmware version : " + firmware + ", Use Twonky Thumbnail : " + NASPref.useTwonkyServer);
     }
 
     private boolean initAutoBackUpService() {
@@ -632,7 +646,9 @@ public class FileManageActivity extends AppCompatActivity implements
             } else if (FileInfo.TYPE.MUSIC.equals(fileInfo.type)) {
                 startMusicActivity(mMode, mRoot, fileInfo);
             } else {
-                toast(R.string.unknown_format);
+                Log.d(TAG, "class name: " + this.getClass().getSimpleName());
+
+                openFileBy3rdApp(this, mFileInfo = fileInfo);
             }
         } else {
             // editor
@@ -948,7 +964,7 @@ public class FileManageActivity extends AppCompatActivity implements
         switch (mLoaderID = id) {
             case LoaderID.SMB_FILE_LIST:
                 mProgressView.setVisibility(View.VISIBLE);
-                return new SmbFileListLoader(this, path);
+                return mSmbFileListLoader = new SmbFileListLoader(this, path);
             case LoaderID.LOCAL_FILE_LIST:
                 mProgressView.setVisibility(View.VISIBLE);
                 return new LocalFileListLoader(this, path);
@@ -967,6 +983,9 @@ public class FileManageActivity extends AppCompatActivity implements
             case LoaderID.SMB_FILE_DELETE:
                 mProgressView.setVisibility(View.VISIBLE);
                 return new SmbFileDeleteLoader(this, paths);
+            case LoaderID.SMB_FILE_DELETE_AFTER_UPLOAD:
+                mProgressView.setVisibility(View.VISIBLE);
+                return new SmbFileDeleteLoader(this, paths, true);
             case LoaderID.LOCAL_FILE_DELETE:
                 mProgressView.setVisibility(View.VISIBLE);
                 return new LocalFileDeleteLoader(this, paths);
@@ -982,6 +1001,8 @@ public class FileManageActivity extends AppCompatActivity implements
                 return new SmbFileDownloadLoader(this, paths, path);
             case LoaderID.LOCAL_FILE_UPLOAD:
                 return new LocalFileUploadLoader(this, paths, path);
+            case LoaderID.LOCAL_FILE_UPLOAD_OPEN_WITH:
+                return new LocalFileUploadLoader(this, paths, path, true);
             case LoaderID.TUTK_NAS_LINK:
                 return new TutkLinkNasLoader(this, args);
             case LoaderID.TUTK_LOGOUT:
@@ -1056,6 +1077,36 @@ public class FileManageActivity extends AppCompatActivity implements
                 ArrayList<FileInfo> files = ((SmbFileShareLoader) loader).getShareList();
                 if (files != null && files.size() > 0)
                     doLocalShare(files);
+            } else if ((loader instanceof LocalFileUploadLoader)) {
+
+                if (((LocalFileUploadLoader) loader).isOpenWithUpload()) {
+                    Bundle args = new Bundle();
+                    ArrayList pathList = new ArrayList();
+                    pathList.add(mFileInfo.path);
+                    args.putStringArrayList("paths", pathList);
+
+                    String fileName = ((LocalFileUploadLoader) loader).getUniqueFileName();
+                    mOpenWithUploadHandler.setTempFilePath(mOpenWithUploadHandler.getRemoteFileDirPath().concat(fileName));
+
+                    getLoaderManager().restartLoader(LoaderID.SMB_FILE_DELETE_AFTER_UPLOAD, args, this).forceLoad();
+                }
+
+            } else if ((loader instanceof SmbFileDeleteLoader)) {
+
+                if (((SmbFileDeleteLoader) loader).isDeleteAfterUpload()) {
+                    Log.d(TAG, "[Enter] (loader instanceof SmbFileDeleteLoader)");
+
+                    Bundle args = new Bundle();
+                    args.putString("path", mOpenWithUploadHandler.getTempFilePath());
+                    args.putString("name", mFileInfo.name);
+                    getLoaderManager().restartLoader(LoaderID.SMB_FILE_RENAME, args, this).forceLoad();
+                }
+
+            } else if ((loader instanceof SmbFileRenameLoader)) {
+                Log.d(TAG, "[Enter] (loader instanceof SmbFileRenameLoader)");
+
+                doRefresh();
+
             } else {
                 doRefresh();
                 if (loader instanceof SmbAbstractLoader) {
@@ -1091,7 +1142,7 @@ public class FileManageActivity extends AppCompatActivity implements
                     LanCheckManager.getInstance().startLanCheck();
                     Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
                 } else {
-                    if(loader instanceof EventNotifyLoader)
+                    if (loader instanceof EventNotifyLoader)
                         LanCheckManager.getInstance().startLanCheck();
                     Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
                 }
@@ -1228,12 +1279,18 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void doUpload(String dest, ArrayList<String> paths) {
+        Log.d(TAG, "[Enter] doUpload()");
+
         int id = LoaderID.LOCAL_FILE_UPLOAD;
         Bundle args = new Bundle();
         args.putStringArrayList("paths", paths);
         args.putString("path", dest);
         getLoaderManager().restartLoader(id, args, FileManageActivity.this).forceLoad();
         Log.w(TAG, "doUpload: " + paths.size() + " item(s) to " + dest);
+
+        Log.d(TAG, "source file path: "+ paths.get(0));
+        Log.d(TAG, "destination file path: "+ dest);
+
     }
 
     private void doDownload(String dest, ArrayList<String> paths) {
@@ -1767,7 +1824,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
     private void startSettingsActivity() {
         Intent intent = new Intent();
-        if(NASPref.useNewLoginFlow) {
+        if (NASPref.useNewLoginFlow) {
             intent.setClass(FileManageActivity.this, NewSettingsActivity.class);
             startActivityForResult(intent, NewSettingsActivity.REQUEST_CODE);
         } else {
@@ -1800,7 +1857,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
         //clean email and account information
         if (clear) {
-            if(NASPref.useFacebookLogin && NASPref.getFBAccountStatus(this))
+            if (NASPref.useFacebookLogin && NASPref.getFBAccountStatus(this))
                 NASPref.logOutFB();
             NASPref.clearDataAfterLogout(this);
         }
@@ -1842,6 +1899,104 @@ public class FileManageActivity extends AppCompatActivity implements
         finish();
     }
 
+    private void initDownloadManager() {
+        mDownloadManager = new DocumentDownloadManager();
+        mDownloadManager.initialize(this);
+        mDownloadManager.setOnFinishLisener(new DocumentDownloadManager.OnFinishLisener() {
+            @Override
+            public void onComplete(String destPath) {
+                mDownloadFilePath = destPath;
+                mOriginMD5Checksum = getMD5Checksum();
+                Log.d(TAG, "mOriginMD5Checksum: "+ mOriginMD5Checksum);
+
+                if (mProgressView != null) {
+                    mProgressView.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+    }
+
+    public void openFileBy3rdApp(Context context, FileInfo fileInfo) {
+        if (fileInfo.isLocalFile()) {
+            openLocalFile(context, fileInfo);
+        } else {
+            if (mProgressView != null) {
+                mProgressView.setVisibility(View.VISIBLE);
+            }
+
+            mDownloadManager.downloadRemoteFile(context, fileInfo);
+        }
+    }
+
+    private void openLocalFile(Context context, FileInfo fileInfo) {
+
+        Uri fileUri = Uri.fromFile(new File(fileInfo.path));
+        NASPref.showAppChooser(context, fileUri);
+    }
+
+    private void checkCacheFileState() {
+        Log.d(TAG, "[Enter] checkCacheFileState() ");
+
+        if (mOriginMD5Checksum != null && !mOriginMD5Checksum.equals(getMD5Checksum()))
+        {
+            mOpenWithUploadHandler = new OpenWithUploadHandler(this, mFileInfo, mDownloadFilePath, mSmbFileListLoader);
+            mOpenWithUploadHandler.showDialog();
+
+            mOriginMD5Checksum = null;
+        }
+    }
+
+    private String getMD5Checksum()
+    {
+        Log.d(TAG, "[Enter] getMD5Checksum()");
+
+        String checksum = null;
+        try {
+            MessageDigest md5Digest = MessageDigest.getInstance("MD5");
+            checksum = getFileChecksum(md5Digest, new File(mDownloadFilePath));
+            Log.d(TAG, "checksum: "+ checksum);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return checksum;
+
+    }
+
+    private String getFileChecksum(MessageDigest digest, File file) throws IOException
+    {
+        //Get file input stream for reading the file content
+        FileInputStream fis = new FileInputStream(file);
+
+        //Create byte array to read data in chunks
+        byte[] byteArray = new byte[1024];
+        int bytesCount = 0;
+
+        //Read file data and update in message digest
+        while ((bytesCount = fis.read(byteArray)) != -1) {
+            digest.update(byteArray, 0, bytesCount);
+        };
+
+        //close the stream; We don't need it now.
+        fis.close();
+
+        //Get the hash's bytes
+        byte[] bytes = digest.digest();
+
+        //This bytes[] has bytes in decimal format;
+        //Convert it to hexadecimal format
+        StringBuilder sb = new StringBuilder();
+        for(int i=0; i< bytes.length ;i++)
+        {
+            sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+        }
+
+        //return complete hash
+        return sb.toString();
+    }
+
     /**
      * GRID LAYOUT MANAGER SPAN SIZE LOOKUP
      */
@@ -1860,3 +2015,4 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
 }
+

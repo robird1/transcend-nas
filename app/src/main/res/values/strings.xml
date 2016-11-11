@@ -306,4 +306,17 @@
     <string name="wizard_success">StoreJet Cloud is Ready</string>
     <string name="wizard_try">Try Again</string>
     <string name="wizard_wifi_info">Connect device Wi-Fi to router network</string>
+
+    <string name="open_with">Open with</string>
+    <string name="file_format_document">Document format</string>
+    <string name="file_format_image">Image format</string>
+    <string name="file_format_video">Video format</string>
+    <string name="file_format_audio">Audio format</string>
+    <string name="upload_modified_file">Do you want to upload the modified file?</string>
+    <string name="dialog_button_yes">YES</string>
+    <string name="dialog_button_no">NO</string>
+    <string name="dialog_remote_file_changed">"This file has been remotely modified. Do you want to replace it or save to local device?"</string>
+    <string name="dialog_button_replace">"Replace"</string>
+    <string name="dialog_button_save">"Save"</string>
+
 </resources>

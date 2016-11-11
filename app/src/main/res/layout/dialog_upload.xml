@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_height="wrap_content"
+    android:layout_width="@dimen/mr_dialog_fixed_width_major"
+    android:background="@android:drawable/screen_background_dark_transparent"
+    android:gravity="center_vertical|center_horizontal">
+
+    <TextView
+        android:text="@string/app_name"
+        android:layout_width="match_parent"
+        android:layout_height="27dp"
+        android:id="@+id/title"
+        android:textColor="@android:color/black"
+        android:background="@color/cardview_light_background"
+        android:textAlignment="textStart"
+        android:gravity="center_vertical"/>
+
+    <TextView
+        android:text="@string/upload_modified_file"
+        android:layout_width="match_parent"
+        android:layout_height="41dp"
+        android:id="@+id/content"
+        android:gravity="center_vertical|center_horizontal"
+        android:textColor="@android:color/black"
+        android:background="@color/cardview_light_background"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="39dp"
+        android:background="@color/cardview_light_background">
+
+        <Button
+            android:text="@string/dialog_button_yes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/button_yes"
+            android:textColor="@color/ccl_intro_overlay_button_background_color"
+            android:textStyle="normal|bold"
+            android:background="@android:color/transparent"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true" />
+
+        <Button
+            android:text="@string/dialog_button_no"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/button_no"
+            android:textColor="@color/ccl_intro_overlay_button_background_color"
+            android:textStyle="normal|bold"
+            android:background="@android:color/transparent"
+            android:layout_alignParentTop="true"
+            android:layout_toLeftOf="@+id/button_yes" />
+    </RelativeLayout>
+
+</LinearLayout>

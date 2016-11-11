@@ -43,5 +43,6 @@ public class LoaderID {
     public static final int SMB_FILE_SHARE = 35;
     public static final int LOCAL_FILE_SHARE = 36;
     public static final int TUTK_FB_LOGIN = 37;
-
+    public static final int LOCAL_FILE_UPLOAD_OPEN_WITH = 38;
+    public static final int SMB_FILE_DELETE_AFTER_UPLOAD = 39;
 }

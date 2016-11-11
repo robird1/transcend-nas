@@ -1,9 +1,16 @@
 package com.transcend.nas;
 
+import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
@@ -412,6 +419,10 @@ public class NASPref {
         return buf.toString();
     }
 
+    public static String getCacheFilesLocation(Context context) {
+        return context.getExternalCacheDir().getPath();
+    }
+
     /**
      * Cache Size
      */
@@ -542,6 +553,68 @@ public class NASPref {
     public static String getFBProfilePhotoUrl()
     {
         return mFBPhotoRequestUrl;
+    }
+
+    public static void showAppChooser(final Context context, final Uri fileUri) {
+
+        final Intent intent = new Intent(Intent.ACTION_VIEW);
+        String extension = MimeTypeMap.getFileExtensionFromUrl(fileUri.toString());
+        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+        Log.d(TAG, "extension: " + extension);
+        Log.d(TAG, "mimeType: " + mimeType);
+
+        intent.setDataAndType(fileUri, mimeType);
+
+        try {
+
+            Log.d(TAG, "decoded path"+ fileUri.getPath());
+
+//            ((Activity) context).startActivityForResult(intent, code);
+            context.startActivity(intent);
+
+
+        } catch (ActivityNotFoundException e) {
+
+            new AlertDialog.Builder(context).setTitle(R.string.open_with).setItems(getItemList(context),
+                    getClickListener(context, fileUri, intent)).create().show();
+        }
+    }
+
+    @NonNull
+    private static String[] getItemList(Context context) {
+        return new String[]{context.getResources().getString(R.string.file_format_document),
+                        context.getResources().getString(R.string.file_format_image),
+                        context.getResources().getString(R.string.file_format_video),
+                                context.getResources().getString(R.string.file_format_audio)};
+    }
+
+    @NonNull
+    private static DialogInterface.OnClickListener getClickListener(final Context context, final Uri fileUri, final Intent intent) {
+        return new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which)
+                {
+                    case 0:
+                        intent.setDataAndType(fileUri, "text/*");
+                        break;
+                    case 1:
+                        intent.setDataAndType(fileUri, "image/*");
+                        break;
+                    case 2:
+                        intent.setDataAndType(fileUri, "video/*");
+                        break;
+                    case 3:
+                        intent.setDataAndType(fileUri, "audio/*");
+                        break;
+                    default:
+                        intent.setDataAndType(fileUri, "text/*");
+                        break;
+                }
+
+                context.startActivity(intent);
+
+            }
+        };
     }
 
 }
