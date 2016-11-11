@@ -152,12 +152,12 @@ public class FileManageActivity extends AppCompatActivity implements
 
     private SmbFileShareLoader mSmbFileShareLoader;
 
-    private  DocumentDownloadManager mDownloadManager;
+    private DocumentDownloadManager mDownloadManager;
     private FileInfo mFileInfo;
     private String mDownloadFilePath;
     private OpenWithUploadHandler mOpenWithUploadHandler;
     private SmbFileListLoader mSmbFileListLoader;
-    private String mLastMD5CheckSum;
+    private String mOriginMD5Checksum;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -210,7 +210,7 @@ public class FileManageActivity extends AppCompatActivity implements
             }
         }
 
-        checkFileState();
+        checkCacheFileState();
 
         super.onResume();
         Log.w(TAG, "onResume");
@@ -1847,8 +1847,8 @@ public class FileManageActivity extends AppCompatActivity implements
             @Override
             public void onComplete(String destPath) {
                 mDownloadFilePath = destPath;
-                mLastMD5CheckSum = getMD5Checksum();
-                Log.d(TAG, "mLastMD5CheckSum: "+ mLastMD5CheckSum);
+                mOriginMD5Checksum = getMD5Checksum();
+                Log.d(TAG, "mOriginMD5Checksum: "+ mOriginMD5Checksum);
 
                 if (mProgressView != null) {
                     mProgressView.setVisibility(View.INVISIBLE);
@@ -1875,15 +1875,15 @@ public class FileManageActivity extends AppCompatActivity implements
         NASPref.showAppChooser(context, fileUri);
     }
 
-    private void checkFileState() {
-        Log.d(TAG, "[Enter] checkFileState() ");
+    private void checkCacheFileState() {
+        Log.d(TAG, "[Enter] checkCacheFileState() ");
 
-        if (mLastMD5CheckSum != null && !mLastMD5CheckSum.equals(getMD5Checksum()))
+        if (mOriginMD5Checksum != null && !mOriginMD5Checksum.equals(getMD5Checksum()))
         {
             mOpenWithUploadHandler = new OpenWithUploadHandler(this, mFileInfo, mDownloadFilePath, mSmbFileListLoader);
             mOpenWithUploadHandler.showDialog();
 
-            mLastMD5CheckSum = null;
+            mOriginMD5Checksum = null;
         }
     }
 
