@@ -50,6 +50,8 @@ public class DocumentDownloadManager {
                         mDownloadListener.onComplete(Uri.parse(localUri).getPath());
 
                         NASPref.showAppChooser(context, Uri.parse(localUri));
+
+                        clearDownloadTaskID();
                     }
                 }
             }
@@ -71,6 +73,20 @@ public class DocumentDownloadManager {
 //                request.setNotificationVisibility(Request.VISIBILITY_HIDDEN);
 
         start(request);
+    }
+
+    long cancel()
+    {
+        Log.d(TAG, "[Enter] cancel()");
+        long cancelId = 0L;
+
+        if (mDownloadId != 0L)
+        {
+            cancelId = mDownloadManager.remove(mDownloadId);
+        }
+        Log.d(TAG, "cancelId: "+ cancelId);
+
+        return cancelId;
     }
 
     private void setRequestDestinationUri(Request request, File dirFile, Uri downloadUri) {
@@ -98,6 +114,10 @@ public class DocumentDownloadManager {
     private void start(Request request)
     {
         mDownloadId = mDownloadManager.enqueue(request);
+    }
+
+    private void clearDownloadTaskID() {
+        mDownloadId = 0L;
     }
 
 }

@@ -231,7 +231,9 @@ public class FileManageActivity extends AppCompatActivity implements
             }
         }
 
-        checkCacheFileState();
+        if (mOriginMD5Checksum != null) {
+            checkCacheFileState();
+        }
 
         super.onResume();
         Log.w(TAG, "onResume");
@@ -859,6 +861,15 @@ public class FileManageActivity extends AppCompatActivity implements
      */
     @Override
     public void onBackPressed() {
+        Log.w(TAG, "[Enter] onBackPressed()");
+
+        if (mDownloadManager != null)
+        {
+            Log.w(TAG, "[Enter] mDownloadManager.cancel()");
+
+            mDownloadManager.cancel();
+        }
+
         toggleDrawerCheckedItem();
         if (mDrawer.isDrawerOpen(GravityCompat.START)) {
             mDrawer.closeDrawer(GravityCompat.START);
@@ -1896,8 +1907,15 @@ public class FileManageActivity extends AppCompatActivity implements
             @Override
             public void onComplete(String destPath) {
                 mDownloadFilePath = destPath;
-                mOriginMD5Checksum = getMD5Checksum();
-                Log.d(TAG, "mOriginMD5Checksum: "+ mOriginMD5Checksum);
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mOriginMD5Checksum = getMD5Checksum();
+
+                        Log.d(TAG, "mOriginMD5Checksum: "+ mOriginMD5Checksum);
+                    }
+                }).start();
 
                 if (mProgressView != null) {
                     mProgressView.setVisibility(View.INVISIBLE);
@@ -1931,9 +1949,9 @@ public class FileManageActivity extends AppCompatActivity implements
         {
             mOpenWithUploadHandler = new OpenWithUploadHandler(this, mFileInfo, mDownloadFilePath, mSmbFileListLoader);
             mOpenWithUploadHandler.showDialog();
-
-            mOriginMD5Checksum = null;
         }
+
+        mOriginMD5Checksum = null;
     }
 
     private String getMD5Checksum()
