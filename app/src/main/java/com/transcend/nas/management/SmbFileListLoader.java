@@ -39,6 +39,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.net.HttpURLConnection;
+import java.util.Map;
 
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
@@ -111,11 +112,7 @@ public class SmbFileListLoader extends SmbAbstractLoader {
             }
         }
 
-        if (NASPref.useTwonkyServer) {
-            if (mPath.equals(NASApp.ROOT_SMB))
-                TwonkyManager.getInstance().doTwonkyRescan(false);
-            TwonkyManager.getInstance().startTwonkyParser(mPath, 0, 100);
-        }
+        TwonkyManager.getInstance().updateTwonky(mPath);
 
         return true;
     }
@@ -185,7 +182,7 @@ public class SmbFileListLoader extends SmbAbstractLoader {
                                             }
                                         }
 
-                                        if(addToSmbList) {
+                                        if (addToSmbList) {
                                             FileInfo fileInfo = new FileInfo();
                                             fileInfo.path = TextUtils.concat(mPath, name + "/").toString();
                                             fileInfo.name = name;

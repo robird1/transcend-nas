@@ -1,13 +1,14 @@
 package com.transcend.nas.service;
 
 import android.util.Log;
-import android.widget.ImageView;
 
 import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.common.FileFactory;
+import com.transcend.nas.common.HttpFactory;
 import com.transcend.nas.management.FileInfo;
 import com.tutk.IOTC.P2PService;
 
@@ -16,14 +17,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class TwonkyManager {
@@ -35,7 +32,6 @@ public class TwonkyManager {
     private HashMap<String, String> mImageMap;
     private HashMap<String, String> mFolderMap;
     private Set<String> mCacheMap;
-    //TODO : check the size
 
     public TwonkyManager() {
         mImageMap = new HashMap<>();
@@ -51,7 +47,7 @@ public class TwonkyManager {
         return mTwonkyManager;
     }
 
-    public void cleanTwonkyMap() {
+    public void cleanTwonky() {
         if (mCacheMap != null)
             mCacheMap.clear();
         if (mFolderMap != null)
@@ -60,7 +56,178 @@ public class TwonkyManager {
             mImageMap.clear();
     }
 
-    public boolean startTwonkyParser(String path, int start, int count) {
+    public boolean initTwonky() {
+        String firmware = NASPref.defaultFirmwareVersion;
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        ServerInfo info = server.getServerInfo();
+        if (info != null)
+            firmware = info.firmwareVer;
+
+        if (NASPref.useTwonkyServer && firmware != null && !firmware.equals("")) {
+            int version = Integer.parseInt(firmware);
+            NASPref.useTwonkyServer = version >= NASPref.useTwonkyMinFirmwareVersion;
+        } else {
+            NASPref.useTwonkyServer = false;
+        }
+        Log.d(TAG, "Firmware version : " + firmware + ", Use Twonky Thumbnail : " + NASPref.useTwonkyServer);
+
+        return NASPref.useTwonkyServer;
+    }
+
+    public void updateTwonky(String path) {
+        if (!NASPref.useTwonkyServer)
+            return;
+
+        if (path.equals(NASApp.ROOT_SMB)) {
+            Server server = ServerManager.INSTANCE.getCurrentServer();
+            String username = server.getUsername();
+            List<String> smbSharedList = new ArrayList<>();
+            //add current user's home folder
+            smbSharedList.add("/home/" + username + "/");
+            //add other smb shared folder
+            List<String> realPathList = FileFactory.getInstance().getAllRealPathFromMap();
+            for (String realPath : realPathList)
+                smbSharedList.add(realPath);
+
+            addTwonkySharedFolder(smbSharedList);
+            doTwonkyRescan(false);
+        }
+
+        //old version
+        //startTwonkyParser(mPath, 0, 100);
+    }
+
+    private String getTwonkyIP() {
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.TWONKY);
+        return hostname;
+    }
+
+    public String getUrlFromPath(boolean thumbnail, String path) {
+        if (!NASPref.useTwonkyServer)
+            return null;
+
+        //old version
+        //String twonkyUrl = getUrlFromMap(thumbnail, FileInfo.TYPE.PHOTO, path);
+        //url = twonkyUrl + (thumbnail ? "?scale=192x192" : "");
+
+        String value = "http://" + getTwonkyIP() + "/rpc/get_thumbnail?path=";
+        String key = FileFactory.getInstance().getRealPathKeyFromMap(path);
+        String realPath = FileFactory.getInstance().getRealPathFromMap(path);
+        if (key != null && !key.equals(""))
+            path = path.replaceFirst(key, realPath);
+
+        if (thumbnail)
+            value += path;
+        else
+            value += path + "&scale=orig";
+        return value;
+    }
+
+
+
+    private boolean addTwonkySharedFolder(List<String> lists) {
+        if (lists == null)
+            return false;
+
+        boolean isSuccess = false;
+        List<String> addLists = new ArrayList<>();
+        for (String folder : lists) {
+            String convert = folder.replaceFirst("/home", "+A|");
+            if (convert.endsWith("/"))
+                addLists.add(convert.substring(0, convert.length() - 1));
+            else
+                addLists.add(convert);
+        }
+
+        //compare current twonky shared list, only add the non-add folder
+        int check = addLists.size();
+        String current = getTwonkySharedFolder();
+        if (current != null && !current.equals("")) {
+            String[] currentFolders = current.split(",");
+            for (String newFolder : addLists) {
+                for (String currentFolder : currentFolders) {
+                    if (currentFolder != null && currentFolder.equals(newFolder)) {
+                        check--;
+                        break;
+                    }
+                }
+            }
+
+            //value "check" less than or equal 0 mean all smb shared folder already exist in twonky shared folder
+            if (check > 0) {
+                for (String currentFolder : currentFolders) {
+                    boolean add = true;
+                    int length = currentFolder.length();
+                    if (length > 2) {
+                        String tmp = currentFolder.substring(2, length);
+                        for (String newFolder : addLists) {
+                            length = newFolder.length();
+                            if (length > 2) {
+                                String tmp2 = newFolder.substring(2, length);
+                                if (tmp2.equals(tmp)) {
+                                    add = false;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (add)
+                            addLists.add(currentFolder);
+                    }
+                }
+
+                if (addLists.size() > 0)
+                    isSuccess = setTwonkySharedFolder(addLists);
+                else
+                    isSuccess = true;
+            } else {
+                isSuccess = true;
+                Log.d(TAG, "All smb shared folder already add to twonky shared folder");
+            }
+        }
+
+        Log.d(TAG, "Add twonky shared folder : " + isSuccess);
+        return isSuccess;
+    }
+
+    private String getTwonkySharedFolder() {
+        String value = "http://" + getTwonkyIP() + "/rpc/get_option?contentdir";
+        String result = HttpFactory.doGetRequest(value);
+        return result;
+    }
+
+    private boolean setTwonkySharedFolder(List<String> addLists) {
+        boolean isSuccess = false;
+        String value = "http://" + getTwonkyIP() + "/rpc/set_option?contentdir=";
+        String folders = "";
+        int length = addLists.size();
+
+        for (int i = 0; i < length; i++) {
+            String tmp = addLists.get(i);
+            if (tmp.startsWith("+"))
+                tmp = "%2B" + tmp.substring(1, tmp.length());
+            folders = folders + tmp + (i == length - 1 ? "" : ",");
+        }
+
+        String result = HttpFactory.doGetRequest(value + folders);
+        if (result != null && result.equals(folders.replace("%2B", "+")))
+            isSuccess = true;
+
+        return isSuccess;
+    }
+
+    private String doTwonkyRescan(boolean force) {
+        //TODO: add lifecycle check
+        if (!force && mCacheMap.contains(NASApp.ROOT_SMB))
+            return null;
+
+        String value = "http://" + getTwonkyIP() + "/rpc/rescan";
+        String result = HttpFactory.doGetRequest(value, false);
+        return result;
+    }
+
+    private boolean startTwonkyParser(String path, int start, int count) {
         String key = FileFactory.getInstance().getRealPathKeyFromMap(path);
         String realPath = FileFactory.getInstance().getRealPathFromMap(path);
         if (key != null && !key.equals(""))
@@ -128,11 +295,12 @@ public class TwonkyManager {
         return false;
     }
 
-    public String getUrlFromMap(boolean convertLink, FileInfo.TYPE type, String path) {
+    private String getUrlFromMap(boolean convertLink, FileInfo.TYPE type, String path) {
+        String convertPath = path.replaceFirst("." + FilenameUtils.getExtension(path), "");
         if (type.equals(FileInfo.TYPE.DIR))
-            return getFolderUrlFromMap(convertLink, path);
+            return getFolderUrlFromMap(convertLink, convertPath);
         else if (type.equals(FileInfo.TYPE.PHOTO))
-            return getImageUrlFromMap(convertLink, path);
+            return getImageUrlFromMap(convertLink, convertPath);
         else
             return null;
     }
@@ -142,7 +310,7 @@ public class TwonkyManager {
         if (mFolderMap != null) {
             result = mFolderMap.get(path);
             if (convertLink && result != null && !result.equals(""))
-                result = convertUrlByLink(result);
+                result = convertUrl(result);
         }
         return result;
     }
@@ -158,96 +326,14 @@ public class TwonkyManager {
         if (mImageMap != null) {
             result = mImageMap.get(path);
             if (convertLink && result != null && !result.equals(""))
-                result = convertUrlByLink(result);
+                result = convertUrl(result);
         }
         return result;
     }
 
-    private String doGetRequest(String url) {
-        HttpURLConnection conn = null;
-        String result = "";
-        try {
-            URL realUrl = new URL(url);
-            conn = (HttpURLConnection) realUrl.openConnection();
-            conn.setRequestProperty("content-type", "application/json");
-            conn.setReadTimeout(10000);
-            conn.setConnectTimeout(10000);
-
-            int responseCode = conn.getResponseCode();
-            //Log.i(TAG, "url " + url);
-            //Log.i(TAG, "responseCode: " + responseCode);
-            if (responseCode == 200 || responseCode == 201) {
-                InputStream is = conn.getInputStream();
-                result = getStringFromInputStream(is);
-            } else {
-                Log.i(TAG, "error " + responseCode);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (conn != null) {
-                conn.disconnect();
-            }
-        }
-
-        return result;
-    }
-
-    private String getStringFromInputStream(InputStream is)
-            throws IOException {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int len = -1;
-        while ((len = is.read(buffer)) != -1) {
-            os.write(buffer, 0, len);
-        }
-        is.close();
-        String state = os.toString();
-        os.close();
-        return state;
-    }
-
-    public String doTwonkyRescan(boolean force) {
-        //TODO: add lifecycle check
-        if (!force && mCacheMap.contains(NASApp.ROOT_SMB))
-            return null;
-
-        Server server = ServerManager.INSTANCE.getCurrentServer();
-        String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.TWONKY);
-        String value = "http://" + hostname + "/rpc/rescan";
-        HttpURLConnection conn = null;
-        String result = "";
-        try {
-            URL realUrl = new URL(value);
-            conn = (HttpURLConnection) realUrl.openConnection();
-            conn.setReadTimeout(10000);
-            conn.setConnectTimeout(10000);
-
-            int responseCode = conn.getResponseCode();
-            Log.i(TAG, "url " + value);
-            Log.i(TAG, "responseCode: " + responseCode);
-            if (responseCode == 200 || responseCode == 201) {
-                InputStream is = conn.getInputStream();
-                result = getStringFromInputStream(is);
-            } else {
-                Log.i(TAG, "error " + responseCode);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (conn != null) {
-                conn.disconnect();
-            }
-        }
-
-        return result;
-    }
-
-    public String parserTwonkyServer() {
-        Server server = ServerManager.INSTANCE.getCurrentServer();
-        String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.TWONKY);
-        String value = "http://" + hostname + "/nmc/rss/server?start=0&fmt=json";
-        String result = doGetRequest(value);
+    private String parserTwonkyServer() {
+        String value = "http://" + getTwonkyIP() + "/nmc/rss/server?start=0&fmt=json";
+        String result = HttpFactory.doGetRequest(value, true);
 
         String target = "";
         try {
@@ -280,9 +366,9 @@ public class TwonkyManager {
         return target;
     }
 
-    public String parserTwonkyCategory(String url, String keyword, String param) {
-        String newUrl = convertUrlByLink(url) + param;
-        String result = doGetRequest(newUrl);
+    private String parserTwonkyCategory(String url, String keyword, String param) {
+        String newUrl = convertUrl(url) + param;
+        String result = HttpFactory.doGetRequest(newUrl, true);
 
         String target = "";
         try {
@@ -303,11 +389,10 @@ public class TwonkyManager {
         return target;
     }
 
-    public boolean parserTwonkyFolder(String path, int start, int count, String url) {
+    private boolean parserTwonkyFolder(String path, int start, int count, String url) {
         if (url != null && !url.equals("")) {
-            String newUrl = convertUrlByLink(url) + "?start=" + start + "&count=" + count + "&fmt=json";
-            Log.d(TAG, newUrl);
-            String result = doGetRequest(newUrl);
+            String newUrl = convertUrl(url) + "?start=" + start + "&count=" + count + "&fmt=json";
+            String result = HttpFactory.doGetRequest(newUrl, true);
             String target = "";
             try {
                 JSONObject obj = new JSONObject(result);
@@ -359,7 +444,8 @@ public class TwonkyManager {
         return false;
     }
 
-    public String convertUrlByLink(String url) {
+    //because we can't check the url in twonky url map is correct, convert it before you start to use the url
+    private String convertUrl(String url) {
         Server server = ServerManager.INSTANCE.getCurrentServer();
         String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.TWONKY);
         String[] splits = url.split("/");
@@ -377,31 +463,5 @@ public class TwonkyManager {
             }
         }
         return newUrl;
-    }
-
-    private String getPhotoPath(boolean thumbnail, String path) {
-        Server server = ServerManager.INSTANCE.getCurrentServer();
-        String username = server.getUsername();
-        String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.TWONKY);
-        String filepath = "";
-
-        if (path.startsWith(Server.HOME))
-            filepath = path.replaceFirst(Server.HOME, "/home/" + username + "/");
-        else if (path.startsWith("/" + username + "/"))
-            filepath = path.replaceFirst("/" + username + "/", "/home/" + username + "/");
-        else {
-            String key = FileFactory.getInstance().getRealPathKeyFromMap(path);
-            String realPath = FileFactory.getInstance().getRealPathFromMap(path);
-            if (key != null && !key.equals(""))
-                filepath = path.replaceFirst(key, realPath);
-        }
-
-        String url = "http://" + hostname + "/rpc/get_thumbnail_url?path=" + filepath.replace(" ", "%20");
-        return url;
-    }
-
-    public void displayImage(String path, ImageView imageView) {
-        TwonkyThumbnailTask task = new TwonkyThumbnailTask(getPhotoPath(true, path), imageView);
-        task.execute();
     }
 }

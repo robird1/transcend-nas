@@ -47,6 +47,7 @@ import com.transcend.nas.management.TutkCreateNasLoader;
 import com.transcend.nas.management.TutkDeleteNasLoader;
 import com.transcend.nas.management.TutkGetNasLoader;
 import com.transcend.nas.management.TutkLinkNasLoader;
+import com.transcend.nas.service.LanCheckManager;
 import com.transcend.nas.view.NotificationDialog;
 import com.tutk.IOTC.P2PService;
 
@@ -274,6 +275,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                 mProgressView.setVisibility(View.VISIBLE);
                 return new TutkLinkNasLoader(this, args);
             case LoaderID.NAS_LIST:
+                LanCheckManager.getInstance().startAndroidDiscovery();
                 return new NASListLoader(this);
             case LoaderID.WIZARD:
                 mProgressView.setVisibility(View.VISIBLE);
@@ -318,6 +320,30 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
 
     private void checkNasListLoader(boolean success, NASListLoader loader) {
         mLANList = loader.getList();
+
+        //merge the list from android NsdManager
+        LanCheckManager.getInstance().stopAndroidDiscovery();
+        ArrayList<HashMap<String,String>> nasList = LanCheckManager.getInstance().getAndroidDiscoveryList();
+        for(HashMap<String,String> nas : nasList) {
+            boolean add = true;
+            String nickname = nas.get("nickname");
+            String hostname = nas.get("hostname");
+            for(HashMap<String,String> tmp : mLANList) {
+                String tmpHostname = tmp.get("hostname");
+                if(hostname != null && hostname.equals(tmpHostname)) {
+                    add = false;
+                    break;
+                }
+            }
+
+            if(add) {
+                mLANList.add(nas);
+                Log.d(TAG, "Add service " + nickname + ", " + hostname + " from NsdManager");
+            }
+            else
+                Log.d(TAG, "Ignore service " + nickname + ", "  + hostname + " from NsdManager");
+        }
+
         showListDialog(mLANList);
     }
 
@@ -525,6 +551,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
 
                 @Override
                 public void onCancel() {
+                    LanCheckManager.getInstance().stopAndroidDiscovery();
                     getLoaderManager().destroyLoader(mLoaderID);
                     hideDialog(true);
                 }

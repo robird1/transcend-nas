@@ -332,7 +332,7 @@ public class FileManageActivity extends AppCompatActivity implements
                 FileFactory.getInstance().cleanRealPathMap();
 
                 //clean twonky map
-                TwonkyManager.getInstance().cleanTwonkyMap();
+                TwonkyManager.getInstance().cleanTwonky();
 
                 //clean lan check
                 LanCheckManager.getInstance().setLanConnect(false, "");
@@ -426,17 +426,7 @@ public class FileManageActivity extends AppCompatActivity implements
             LanCheckManager.getInstance().setLanConnect(true, hostname);
         }
 
-        String firmware = NASPref.defaultFirmwareVersion;
-        ServerInfo info = mServer.getServerInfo();
-        if (info != null)
-            firmware = info.firmwareVer;
-        if (NASPref.useTwonkyServer && firmware != null && !firmware.equals("")) {
-            int version = Integer.parseInt(firmware);
-            NASPref.useTwonkyServer = version >= NASPref.useTwonkyMinFirmwareVersion;
-        } else {
-            NASPref.useTwonkyServer = false;
-        }
-        Log.d(TAG, "Firmware version : " + firmware + ", Use Twonky Thumbnail : " + NASPref.useTwonkyServer);
+        TwonkyManager.getInstance().initTwonky();
     }
 
     private boolean initAutoBackUpService() {
@@ -1883,7 +1873,7 @@ public class FileManageActivity extends AppCompatActivity implements
         FileFactory.getInstance().cleanRealPathMap();
 
         //clean twonky map
-        TwonkyManager.getInstance().cleanTwonkyMap();
+        TwonkyManager.getInstance().cleanTwonky();
 
         //clean lan check
         LanCheckManager.getInstance().setLanConnect(false, "");

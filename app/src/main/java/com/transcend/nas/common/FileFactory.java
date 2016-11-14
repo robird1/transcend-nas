@@ -126,18 +126,13 @@ public class FileFactory {
     }
 
     public String getPhotoPath(boolean thumbnail, String path) {
-        String url;
+        String url = "";
         if (path.startsWith(NASApp.ROOT_STG)) {
             url = "file://" + path;
         } else {
-            String extension = FilenameUtils.getExtension(path);
-            String twonkyUrl = TwonkyManager.getInstance().getUrlFromMap(true, FileInfo.TYPE.PHOTO, path.replaceFirst("." + extension, ""));
-            if(NASPref.useTwonkyServer && twonkyUrl != null && !twonkyUrl.equals("")) {
-                if (thumbnail)
-                    url = twonkyUrl + "?scale=192x192";
-                else
-                    url = twonkyUrl;
-            } else {
+            //First, try twonky image, and try webdav image when twonky image empty
+            url = TwonkyManager.getInstance().getUrlFromPath(thumbnail, path);
+            if(null == url || "".equals(url)) {
                 Server server = ServerManager.INSTANCE.getCurrentServer();
                 String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
                 String username = server.getUsername();
@@ -256,6 +251,16 @@ public class FileFactory {
         if (mRealPathMap != null)
             size = mRealPathMap.size();
         return size;
+    }
+
+    public List<String> getAllRealPathFromMap(){
+        List<String> list = new ArrayList<>();
+        if(mRealPathMap != null && mRealPathMap.size() > 0) {
+            for (String key : mRealPathMap.keySet())
+                list.add(mRealPathMap.get(key));
+        }
+
+        return list;
     }
 
     public String getRealPathKeyFromMap(String path) {
