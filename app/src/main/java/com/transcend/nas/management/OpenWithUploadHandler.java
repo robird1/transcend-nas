@@ -2,15 +2,17 @@ package com.transcend.nas.management;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.PixelFormat;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
@@ -57,21 +59,39 @@ public class OpenWithUploadHandler{
         Log.d(TAG, "[Enter] showDialog() ");
 
         WindowManager windowManager = (WindowManager) mActivity.getSystemService(Context.WINDOW_SERVICE);
-        final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams();
         params.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
-        params.format = PixelFormat.TRANSLUCENT;
-        params.gravity = Gravity.CENTER;
-        LayoutInflater inflater = LayoutInflater.from(mActivity.getApplication());
-        LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.dialog_upload, null);
+        params.width = WindowManager.LayoutParams.WRAP_CONTENT;
+        params.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        params.flags = WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+        params.dimAmount = 0.5f;
+        LinearLayout layout = configureLayout();
+
         setupClickListener(layout, windowManager);
         windowManager.addView(layout, params);
+    }
 
+    @NonNull
+    private LinearLayout configureLayout() {
+        LayoutInflater inflater = LayoutInflater.from(mActivity.getApplication());
+        LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.alert_dialog, null);
+        layout.setBackgroundColor(Color.WHITE);
+        TextView title = (TextView) layout.findViewById(R.id.alertTitle);
+        title.setText(R.string.app_name);
+        title.setTextColor(Color.BLACK);
+        TextView content = (TextView) layout.findViewById(R.id.message);
+        content.setText(R.string.upload_modified_file);
+        content.setTextColor(Color.BLACK);
+        return layout;
     }
 
     private void setupClickListener(final LinearLayout layout, final WindowManager windowManager)
     {
-        View yesButton = layout.findViewById(R.id.button_yes);
-        View noButton = layout.findViewById(R.id.button_no);
+        Button noButton = (Button) layout.findViewById(R.id.button2);
+        noButton.setText(R.string.dialog_button_no);
+        Button yesButton = (Button) layout.findViewById(R.id.button3);
+        yesButton.setText(R.string.dialog_button_yes);
+
         if (yesButton != null)
         {
             yesButton.setOnClickListener(new View.OnClickListener() {
