@@ -1945,10 +1945,14 @@ public class FileManageActivity extends AppCompatActivity implements
     private void checkCacheFileState() {
         Log.d(TAG, "[Enter] checkCacheFileState() ");
 
-        if (mOriginMD5Checksum != null && !mOriginMD5Checksum.equals(getMD5Checksum()))
+        if (mOriginMD5Checksum != null)
         {
-            mOpenWithUploadHandler = new OpenWithUploadHandler(this, mFileInfo, mDownloadFilePath, mSmbFileListLoader);
-            mOpenWithUploadHandler.showDialog();
+            String checksum = getMD5Checksum();
+            if (checksum != null && !mOriginMD5Checksum.equals(checksum))
+            {
+                mOpenWithUploadHandler = new OpenWithUploadHandler(this, mFileInfo, mDownloadFilePath, mSmbFileListLoader);
+                mOpenWithUploadHandler.showDialog();
+            }
         }
 
         mOriginMD5Checksum = null;
@@ -1964,8 +1968,7 @@ public class FileManageActivity extends AppCompatActivity implements
             checksum = getFileChecksum(md5Digest, new File(mDownloadFilePath));
             Log.d(TAG, "checksum: "+ checksum);
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             e.printStackTrace();
         }
 
