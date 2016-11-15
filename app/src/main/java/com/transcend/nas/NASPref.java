@@ -36,8 +36,6 @@ public class NASPref {
     public static boolean useTwonkyServer = false;
     public static boolean useSwitchNas = false;
 
-    private static String mFBPhotoRequestUrl;
-
     public enum Sort {
         TYPE,
         DATE,
@@ -527,7 +525,7 @@ public class NASPref {
         setBackupSource(context, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
     }
 
-    public static void logOutFB() {
+    public static void logOutFB(Context context) {
         if (AccessToken.getCurrentAccessToken() != null) {
             new GraphRequest(AccessToken.getCurrentAccessToken(), "/me/permissions/", null, HttpMethod.DELETE, new GraphRequest
                     .Callback() {
@@ -542,17 +540,21 @@ public class NASPref {
             }).executeAsync();
         }
 
-        setFBProfilePhotoUrl(null);
+        setFBProfilePhotoUrl(context, null);
     }
 
-    public static void setFBProfilePhotoUrl(String url)
+    public static void setFBProfilePhotoUrl(Context context, String url)
     {
-        mFBPhotoRequestUrl = url;
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = "fb_profile_photo_url";
+        PrefUtil.write(context, name, key, url);
     }
 
-    public static String getFBProfilePhotoUrl()
+    public static String getFBProfilePhotoUrl(Context context)
     {
-        return mFBPhotoRequestUrl;
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = "fb_profile_photo_url";
+        return PrefUtil.read(context, name, key, null);
     }
 
     public static void showAppChooser(final Context context, final Uri fileUri) {

@@ -4,7 +4,11 @@ import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -38,10 +42,15 @@ import com.transcend.nas.view.NotificationDialog;
 
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Set;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import static com.facebook.AccessToken.getCurrentAccessToken;
 
@@ -51,6 +60,8 @@ import static com.facebook.AccessToken.getCurrentAccessToken;
 public class LoginActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Boolean>,
         View.OnClickListener {
+
+    private static final int FB_PROFILE_PHOTO = 999;
 
     public static final int REQUEST_CODE = LoginActivity.class.hashCode() & 0xFFFF;
     public static final String TAG = LoginActivity.class.getSimpleName();
@@ -65,6 +76,19 @@ public class LoginActivity extends AppCompatActivity implements
     private CallbackManager mCallbackManager;
     private AccessToken mAccessToken;
 
+    private ImageView mAccountImage;
+    private Bitmap mPhotoBitmap;
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch(msg.what){
+                case FB_PROFILE_PHOTO:
+                    mAccountImage.setImageBitmap(mPhotoBitmap);
+                    break;
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,6 +97,42 @@ public class LoginActivity extends AppCompatActivity implements
         AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.START);
 
         initView();
+
+        if (NASPref.getFBAccountStatus(this))
+        {
+            setFBPhoto();
+        }
+
+    }
+
+    private void setFBPhoto()
+    {
+        final String storedUrl = NASPref.getFBProfilePhotoUrl(this);
+        if (storedUrl != null)
+        {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        URL url = new URL(storedUrl);
+                        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+                        HttpsURLConnection.setFollowRedirects(true);
+                        connection.setInstanceFollowRedirects(true);
+                        mPhotoBitmap = BitmapFactory.decodeStream(connection.getInputStream());
+                        if (mPhotoBitmap != null) {
+                            Message msg = new Message();
+                            msg.what = FB_PROFILE_PHOTO;
+                            mHandler.sendMessage(msg);
+                        }
+
+                    } catch (MalformedURLException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        }
     }
 
     @Override
@@ -153,9 +213,9 @@ public class LoginActivity extends AppCompatActivity implements
         signInOther.setOnClickListener(this);
         TextView accountTitle = (TextView) findViewById(R.id.start_account_title);
         TextView accountContent = (TextView) findViewById(R.id.start_account_content);
-        ImageView accountImage = (ImageView) findViewById(R.id.start_account_image);
+        mAccountImage = (ImageView) findViewById(R.id.start_account_image);
         if(NASPref.getFBAccountStatus(mContext))
-            accountImage.setImageResource(R.drawable.icon_facebook_24dp);
+            mAccountImage.setImageResource(R.drawable.icon_facebook_24dp);
 
         String email = NASPref.getCloudUsername(mContext);
         String pwd = NASPref.getCloudPassword(mContext);
@@ -243,7 +303,7 @@ public class LoginActivity extends AppCompatActivity implements
             else
                 Toast.makeText(this, getString(R.string.error_format), Toast.LENGTH_SHORT).show();
             // remove the FB authentication if the email address is already taken
-            NASPref.logOutFB();
+            NASPref.logOutFB(this);
             AnalysisFactory.getInstance(this).sendEvent(AnalysisFactory.VIEW.START, AnalysisFactory.ACTION.LoginTutk,
                     AnalysisFactory.LABEL.LoginByFacebook + "_" + status);
         }
@@ -381,7 +441,7 @@ public class LoginActivity extends AppCompatActivity implements
 
 //                                String url = object.getJSONObject("picture").getJSONObject("data").getString("url");
                             String url = "https://graph.facebook.com/" + mAccessToken.getUserId() + "/picture?type=large";
-                            NASPref.setFBProfilePhotoUrl(url);
+                            NASPref.setFBProfilePhotoUrl(LoginActivity.this, url);
 
                             Bundle arg = new Bundle();
                             arg.putString("server", NASPref.getCloudServer(mContext));
@@ -459,7 +519,7 @@ public class LoginActivity extends AppCompatActivity implements
                     public void onConfirm() {
                         AnalysisFactory.getInstance(mContext).sendEvent(AnalysisFactory.VIEW.START, AnalysisFactory.ACTION.Click, AnalysisFactory.LABEL.Logout);
                         if(NASPref.useFacebookLogin && NASPref.getFBAccountStatus(mContext))
-                            NASPref.logOutFB();
+                            NASPref.logOutFB(LoginActivity.this);
                         NASPref.clearDataAfterLogout(mContext);
                         showLoginView();
                     }

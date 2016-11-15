@@ -528,13 +528,14 @@ public class FileManageActivity extends AppCompatActivity implements
 
     private void setDrawerHeaderIcon()
     {
-        if (NASPref.getFBProfilePhotoUrl() != null) {
+        final String storedUrl = NASPref.getFBProfilePhotoUrl(this);
+        if (storedUrl != null) {
 
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        URL url = new URL(NASPref.getFBProfilePhotoUrl());
+                        URL url = new URL(storedUrl);
                         HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
                         HttpsURLConnection.setFollowRedirects(true);
                         connection.setInstanceFollowRedirects(true);
@@ -1859,7 +1860,7 @@ public class FileManageActivity extends AppCompatActivity implements
         //clean email and account information
         if (clear) {
             if (NASPref.useFacebookLogin && NASPref.getFBAccountStatus(this))
-                NASPref.logOutFB();
+                NASPref.logOutFB(this);
             NASPref.clearDataAfterLogout(this);
         }
 
