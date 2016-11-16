@@ -22,12 +22,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.transcend.nas.BuildConfig;
+import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.view.NotificationDialog;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 
 /**
  * Created by ikeLee on 16/3/21.
@@ -40,6 +37,7 @@ public class AboutActivity extends AppCompatActivity {
     private static boolean isSubFragment = false;
     private static TextView mTitle = null;
     private static LinearLayout mAbout = null;
+    private static Context mContext;
 
     private TextView mVersion;
     private int mLoaderID;
@@ -47,6 +45,7 @@ public class AboutActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mContext = this;
         setContentView(R.layout.activity_about);
         mAbout = (LinearLayout) findViewById(R.id.about_layout);
         mVersion = (TextView) findViewById(R.id.about_version);
@@ -79,6 +78,12 @@ public class AboutActivity extends AppCompatActivity {
                 initFragment();
             else
                 finish();
+    }
+
+    @Override
+    public void onDestroy() {
+        mContext = null;
+        super.onDestroy();
     }
 
     /**
@@ -204,20 +209,12 @@ public class AboutActivity extends AppCompatActivity {
             else if(id == R.string.termsofuse){
                 v = inflater.inflate(R.layout.fragment_term_of_use, container, false);
                 TextView info = (TextView) v.findViewById(R.id.info);
-                try {
-                    info.setText(Html.fromHtml(readFromAssets(getActivity(), "terms_of_use.txt")));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                info.setText(Html.fromHtml(NASPref.readFromAssets(mContext, "NASAPPEULA.txt")));
             }
             else if(id == R.string.licenses){
                 v = inflater.inflate(R.layout.fragment_license, container, false);
                 TextView info = (TextView) v.findViewById(R.id.info);
-                try {
-                    info.setText(Html.fromHtml(readFromAssets(getActivity(), "LicensedText-SJCAndroid.txt")));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                info.setText(Html.fromHtml(NASPref.readFromAssets(mContext, "LicensedText-SJCAndroid.txt")));
             }
             else {
                 v = inflater.inflate(R.layout.fragment_about_info, container, false);
@@ -225,25 +222,6 @@ public class AboutActivity extends AppCompatActivity {
                 info.setText(getString(id));
             }
             return v;
-        }
-
-        public String readFromAssets(Context context, String filename) throws IOException {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(context.getAssets().open(filename)));
-
-            // do reading, usually loop until end of file reading
-            StringBuilder sb = new StringBuilder();
-            String mLine = reader.readLine();
-            while (mLine != null) {
-                if(mLine.endsWith(".") && mLine.length() < 30)
-                    sb.append(String.format("<h3>%s</h3>", mLine));
-                else {
-                    sb.append(String.format("<p>%s</p>", mLine));
-                }
-                sb.append(System.getProperty("line.separator"));
-                mLine = reader.readLine();
-            }
-            reader.close();
-            return sb.toString();
         }
     }
 

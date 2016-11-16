@@ -14,6 +14,7 @@ import com.transcend.nas.connection.GuideActivity;
 import com.transcend.nas.connection.NASListActivity;
 import com.transcend.nas.connection.NASListLoader;
 import com.transcend.nas.connection.StartActivity;
+import com.transcend.nas.connection_new.FirstUseActivity;
 import com.transcend.nas.connection_new.IntroduceActivity;
 import com.transcend.nas.connection_new.LoginActivity;
 import com.transcend.nas.common.AnimFactory;
@@ -38,6 +39,14 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        boolean isFirstUse = NASPref.getIsFirstUse(this);
+        if (isFirstUse) {
+            startActivity(new Intent(this, FirstUseActivity.class));
+            finish();
+            return;
+        }
+
         setContentView(R.layout.activity_welcome);
         ImageView logo = (ImageView) findViewById(R.id.welcome_image);
         mTextView = (TextView) findViewById(R.id.welcome_text);

@@ -171,6 +171,21 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:label="@string/app_name" />
 
+        <activity
+            android:name=".connection_new.FirstUseActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
+
+        <activity
+            android:name=".connection_new.LicenseAgreementActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
+
+        <activity
+            android:name=".connection_new.PrivacyPolicyActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
+
         <service android:name=".service.AutoBackupService">
         </service>
 

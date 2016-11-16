@@ -21,6 +21,10 @@ import com.transcend.nas.management.FileManageRecyclerAdapter;
 import com.transcend.nas.utils.PrefUtil;
 import com.transcend.nas.viewer.music.MusicActivity;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 /**
  * Created by silverhsu on 16/1/15.
  */
@@ -555,6 +559,53 @@ public class NASPref {
         String name = context.getResources().getString(R.string.pref_name);
         String key = "fb_profile_photo_url";
         return PrefUtil.read(context, name, key, null);
+    }
+
+    public static void setIsFirstUse(Context context, boolean isFirstUse)
+    {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = "is_first_use";
+        PrefUtil.write(context, name, key, isFirstUse);
+    }
+
+    public static boolean getIsFirstUse(Context context)
+    {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = "is_first_use";
+        return PrefUtil.read(context, name, key, true);
+    }
+
+    public static String readFromAssets(Context context, String filename) {
+
+        BufferedReader reader = null;
+        StringBuilder sb = new StringBuilder();
+        try {
+            reader = new BufferedReader(new InputStreamReader(context.getAssets().open(filename)));
+            String mLine = reader.readLine();
+            while (mLine != null) {
+                if (mLine.endsWith(".") && mLine.length() < 30)
+                    sb.append(String.format("<h3>%s</h3>", mLine));
+                else {
+                    sb.append(String.format("<p>%s</p>", mLine));
+                }
+                sb.append(System.getProperty("line.separator"));
+                mLine = reader.readLine();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return sb.toString();
     }
 
     public static void showAppChooser(final Context context, final Uri fileUri) {
