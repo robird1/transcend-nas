@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by ike_lee on 2016/7/7.
  */
-public class MusicService extends Service implements MusicLoader.MusicLoaderCallBack, FileFactory.MediaPlayerListener {
+public class MusicService extends Service implements MusicLoader.MusicLoaderCallBack, MusicManager.MediaPlayerListener {
 
     private static final String TAG = "MusicService";
     private static int MUSIC_NOTIFICATION = 10000;
@@ -56,8 +56,8 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
 
         if (showProgress)
             mHandler = new Handler();
-        mFileList = FileFactory.getInstance().getMusicList();
-        mFileIndex = FileFactory.getInstance().getMusicIndex();
+        mFileList = MusicManager.getInstance().getMusicList();
+        mFileIndex = MusicManager.getInstance().getMusicIndex();
         mRemoteViews = new RemoteViews(getPackageName(), R.layout.notification_music);
 
         mBuilder = new NotificationCompat.Builder(this);
@@ -70,13 +70,13 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
             mNotification.bigContentView = mBigRemoteViews;
         }
 
-        FileFactory.getInstance().addMediaPlayerListener(this);
-        FileFactory.getInstance().notifyMediaPlayerListener(FileFactory.MediaPlayerStatus.LOAD);
+        MusicManager.getInstance().addMediaPlayerListener(this);
+        MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.LOAD);
     }
 
     @Override
     public void onDestroy() {
-        FileFactory.getInstance().removeMediaPlayerListener(this);
+        MusicManager.getInstance().removeMediaPlayerListener(this);
         stopMusicLoader();
         stopMusicPlayer();
         super.onDestroy();
@@ -145,7 +145,7 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
         switch (mMusicMode) {
             case NORMAL:
                 if (mFileIndex == length - 1) {
-                    FileFactory.getInstance().notifyMediaPlayerListener(FileFactory.MediaPlayerStatus.STOP);
+                    MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.STOP);
                 } else {
                     loadNextMusic();
                 }
@@ -169,7 +169,7 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
         if (mFileList != null && mFileList.size() > 1) {
             stopMusicPlayer();
             mFileIndex = (mFileIndex + 1) % mFileList.size();
-            FileFactory.getInstance().notifyMediaPlayerListener(FileFactory.MediaPlayerStatus.LOAD);
+            MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.LOAD);
         }
     }
 
@@ -180,7 +180,7 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
                 mFileIndex = mFileList.size() - 1;
             else
                 mFileIndex = mFileIndex - 1;
-            FileFactory.getInstance().notifyMediaPlayerListener(FileFactory.MediaPlayerStatus.LOAD);
+            MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.LOAD);
         }
     }
 
@@ -368,27 +368,27 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
                 @Override
                 public boolean onError(MediaPlayer mp, int what, int extra) {
                     Log.d(TAG, "MediaPlayer onErrorListener : " + what);
-                    FileFactory.getInstance().notifyMediaPlayerListener(FileFactory.MediaPlayerStatus.ERROR);
+                    MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.ERROR);
                     return false;
                 }
             });
         }
         mMediaMetadataRetriever = loader.getMediaMetadataRetriever();
 
-        FileFactory.getInstance().setMediaInfo(mMediaPlayer, mMediaMetadataRetriever);
+        MusicManager.getInstance().setMediaInfo(mMediaPlayer, mMediaMetadataRetriever);
         if (mMediaPlayer != null) {
-            FileFactory.getInstance().setMusicIndex(mFileIndex);
-            FileFactory.getInstance().notifyMediaPlayerListener(FileFactory.MediaPlayerStatus.NEW);
+            MusicManager.getInstance().setMusicIndex(mFileIndex);
+            MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.NEW);
         } else {
-            FileFactory.getInstance().setMusicIndex(-1);
-            FileFactory.getInstance().notifyMediaPlayerListener(FileFactory.MediaPlayerStatus.ERROR);
+            MusicManager.getInstance().setMusicIndex(-1);
+            MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.ERROR);
         }
         mMusicLoader = null;
     }
 
     @Override
     public void onMusicLoadFail() {
-        FileFactory.getInstance().notifyMediaPlayerListener(FileFactory.MediaPlayerStatus.ERROR);
+        MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.ERROR);
         mMusicLoader = null;
     }
 
@@ -401,7 +401,7 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
     };
 
     @Override
-    public void onMusicChange(FileFactory.MediaPlayerStatus status) {
+    public void onMusicChange(MusicManager.MediaPlayerStatus status) {
         switch (status) {
             case NEW:
                 setUpNotification(true, true, true);

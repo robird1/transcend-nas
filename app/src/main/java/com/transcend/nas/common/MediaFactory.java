@@ -14,7 +14,7 @@ import com.google.android.gms.cast.MediaMetadata;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
-import com.transcend.nas.common.FileFactory;
+import com.transcend.nas.firmware_api.ShareFolderManager;
 import com.transcend.nas.utils.MimeUtil;
 import com.tutk.IOTC.P2PService;
 
@@ -98,10 +98,7 @@ public class MediaFactory {
                 filepath = Server.USER_DAV_HOME + path.replaceFirst("/" + username + "/", "/");
             else {
                 if(username.equals("admin")) {
-                    String key = FileFactory.getInstance().getRealPathKeyFromMap(path);
-                    String realPath = FileFactory.getInstance().getRealPathFromMap(path);
-                    if (key != null && !key.equals(""))
-                        path = path.replaceFirst(key, realPath);
+                    path = ShareFolderManager.getInstance().getRealPath(path);
                     filepath = Server.DEVICE_DAV_HOME + path.replaceFirst("/home/", "/");
                 }
                 else{

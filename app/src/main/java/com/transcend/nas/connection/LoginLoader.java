@@ -1,20 +1,16 @@
 package com.transcend.nas.connection;
 
-import android.app.Activity;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
-import com.transcend.nas.common.AnalysisFactory;
-import com.transcend.nas.common.FileFactory;
 import com.transcend.nas.connection_new.LoginHelper;
-import com.tutk.IOTC.P2PService;
+import com.transcend.nas.firmware_api.ShareFolderManager;
 
 /**
  * Created by silverhsu on 16/1/5.
@@ -78,7 +74,7 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
         NASPref.setMacAddress(getContext(), mServer.getServerInfo().mac);
         NASPref.setLocalHostname(getContext(), mServer.getServerInfo().ipAddress);
 
-        FileFactory.getInstance().cleanRealPathMap();
+        ShareFolderManager.getInstance().cleanRealPathMap();
 
         if(NASPref.useNewLoginFlow){
             mLoginHelper = new LoginHelper(mContext);

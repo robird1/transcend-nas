@@ -569,8 +569,8 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
         }
 
         if (mLoginDialog != null) {
-            P2PService.getInstance().stopP2PConnect();
             if (dismiss) {
+                P2PService.getInstance().stopP2PConnect();
                 mLoginDialog.dismiss();
                 mLoginDialog = null;
             } else

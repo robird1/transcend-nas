@@ -1,26 +1,19 @@
 package com.transcend.nas.common;
 
-import android.media.MediaMetadataRetriever;
-import android.media.MediaPlayer;
-import android.net.Uri;
 import android.util.Log;
 
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
-import com.transcend.nas.NASPref;
+import com.transcend.nas.firmware_api.ShareFolderManager;
 import com.transcend.nas.management.FileInfo;
 import com.transcend.nas.service.TwonkyManager;
 import com.tutk.IOTC.P2PService;
 
-import org.apache.commons.io.FilenameUtils;
-
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by ike_lee on 2016/5/23.
@@ -31,30 +24,11 @@ public class FileFactory {
     private static FileFactory mFileFactory;
     private static final Object mMute = new Object();
     private List<String> mNotificationList;
-    private Map<String, String> mRealPathMap;
-    private int RealPathMapLifeCycle = 10;
     private ArrayList<FileInfo> mFileList;
-    private int mFileIndex = -1;
-    private ArrayList<FileInfo> mMusicList;
-    private int mMusicIndex = -1;
-    private MediaPlayer mMediaPlayer;
-    private MediaMetadataRetriever mMediaMetadataRetriever;
-    private ArrayList<MediaPlayerListener> mMediaPlayerListener;
-
-    public enum MediaPlayerStatus {
-        NEW, LOAD, PLAY, PAUSE, STOP, PREV, NEXT, ERROR
-    }
-
-    public interface MediaPlayerListener {
-        public void onMusicChange(MediaPlayerStatus status);
-    }
 
     public FileFactory() {
         mNotificationList = new ArrayList<String>();
-        mRealPathMap = new HashMap<String, String>();
         mFileList = new ArrayList<FileInfo>();
-        mMusicList = new ArrayList<FileInfo>();
-        mMediaPlayerListener = new ArrayList<MediaPlayerListener>();
     }
 
     public static FileFactory getInstance() {
@@ -144,12 +118,7 @@ public class FileFactory {
                     filepath = Server.USER_DAV_HOME + path.replaceFirst("/" + username + "/", "/");
                 else {
                     if (username.equals("admin")) {
-                        for (String key : mRealPathMap.keySet()) {
-                            if (path.startsWith(key)) {
-                                path = path.replaceFirst(key, mRealPathMap.get(key));
-                                break;
-                            }
-                        }
+                        path = ShareFolderManager.getInstance().getRealPath(path);
                         filepath = Server.DEVICE_DAV_HOME + path.replaceFirst("/home/", "/");
                     } else {
                         String newPath = "";
@@ -170,7 +139,7 @@ public class FileFactory {
                 else
                     url = "http://" + hostname + filepath + "?session=" + hash + "&webview";
             }
-            Log.d(TAG,"path : " + path + ", url : " + url);
+            Log.d(TAG, "path : " + path + ", url : " + url);
         }
         return url;
     }
@@ -236,74 +205,6 @@ public class FileFactory {
         mNotificationList.remove(value);
     }
 
-    public void addRealPathToMap(String path, String realPath) {
-        if (mRealPathMap == null)
-            mRealPathMap = new HashMap<String, String>();
-        if (!path.startsWith("/"))
-            path = "/" + path + "/";
-        if (!realPath.endsWith("/"))
-            realPath = realPath + "/";
-        mRealPathMap.put(path, realPath);
-    }
-
-    public int getRealPathMapSize() {
-        int size = 0;
-        if (mRealPathMap != null)
-            size = mRealPathMap.size();
-        return size;
-    }
-
-    public List<String> getAllRealPathFromMap(){
-        List<String> list = new ArrayList<>();
-        if(mRealPathMap != null && mRealPathMap.size() > 0) {
-            for (String key : mRealPathMap.keySet())
-                list.add(mRealPathMap.get(key));
-        }
-
-        return list;
-    }
-
-    public String getRealPathKeyFromMap(String path) {
-        String result = "";
-        if (mRealPathMap != null) {
-            for (String key : mRealPathMap.keySet()) {
-                if (path.startsWith(key)) {
-                    result = key;
-                    break;
-                }
-            }
-        }
-        return result;
-    }
-
-    public String getRealPathFromMap(String path) {
-        String realPath = "";
-        if (mRealPathMap != null) {
-            for (String key : mRealPathMap.keySet()) {
-                if (path.startsWith(key)) {
-                    realPath = mRealPathMap.get(key);
-                    break;
-                }
-            }
-        }
-        return realPath;
-    }
-
-    public boolean checkRealPathMapLifeCycle() {
-        RealPathMapLifeCycle--;
-        if (RealPathMapLifeCycle > 0)
-            return true;
-        else {
-            RealPathMapLifeCycle = 10;
-            return false;
-        }
-    }
-
-    public void cleanRealPathMap() {
-        if (mRealPathMap != null)
-            mRealPathMap.clear();
-    }
-
     public void setFileList(ArrayList<FileInfo> list) {
         if (mFileList == null)
             mFileList = new ArrayList<FileInfo>();
@@ -316,77 +217,5 @@ public class FileFactory {
 
     public ArrayList<FileInfo> getFileList() {
         return mFileList;
-    }
-
-    public void setMusicList(ArrayList<FileInfo> list) {
-        if (mMusicList == null)
-            mMusicList = new ArrayList<FileInfo>();
-        mMusicList.clear();
-
-        for (FileInfo info : list) {
-            mMusicList.add(info);
-        }
-    }
-
-    public ArrayList<FileInfo> getMusicList() {
-        return mMusicList;
-    }
-
-    public void setMusicIndex(int index) {
-        mMusicIndex = index;
-    }
-
-    public int getMusicIndex() {
-        return mMusicIndex;
-    }
-
-    public void addMediaPlayerListener(MediaPlayerListener listener) {
-        if (mMediaPlayerListener == null)
-            mMediaPlayerListener = new ArrayList<MediaPlayerListener>();
-
-        if (!mMediaPlayerListener.contains(listener)) {
-            mMediaPlayerListener.add(listener);
-        }
-    }
-
-    public void removeMediaPlayerListener(MediaPlayerListener listener) {
-        if (mMediaPlayerListener != null) {
-            mMediaPlayerListener.remove(listener);
-        }
-    }
-
-    public void notifyMediaPlayerListener(MediaPlayerStatus status) {
-        Log.d(TAG, "MediaPlayerListener Notify: " + status.toString());
-        if (mMediaPlayerListener != null && mMediaPlayerListener.size() > 0) {
-            Log.d(TAG, "MediaPlayerListener Size: " + mMediaPlayerListener.size());
-            for (MediaPlayerListener listener : mMediaPlayerListener) {
-                listener.onMusicChange(status);
-            }
-        } else {
-            //empty lister, reset mediaInfo
-            Log.d(TAG, "MediaPlayerListener Size: Empty, release media item");
-            if (mMediaPlayer != null) {
-                mMediaPlayer.release();
-                mMediaPlayer = null;
-            }
-            if (mMediaMetadataRetriever != null) {
-                mMediaMetadataRetriever.release();
-                mMediaMetadataRetriever = null;
-            }
-            mFileIndex = -1;
-        }
-    }
-
-    public void setMediaInfo(MediaPlayer mediaPlayer, MediaMetadataRetriever mediaMetadataRetriever) {
-        mMediaPlayer = mediaPlayer;
-        mMediaMetadataRetriever = mediaMetadataRetriever;
-    }
-
-    public MediaPlayer getMediaPlayer() {
-        return mMediaPlayer;
-    }
-
-    public MediaMetadataRetriever getMediaMetadataRetriever() {
-        return mMediaMetadataRetriever;
     }
 }

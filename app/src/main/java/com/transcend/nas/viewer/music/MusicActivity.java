@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by ikelee on 16/7/1.
  */
-public class MusicActivity extends AppCompatActivity implements FileFactory.MediaPlayerListener {
+public class MusicActivity extends AppCompatActivity implements MusicManager.MediaPlayerListener {
 
     public static final int REQUEST_CODE = MusicActivity.class.hashCode() & 0xFFFF;
     private static final String TAG = MusicActivity.class.getSimpleName();
@@ -94,13 +94,13 @@ public class MusicActivity extends AppCompatActivity implements FileFactory.Medi
         initPager();
         updateMusicMode(true);
 
-        FileFactory.getInstance().addMediaPlayerListener(this);
+        MusicManager.getInstance().addMediaPlayerListener(this);
         if (mCurrentIndex >= 0) {
             stopMusicService();
-            FileFactory.getInstance().setMusicIndex(mCurrentIndex);
+            MusicManager.getInstance().setMusicIndex(mCurrentIndex);
             startMusicService();
         } else {
-            FileFactory.getInstance().setMusicIndex(-1);
+            MusicManager.getInstance().setMusicIndex(-1);
             finish();
         }
 
@@ -108,7 +108,7 @@ public class MusicActivity extends AppCompatActivity implements FileFactory.Medi
 
     @Override
     protected void onDestroy() {
-        FileFactory.getInstance().removeMediaPlayerListener(this);
+        MusicManager.getInstance().removeMediaPlayerListener(this);
         myHandler.removeCallbacks(UpdateSongTime);
         super.onDestroy();
         Log.w(TAG, "onDestroy");
@@ -138,7 +138,7 @@ public class MusicActivity extends AppCompatActivity implements FileFactory.Medi
             mPath = args.getString("path");
             mMode = args.getString("mode");
             mRoot = args.getString("root");
-            mList = FileFactory.getInstance().getMusicList();
+            mList = MusicManager.getInstance().getMusicList();
             if (mList != null) {
                 for (int i = 0; i < mList.size(); i++) {
                     if (mPath.equals(mList.get(i).path)) {
@@ -171,7 +171,7 @@ public class MusicActivity extends AppCompatActivity implements FileFactory.Medi
         musicPrev.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FileFactory.getInstance().notifyMediaPlayerListener(FileFactory.MediaPlayerStatus.PREV);
+                MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.PREV);
             }
         });
 
@@ -179,7 +179,7 @@ public class MusicActivity extends AppCompatActivity implements FileFactory.Medi
         musicNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FileFactory.getInstance().notifyMediaPlayerListener(FileFactory.MediaPlayerStatus.NEXT);
+                MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.NEXT);
             }
         });
 
@@ -189,9 +189,9 @@ public class MusicActivity extends AppCompatActivity implements FileFactory.Medi
             public void onClick(View v) {
                 if (mMediaPlayer != null) {
                     if (mMediaPlayer.isPlaying())
-                        FileFactory.getInstance().notifyMediaPlayerListener(FileFactory.MediaPlayerStatus.PAUSE);
+                        MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.PAUSE);
                     else
-                        FileFactory.getInstance().notifyMediaPlayerListener(FileFactory.MediaPlayerStatus.PLAY);
+                        MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.PLAY);
                 }
             }
         });
@@ -328,9 +328,9 @@ public class MusicActivity extends AppCompatActivity implements FileFactory.Medi
     }
 
     private void updateMusicInfo() {
-        mMediaPlayer = FileFactory.getInstance().getMediaPlayer();
-        mMediaMetadataRetriever = FileFactory.getInstance().getMediaMetadataRetriever();
-        mCurrentIndex = FileFactory.getInstance().getMusicIndex();
+        mMediaPlayer = MusicManager.getInstance().getMediaPlayer();
+        mMediaMetadataRetriever = MusicManager.getInstance().getMediaMetadataRetriever();
+        mCurrentIndex = MusicManager.getInstance().getMusicIndex();
         String title = mCurrentIndex >= 0 && mList.size() > mCurrentIndex ? mList.get(mCurrentIndex).name : "";
         if (title != null && !title.equals(""))
             musicTitle.setText(title);
@@ -415,7 +415,7 @@ public class MusicActivity extends AppCompatActivity implements FileFactory.Medi
     };
 
     @Override
-    public void onMusicChange(FileFactory.MediaPlayerStatus status) {
+    public void onMusicChange(MusicManager.MediaPlayerStatus status) {
         Message m = new Message();
         m.what = status.ordinal();
         handler.sendMessage(m);
@@ -424,24 +424,27 @@ public class MusicActivity extends AppCompatActivity implements FileFactory.Medi
     Handler handler = new Handler() {
         public void handleMessage(Message msg) {
             int index = msg.what;
-            if (index == FileFactory.MediaPlayerStatus.LOAD.ordinal() ||
-                    index == FileFactory.MediaPlayerStatus.NEXT.ordinal() ||
-                    index == FileFactory.MediaPlayerStatus.PREV.ordinal()) {
+            if (index == MusicManager.MediaPlayerStatus.LOAD.ordinal()) {
                 mProgressView.setVisibility(View.VISIBLE);
                 pauseMusicPlayer();
-            } else if (index == FileFactory.MediaPlayerStatus.NEW.ordinal()) {
+            } else if (index == MusicManager.MediaPlayerStatus.NEXT.ordinal() || index == MusicManager.MediaPlayerStatus.PREV.ordinal()) {
+                if(MusicManager.getInstance().getMusicListSize() > 1) {
+                    mProgressView.setVisibility(View.VISIBLE);
+                    pauseMusicPlayer();
+                }
+            } else if (index == MusicManager.MediaPlayerStatus.NEW.ordinal()) {
                 mProgressView.setVisibility(View.INVISIBLE);
                 updateMusicInfo();
-            } else if (index == FileFactory.MediaPlayerStatus.PLAY.ordinal()) {
+            } else if (index == MusicManager.MediaPlayerStatus.PLAY.ordinal()) {
                 startMusicPlayer();
-            } else if (index == FileFactory.MediaPlayerStatus.PAUSE.ordinal()) {
+            } else if (index == MusicManager.MediaPlayerStatus.PAUSE.ordinal()) {
                 pauseMusicPlayer();
                 isPlay = false;
-            } else if (index == FileFactory.MediaPlayerStatus.STOP.ordinal()) {
+            } else if (index == MusicManager.MediaPlayerStatus.STOP.ordinal()) {
                 mProgressView.setVisibility(View.INVISIBLE);
                 pauseMusicPlayer();
                 doFinish();
-            } else if (index == FileFactory.MediaPlayerStatus.ERROR.ordinal()) {
+            } else if (index == MusicManager.MediaPlayerStatus.ERROR.ordinal()) {
                 Toast.makeText(MusicActivity.this, getString(R.string.music) + " - " + getString(R.string.error), Toast.LENGTH_SHORT).show();
                 mProgressView.setVisibility(View.INVISIBLE);
                 pauseMusicPlayer();
