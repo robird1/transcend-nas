@@ -36,6 +36,7 @@ import com.transcend.nas.common.FileFactory;
 import com.transcend.nas.common.MediaFactory;
 import com.transcend.nas.service.LanCheckManager;
 import com.transcend.nas.viewer.music.MusicActivity;
+import com.transcend.nas.viewer.music.MusicManager;
 import com.transcend.nas.viewer.photo.ViewerActivity;
 import com.tutk.IOTC.P2PService;
 
@@ -705,7 +706,7 @@ public class FileSharedActivity extends AppCompatActivity implements
                 list.add(info);
             }
         }
-        FileFactory.getInstance().setMusicList(list);
+        MusicManager.getInstance().setMusicList(list);
 
         Bundle args = new Bundle();
         args.putString("path", fileInfo.path);

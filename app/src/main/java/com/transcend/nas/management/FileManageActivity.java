@@ -56,7 +56,6 @@ import com.google.android.libraries.cast.companionlibrary.cast.exceptions.NoConn
 import com.google.android.libraries.cast.companionlibrary.cast.exceptions.TransientNetworkDisconnectionException;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.realtek.nasfun.api.Server;
-import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
@@ -69,6 +68,7 @@ import com.transcend.nas.common.MediaFactory;
 import com.transcend.nas.connection.StartActivity;
 import com.transcend.nas.connection_new.LoginActivity;
 import com.transcend.nas.connection_new.LoginListActivity;
+import com.transcend.nas.firmware_api.ShareFolderManager;
 import com.transcend.nas.service.AutoBackupService;
 import com.transcend.nas.service.LanCheckManager;
 import com.transcend.nas.service.TwonkyManager;
@@ -80,6 +80,7 @@ import com.transcend.nas.settings.SettingsActivity;
 import com.transcend.nas.view.NotificationDialog;
 import com.transcend.nas.view.ProgressDialog;
 import com.transcend.nas.viewer.music.MusicActivity;
+import com.transcend.nas.viewer.music.MusicManager;
 import com.transcend.nas.viewer.music.MusicService;
 import com.transcend.nas.viewer.photo.ViewerActivity;
 import com.tutk.IOTC.P2PService;
@@ -331,7 +332,7 @@ public class FileManageActivity extends AppCompatActivity implements
                 DiskFactory.getInstance().cleanDiskDevices();
 
                 //clean path map
-                FileFactory.getInstance().cleanRealPathMap();
+                ShareFolderManager.getInstance().cleanRealPathMap();
 
                 //clean twonky map
                 TwonkyManager.getInstance().cleanTwonky();
@@ -1761,7 +1762,7 @@ public class FileManageActivity extends AppCompatActivity implements
                     list.add(info);
                 }
             }
-            FileFactory.getInstance().setMusicList(list);
+            MusicManager.getInstance().setMusicList(list);
 
             Bundle args = new Bundle();
             args.putString("path", fileInfo.path);
@@ -1882,7 +1883,7 @@ public class FileManageActivity extends AppCompatActivity implements
         DiskFactory.getInstance().cleanDiskDevices();
 
         //clean path map
-        FileFactory.getInstance().cleanRealPathMap();
+        ShareFolderManager.getInstance().cleanRealPathMap();
 
         //clean twonky map
         TwonkyManager.getInstance().cleanTwonky();

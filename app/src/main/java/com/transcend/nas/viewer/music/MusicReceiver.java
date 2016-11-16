@@ -5,8 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import com.transcend.nas.common.FileFactory;
-
 /**
  * Created by ike_lee on 2016/7/11.
  */
@@ -24,15 +22,15 @@ public class MusicReceiver extends BroadcastReceiver {
             String action = intent.getAction();
             Log.d(TAG,"onReceiver: " + action);
             if(MUSIC_PREV.equals(action)){
-                FileFactory.getInstance().notifyMediaPlayerListener(FileFactory.MediaPlayerStatus.PREV);
+                MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.PREV);
             }else if(MUSIC_NEXT.equals(action)) {
-                FileFactory.getInstance().notifyMediaPlayerListener(FileFactory.MediaPlayerStatus.NEXT);
+                MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.NEXT);
             }else if(MUSIC_PLAY.equals(action)){
-                FileFactory.getInstance().notifyMediaPlayerListener(FileFactory.MediaPlayerStatus.PLAY);
+                MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.PLAY);
             }else if(MUSIC_PAUSE.equals(action)){
-                FileFactory.getInstance().notifyMediaPlayerListener(FileFactory.MediaPlayerStatus.PAUSE);
+                MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.PAUSE);
             }else if(MUSIC_CLOSE.equals(action)){
-                FileFactory.getInstance().notifyMediaPlayerListener(FileFactory.MediaPlayerStatus.STOP);
+                MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.STOP);
             }
         }
     }

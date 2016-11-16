@@ -80,7 +80,8 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
         boolean isMobile = (info.getType() == ConnectivityManager.TYPE_MOBILE);
         Log.w(TAG, "Wi-Fi: " + isWiFi);
         Log.w(TAG, "Mobile: " + isMobile);
-        return (isWiFi || isMobile);
+        Log.w(TAG, "checkNetworkAvailable: " + (isWiFi || (isRemote ? isMobile : false)));
+        return isWiFi || (isRemote ? isMobile : false);
     }
 
     private boolean doWizardCheck(String hostname) {

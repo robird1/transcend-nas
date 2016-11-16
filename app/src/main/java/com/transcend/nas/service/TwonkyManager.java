@@ -7,8 +7,8 @@ import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
-import com.transcend.nas.common.FileFactory;
 import com.transcend.nas.common.HttpFactory;
+import com.transcend.nas.firmware_api.ShareFolderManager;
 import com.transcend.nas.management.FileInfo;
 import com.tutk.IOTC.P2PService;
 
@@ -85,7 +85,7 @@ public class TwonkyManager {
             //add current user's home folder
             smbSharedList.add("/home/" + username + "/");
             //add other smb shared folder
-            List<String> realPathList = FileFactory.getInstance().getAllRealPathFromMap();
+            List<String> realPathList = ShareFolderManager.getInstance().getAllValue();
             for (String realPath : realPathList)
                 smbSharedList.add(realPath);
 
@@ -112,11 +112,7 @@ public class TwonkyManager {
         //url = twonkyUrl + (thumbnail ? "?scale=192x192" : "");
 
         String value = "http://" + getTwonkyIP() + "/rpc/get_thumbnail?path=";
-        String key = FileFactory.getInstance().getRealPathKeyFromMap(path);
-        String realPath = FileFactory.getInstance().getRealPathFromMap(path);
-        if (key != null && !key.equals(""))
-            path = path.replaceFirst(key, realPath);
-
+        path = ShareFolderManager.getInstance().getRealPath(path);
         if (thumbnail)
             value += path;
         else
@@ -228,11 +224,7 @@ public class TwonkyManager {
     }
 
     private boolean startTwonkyParser(String path, int start, int count) {
-        String key = FileFactory.getInstance().getRealPathKeyFromMap(path);
-        String realPath = FileFactory.getInstance().getRealPathFromMap(path);
-        if (key != null && !key.equals(""))
-            path = path.replaceFirst(key, realPath);
-        path = path.replaceFirst("/home/", "/");
+        path = ShareFolderManager.getInstance().getRealPath(path).replaceFirst("/home/", "/");
         Log.d(TAG, "twonky origin path : " + path);
 
         if (mCacheMap.contains(path)) {
@@ -316,11 +308,7 @@ public class TwonkyManager {
     }
 
     private String getImageUrlFromMap(boolean convertLink, String path) {
-        String key = FileFactory.getInstance().getRealPathKeyFromMap(path);
-        String realPath = FileFactory.getInstance().getRealPathFromMap(path);
-        if (key != null && !key.equals(""))
-            path = path.replaceFirst(key, realPath);
-        path = path.replaceFirst("/home/", "/");
+        path = ShareFolderManager.getInstance().getRealPath(path).replaceFirst("/home/", "/");
 
         String result = "";
         if (mImageMap != null) {
