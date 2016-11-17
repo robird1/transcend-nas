@@ -35,8 +35,17 @@ public class LicenseAgreementActivity extends Activity {
                 startActivity(new Intent(LicenseAgreementActivity.this, AutoLinkActivity.class));
 
                 NASPref.setIsFirstUse(LicenseAgreementActivity.this, false);
+
+                LicenseAgreementActivity.this.finish();
             }
         });
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        startActivity(new Intent(this, FirstUseActivity.class));
+        super.onBackPressed();
     }
 
 }

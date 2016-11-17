@@ -9,7 +9,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.transcend.nas.R;
-import com.transcend.nas.connection.StartActivity;
 
 /**
  * Created by steve_su on 2016/11/16.
@@ -35,7 +34,9 @@ public class FirstUseActivity extends Activity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(FirstUseActivity.this, LicenseAgreementActivity.class));
+                FirstUseActivity.this.finish();
             }
         });
     }
+
 }
