@@ -29,9 +29,9 @@ import android.widget.Toast;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.R;
-import com.transcend.nas.common.LoaderID;
-import com.transcend.nas.common.FileFactory;
-import com.transcend.nas.common.MediaFactory;
+import com.transcend.nas.LoaderID;
+import com.transcend.nas.management.firmware.FileFactory;
+import com.transcend.nas.management.firmware.MediaFactory;
 import com.transcend.nas.viewer.photo.ViewerActivity;
 
 import java.io.File;

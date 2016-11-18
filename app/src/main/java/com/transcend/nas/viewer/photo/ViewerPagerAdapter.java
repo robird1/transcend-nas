@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.transcend.nas.common.FileFactory;
+import com.transcend.nas.management.firmware.FileFactory;
 
 import java.util.ArrayList;
 

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.transcend.nas.connection_new.IntroduceActivity">
+    tools:context="com.transcend.nas.introduce.IntroduceActivity">
 
     <ImageView
         android:id="@+id/introduce_bg"
@@ -86,7 +86,7 @@
             android:theme="@style/MyRadioButton" />
     </RadioGroup>
 
-    <com.transcend.nas.connection_new.BasicViewerPager
+    <com.transcend.nas.introduce.BasicViewerPager
         android:id="@+id/introduce_view_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

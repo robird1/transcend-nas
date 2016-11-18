@@ -27,18 +27,19 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
-import com.transcend.nas.common.LoaderID;
-import com.transcend.nas.common.FileFactory;
-import com.transcend.nas.common.MediaFactory;
+import com.transcend.nas.LoaderID;
+import com.transcend.nas.management.firmware.EventNotifyLoader;
+import com.transcend.nas.management.firmware.FileFactory;
+import com.transcend.nas.management.firmware.MediaFactory;
 import com.transcend.nas.service.LanCheckManager;
+import com.transcend.nas.tutk.TutkLinkNasLoader;
+import com.transcend.nas.tutk.TutkLogoutLoader;
 import com.transcend.nas.viewer.music.MusicActivity;
 import com.transcend.nas.viewer.music.MusicManager;
 import com.transcend.nas.viewer.photo.ViewerActivity;
-import com.tutk.IOTC.P2PService;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -479,8 +480,11 @@ public class FileSharedActivity extends AppCompatActivity implements
                     LanCheckManager.getInstance().startLanCheck();
                     Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
                 }
-                else
+                else {
+                    if (loader instanceof EventNotifyLoader)
+                        LanCheckManager.getInstance().startLanCheck();
                     Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+                }
             }
         }
 

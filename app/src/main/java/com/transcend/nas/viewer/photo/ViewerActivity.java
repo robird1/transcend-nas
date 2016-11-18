@@ -29,7 +29,7 @@ import com.google.android.libraries.cast.companionlibrary.cast.exceptions.Transi
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
-import com.transcend.nas.common.LoaderID;
+import com.transcend.nas.LoaderID;
 import com.transcend.nas.management.FileActionDeleteDialog;
 import com.transcend.nas.management.FileActionLocateActivity;
 import com.transcend.nas.management.FileInfo;
@@ -39,7 +39,7 @@ import com.transcend.nas.management.LocalFileUploadLoader;
 import com.transcend.nas.management.SmbAbstractLoader;
 import com.transcend.nas.management.SmbFileDeleteLoader;
 import com.transcend.nas.management.SmbFileDownloadLoader;
-import com.transcend.nas.common.FileFactory;
+import com.transcend.nas.management.firmware.FileFactory;
 
 import java.util.ArrayList;
 

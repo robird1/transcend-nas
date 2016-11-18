@@ -60,25 +60,32 @@ import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
-import com.transcend.nas.common.AnalysisFactory;
-import com.transcend.nas.common.FileFactory;
-import com.transcend.nas.common.LoaderID;
+import com.transcend.nas.common.GoogleAnalysisFactory;
+import com.transcend.nas.management.firmware.EventNotifyLoader;
+import com.transcend.nas.management.firmware.FileFactory;
+import com.transcend.nas.LoaderID;
 import com.transcend.nas.common.ManageFactory;
-import com.transcend.nas.common.MediaFactory;
-import com.transcend.nas.connection.StartActivity;
-import com.transcend.nas.connection_new.LoginActivity;
-import com.transcend.nas.connection_new.LoginListActivity;
-import com.transcend.nas.firmware_api.ShareFolderManager;
+import com.transcend.nas.management.firmware.MediaFactory;
+import com.transcend.nas.connection.old.StartActivity;
+import com.transcend.nas.connection.LoginActivity;
+import com.transcend.nas.connection.LoginListActivity;
+import com.transcend.nas.management.firmware.MediaManagerLoader;
+import com.transcend.nas.management.firmware.ShareFolderManager;
+import com.transcend.nas.service.AutoBackupInitLoader;
 import com.transcend.nas.service.AutoBackupService;
 import com.transcend.nas.service.LanCheckManager;
-import com.transcend.nas.service.TwonkyManager;
+import com.transcend.nas.management.firmware.TwonkyManager;
 import com.transcend.nas.settings.AboutActivity;
 import com.transcend.nas.settings.DiskFactory;
 import com.transcend.nas.settings.DiskInfoActivity;
 import com.transcend.nas.settings.NewSettingsActivity;
 import com.transcend.nas.settings.SettingsActivity;
+import com.transcend.nas.tutk.TutkLinkNasLoader;
+import com.transcend.nas.tutk.TutkLogoutLoader;
 import com.transcend.nas.view.NotificationDialog;
 import com.transcend.nas.view.ProgressDialog;
+import com.transcend.nas.viewer.document.DocumentDownloadManager;
+import com.transcend.nas.viewer.document.OpenWithUploadHandler;
 import com.transcend.nas.viewer.music.MusicActivity;
 import com.transcend.nas.viewer.music.MusicManager;
 import com.transcend.nas.viewer.music.MusicService;
@@ -154,7 +161,6 @@ public class FileManageActivity extends AppCompatActivity implements
     private int mPreviousLoaderID = -1;
     private Bundle mPreviousLoaderArgs = null;
     private boolean isAutoBackupServiceInit = false;
-    private boolean isNeedEventNotify = false;
 
     private VideoCastManager mCastManager;
     private VideoCastConsumer mCastConsumer;
@@ -186,7 +192,7 @@ public class FileManageActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         Log.w(TAG, "onCreate");
         setContentView(R.layout.activity_file_manage);
-        AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.BROWSER_REMOTE);
+        GoogleAnalysisFactory.getInstance(this).sendScreen(GoogleAnalysisFactory.VIEW.BROWSER_REMOTE);
         String password = NASPref.getPassword(this);
         if (password != null && !password.equals("")) {
             init();
@@ -224,14 +230,6 @@ public class FileManageActivity extends AppCompatActivity implements
             mCastManager.incrementUiCounter();
         }
 
-        Log.d(TAG, "onResume is need event notify : " + isNeedEventNotify);
-        if (isNeedEventNotify) {
-            isNeedEventNotify = false;
-            if (!mProgressView.isShown()) {
-                doEventNotify(false, mPath);
-            }
-        }
-
         if (mOriginMD5Checksum != null) {
             checkCacheFileState();
         }
@@ -252,7 +250,6 @@ public class FileManageActivity extends AppCompatActivity implements
 
     @Override
     protected void onStop() {
-        isNeedEventNotify = true;
         super.onStop();
         Log.w(TAG, "onStop");
     }
@@ -353,8 +350,6 @@ public class FileManageActivity extends AppCompatActivity implements
                 LanCheckManager.getInstance().setInit(true);
             }
         }
-
-        isNeedEventNotify = false;
     }
 
     @Override
@@ -416,8 +411,6 @@ public class FileManageActivity extends AppCompatActivity implements
                 Log.d(TAG, "onConnectionSuspended() was called with cause: " + cause);
             }
         };
-
-        isNeedEventNotify = false;
 
         String hostname = mServer.getHostname();
 
@@ -700,17 +693,17 @@ public class FileManageActivity extends AppCompatActivity implements
             case R.id.nav_storage:
                 mDevice = false;
                 doLoad(NASApp.ROOT_SMB);
-                AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.BROWSER_REMOTE);
+                GoogleAnalysisFactory.getInstance(this).sendScreen(GoogleAnalysisFactory.VIEW.BROWSER_REMOTE);
                 break;
             case R.id.nav_device:
                 mDevice = true;
                 doLoad(NASApp.ROOT_STG);
-                AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.BROWSER_LOCAL);
+                GoogleAnalysisFactory.getInstance(this).sendScreen(GoogleAnalysisFactory.VIEW.BROWSER_LOCAL);
                 break;
             case R.id.nav_downloads:
                 mDevice = false;
                 doLoad(NASPref.getDownloadLocation(this));
-                AnalysisFactory.getInstance(this).sendScreen(AnalysisFactory.VIEW.BROWSER_LOCAL_DOWNLOAD);
+                GoogleAnalysisFactory.getInstance(this).sendScreen(GoogleAnalysisFactory.VIEW.BROWSER_LOCAL_DOWNLOAD);
                 break;
             case R.id.nav_disk_info:
                 startDiskInfoActivity();
@@ -882,7 +875,7 @@ public class FileManageActivity extends AppCompatActivity implements
             mProgressView.setVisibility(View.INVISIBLE);
             return;
         }
-        if (!ManageFactory.isTopDirectory(mMode, mRoot, mPath)) {
+        if (!FileFactory.getInstance().isTopDirectory(mMode, mRoot, mPath)) {
             String parent = new File(mPath).getParent();
             doLoad(parent);
         } else {
@@ -1012,7 +1005,7 @@ public class FileManageActivity extends AppCompatActivity implements
                 mProgressView.setVisibility(View.VISIBLE);
                 return new TutkLogoutLoader(this);
             case LoaderID.AUTO_BACKUP:
-                return new AutoBackupLoader(this);
+                return new AutoBackupInitLoader(this);
             case LoaderID.MEDIA_PLAYER:
                 mProgressView.setVisibility(View.VISIBLE);
                 return new MediaManagerLoader(this, args);
@@ -1071,7 +1064,7 @@ public class FileManageActivity extends AppCompatActivity implements
                     doLoad(path);
                     return;
                 }
-            } else if (loader instanceof AutoBackupLoader) {
+            } else if (loader instanceof AutoBackupInitLoader) {
                 //do nothing
             } else if (loader instanceof MediaManagerLoader) {
                 Bundle args = ((MediaManagerLoader) loader).getBundleArgs();
@@ -1166,17 +1159,13 @@ public class FileManageActivity extends AppCompatActivity implements
 
 
     private boolean doEventNotify(boolean update, String path) {
-        int id = path.startsWith(NASApp.ROOT_STG)
-                ? LoaderID.LOCAL_FILE_LIST : LoaderID.SMB_FILE_LIST;
-
         Long lastTime = Long.parseLong(NASPref.getSessionVerifiedTime(this));
         Long currTime = System.currentTimeMillis();
-        Log.w(TAG, "hash key time check : " + (currTime - lastTime));
-        if (id == LoaderID.SMB_FILE_LIST && currTime - lastTime >= 180000) {
+        if (!path.startsWith(NASApp.ROOT_STG) && currTime - lastTime >= 180000/6) {
             Bundle args = new Bundle();
             args.putString("path", update ? path : "");
             getLoaderManager().restartLoader(LoaderID.EVENT_NOTIFY, args, this).forceLoad();
-            Log.w(TAG, "doEventNotify");
+            Log.d(TAG, "doEventNotify");
             return false;
         }
 
@@ -1190,8 +1179,7 @@ public class FileManageActivity extends AppCompatActivity implements
         int id = path.startsWith(NASApp.ROOT_STG)
                 ? LoaderID.LOCAL_FILE_LIST : LoaderID.SMB_FILE_LIST;
 
-        boolean pass = doEventNotify(true, path);
-        if (pass) {
+        if (doEventNotify(true, path)) {
             Bundle args = new Bundle();
             args.putString("path", path);
             getLoaderManager().restartLoader(id, args, this).forceLoad();

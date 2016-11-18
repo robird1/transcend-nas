@@ -52,7 +52,7 @@ public class LanCheckTask extends AsyncTask<String, String, Boolean> {
     private LanCheckCallback mListener;
 
     public LanCheckTask() {
-        mContext = NASApp.mContext;
+        mContext = NASApp.getContext();
         mWifiMgr = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
         mLock = mWifiMgr.createMulticastLock(TAG);
         mNASList = new ArrayList<HashMap<String, String>>();
@@ -76,7 +76,6 @@ public class LanCheckTask extends AsyncTask<String, String, Boolean> {
                     if(mLock != null)
                         mLock.release();
                     //closeJmDNS();
-                    tryLink();
                     return tryLink();
             }
         }
@@ -154,7 +153,6 @@ public class LanCheckTask extends AsyncTask<String, String, Boolean> {
 
                 // Method 2 : Compare the name of the server.
                 String server = info.getServer();
-                Log.w(TAG, "Server: " + server);
                 if (server.contains(SERVER)) {
                     isMyNAS = true;
                 }
@@ -173,8 +171,6 @@ public class LanCheckTask extends AsyncTask<String, String, Boolean> {
                     nas.put("nasId", "-1");
                     nas.put("nickname", name);
                     nas.put("hostname", info.getInet4Addresses()[0].getHostAddress());
-                    Log.w(TAG, "nickname: " + nas.get("nickname"));
-                    Log.w(TAG, "hostname: " + nas.get("hostname"));
                     if (mNASList.contains(nas))
                         continue;
                     mNASList.add(nas);
@@ -256,7 +252,7 @@ public class LanCheckTask extends AsyncTask<String, String, Boolean> {
                     if(hwAddr != null && hwAddr.equals(macAddress)) {
                         mTargetIp = ipAddr;
                         success = true;
-                        Log.w(TAG, "Current IP : " + NASPref.getLocalHostname(mContext) + ", LAN IP : " + ipAddr);
+                        Log.w(TAG, "Current IP : " + ipAddr);
                     }
                 } catch (XmlPullParserException e) {
                     e.printStackTrace();

@@ -28,7 +28,7 @@ public class AnimFactory {
         return mAnimFactory;
     }
 
-    public Animation getBlinkAnimation(){
+    public Animation getBlinkAnimation() {
         Animation anim = new AlphaAnimation(1.0f, 0.0f);
         anim.setDuration(1000); //You can manage the blinking time with this parameter
         anim.setStartOffset(100);

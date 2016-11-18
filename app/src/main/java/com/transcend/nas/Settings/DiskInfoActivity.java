@@ -30,8 +30,8 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.transcend.nas.R;
-import com.transcend.nas.common.LoaderID;
-import com.transcend.nas.common.FileFactory;
+import com.transcend.nas.LoaderID;
+import com.transcend.nas.management.firmware.FileFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;

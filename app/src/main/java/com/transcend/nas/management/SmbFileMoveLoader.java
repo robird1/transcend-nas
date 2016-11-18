@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 
 import com.transcend.nas.R;
-import com.transcend.nas.common.FileFactory;
+import com.transcend.nas.management.firmware.FileFactory;
 
 import java.net.MalformedURLException;
 import java.util.List;

@@ -5,8 +5,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.transcend.nas.NASApp;
-import com.transcend.nas.firmware_api.ShareFolderManager;
-import com.transcend.nas.service.TwonkyManager;
+import com.transcend.nas.management.firmware.ShareFolderManager;
+import com.transcend.nas.management.firmware.TwonkyManager;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;

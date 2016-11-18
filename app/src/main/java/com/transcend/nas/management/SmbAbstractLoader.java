@@ -15,8 +15,7 @@ import com.realtek.nasfun.api.SambaStatus;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.R;
-import com.transcend.nas.common.FileFactory;
-import com.transcend.nas.service.LanCheckManager;
+import com.transcend.nas.management.firmware.FileFactory;
 import com.transcend.nas.utils.MathUtil;
 import com.tutk.IOTC.P2PService;
 
@@ -83,7 +82,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         return (str != null) && (!str.isEmpty());
     }
 
-    protected String getSmbUrl(String path) {
+    public String getSmbUrl(String path) {
         StringBuilder builder = new StringBuilder();
         builder.append("smb://");
         if (isValid(mUsername) && isValid(mPassword)) {

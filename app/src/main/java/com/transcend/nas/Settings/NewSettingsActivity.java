@@ -27,24 +27,21 @@ import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.utils.StorageUtils;
-import com.realtek.nasfun.api.Server;
-import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
-import com.transcend.nas.common.LoaderID;
-import com.transcend.nas.common.TutkCodeID;
-import com.transcend.nas.management.AutoBackupLoader;
+import com.transcend.nas.LoaderID;
+import com.transcend.nas.tutk.TutkCodeID;
+import com.transcend.nas.service.AutoBackupInitLoader;
 import com.transcend.nas.management.FileActionLocateActivity;
 import com.transcend.nas.management.SmbFolderCreateLoader;
-import com.transcend.nas.management.TutkGetNasLoader;
-import com.transcend.nas.management.TutkLoginLoader;
+import com.transcend.nas.tutk.TutkGetNasLoader;
+import com.transcend.nas.tutk.TutkLoginLoader;
 import com.transcend.nas.service.AutoBackupService;
-import com.transcend.nas.common.FileFactory;
+import com.transcend.nas.management.firmware.FileFactory;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.prefs.Preferences;
 
 /**
  * Created by silverhsu on 16/3/2.
@@ -128,7 +125,7 @@ public class NewSettingsActivity extends AppCompatActivity implements
                 token = args.getString("token");
                 return new TutkGetNasLoader(this, server, token);
             case LoaderID.AUTO_BACKUP:
-                return new AutoBackupLoader(this);
+                return new AutoBackupInitLoader(this);
         }
         return null;
     }
@@ -157,7 +154,7 @@ public class NewSettingsActivity extends AppCompatActivity implements
             checkLoginNASResult((TutkLoginLoader) loader);
         } else if (loader instanceof TutkGetNasLoader) {
             checkGetNASResult((TutkGetNasLoader) loader);
-        } else if (loader instanceof AutoBackupLoader) {
+        } else if (loader instanceof AutoBackupInitLoader) {
             mProgressView.setVisibility(View.INVISIBLE);
         }
     }

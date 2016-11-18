@@ -32,8 +32,8 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
-import com.transcend.nas.common.LoaderID;
-import com.transcend.nas.common.FileFactory;
+import com.transcend.nas.LoaderID;
+import com.transcend.nas.management.firmware.FileFactory;
 
 import java.io.File;
 import java.util.ArrayList;

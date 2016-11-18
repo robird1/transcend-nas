@@ -7,10 +7,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Build;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.os.Handler;
@@ -22,15 +20,12 @@ import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
-import com.transcend.nas.management.AutoBackupLoader;
 import com.transcend.nas.management.FileInfo;
 import com.tutk.IOTC.P2PService;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
 
 import jcifs.smb.SmbException;
 

@@ -4,7 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.transcend.nas.R;
-import com.transcend.nas.common.FileFactory;
+import com.transcend.nas.management.firmware.FileFactory;
 
 import org.apache.commons.io.FilenameUtils;
 

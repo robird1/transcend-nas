@@ -21,7 +21,6 @@ import android.widget.RemoteViews;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.management.FileInfo;
-import com.transcend.nas.common.FileFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

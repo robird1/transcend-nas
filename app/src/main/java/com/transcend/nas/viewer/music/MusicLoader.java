@@ -7,7 +7,10 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 
-import com.transcend.nas.common.MediaFactory;
+import com.transcend.nas.NASApp;
+import com.transcend.nas.management.firmware.MediaFactory;
+
+import java.util.HashMap;
 
 /**
  * Created by ikelee on 16/7/4.
@@ -56,7 +59,16 @@ public class MusicLoader extends AsyncTask<String, String, Boolean> {
             Uri uri = MediaFactory.createUri(mPath);
             mMediaPlayer = MediaPlayer.create(mContext, uri);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                mMediaMetadataRetriever = MediaFactory.getMediaMetadataRetriever(mPath, uri);
+                MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+                if (mPath.startsWith(NASApp.ROOT_STG)) {
+                    mmr.setDataSource(mPath);
+                } else {
+                    if (Build.VERSION.SDK_INT >= 14)
+                        mmr.setDataSource(uri.toString(), new HashMap<String, String>());
+                    else
+                        mmr.setDataSource(uri.toString());
+                }
+                mMediaMetadataRetriever = mmr;
             }
         } catch (Exception e){
             e.printStackTrace();

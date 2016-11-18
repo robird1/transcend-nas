@@ -42,23 +42,23 @@ import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
-import com.transcend.nas.common.LoaderID;
+import com.transcend.nas.LoaderID;
 import com.transcend.nas.view.NotificationDialog;
-import com.transcend.nas.common.TutkCodeID;
-import com.transcend.nas.connection.BindDialog;
+import com.transcend.nas.tutk.TutkCodeID;
+import com.transcend.nas.connection.old.BindDialog;
 import com.transcend.nas.connection.ForgetPwdDialog;
 import com.transcend.nas.connection.LoginLoader;
-import com.transcend.nas.management.AutoBackupLoader;
+import com.transcend.nas.service.AutoBackupInitLoader;
 import com.transcend.nas.management.FileActionLocateActivity;
 import com.transcend.nas.management.SmbFolderCreateLoader;
-import com.transcend.nas.management.TutkCreateNasLoader;
-import com.transcend.nas.management.TutkForgetPasswordLoader;
-import com.transcend.nas.management.TutkGetNasLoader;
-import com.transcend.nas.management.TutkLoginLoader;
-import com.transcend.nas.management.TutkRegisterLoader;
-import com.transcend.nas.management.TutkResendActivateLoader;
+import com.transcend.nas.tutk.TutkCreateNasLoader;
+import com.transcend.nas.tutk.TutkForgetPasswordLoader;
+import com.transcend.nas.tutk.TutkGetNasLoader;
+import com.transcend.nas.tutk.TutkLoginLoader;
+import com.transcend.nas.tutk.TutkRegisterLoader;
+import com.transcend.nas.tutk.TutkResendActivateLoader;
 import com.transcend.nas.service.AutoBackupService;
-import com.transcend.nas.common.FileFactory;
+import com.transcend.nas.management.firmware.FileFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -242,7 +242,7 @@ public class SettingsActivity extends AppCompatActivity implements
                 email = args.getString("email");
                 return new TutkForgetPasswordLoader(this, server, email);
             case LoaderID.AUTO_BACKUP:
-                return new AutoBackupLoader(this);
+                return new AutoBackupInitLoader(this);
             case LoaderID.LOGIN:
                 return new LoginLoader(this, args, false);
         }
@@ -305,7 +305,7 @@ public class SettingsActivity extends AppCompatActivity implements
             checkGetNASResult((TutkGetNasLoader) loader);
         } else if (loader instanceof TutkResendActivateLoader) {
             checkResendActivateResult((TutkResendActivateLoader) loader);
-        } else if (loader instanceof AutoBackupLoader) {
+        } else if (loader instanceof AutoBackupInitLoader) {
             mProgressView.setVisibility(View.INVISIBLE);
         } else if (loader instanceof LoginLoader) {
             checkLoginResult((LoginLoader) loader);

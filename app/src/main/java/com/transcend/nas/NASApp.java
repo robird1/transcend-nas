@@ -42,7 +42,7 @@ public class NASApp extends MultiDexApplication {
 
     public static final String TUTK_NAME_TAG     = "@tS#";
 
-    public static Context mContext;
+    private static Context mContext;
     private Tracker mTracker;
 
     @Override

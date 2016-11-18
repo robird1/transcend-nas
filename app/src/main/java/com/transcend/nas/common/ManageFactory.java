@@ -35,14 +35,4 @@ public class ManageFactory {
         }
         return false;
     }
-
-    public static boolean isTopDirectory(String mode, String root, String path) {
-        if (NASApp.MODE_SMB.equals(mode)) {
-            return path.equals(root);
-        } else {
-            File base = new File(root);
-            File file = new File(path);
-            return file.equals(base);
-        }
-    }
 }

@@ -19,22 +19,22 @@
         android:theme="@style/AppTheme">
 
         <activity
-            android:name=".connection_new.IntroduceActivity"
+            android:name=".introduce.IntroduceActivity"
             android:screenOrientation="portrait">
         </activity>
 
         <activity
-            android:name=".connection_new.LoginActivity"
+            android:name=".connection.LoginActivity"
             android:screenOrientation="portrait">
         </activity>
 
         <activity
-            android:name=".connection_new.LoginByEmailActivity"
+            android:name=".connection.LoginByEmailActivity"
             android:screenOrientation="portrait">
         </activity>
 
         <activity
-            android:name=".connection_new.LoginListActivity"
+            android:name=".connection.LoginListActivity"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 
@@ -48,24 +48,24 @@
         </activity>
 
         <activity
-            android:name=".connection.GuideActivity"
+            android:name=".connection.old.GuideActivity"
             android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 
         <activity
-            android:name=".connection.WizardActivity"
+            android:name=".connection.old.WizardActivity"
             android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 
         <activity
-            android:name=".connection.NASListActivity"
+            android:name=".connection.old.NASListActivity"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 
         <activity
-            android:name=".connection.StartActivity"
+            android:name=".connection.old.StartActivity"
             android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
@@ -172,17 +172,17 @@
             android:label="@string/app_name" />
 
         <activity
-            android:name=".connection_new.FirstUseActivity"
+            android:name=".introduce.FirstUseActivity"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 
         <activity
-            android:name=".connection_new.LicenseAgreementActivity"
+            android:name=".introduce.LicenseAgreementActivity"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 
         <activity
-            android:name=".connection_new.PrivacyPolicyActivity"
+            android:name=".introduce.PrivacyPolicyActivity"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 

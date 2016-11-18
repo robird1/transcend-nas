@@ -107,7 +107,7 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
         boolean check = false;
         stopLanCheck();
 
-        ConnectivityManager connectivityManager = (ConnectivityManager) NASApp.mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connectivityManager = (ConnectivityManager) NASApp.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = connectivityManager.getActiveNetworkInfo();
         if (info != null && info.isAvailable()) {
             int type = info.getType();

@@ -9,8 +9,7 @@ import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
-import com.transcend.nas.connection_new.LoginHelper;
-import com.transcend.nas.firmware_api.ShareFolderManager;
+import com.transcend.nas.management.firmware.ShareFolderManager;
 
 /**
  * Created by silverhsu on 16/1/5.
