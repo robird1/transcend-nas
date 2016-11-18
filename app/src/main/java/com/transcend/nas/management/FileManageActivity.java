@@ -179,7 +179,7 @@ public class FileManageActivity extends AppCompatActivity implements
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            switch(msg.what){
+            switch (msg.what) {
                 case FB_PROFILE_PHOTO:
                     mNavHeaderIcon.setImageBitmap(mPhotoBitmap);
                     break;
@@ -415,7 +415,7 @@ public class FileManageActivity extends AppCompatActivity implements
         String hostname = mServer.getHostname();
 
         LanCheckManager.getInstance().setInit(true);
-        if(hostname.contains(P2PService.getInstance().getP2PIP())) {
+        if (hostname.contains(P2PService.getInstance().getP2PIP())) {
             LanCheckManager.getInstance().setLanConnect(false, "");
             LanCheckManager.getInstance().startLanCheck();
         } else {
@@ -520,8 +520,7 @@ public class FileManageActivity extends AppCompatActivity implements
         mNavView.getMenu().findItem(R.id.nav_switch).setVisible(NASPref.useSwitchNas);
     }
 
-    private void setDrawerHeaderIcon()
-    {
+    private void setDrawerHeaderIcon() {
         final String storedUrl = NASPref.getFBProfilePhotoUrl(this);
         if (storedUrl != null) {
 
@@ -858,8 +857,7 @@ public class FileManageActivity extends AppCompatActivity implements
     public void onBackPressed() {
         Log.w(TAG, "[Enter] onBackPressed()");
 
-        if (mDownloadManager != null)
-        {
+        if (mDownloadManager != null) {
             Log.w(TAG, "[Enter] mDownloadManager.cancel()");
 
             mDownloadManager.cancel();
@@ -1073,36 +1071,20 @@ public class FileManageActivity extends AppCompatActivity implements
                 ArrayList<FileInfo> files = ((SmbFileShareLoader) loader).getShareList();
                 if (files != null && files.size() > 0)
                     doLocalShare(files);
-            } else if ((loader instanceof LocalFileUploadLoader)) {
-
-                if (((LocalFileUploadLoader) loader).isOpenWithUpload()) {
-                    Bundle args = new Bundle();
-                    ArrayList pathList = new ArrayList();
-                    pathList.add(mFileInfo.path);
-                    args.putStringArrayList("paths", pathList);
-
-                    String fileName = ((LocalFileUploadLoader) loader).getUniqueFileName();
-                    mOpenWithUploadHandler.setTempFilePath(mOpenWithUploadHandler.getRemoteFileDirPath().concat(fileName));
-
-                    getLoaderManager().restartLoader(LoaderID.SMB_FILE_DELETE_AFTER_UPLOAD, args, this).forceLoad();
-                }
-
-            } else if ((loader instanceof SmbFileDeleteLoader)) {
-
-                if (((SmbFileDeleteLoader) loader).isDeleteAfterUpload()) {
-                    Log.d(TAG, "[Enter] (loader instanceof SmbFileDeleteLoader)");
-
-                    Bundle args = new Bundle();
-                    args.putString("path", mOpenWithUploadHandler.getTempFilePath());
-                    args.putString("name", mFileInfo.name);
-                    getLoaderManager().restartLoader(LoaderID.SMB_FILE_RENAME, args, this).forceLoad();
-                }
-
-            } else if ((loader instanceof SmbFileRenameLoader)) {
-                Log.d(TAG, "[Enter] (loader instanceof SmbFileRenameLoader)");
-
-                doRefresh();
-
+            } else if ((loader instanceof LocalFileUploadLoader) && ((LocalFileUploadLoader) loader).isOpenWithUpload()) {
+                Bundle args = new Bundle();
+                ArrayList pathList = new ArrayList();
+                pathList.add(mFileInfo.path);
+                args.putStringArrayList("paths", pathList);
+                String fileName = ((LocalFileUploadLoader) loader).getUniqueFileName();
+                mOpenWithUploadHandler.setTempFilePath(mOpenWithUploadHandler.getRemoteFileDirPath().concat(fileName));
+                getLoaderManager().restartLoader(LoaderID.SMB_FILE_DELETE_AFTER_UPLOAD, args, this).forceLoad();
+            } else if ((loader instanceof SmbFileDeleteLoader) && ((SmbFileDeleteLoader) loader).isDeleteAfterUpload()) {
+                Log.d(TAG, "[Enter] (loader instanceof SmbFileDeleteLoader)");
+                Bundle args = new Bundle();
+                args.putString("path", mOpenWithUploadHandler.getTempFilePath());
+                args.putString("name", mFileInfo.name);
+                getLoaderManager().restartLoader(LoaderID.SMB_FILE_RENAME, args, this).forceLoad();
             } else {
                 doRefresh();
                 if (loader instanceof SmbAbstractLoader) {
@@ -1161,7 +1143,7 @@ public class FileManageActivity extends AppCompatActivity implements
     private boolean doEventNotify(boolean update, String path) {
         Long lastTime = Long.parseLong(NASPref.getSessionVerifiedTime(this));
         Long currTime = System.currentTimeMillis();
-        if (!path.startsWith(NASApp.ROOT_STG) && currTime - lastTime >= 180000/6) {
+        if (!path.startsWith(NASApp.ROOT_STG) && currTime - lastTime >= 180000) {
             Bundle args = new Bundle();
             args.putString("path", update ? path : "");
             getLoaderManager().restartLoader(LoaderID.EVENT_NOTIFY, args, this).forceLoad();
@@ -1279,8 +1261,8 @@ public class FileManageActivity extends AppCompatActivity implements
         getLoaderManager().restartLoader(id, args, FileManageActivity.this).forceLoad();
         Log.w(TAG, "doUpload: " + paths.size() + " item(s) to " + dest);
 
-        Log.d(TAG, "source file path: "+ paths.get(0));
-        Log.d(TAG, "destination file path: "+ dest);
+        Log.d(TAG, "source file path: " + paths.get(0));
+        Log.d(TAG, "destination file path: " + dest);
 
     }
 
@@ -1903,7 +1885,7 @@ public class FileManageActivity extends AppCompatActivity implements
                     public void run() {
                         mOriginMD5Checksum = getMD5Checksum();
 
-                        Log.d(TAG, "mOriginMD5Checksum: "+ mOriginMD5Checksum);
+                        Log.d(TAG, "mOriginMD5Checksum: " + mOriginMD5Checksum);
                     }
                 }).start();
 
@@ -1935,11 +1917,9 @@ public class FileManageActivity extends AppCompatActivity implements
     private void checkCacheFileState() {
         Log.d(TAG, "[Enter] checkCacheFileState() ");
 
-        if (mOriginMD5Checksum != null)
-        {
+        if (mOriginMD5Checksum != null) {
             String checksum = getMD5Checksum();
-            if (checksum != null && !mOriginMD5Checksum.equals(checksum))
-            {
+            if (checksum != null && !mOriginMD5Checksum.equals(checksum)) {
                 mOpenWithUploadHandler = new OpenWithUploadHandler(this, mFileInfo, mDownloadFilePath, mSmbFileListLoader);
                 mOpenWithUploadHandler.showDialog();
             }
@@ -1948,17 +1928,15 @@ public class FileManageActivity extends AppCompatActivity implements
         mOriginMD5Checksum = null;
     }
 
-    private String getMD5Checksum()
-    {
+    private String getMD5Checksum() {
         Log.d(TAG, "[Enter] getMD5Checksum()");
 
         String checksum = null;
         try {
             MessageDigest md5Digest = MessageDigest.getInstance("MD5");
             checksum = getFileChecksum(md5Digest, new File(mDownloadFilePath));
-            Log.d(TAG, "checksum: "+ checksum);
-        }
-        catch (Exception e) {
+            Log.d(TAG, "checksum: " + checksum);
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -1966,8 +1944,7 @@ public class FileManageActivity extends AppCompatActivity implements
 
     }
 
-    private String getFileChecksum(MessageDigest digest, File file) throws IOException
-    {
+    private String getFileChecksum(MessageDigest digest, File file) throws IOException {
         //Get file input stream for reading the file content
         FileInputStream fis = new FileInputStream(file);
 
@@ -1978,7 +1955,8 @@ public class FileManageActivity extends AppCompatActivity implements
         //Read file data and update in message digest
         while ((bytesCount = fis.read(byteArray)) != -1) {
             digest.update(byteArray, 0, bytesCount);
-        };
+        }
+        ;
 
         //close the stream; We don't need it now.
         fis.close();
@@ -1989,8 +1967,7 @@ public class FileManageActivity extends AppCompatActivity implements
         //This bytes[] has bytes in decimal format;
         //Convert it to hexadecimal format
         StringBuilder sb = new StringBuilder();
-        for(int i=0; i< bytes.length ;i++)
-        {
+        for (int i = 0; i < bytes.length; i++) {
             sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
         }
 
