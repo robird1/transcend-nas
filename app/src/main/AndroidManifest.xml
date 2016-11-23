@@ -186,6 +186,11 @@
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 
+        <activity
+            android:name=".management.FeedbackActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
+
         <service android:name=".service.AutoBackupService">
         </service>
 

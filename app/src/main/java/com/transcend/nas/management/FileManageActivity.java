@@ -516,7 +516,6 @@ public class FileManageActivity extends AppCompatActivity implements
             mNavHeaderSubtitle.setText(String.format("%s", email));
         else
             mNavHeaderSubtitle.setText(String.format("%s@%s", mServer.getUsername(), mServer.getHostname()));
-        mNavView.getMenu().findItem(R.id.nav_disk_info).setVisible(NASPref.defaultUserName.equals(mServer.getUsername()));
         mNavView.getMenu().findItem(R.id.nav_switch).setVisible(NASPref.useSwitchNas);
     }
 
@@ -704,18 +703,15 @@ public class FileManageActivity extends AppCompatActivity implements
                 doLoad(NASPref.getDownloadLocation(this));
                 GoogleAnalysisFactory.getInstance(this).sendScreen(GoogleAnalysisFactory.VIEW.BROWSER_LOCAL_DOWNLOAD);
                 break;
-            case R.id.nav_disk_info:
-                startDiskInfoActivity();
-                break;
             case R.id.nav_settings:
                 startSettingsActivity();
                 break;
-            case R.id.nav_about:
-                startAboutActivity();
+            case R.id.nav_help:
+                startHelpActivity();
                 break;
-            //case R.id.nav_help:
-            //    startHelpActivity();
-            //    break;
+            case R.id.nav_feedback:
+                startFeedbackActivity();
+                break;
             case R.id.nav_switch:
                 startLoginListActivity();
                 break;
@@ -1814,6 +1810,12 @@ public class FileManageActivity extends AppCompatActivity implements
 
     private void startHelpActivity() {
         Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse("http://help.storejetcloud.com.s3-website-ap-northeast-1.amazonaws.com/TW/start.html"));
+        startActivity(i);
+    }
+
+    private void startFeedbackActivity()
+    {
+        Intent i = new Intent(this, FeedbackActivity.class);
         startActivity(i);
     }
 
