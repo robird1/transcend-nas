@@ -214,8 +214,10 @@ public class SettingsFragment extends BasicFragment implements SharedPreferences
             @Override
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
-                Preference pref = findPreference(getString(R.string.pref_firmware_version));
-                pref.setSummary((String) msg.obj);
+                if (getActivity() != null) {
+                    Preference pref = findPreference(getString(R.string.pref_firmware_version));
+                    pref.setSummary((String) msg.obj);
+                }
             }
         };
 
