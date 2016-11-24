@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.transcend.nas.R;
+import com.transcend.nas.common.CustomNotificationManager;
 import com.transcend.nas.management.firmware.FileFactory;
 
 import org.apache.commons.io.FilenameUtils;
@@ -50,7 +51,7 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
         super(context);
         mSrcs = srcs;
         mDest = dest;
-        mNotificationID = FileFactory.getInstance().getNotificationID();
+        mNotificationID = CustomNotificationManager.getInstance().queryNotificationID();
         mType = getContext().getString(R.string.upload);
         mTotal = mSrcs.size();
         mCurrent = 0;

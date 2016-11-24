@@ -133,9 +133,8 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
     };
 
     private boolean isWifiOnly() {
-        String scenario = NASPref.getBackupScenario(getApplicationContext());
-        String[] scenarios = getApplicationContext().getResources().getStringArray(R.array.backup_scenario_values);
-        return Arrays.asList(scenarios).indexOf(scenario) == 1;
+        boolean scenario = NASPref.getBackupScenario(getApplicationContext());
+        return !scenario;
     }
 
     private void initBackup() {

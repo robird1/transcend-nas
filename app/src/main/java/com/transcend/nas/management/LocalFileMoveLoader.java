@@ -12,6 +12,7 @@ import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import com.transcend.nas.R;
+import com.transcend.nas.common.CustomNotificationManager;
 import com.transcend.nas.management.firmware.FileFactory;
 import com.transcend.nas.utils.MathUtil;
 
@@ -49,7 +50,7 @@ public class LocalFileMoveLoader extends AsyncTaskLoader<Boolean> {
         mActivity = (Activity) context;
         mSrcs = srcs;
         mDest = dest;
-        mNotificationID = FileFactory.getInstance().getNotificationID();
+        mNotificationID = CustomNotificationManager.getInstance().queryNotificationID();
         mTotal = mSrcs.size();
         mCurrent = 0;
     }
@@ -216,7 +217,7 @@ public class LocalFileMoveLoader extends AsyncTaskLoader<Boolean> {
         builder.setContentIntent(pendingIntent);
         builder.setAutoCancel(true);
         ntfMgr.notify(mNotificationID, builder.build());
-        FileFactory.getInstance().releaseNotificationID(mNotificationID);
+        CustomNotificationManager.getInstance().releaseNotificationID(mNotificationID);
     }
 
 }

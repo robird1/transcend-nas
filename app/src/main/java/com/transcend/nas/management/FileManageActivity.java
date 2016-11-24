@@ -71,16 +71,11 @@ import com.transcend.nas.connection.LoginActivity;
 import com.transcend.nas.connection.LoginListActivity;
 import com.transcend.nas.management.firmware.MediaManagerLoader;
 import com.transcend.nas.management.firmware.ShareFolderManager;
-import com.transcend.nas.service.AutoBackupInitLoader;
 import com.transcend.nas.service.AutoBackupService;
 import com.transcend.nas.service.LanCheckManager;
 import com.transcend.nas.management.firmware.TwonkyManager;
-import com.transcend.nas.settings.AboutActivity;
 import com.transcend.nas.settings.DiskFactory;
-import com.transcend.nas.settings.DiskInfoActivity;
-import com.transcend.nas.settings.NewSettingsActivity;
 import com.transcend.nas.settings.SettingsActivity;
-import com.transcend.nas.settings.SettingsActivity2;
 import com.transcend.nas.tutk.TutkLinkNasLoader;
 import com.transcend.nas.tutk.TutkLogoutLoader;
 import com.transcend.nas.view.NotificationDialog;
@@ -161,7 +156,6 @@ public class FileManageActivity extends AppCompatActivity implements
     private int mLoaderID;
     private int mPreviousLoaderID = -1;
     private Bundle mPreviousLoaderArgs = null;
-    private boolean isAutoBackupServiceInit = false;
 
     private VideoCastManager mCastManager;
     private VideoCastConsumer mCastConsumer;
@@ -205,9 +199,9 @@ public class FileManageActivity extends AppCompatActivity implements
             initDrawer();
             initActionModeView();
             initDownloadManager();
+            initAutoBackUpService();
             doRefresh();
             NASPref.setInitial(this, true);
-
             // Get intent, action and MIME type
             Intent intent = getIntent();
             onReceiveIntent(intent);
@@ -426,20 +420,17 @@ public class FileManageActivity extends AppCompatActivity implements
         TwonkyManager.getInstance().initTwonky();
     }
 
-    private boolean initAutoBackUpService() {
-        isAutoBackupServiceInit = true;
-        boolean checked = NASPref.getBackupSetting(this);
+    private void initAutoBackUpService() {
+        boolean enable = NASPref.getBackupSetting(this);
         Intent intent = new Intent(this, AutoBackupService.class);
-        boolean isRunning = ManageFactory.isServiceRunning(this, AutoBackupService.class);
-        if (checked) {
-            if (!isRunning) {
-                Bundle args = new Bundle();
-                getLoaderManager().restartLoader(LoaderID.AUTO_BACKUP, args, this).forceLoad();
-                return true;
-            }
-        } else
+        if(!enable) {
             stopService(intent);
-        return false;
+            return;
+        }
+
+        if(!ManageFactory.isServiceRunning(this, AutoBackupService.class))
+            startService(intent);
+
     }
 
     private void initToolbar() {
@@ -684,42 +675,47 @@ public class FileManageActivity extends AppCompatActivity implements
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
 
-        int id = item.getItemId();
-        if (id != R.id.nav_logout)
+        final int id = item.getItemId();
+        if (id == R.id.nav_logout) {
+            showLogoutDialog();
+        } else {
             mDrawer.closeDrawer(GravityCompat.START);
-
-        switch (id) {
-            case R.id.nav_storage:
-                mDevice = false;
-                doLoad(NASApp.ROOT_SMB);
-                GoogleAnalysisFactory.getInstance(this).sendScreen(GoogleAnalysisFactory.VIEW.BROWSER_REMOTE);
-                break;
-            case R.id.nav_device:
-                mDevice = true;
-                doLoad(NASApp.ROOT_STG);
-                GoogleAnalysisFactory.getInstance(this).sendScreen(GoogleAnalysisFactory.VIEW.BROWSER_LOCAL);
-                break;
-            case R.id.nav_downloads:
-                mDevice = false;
-                doLoad(NASPref.getDownloadLocation(this));
-                GoogleAnalysisFactory.getInstance(this).sendScreen(GoogleAnalysisFactory.VIEW.BROWSER_LOCAL_DOWNLOAD);
-                break;
-            case R.id.nav_settings:
-                startSettingsActivity();
-                break;
-            case R.id.nav_help:
-                startHelpActivity();
-                break;
-            case R.id.nav_feedback:
-                startFeedbackActivity();
-                break;
-            case R.id.nav_switch:
-                startLoginListActivity();
-                break;
-            case R.id.nav_logout:
-                showLogoutDialog();
-                break;
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    switch (id) {
+                        case R.id.nav_storage:
+                            mDevice = false;
+                            doLoad(NASApp.ROOT_SMB);
+                            GoogleAnalysisFactory.getInstance(FileManageActivity.this).sendScreen(GoogleAnalysisFactory.VIEW.BROWSER_REMOTE);
+                            break;
+                        case R.id.nav_device:
+                            mDevice = true;
+                            doLoad(NASApp.ROOT_STG);
+                            GoogleAnalysisFactory.getInstance(FileManageActivity.this).sendScreen(GoogleAnalysisFactory.VIEW.BROWSER_LOCAL);
+                            break;
+                        case R.id.nav_downloads:
+                            mDevice = false;
+                            doLoad(NASPref.getDownloadLocation(FileManageActivity.this));
+                            GoogleAnalysisFactory.getInstance(FileManageActivity.this).sendScreen(GoogleAnalysisFactory.VIEW.BROWSER_LOCAL_DOWNLOAD);
+                            break;
+                        case R.id.nav_settings:
+                            startSettingsActivity();
+                            break;
+                        case R.id.nav_help:
+                            startHelpActivity();
+                            break;
+                        case R.id.nav_feedback:
+                            startFeedbackActivity();
+                            break;
+                        case R.id.nav_switch:
+                            startLoginListActivity();
+                            break;
+                    }
+                }
+            }, 200);
         }
+
         return true;
     }
 
@@ -999,8 +995,6 @@ public class FileManageActivity extends AppCompatActivity implements
             case LoaderID.TUTK_LOGOUT:
                 mProgressView.setVisibility(View.VISIBLE);
                 return new TutkLogoutLoader(this);
-            case LoaderID.AUTO_BACKUP:
-                return new AutoBackupInitLoader(this);
             case LoaderID.MEDIA_PLAYER:
                 mProgressView.setVisibility(View.VISIBLE);
                 return new MediaManagerLoader(this, args);
@@ -1059,8 +1053,6 @@ public class FileManageActivity extends AppCompatActivity implements
                     doLoad(path);
                     return;
                 }
-            } else if (loader instanceof AutoBackupInitLoader) {
-                //do nothing
             } else if (loader instanceof MediaManagerLoader) {
                 Bundle args = ((MediaManagerLoader) loader).getBundleArgs();
                 MediaFactory.open(this, args);
@@ -1125,9 +1117,6 @@ public class FileManageActivity extends AppCompatActivity implements
         }
 
         toggleDrawerCheckedItem();
-        if (!isAutoBackupServiceInit && initAutoBackUpService()) {
-            return;
-        }
         mProgressView.setVisibility(View.INVISIBLE);
     }
 
@@ -1786,27 +1775,10 @@ public class FileManageActivity extends AppCompatActivity implements
         startActivityForResult(intent, FileInfoActivity.REQUEST_CODE);
     }
 
-    private void startDiskInfoActivity() {
-        Intent intent = new Intent();
-        intent.setClass(FileManageActivity.this, DiskInfoActivity.class);
-        startActivityForResult(intent, DiskInfoActivity.REQUEST_CODE);
-    }
-
     private void startSettingsActivity() {
         Intent intent = new Intent();
-        if (NASPref.useNewLoginFlow) {
-            intent.setClass(FileManageActivity.this, SettingsActivity2.class);
-            startActivityForResult(intent, SettingsActivity2.REQUEST_CODE);
-        } else {
-            intent.setClass(FileManageActivity.this, SettingsActivity.class);
-            startActivityForResult(intent, SettingsActivity.REQUEST_CODE);
-        }
-    }
-
-    private void startAboutActivity() {
-        Intent intent = new Intent();
-        intent.setClass(FileManageActivity.this, AboutActivity.class);
-        startActivityForResult(intent, AboutActivity.REQUEST_CODE);
+        intent.setClass(FileManageActivity.this, SettingsActivity.class);
+        startActivityForResult(intent, SettingsActivity.REQUEST_CODE);
     }
 
     private void startHelpActivity() {
@@ -1814,8 +1786,7 @@ public class FileManageActivity extends AppCompatActivity implements
         startActivity(i);
     }
 
-    private void startFeedbackActivity()
-    {
+    private void startFeedbackActivity() {
         Intent i = new Intent(this, FeedbackActivity.class);
         startActivity(i);
     }

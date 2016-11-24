@@ -3,7 +3,7 @@ package com.transcend.nas.management;
 import android.content.Context;
 
 import com.transcend.nas.R;
-import com.transcend.nas.management.firmware.FileFactory;
+import com.transcend.nas.common.CustomNotificationManager;
 
 import java.net.MalformedURLException;
 import java.util.List;
@@ -23,7 +23,7 @@ public class SmbFileCopyLoader extends SmbAbstractLoader {
         super(context);
         mSrcs = srcs;
         mDest = dest;
-        mNotificationID = FileFactory.getInstance().getNotificationID();
+        mNotificationID = CustomNotificationManager.getInstance().queryNotificationID();
         mType = getContext().getString(R.string.copy);
         mTotal = mSrcs.size();
         mCurrent = 0;
@@ -65,7 +65,7 @@ public class SmbFileCopyLoader extends SmbAbstractLoader {
     }
 
     private void copyDirectory(SmbFile source, String destination) throws MalformedURLException, SmbException {
-        String name = createUniqueName(source, destination);
+        String name = createRemoteUniqueName(source, destination);
         SmbFile target = new SmbFile(destination, name);
         target.mkdirs();
         SmbFile[] files = source.listFiles();
@@ -90,7 +90,7 @@ public class SmbFileCopyLoader extends SmbAbstractLoader {
     }
 
     private void copyFile(SmbFile source, String destination) throws MalformedURLException, SmbException {
-        String name = createUniqueName(source, destination);
+        String name = createRemoteUniqueName(source, destination);
         SmbFile target = new SmbFile(destination, name);
         int total = getSize(source);
         startProgressWatcher(name, target, total);

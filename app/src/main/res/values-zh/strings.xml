@@ -49,6 +49,8 @@
     <string name="access_error">存取錯誤</string>
     <string name="add_device">新增 StoreJetCloud</string>
     <string name="all_networks">Wi-Fi與行動網路</string>
+    <string name="advanced_setting">進階選項</string>
+    <string name="use_cellular_network">使用行動網路</string>
     <string name="already_have_account">已有帳號?</string>
     <string name="always">總是</string>
     <string name="appwizard1_freely_access">無論你身在何處，都可以透過行動裝置APP，自由存取StoreJet Cloud內的檔案。</string>

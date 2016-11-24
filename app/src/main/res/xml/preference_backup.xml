@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout="@layout/preference_item">
+
+    <PreferenceCategory
+        android:layout="@layout/preference_category_widget"
+        android:title="@string/camera_backup">
+
+        <CheckBoxPreference
+            android:key="@string/pref_auto_backup"
+            android:layout="@layout/preference_item"
+            android:summary="@string/msg_auto_backup"
+            android:title="@string/auto_backup"
+            android:widgetLayout="@layout/switch_button" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/preference_category_widget"
+        android:title="@string/advanced_setting">
+
+        <CheckBoxPreference
+            android:key="@string/pref_backup_scenario"
+            android:layout="@layout/preference_item"
+            android:summary="@string/msg_backup_by_cellular"
+            android:title="@string/use_cellular_network"
+            android:widgetLayout="@layout/switch_button" />
+
+        <CheckBoxPreference
+            android:key="@string/pref_backup_video"
+            android:layout="@layout/preference_item"
+            android:title="@string/backup_videos"
+            android:widgetLayout="@layout/switch_button" />
+
+        <Preference
+            android:key="@string/pref_backup_location"
+            android:layout="@layout/preference_item"
+            android:summary="/"
+            android:title="@string/backup_destination" />
+
+        <Preference
+            android:key="@string/pref_backup_source"
+            android:layout="@layout/preference_item"
+            android:summary="/"
+            android:title="@string/backup_source" />
+    </PreferenceCategory>
+
+    <PreferenceCategory>
+        <!-- footer -->
+    </PreferenceCategory>
+
+</PreferenceScreen>

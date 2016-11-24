@@ -5,8 +5,8 @@
     <!--<color name="colorAccent">#D32F2F</color>-->
     <color name="colorAccent">#960014</color>
     <color name="textColorPrimary">#424242</color>
-    <!--<color name="textColorSecondary">#9E9E9E</color>-->
-    <color name="textColorSecondary">#DFDFDF</color>
+    <color name="textColorSecondary">#9E9E9E</color>
+    <!-- color name="textColorSecondary">#DFDFDF</color>-->
     <color name="colorPressed">#EEEEEE</color>
     <color name="colorSelected">#EEEEEE</color>
     <color name="colorAccentDialog">#03A9F4</color>

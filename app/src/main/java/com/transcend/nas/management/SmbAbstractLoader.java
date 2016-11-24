@@ -15,12 +15,15 @@ import com.realtek.nasfun.api.SambaStatus;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.R;
+import com.transcend.nas.common.CustomNotificationManager;
 import com.transcend.nas.management.firmware.FileFactory;
 import com.transcend.nas.utils.MathUtil;
 import com.tutk.IOTC.P2PService;
 
 import org.apache.commons.io.FilenameUtils;
 
+import java.io.File;
+import java.io.FileFilter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -144,7 +147,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         return total;
     }
 
-    protected String createUniqueName(SmbFile source, String destination) throws MalformedURLException, SmbException {
+    protected String createRemoteUniqueName(SmbFile source, String destination) throws MalformedURLException, SmbException {
         final boolean isDirectory= source.isDirectory();
         SmbFile dir = new SmbFile(destination);
         SmbFile[] files = dir.listFiles(new SmbFileFilter() {
@@ -160,6 +163,30 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         String ext = FilenameUtils.getExtension(origin);
         String prefix = FilenameUtils.getBaseName(origin.replace("/", ""));
         String suffix = isDirectory ? "/" : ext.isEmpty() ? "" : String.format(".%s", ext);
+        int index = 2;
+        while (names.contains(unique)) {
+            unique = String.format(prefix + "_%d" + suffix, index++);
+        }
+        Log.w(TAG, "unique name: " + unique);
+        return unique;
+    }
+
+    protected String createLocalUniqueName(SmbFile source, String destination) throws MalformedURLException, SmbException {
+        final boolean isDirectory = source.isDirectory();
+        File dir = new File(destination);
+        File[] files = dir.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File pathname) {
+                return pathname.isDirectory() == isDirectory;
+            }
+        });
+        List<String> names = new ArrayList<String>();
+        for (File file : files) names.add(file.getName());
+        String origin = source.getName().replace("/", ""); // remove last character "/"
+        String unique = origin;
+        String ext = FilenameUtils.getExtension(origin);
+        String prefix = FilenameUtils.getBaseName(origin);
+        String suffix = ext.isEmpty() ? "" : String.format(".%s", ext);
         int index = 2;
         while (names.contains(unique)) {
             unique = String.format(prefix + "_%d" + suffix, index++);
@@ -254,7 +281,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         builder.setContentIntent(pendingIntent);
         builder.setAutoCancel(true);
         ntfMgr.notify(mNotificationID, builder.build());
-        FileFactory.getInstance().releaseNotificationID(mNotificationID);
+        CustomNotificationManager.getInstance().releaseNotificationID(mNotificationID);
     }
 
 }

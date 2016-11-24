@@ -135,7 +135,6 @@ public class AutoBackupTask extends AsyncTask<String, String, Boolean>
         if (isValid(path))
             builder.append(path);
 
-        Log.d(TAG, "Auto backup task url : " + builder.toString());
         return builder.toString();
     }
 
@@ -218,7 +217,7 @@ public class AutoBackupTask extends AsyncTask<String, String, Boolean>
         if(!target.exists())
             target.mkdirs();
         String folder = destination + name + "/";
-        Log.w(TAG, "upload folder : " + folder);
+        Log.w(TAG, "upload folder : " + name);
         return folder;
     }
 

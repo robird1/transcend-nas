@@ -120,7 +120,7 @@ public class FileManageDropdownAdapter extends BaseAdapter {
             View view = inflater.inflate(R.layout.dropdown, parent, false);
             convertView = ViewHolder.get(view, R.id.dropdown_text);
         }
-        ((TextView)convertView).setText(mList.get(0));
+        ((TextView)convertView).setText(mList.get(0) + "  ");
         return convertView;
     }
 

@@ -317,16 +317,16 @@ public class NASPref {
     /**
      * Backup scenario
      */
-    public static void setBackupScenario(Context context, String scenario) {
+    public static void setBackupScenario(Context context, boolean scenario) {
         String name = context.getResources().getString(R.string.pref_name);
         String key = context.getResources().getString(R.string.pref_backup_scenario);
         PrefUtil.write(context, name, key, scenario);
     }
 
-    public static String getBackupScenario(Context context) {
+    public static boolean getBackupScenario(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
         String key = context.getResources().getString(R.string.pref_backup_scenario);
-        String def = context.getResources().getStringArray(R.array.backup_scenario_values)[1];
+        boolean def = false;
         return PrefUtil.read(context, name, key, def);
     }
 
@@ -514,16 +514,14 @@ public class NASPref {
         setCloudAuthToken(context, "");
         setCloudAccountStatus(context, Status.Inactive.ordinal());
         setCloudUUID(context, "");
-        String[] scenarios = context.getResources().getStringArray(R.array.backup_scenario_values);
-        setBackupScenario(context, scenarios[1]);
+        setBackupScenario(context, false);
         setBackupSetting(context, false);
         setBackupLocation(context, "/homes/" + Build.MODEL + "/");
         setBackupSource(context, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
     }
 
     public static void clearDataAfterSwitch(Context context){
-        String[] scenarios = context.getResources().getStringArray(R.array.backup_scenario_values);
-        setBackupScenario(context, scenarios[1]);
+        setBackupScenario(context, false);
         setBackupSetting(context, false);
         setBackupLocation(context, "/homes/" + Build.MODEL + "/");
         setBackupSource(context, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
