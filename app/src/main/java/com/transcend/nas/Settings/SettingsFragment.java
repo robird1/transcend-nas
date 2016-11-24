@@ -5,6 +5,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceScreen;
@@ -15,11 +17,35 @@ import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.utils.StorageUtils;
+import com.realtek.nasfun.api.HttpClientManager;
+import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.management.FileActionLocateActivity;
 import com.transcend.nas.management.firmware.FileFactory;
+import com.tutk.IOTC.P2PService;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -28,6 +54,7 @@ import com.transcend.nas.management.firmware.FileFactory;
 
 public class SettingsFragment extends BasicFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String TAG = SettingsActivity.class.getSimpleName();
+    private static final String XML_TAG_FIRMWARE_VERSION = "software";
     private Toast mToast;
 
     public SettingsFragment() {
@@ -42,6 +69,7 @@ public class SettingsFragment extends BasicFragment implements SharedPreferences
         getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
         refreshColumnDownloadLocation();
         refreshColumnCacheUseSize();
+        refreshFirmwareVersion();
         getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
     }
 
@@ -179,5 +207,119 @@ public class SettingsFragment extends BasicFragment implements SharedPreferences
         Intent intent = new Intent();
         intent.setClass(getActivity(), DiskInfoActivity.class);
         startActivity(intent);
+    }
+
+    private void refreshFirmwareVersion() {
+        final Handler handler = new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                Preference pref = findPreference(getString(R.string.pref_firmware_version));
+                pref.setSummary((String) msg.obj);
+            }
+        };
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String version = getFirmwareVersion();
+                if (version != null) {
+                    Message msg = Message.obtain();
+                    msg.obj = version;
+                    handler.sendMessage(msg);
+                }
+            }
+        }).start();
+
+    }
+
+    private String getFirmwareVersion() {
+        String firmwareVersion = null;
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
+        String hash = server.getHash();
+        DefaultHttpClient httpClient = HttpClientManager.getClient();
+        String commandURL = "http://" + hostname + "/nas/get/info";
+        Log.d(TAG, commandURL);
+
+        HttpResponse response;
+        InputStream inputStream = null;
+        try {
+            HttpPost httpPost = new HttpPost(commandURL);
+            List<NameValuePair> nameValuePairs = new ArrayList<>();
+            nameValuePairs.add(new BasicNameValuePair("hash", hash));
+            httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+            response = httpClient.execute(httpPost);
+            HttpEntity entity = null;
+            if (response != null) {
+                entity = response.getEntity();
+            }
+
+            if (entity != null) {
+                inputStream = entity.getContent();
+            }
+            String inputEncoding = EntityUtils.getContentCharSet(entity);
+            if (inputEncoding == null) {
+                inputEncoding = HTTP.DEFAULT_CONTENT_CHARSET;
+            }
+
+            if (inputStream != null) {
+                firmwareVersion = doParse(inputStream, inputEncoding);
+            }
+
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return firmwareVersion;
+    }
+
+    private String doParse(InputStream inputStream, String inputEncoding)
+    {
+        Log.d(TAG, "[Enter] doParse()");
+
+        String firmwareVersion = null;
+        XmlPullParserFactory factory;
+
+        try {
+            factory = XmlPullParserFactory.newInstance();
+            factory.setNamespaceAware(true);
+            XmlPullParser parser = factory.newPullParser();
+            parser.setInput(inputStream, inputEncoding);
+            int eventType = parser.getEventType();
+
+            do {
+                String tagName = parser.getName();
+                Log.d(TAG, "tagName: " + tagName);
+
+                if (eventType == XmlPullParser.START_TAG) {
+                    if (tagName.equals(XML_TAG_FIRMWARE_VERSION)) {
+                        parser.next();
+                        Log.d(TAG, "parser.getText(): " + parser.getText());
+
+                        firmwareVersion = parser.getText();
+                        break;
+                    }
+
+                } else if (eventType == XmlPullParser.TEXT) {
+                    Log.d(TAG, "parser.getText(): " + parser.getText());
+                }
+
+                eventType = parser.next();
+
+            } while (eventType != XmlPullParser.END_DOCUMENT);
+
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return firmwareVersion;
+
     }
 }
