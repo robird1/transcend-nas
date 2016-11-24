@@ -80,6 +80,7 @@ import com.transcend.nas.settings.DiskFactory;
 import com.transcend.nas.settings.DiskInfoActivity;
 import com.transcend.nas.settings.NewSettingsActivity;
 import com.transcend.nas.settings.SettingsActivity;
+import com.transcend.nas.settings.SettingsActivity2;
 import com.transcend.nas.tutk.TutkLinkNasLoader;
 import com.transcend.nas.tutk.TutkLogoutLoader;
 import com.transcend.nas.view.NotificationDialog;
@@ -1794,8 +1795,8 @@ public class FileManageActivity extends AppCompatActivity implements
     private void startSettingsActivity() {
         Intent intent = new Intent();
         if (NASPref.useNewLoginFlow) {
-            intent.setClass(FileManageActivity.this, NewSettingsActivity.class);
-            startActivityForResult(intent, NewSettingsActivity.REQUEST_CODE);
+            intent.setClass(FileManageActivity.this, SettingsActivity2.class);
+            startActivityForResult(intent, SettingsActivity2.REQUEST_CODE);
         } else {
             intent.setClass(FileManageActivity.this, SettingsActivity.class);
             startActivityForResult(intent, SettingsActivity.REQUEST_CODE);

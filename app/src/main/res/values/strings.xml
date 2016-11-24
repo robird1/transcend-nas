@@ -332,5 +332,18 @@
     <string name="invalid_email">Invalid email address</string>
     <string name="invalid_message">Empty message</string>
     <string name="thank_you">Thank you</string>
+    <string name="pref_disk_info">DISK INFORMATION</string>
+    <string name="pref_device_info">DEVICE INFORMATION</string>
+    <string name="pref_firmware_version">FIRMWARE VERSION</string>
+    <string name="settings_download_location">Download Location</string>
+    <string name="dialog_clean_cache">Do you want to clean cache?</string>
+    <string name="settings_auto_backup_subtitle">Auto backup your camera folder</string>
+    <string name="settings_disk_info_title">Disk Manager</string>
+    <string name="settings_disk_info_subtitle">StoreJet Cloud Disk Status</string>
+    <string name="settings_device_info_title">Device Information</string>
+    <string name="settings_device_info_subtitle">StoreJet Cloud Status</string>
+    <string name="settings_firmware_version_title">Firmware Version</string>
+
+
 
 </resources>
