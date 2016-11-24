@@ -134,6 +134,7 @@ public class EventNotifyLoader extends AsyncTaskLoader<Boolean> {
             if (!isValid) {
                 Log.w(TAG, "hash key not valid, start login again");
                 Server mServer = ServerManager.INSTANCE.getCurrentServer();
+                mServer.setHostname(P2PService.getInstance().getIP(mServer.getHostname(), P2PService.P2PProtocalType.HTTP));
                 isSuccess = mServer.connect(false);
                 if (isSuccess) {
                     ServerManager.INSTANCE.saveServer(mServer);

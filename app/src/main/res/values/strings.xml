@@ -1,6 +1,4 @@
-<resources
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:ignore="MissingTranslation" >
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="app_name">StoreJet Cloud</string>
     <string name="storage_name">Storage</string>
@@ -26,7 +24,7 @@
     <string name="pref_remote_access">REMOTE ACCESS</string>
     <string name="pref_auto_backup">AUTO BACKUP</string>
     <string name="pref_backup_video">BACKUP VIDEO</string>
-    <string name="pref_backup_scenario">BACKUP SCENARIO</string>
+    <string name="pref_backup_scenario">BACKUP MODE</string>
     <string name="pref_backup_location">BACKUP LOCATION</string>
     <string name="pref_backup_source">BACKUP SOURCE</string>
     <string name="pref_backup_error_task">BACKUP ERROR TASK</string>
@@ -82,16 +80,6 @@
         <item>@string/reverse_date</item>
         <item>@string/name</item>
         <item>@string/reverse_name</item>
-    </string-array>
-
-    <string-array name="backup_scenario_entries">
-        <item>@string/all_networks</item>
-        <item>@string/wifi_only</item>
-    </string-array>
-
-    <string-array name="backup_scenario_values">
-        <item>ALWAYS</item>
-        <item>WIFI_ONLY</item>
     </string-array>
 
     <string-array name="cache_size_entries">
@@ -153,6 +141,8 @@
     <string name="access_error">Access deny</string>
     <string name="add_device">Add new StoreJet Cloud</string>
     <string name="all_networks">Wi-Fi &amp; Cellular network</string>
+    <string name="advanced_setting">Advanced settings</string>
+    <string name="use_cellular_network">Use Cellular network</string>
     <string name="already_have_account">Do you already have an account?</string>
     <string name="always">Always</string>
     <string name="appwizard1_freely_access">Freely access all your files stored on StoreJet Cloud anywhere through mobile APP.</string>
@@ -215,6 +205,7 @@
     <string name="login_not">Not Login</string>
     <string name="model">Model</string>
     <string name="msg_auto_backup">Auto upload your camera photos and video to StoreJet Cloud.</string>
+    <string name="msg_backup_by_cellular">Use Cellular network to backup your camera photos and video.</string>
     <string name="msg_backup_scenario">Choose a scenario to backup your camera photos and video.</string>
     <string name="msg_cache_cleared">Cache cleared</string>
     <string name="msg_conj_deleted">%1$d item(s) will be deleted.</string>
@@ -343,7 +334,5 @@
     <string name="settings_device_info_title">Device Information</string>
     <string name="settings_device_info_subtitle">StoreJet Cloud Status</string>
     <string name="settings_firmware_version_title">Firmware Version</string>
-
-
 
 </resources>

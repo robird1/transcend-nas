@@ -21,11 +21,9 @@ public class FileFactory {
     private static final String TAG = FileFactory.class.getSimpleName();
     private static FileFactory mFileFactory;
     private static final Object mMute = new Object();
-    private List<String> mNotificationList;
     private ArrayList<FileInfo> mFileList;
 
     public FileFactory() {
-        mNotificationList = new ArrayList<String>();
         mFileList = new ArrayList<FileInfo>();
     }
 
@@ -194,23 +192,6 @@ public class FileFactory {
         String formatSize = df.format(sizeMB) + s;
 
         return formatSize;
-    }
-
-    public int getNotificationID() {
-        int id = 1;
-        if (mNotificationList.size() > 0) {
-            String value = mNotificationList.get(mNotificationList.size() - 1);
-            id = Integer.parseInt(value) + 1;
-            mNotificationList.add(Integer.toString(id));
-        } else {
-            mNotificationList.add(Integer.toString(id));
-        }
-        return id;
-    }
-
-    public void releaseNotificationID(int id) {
-        String value = "" + id;
-        mNotificationList.remove(value);
     }
 
     public void setFileList(ArrayList<FileInfo> list) {

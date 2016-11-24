@@ -125,16 +125,6 @@
         </activity>
 
         <activity
-            android:name=".settings.RemoteAccessActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize">
-        </activity>
-
-        <activity
-            android:name=".settings.NewSettingsActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize">
-        </activity>
-
-        <activity
             android:name=".settings.AboutActivity"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
@@ -188,11 +178,6 @@
 
         <activity
             android:name=".management.FeedbackActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize">
-        </activity>
-
-        <activity
-            android:name=".settings.SettingsActivity2"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 

@@ -5,6 +5,7 @@ import android.os.Build;
 import android.util.Log;
 
 import com.transcend.nas.R;
+import com.transcend.nas.common.CustomNotificationManager;
 import com.transcend.nas.management.firmware.FileFactory;
 
 import org.apache.commons.io.FilenameUtils;
@@ -43,7 +44,7 @@ public class SmbFileShareLoader extends SmbAbstractLoader {
         super(context);
         mSrcs = srcs;
         mDest = dest;
-        mNotificationID = FileFactory.getInstance().getNotificationID();
+        mNotificationID = CustomNotificationManager.getInstance().queryNotificationID();
         mType = getContext().getString(R.string.share);
         mShareList = new ArrayList<>();
     }
@@ -131,29 +132,7 @@ public class SmbFileShareLoader extends SmbAbstractLoader {
         }
     }
 
-    private String createLocalUniqueName(SmbFile source, String destination) throws MalformedURLException, SmbException {
-        final boolean isDirectory = source.isDirectory();
-        File dir = new File(destination);
-        File[] files = dir.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File pathname) {
-                return pathname.isDirectory() == isDirectory;
-            }
-        });
-        List<String> names = new ArrayList<String>();
-        for (File file : files) names.add(file.getName());
-        String origin = source.getName().replace("/", ""); // remove last character "/"
-        String unique = origin;
-        String ext = FilenameUtils.getExtension(origin);
-        String prefix = FilenameUtils.getBaseName(origin);
-        String suffix = ext.isEmpty() ? "" : String.format(".%s", ext);
-        int index = 2;
-        while (names.contains(unique)) {
-            unique = String.format(prefix + "_%d" + suffix, index++);
-        }
-        Log.w(TAG, "unique name: " + unique);
-        return unique;
-    }
+
 
     public ArrayList<FileInfo> getShareList(){
         return mShareList;

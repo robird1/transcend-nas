@@ -193,8 +193,7 @@ public class LoginByEmailActivity extends AppCompatActivity implements
             NASPref.setCloudPassword(this, "");
             NASPref.setCloudAuthToken(this, "");
             NASPref.setCloudUUID(this, "");
-            String[] scenarios = getResources().getStringArray(R.array.backup_scenario_values);
-            NASPref.setBackupScenario(this, scenarios[1]);
+            NASPref.setBackupScenario(this, false);
             Toast.makeText(this, getString(R.string.forget_password_send), Toast.LENGTH_SHORT).show();
         } else {
             if (!code.equals(""))
@@ -316,8 +315,7 @@ public class LoginByEmailActivity extends AppCompatActivity implements
                     NASPref.setCloudPassword(mContext, "");
                     NASPref.setCloudAuthToken(mContext, "");
                     NASPref.setCloudUUID(mContext, "");
-                    String[] scenarios = mContext.getResources().getStringArray(R.array.backup_scenario_values);
-                    NASPref.setBackupScenario(mContext, scenarios[1]);
+                    NASPref.setBackupScenario(mContext, false);
                     isRemoteAccessRegister = false;
                     updateView();
                 } else {

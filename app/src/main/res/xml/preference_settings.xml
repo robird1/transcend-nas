@@ -3,92 +3,52 @@
     android:layout="@layout/preference_item">
 
     <PreferenceCategory
-        android:layout="@layout/preference_category_widget"
-        android:title="@string/download">
+        android:layout="@layout/preference_category_widget">
 
         <Preference
             android:key="@string/pref_download_location"
             android:layout="@layout/preference_item"
-            android:summary="/"
-            android:title="@string/location" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:key="@string/pref_remote_access_category"
-        android:layout="@layout/preference_category_widget"
-        android:title="@string/remote_access">
+            android:summary="xxxxxx"
+            android:title="@string/settings_download_location" />
 
         <Preference
-            android:key="@string/pref_remote_access"
-            android:layout="@layout/preference_item"
-            android:summary="@string/remote_access_info"
-            android:title="@string/remote_access_inactive" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:layout="@layout/preference_category_widget"
-        android:title="@string/camera_backup">
-
-        <CheckBoxPreference
             android:key="@string/pref_auto_backup"
             android:layout="@layout/preference_item"
-            android:summary="@string/msg_auto_backup"
             android:title="@string/auto_backup"
-            android:widgetLayout="@layout/switch_button" />
-
-        <ListPreference
-            android:dialogTitle="@string/choose_a_scenario"
-            android:entries="@array/backup_scenario_entries"
-            android:entryValues="@array/backup_scenario_values"
-            android:key="@string/pref_backup_scenario"
-            android:layout="@layout/preference_item"
-            android:summary="@string/msg_backup_scenario"
-            android:title="@string/all_networks" />
-
-        <CheckBoxPreference
-            android:key="@string/pref_backup_video"
-            android:layout="@layout/preference_item"
-            android:title="@string/backup_videos"
-            android:widgetLayout="@layout/switch_button" />
+            android:summary="@string/settings_auto_backup_subtitle" />
 
         <Preference
-            android:key="@string/pref_backup_location"
+            android:key="@string/pref_disk_info"
             android:layout="@layout/preference_item"
-            android:summary="/"
-            android:title="@string/backup_destination" />
+            android:title="@string/settings_disk_info_title"
+            android:summary="@string/settings_disk_info_subtitle" />
 
         <Preference
-            android:key="@string/pref_backup_source"
+            android:key="@string/pref_device_info"
             android:layout="@layout/preference_item"
-            android:summary="/"
-            android:title="@string/backup_source" />
+            android:title="@string/settings_device_info_title"
+            android:summary="@string/settings_device_info_subtitle" />
 
-    </PreferenceCategory>
-
-
-    <PreferenceCategory
-        android:layout="@layout/preference_category_widget"
-        android:title="@string/cache">
-        <!--
-        <ListPreference
-            android:key="@string/pref_cache_size"
+        <Preference
+            android:key="@string/pref_firmware_version"
             android:layout="@layout/preference_item"
-            android:title="@string/size"
-            android:summary="100MB"
-            android:entries="@array/cache_size_entries"
-            android:entryValues="@array/cache_size_entries" />
-        -->
+            android:title="@string/settings_firmware_version_title"
+            android:summary="xxxxxx" />
+
         <Preference
             android:key="@string/pref_cache_clean"
             android:layout="@layout/preference_item"
-            android:title="@string/clean" />
+            android:title="@string/cache"
+            android:summary="xxxxxx" />
+
+        <Preference
+            android:key="@string/pref_about"
+            android:layout="@layout/preference_item"
+            android:title="@string/about" />
 
     </PreferenceCategory>
 
     <PreferenceCategory>
         <!-- footer -->
     </PreferenceCategory>
-
 </PreferenceScreen>
