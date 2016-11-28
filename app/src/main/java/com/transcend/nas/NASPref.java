@@ -1,5 +1,6 @@
 package com.transcend.nas;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -10,6 +11,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.View;
 import android.webkit.MimeTypeMap;
 
 import com.facebook.AccessToken;
@@ -17,13 +19,29 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
+import com.realtek.nasfun.api.HttpClientManager;
+import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.management.FileManageRecyclerAdapter;
 import com.transcend.nas.utils.PrefUtil;
 import com.transcend.nas.viewer.music.MusicActivity;
+import com.tutk.IOTC.P2PService;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by silverhsu on 16/1/15.
@@ -604,6 +622,48 @@ public class NASPref {
         }
 
         return sb.toString();
+    }
+
+    public static HttpEntity sendGetRequest() {
+        HttpEntity entity = null;
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
+        String hash = server.getHash();
+        DefaultHttpClient httpClient = HttpClientManager.getClient();
+        String commandURL = "http://" + hostname + "/nas/get/info";
+        Log.d(TAG, commandURL);
+
+        HttpResponse response;
+        try {
+            HttpPost httpPost = new HttpPost(commandURL);
+            List<NameValuePair> nameValuePairs = new ArrayList<>();
+            nameValuePairs.add(new BasicNameValuePair("hash", hash));
+            httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+            response = httpClient.execute(httpPost);
+            if (response != null) {
+                entity = response.getEntity();
+            }
+
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return entity;
+    }
+
+    /**
+     * Display the progress bar of the R.layout.activity_settings
+     *
+     * @param activity
+     * @param isShow
+     */
+    public static void showProgressBar(@NonNull Activity activity, boolean isShow) {
+        View progressBar = activity.findViewById(R.id.settings_progress_view);
+        progressBar.setVisibility(isShow? View.VISIBLE : View.INVISIBLE);
     }
 
     public static void showAppChooser(final Context context, final Uri fileUri) {

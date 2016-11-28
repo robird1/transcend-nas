@@ -326,6 +326,8 @@
     <string name="pref_disk_info">DISK INFORMATION</string>
     <string name="pref_device_info">DEVICE INFORMATION</string>
     <string name="pref_firmware_version">FIRMWARE VERSION</string>
+    <string name="pref_device_name">DEVICE NAME</string>
+    <string name="pref_ip_address">IP ADDRESS</string>
     <string name="settings_download_location">Download Location</string>
     <string name="dialog_clean_cache">Do you want to clean cache?</string>
     <string name="settings_auto_backup_subtitle">Auto backup your camera folder</string>
@@ -334,5 +336,8 @@
     <string name="settings_device_info_title">Device Information</string>
     <string name="settings_device_info_subtitle">StoreJet Cloud Status</string>
     <string name="settings_firmware_version_title">Firmware Version</string>
+    <string name="settings_device_name_title">Device Name</string>
+    <string name="settings_ip_address_title">IP Address</string>
+    <string name="settings_mac_address_title">MAC Address</string>
 
 </resources>

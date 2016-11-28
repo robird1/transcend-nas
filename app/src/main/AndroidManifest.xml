@@ -130,6 +130,11 @@
         </activity>
 
         <activity
+            android:name=".settings.DeviceInfoActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
+
+        <activity
             android:name=".viewer.photo.ViewerActivity"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>

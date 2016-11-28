@@ -47,6 +47,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.transcend.nas.NASPref.sendGetRequest;
+
 
 /**
  * Created by ikelee on 16/11/23.
@@ -107,7 +109,7 @@ public class SettingsFragment extends BasicFragment implements SharedPreferences
         } else if (key.equals(getString(R.string.pref_disk_info))) {
             startDiskInfoActivity();
         } else if (key.equals(getString(R.string.pref_device_info))) {
-            // TODO start an activity to show device information
+            startDeviceInfoActivity();
         } else if (key.equals(getString(R.string.pref_cache_clean))) {
             showCleanCacheDialog();
         } else if (key.equals(getString(R.string.pref_about))) {
@@ -209,6 +211,12 @@ public class SettingsFragment extends BasicFragment implements SharedPreferences
         startActivity(intent);
     }
 
+    private void startDeviceInfoActivity() {
+        Intent intent = new Intent();
+        intent.setClass(getActivity(), DeviceInfoActivity.class);
+        startActivity(intent);
+    }
+
     private void refreshFirmwareVersion() {
         final Handler handler = new Handler(){
             @Override
@@ -217,6 +225,8 @@ public class SettingsFragment extends BasicFragment implements SharedPreferences
                 if (getActivity() != null) {
                     Preference pref = findPreference(getString(R.string.pref_firmware_version));
                     pref.setSummary((String) msg.obj);
+
+                    NASPref.showProgressBar(getActivity(), false);
                 }
             }
         };
@@ -237,44 +247,25 @@ public class SettingsFragment extends BasicFragment implements SharedPreferences
 
     private String getFirmwareVersion() {
         String firmwareVersion = null;
-        Server server = ServerManager.INSTANCE.getCurrentServer();
-        String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
-        String hash = server.getHash();
-        DefaultHttpClient httpClient = HttpClientManager.getClient();
-        String commandURL = "http://" + hostname + "/nas/get/info";
-        Log.d(TAG, commandURL);
-
-        HttpResponse response;
+        HttpEntity entity = NASPref.sendGetRequest();
         InputStream inputStream = null;
-        try {
-            HttpPost httpPost = new HttpPost(commandURL);
-            List<NameValuePair> nameValuePairs = new ArrayList<>();
-            nameValuePairs.add(new BasicNameValuePair("hash", hash));
-            httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-            response = httpClient.execute(httpPost);
-            HttpEntity entity = null;
-            if (response != null) {
-                entity = response.getEntity();
-            }
+        String inputEncoding = null;
 
-            if (entity != null) {
+        if (entity != null) {
+            try {
                 inputStream = entity.getContent();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            String inputEncoding = EntityUtils.getContentCharSet(entity);
-            if (inputEncoding == null) {
-                inputEncoding = HTTP.DEFAULT_CONTENT_CHARSET;
-            }
+            inputEncoding = EntityUtils.getContentCharSet(entity);
+        }
 
-            if (inputStream != null) {
-                firmwareVersion = doParse(inputStream, inputEncoding);
-            }
+        if (inputEncoding == null) {
+            inputEncoding = HTTP.DEFAULT_CONTENT_CHARSET;
+        }
 
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (inputStream != null) {
+            firmwareVersion = doParse(inputStream, inputEncoding);
         }
 
         return firmwareVersion;
@@ -296,19 +287,17 @@ public class SettingsFragment extends BasicFragment implements SharedPreferences
 
             do {
                 String tagName = parser.getName();
-                Log.d(TAG, "tagName: " + tagName);
+//                Log.d(TAG, "tagName: " + tagName);
 
                 if (eventType == XmlPullParser.START_TAG) {
                     if (tagName.equals(XML_TAG_FIRMWARE_VERSION)) {
                         parser.next();
-                        Log.d(TAG, "parser.getText(): " + parser.getText());
+//                        Log.d(TAG, "parser.getText(): " + parser.getText());
 
                         firmwareVersion = parser.getText();
                         break;
                     }
 
-                } else if (eventType == XmlPullParser.TEXT) {
-                    Log.d(TAG, "parser.getText(): " + parser.getText());
                 }
 
                 eventType = parser.next();
