@@ -1782,8 +1782,7 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void startHelpActivity() {
-        Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse("http://help.storejetcloud.com.s3-website-ap-northeast-1.amazonaws.com/TW/start.html"));
-        startActivity(i);
+        startActivity(new Intent(this, HelpActivity.class));
     }
 
     private void startFeedbackActivity() {
