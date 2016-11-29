@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.ListPreference;
 import android.preference.Preference;
+import android.preference.PreferenceCategory;
 import android.preference.PreferenceScreen;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -33,7 +34,6 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
@@ -47,7 +47,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.transcend.nas.NASPref.sendGetRequest;
+import static com.transcend.nas.R.string.pref_firmware_version;
 
 
 /**
@@ -55,8 +55,8 @@ import static com.transcend.nas.NASPref.sendGetRequest;
  */
 
 public class SettingsFragment extends BasicFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
-    public static final String TAG = SettingsActivity.class.getSimpleName();
-    private static final String XML_TAG_FIRMWARE_VERSION = "software";
+    public static final String TAG = SettingsFragment.class.getSimpleName();
+    private static final String XML_TAG_FIRMWARE_VERSION = "remote_ver";
     private Toast mToast;
 
     public SettingsFragment() {
@@ -218,12 +218,32 @@ public class SettingsFragment extends BasicFragment implements SharedPreferences
     }
 
     private void refreshFirmwareVersion() {
+        if (isAdmin()) {
+            if (getActivity() != null) {
+                NASPref.showProgressBar(getActivity(), true);
+            }
+            update();
+        } else {
+            String categoryKey = getString(R.string.pref_setting_category);
+            PreferenceCategory category = (PreferenceCategory) findPreference(categoryKey);
+            String preferenceKey = getString(R.string.pref_firmware_version);
+            Preference firmwarePref = findPreference(preferenceKey);
+            category.removePreference(firmwarePref);
+        }
+    }
+
+    private boolean isAdmin() {
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        return NASPref.defaultUserName.equals(server.getUsername());
+    }
+
+    private void update() {
         final Handler handler = new Handler(){
             @Override
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
                 if (getActivity() != null) {
-                    Preference pref = findPreference(getString(R.string.pref_firmware_version));
+                    Preference pref = findPreference(getString(pref_firmware_version));
                     pref.setSummary((String) msg.obj);
 
                     NASPref.showProgressBar(getActivity(), false);
@@ -242,12 +262,11 @@ public class SettingsFragment extends BasicFragment implements SharedPreferences
                 }
             }
         }).start();
-
     }
 
     private String getFirmwareVersion() {
         String firmwareVersion = null;
-        HttpEntity entity = NASPref.sendGetRequest();
+        HttpEntity entity = sendPostRequest();
         InputStream inputStream = null;
         String inputEncoding = null;
 
@@ -266,15 +285,43 @@ public class SettingsFragment extends BasicFragment implements SharedPreferences
 
         if (inputStream != null) {
             firmwareVersion = doParse(inputStream, inputEncoding);
+//            getPostResultString(entity, inputStream);
         }
 
         return firmwareVersion;
     }
 
+    private HttpEntity sendPostRequest() {
+        HttpEntity entity = null;
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
+        String commandURL = "http://" + hostname + "/nas/firmware/getversion";
+
+        HttpResponse response;
+        try {
+            HttpPost httpPost = new HttpPost(commandURL);
+            List<NameValuePair> nameValuePairs = new ArrayList<>();
+            nameValuePairs.add(new BasicNameValuePair("hash", server.getHash()));
+            httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+            response = HttpClientManager.getClient().execute(httpPost);
+
+            if (response != null) {
+                entity = response.getEntity();
+            }
+
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return entity;
+    }
+
     private String doParse(InputStream inputStream, String inputEncoding)
     {
-        Log.d(TAG, "[Enter] doParse()");
-
         String firmwareVersion = null;
         XmlPullParserFactory factory;
 
@@ -297,7 +344,6 @@ public class SettingsFragment extends BasicFragment implements SharedPreferences
                         firmwareVersion = parser.getText();
                         break;
                     }
-
                 }
 
                 eventType = parser.next();
@@ -313,4 +359,25 @@ public class SettingsFragment extends BasicFragment implements SharedPreferences
         return firmwareVersion;
 
     }
+
+//    private void getPostResultString(HttpEntity entity, InputStream inputStream) {
+//        Log.d(TAG, "inputStream: "+ inputStream);
+//        Log.d(TAG, "contentType: " + entity.getContentType().toString());
+//
+//        try {
+//            ByteArrayOutputStream result = new ByteArrayOutputStream();
+//            byte[] buffer = new byte[1024];
+//            int length;
+//
+//            while ((length = inputStream.read(buffer)) != -1) {
+//                result.write(buffer, 0, length);
+//            }
+//
+//            Log.d(TAG, "result: "+ result.toString("UTF-8"));
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
 }

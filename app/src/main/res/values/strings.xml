@@ -328,6 +328,7 @@
     <string name="pref_firmware_version">FIRMWARE VERSION</string>
     <string name="pref_device_name">DEVICE NAME</string>
     <string name="pref_ip_address">IP ADDRESS</string>
+    <string name="pref_setting_category">SETTING CATEGORY</string>
     <string name="settings_download_location">Download Location</string>
     <string name="dialog_clean_cache">Do you want to clean cache?</string>
     <string name="settings_auto_backup_subtitle">Auto backup your camera folder</string>

@@ -6,7 +6,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 
 
@@ -25,7 +24,6 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         initToolbar();
-        NASPref.showProgressBar(this, true);
 
         mListener = new ChangeFragmentListener(){
             @Override

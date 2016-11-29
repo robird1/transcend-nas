@@ -3,6 +3,7 @@
     android:layout="@layout/preference_item">
 
     <PreferenceCategory
+        android:key="@string/pref_setting_category"
         android:layout="@layout/preference_category_widget">
 
         <Preference
