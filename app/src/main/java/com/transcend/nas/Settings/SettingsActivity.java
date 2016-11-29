@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.ListPreference;
 import android.preference.Preference;
+import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.support.v7.app.AlertDialog;
@@ -24,7 +25,6 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.utils.StorageUtils;
 import com.realtek.nasfun.api.HttpClientManager;
 import com.realtek.nasfun.api.Server;
-import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
@@ -39,7 +39,6 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
@@ -47,11 +46,14 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.transcend.nas.R.string.pref_firmware_version;
 
 
 /**
@@ -68,6 +70,7 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         initToolbar();
+
         mFragment = new SettingsFragment();
         getFragmentManager().beginTransaction().replace(R.id.settings_frame, mFragment).commit();
     }
@@ -106,7 +109,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     public static class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
         public final String TAG = SettingsActivity.class.getSimpleName();
-        private static final String XML_TAG_FIRMWARE_VERSION = "software";
+        private static final String XML_TAG_FIRMWARE_VERSION = "remote_ver";
         private Toast mToast;
 
         public SettingsFragment() {
@@ -266,12 +269,32 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
         private void refreshFirmwareVersion() {
+            if (isAdmin()) {
+                if (getActivity() != null) {
+                    NASPref.showProgressBar(getActivity(), true);
+                }
+                update();
+            } else {
+                String categoryKey = getString(R.string.pref_setting_category);
+                PreferenceCategory category = (PreferenceCategory) findPreference(categoryKey);
+                String preferenceKey = getString(pref_firmware_version);
+                Preference firmwarePref = findPreference(preferenceKey);
+                category.removePreference(firmwarePref);
+            }
+        }
+
+        private boolean isAdmin() {
+            Server server = ServerManager.INSTANCE.getCurrentServer();
+            return NASPref.defaultUserName.equals(server.getUsername());
+        }
+
+        private void update() {
             final Handler handler = new Handler(){
                 @Override
                 public void handleMessage(Message msg) {
                     super.handleMessage(msg);
                     if (getActivity() != null) {
-                        Preference pref = findPreference(getString(R.string.pref_firmware_version));
+                        Preference pref = findPreference(getString(pref_firmware_version));
                         pref.setSummary((String) msg.obj);
 
                         NASPref.showProgressBar(getActivity(), false);
@@ -283,6 +306,7 @@ public class SettingsActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     String version = getFirmwareVersion();
+
                     if (version != null) {
                         Message msg = Message.obtain();
                         msg.obj = version;
@@ -290,12 +314,11 @@ public class SettingsActivity extends AppCompatActivity {
                     }
                 }
             }).start();
-
         }
 
         private String getFirmwareVersion() {
             String firmwareVersion = null;
-            HttpEntity entity = NASPref.sendGetRequest();
+            HttpEntity entity = sendPostRequest();
             InputStream inputStream = null;
             String inputEncoding = null;
 
@@ -314,15 +337,43 @@ public class SettingsActivity extends AppCompatActivity {
 
             if (inputStream != null) {
                 firmwareVersion = doParse(inputStream, inputEncoding);
+//            getPostResultString(entity, inputStream);
             }
 
             return firmwareVersion;
         }
 
+        private HttpEntity sendPostRequest() {
+            HttpEntity entity = null;
+            Server server = ServerManager.INSTANCE.getCurrentServer();
+            String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
+            String commandURL = "http://" + hostname + "/nas/firmware/getversion";
+
+            HttpResponse response;
+            try {
+                HttpPost httpPost = new HttpPost(commandURL);
+                List<NameValuePair> nameValuePairs = new ArrayList<>();
+                nameValuePairs.add(new BasicNameValuePair("hash", server.getHash()));
+                httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+                response = HttpClientManager.getClient().execute(httpPost);
+
+                if (response != null) {
+                    entity = response.getEntity();
+                }
+
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            } catch (ClientProtocolException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return entity;
+        }
+
         private String doParse(InputStream inputStream, String inputEncoding)
         {
-            Log.d(TAG, "[Enter] doParse()");
-
             String firmwareVersion = null;
             XmlPullParserFactory factory;
 
@@ -335,17 +386,16 @@ public class SettingsActivity extends AppCompatActivity {
 
                 do {
                     String tagName = parser.getName();
-//                Log.d(TAG, "tagName: " + tagName);
+//                    Log.d(TAG, "tagName: " + tagName);
 
                     if (eventType == XmlPullParser.START_TAG) {
                         if (tagName.equals(XML_TAG_FIRMWARE_VERSION)) {
                             parser.next();
-//                        Log.d(TAG, "parser.getText(): " + parser.getText());
+//                            Log.d(TAG, "parser.getText(): " + parser.getText());
 
                             firmwareVersion = parser.getText();
                             break;
                         }
-
                     }
 
                     eventType = parser.next();
@@ -361,6 +411,26 @@ public class SettingsActivity extends AppCompatActivity {
             return firmwareVersion;
 
         }
+
+//    private void getPostResultString(HttpEntity entity, InputStream inputStream) {
+//        Log.d(TAG, "inputStream: "+ inputStream);
+//        Log.d(TAG, "contentType: " + entity.getContentType().toString());
+//
+//        try {
+//            ByteArrayOutputStream result = new ByteArrayOutputStream();
+//            byte[] buffer = new byte[1024];
+//            int length;
+//
+//            while ((length = inputStream.read(buffer)) != -1) {
+//                result.write(buffer, 0, length);
+//            }
+//
+//            Log.d(TAG, "result: "+ result.toString("UTF-8"));
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
     }
 }
 
