@@ -1242,8 +1242,8 @@ public class Server {
 		InputStream inputStream = null;
 		try {
 			do{
-				HttpPost httpPost = new HttpPost(commandURL);
-				response = httpClient.execute(httpPost);
+				HttpGet httpGet = new HttpGet(commandURL);
+				response = httpClient.execute(httpGet);
 				if(response == null) {
 					Log.e(TAG, "response is null");
 					break;

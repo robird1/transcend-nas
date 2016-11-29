@@ -125,12 +125,22 @@
         </activity>
 
         <activity
-            android:name=".settings.AboutActivity"
+            android:name=".settings.SettingBackupActivity"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 
         <activity
             android:name=".settings.DeviceInfoActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
+
+        <activity
+            android:name=".management.HelpActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
+
+        <activity
+            android:name=".settings.AboutActivity"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 
@@ -183,11 +193,6 @@
 
         <activity
             android:name=".management.FeedbackActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize">
-        </activity>
-
-        <activity
-            android:name=".management.HelpActivity"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 

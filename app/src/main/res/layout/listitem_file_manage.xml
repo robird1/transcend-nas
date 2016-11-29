@@ -39,6 +39,7 @@
             android:id="@+id/listitem_file_manage_info"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="?selectableItemBackgroundBorderless"
             android:clickable="true"
             android:padding="20dp"
             android:src="@drawable/ic_info_gray_24dp" />

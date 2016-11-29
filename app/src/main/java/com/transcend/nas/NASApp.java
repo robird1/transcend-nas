@@ -15,6 +15,7 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.service.LanCheckManager;
 
 import java.io.File;
 import java.util.Locale;
@@ -77,6 +78,7 @@ public class NASApp extends MultiDexApplication {
 
     private void initServerManager() {
         ServerManager.INSTANCE.setPreference(getSharedPreferences(TAG, Context.MODE_PRIVATE));
+        LanCheckManager.getInstance().getLanConnect();
     }
 
     private void createDownloadsDirectory() {

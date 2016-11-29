@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -227,6 +228,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
             for (HashMap<String, String> nas : mNASList) {
                 String hostname = nas.get("hostname");
                 if (hostname.equals(uuid)) {
+                    hideDialog(true);
                     startFileManageActivity();
                     return;
                 }
@@ -370,8 +372,10 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                 InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
                 mWizardDialog.showFinishView();
-            } else
+            } else {
+                hideDialog(true);
                 startFileManageActivity();
+            }
         } else {
             hideDialog(wizard);
             Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
@@ -504,8 +508,6 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
             args.putString("password", account.password);
 
             showLoginDialog(args, remoteAccess, exist);
-            if (exist)
-                startLoginLoader(args);
         } else {
             showWizardDialog(args);
         }
@@ -565,7 +567,6 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
 
         if (mLoginDialog != null) {
             if (dismiss) {
-                P2PService.getInstance().stopP2PConnect();
                 mLoginDialog.dismiss();
                 mLoginDialog = null;
             } else
@@ -600,6 +601,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
             @Override
             public void onCancel() {
                 getLoaderManager().destroyLoader(mLoaderID);
+                P2PService.getInstance().stopP2PConnect();
                 hideDialog(true);
             }
         };
@@ -626,11 +628,14 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
             @Override
             public void onCancel() {
                 getLoaderManager().destroyLoader(mLoaderID);
+                P2PService.getInstance().stopP2PConnect();
                 hideDialog(true);
             }
         };
-        if (startProgress)
+        if (startProgress) {
             mLoginDialog.showProgress();
+            startLoginLoader(args);
+        }
     }
 
     private void showNotificationDialog(final Bundle args) {
@@ -746,6 +751,27 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                 delete.setOnClickListener(this);
                 listItem = (RelativeLayout) itemView.findViewById(R.id.listitem_nas_finder_list_layout);
                 addItem = (LinearLayout) itemView.findViewById(R.id.listitem_nas_finder_add_layout);
+                addItem.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        startNASListLoader(false);
+                    }
+                });
+                addItem.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        switch (event.getAction()) {
+                            case MotionEvent.ACTION_DOWN:
+                                v.setBackground(ContextCompat.getDrawable(LoginListActivity.this, R.drawable.dotted_line_selected_layout));
+                                break;
+                            case MotionEvent.ACTION_CANCEL:
+                            case MotionEvent.ACTION_UP:
+                                v.setBackground(ContextCompat.getDrawable(LoginListActivity.this, R.drawable.dotted_line_layout));
+                                break;
+                        }
+                        return false;
+                    }
+                });
                 itemView.setOnClickListener(this);
             }
 

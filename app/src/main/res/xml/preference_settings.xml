@@ -3,43 +3,55 @@
     android:layout="@layout/preference_item">
 
     <PreferenceCategory
-        android:layout="@layout/preference_category_widget">
+        android:layout="@layout/preference_category_widget"
+        android:title="@string/settings">
 
         <Preference
             android:key="@string/pref_download_location"
             android:layout="@layout/preference_item"
-            android:summary="xxxxxx"
+            android:summary="-"
             android:title="@string/settings_download_location" />
-
-        <Preference
-            android:key="@string/pref_auto_backup"
-            android:layout="@layout/preference_item"
-            android:title="@string/auto_backup"
-            android:summary="@string/settings_auto_backup_subtitle" />
-
-        <Preference
-            android:key="@string/pref_disk_info"
-            android:layout="@layout/preference_item"
-            android:title="@string/settings_disk_info_title"
-            android:summary="@string/settings_disk_info_subtitle" />
-
-        <Preference
-            android:key="@string/pref_device_info"
-            android:layout="@layout/preference_item"
-            android:title="@string/settings_device_info_title"
-            android:summary="@string/settings_device_info_subtitle" />
-
-        <Preference
-            android:key="@string/pref_firmware_version"
-            android:layout="@layout/preference_item"
-            android:title="@string/settings_firmware_version_title"
-            android:summary="xxxxxx" />
 
         <Preference
             android:key="@string/pref_cache_clean"
             android:layout="@layout/preference_item"
-            android:title="@string/cache"
-            android:summary="xxxxxx" />
+            android:summary="-"
+            android:title="@string/cache" />
+        
+        <Preference
+            android:key="@string/pref_auto_backup"
+            android:layout="@layout/preference_item"
+            android:summary="@string/msg_auto_backup"
+            android:title="@string/auto_backup" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/preference_category_widget"
+        android:title="@string/app_name">
+
+        <Preference
+            android:key="@string/pref_firmware_version"
+            android:layout="@layout/preference_item"
+            android:summary="@string/loading"
+            android:title="@string/settings_firmware_version_title" />
+
+        <Preference
+            android:key="@string/pref_device_info"
+            android:layout="@layout/preference_item"
+            android:summary="@string/settings_device_info_subtitle"
+            android:title="@string/settings_device_info_title" />
+
+        <Preference
+            android:key="@string/pref_disk_info"
+            android:layout="@layout/preference_item"
+            android:summary="@string/settings_disk_info_subtitle"
+            android:title="@string/disk_info" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/preference_category_widget"
+        android:title="@string/other">
 
         <Preference
             android:key="@string/pref_about"

@@ -274,6 +274,7 @@ public class LoginByEmailActivity extends AppCompatActivity implements
     }
 
     private void checkGetNASResult(TutkGetNasLoader loader) {
+        mProgressView.setVisibility(View.INVISIBLE);
         String status = loader.getStatus();
         String code = loader.getCode();
         NASPref.setCloudAccountStatus(mContext, NASPref.Status.Active.ordinal());
@@ -287,7 +288,6 @@ public class LoginByEmailActivity extends AppCompatActivity implements
             finish();
         } else {
             Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
-            mProgressView.setVisibility(View.INVISIBLE);
         }
     }
 

@@ -29,18 +29,13 @@
     </group>
 
     <group
-        android:id="@+id/nav_group_2nd"
+        android:id="@+id/nav_group_3st"
         android:checkableBehavior="none">
 
         <item
             android:id="@+id/nav_settings"
             android:icon="@drawable/ic_settings_gray_24dp"
             android:title="@string/settings" />
-    </group>
-
-    <group
-        android:id="@+id/nav_group_3rd"
-        android:checkableBehavior="none">
 
         <item
             android:id="@+id/nav_help"
@@ -51,11 +46,6 @@
             android:id="@+id/nav_feedback"
             android:icon="@drawable/icon_email_24dp"
             android:title="@string/feedback" />
-    </group>
-
-    <group
-        android:id="@+id/nav_group_4th"
-        android:checkableBehavior="none">
 
         <item
             android:id="@+id/nav_switch"
