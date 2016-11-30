@@ -10,8 +10,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -29,10 +31,10 @@ import com.facebook.GraphResponse;
 import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
+import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.common.GoogleAnalysisFactory;
-import com.transcend.nas.LoaderID;
 import com.transcend.nas.common.StyleFactory;
 import com.transcend.nas.tutk.TutkCodeID;
 import com.transcend.nas.tutk.TutkFBLoginLoader;
@@ -94,6 +96,9 @@ public class LoginActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         mContext = this;
         setContentView(R.layout.activity_login);
+
+        setBackgroundImage();
+
         GoogleAnalysisFactory.getInstance(this).sendScreen(GoogleAnalysisFactory.VIEW.START);
 
         initView();
@@ -199,8 +204,8 @@ public class LoginActivity extends AppCompatActivity implements
         if(!NASPref.useFacebookLogin){
             RelativeLayout fbLayout = (RelativeLayout) findViewById(R.id.login_fb_layout);
             fbLayout.setVisibility(View.GONE);
-            LinearLayout orLayout = (LinearLayout) findViewById(R.id.login_or_layout);
-            orLayout.setVisibility(View.INVISIBLE);
+//            LinearLayout orLayout = (LinearLayout) findViewById(R.id.login_or_layout);
+//            orLayout.setVisibility(View.INVISIBLE);
         }
 
         //init start layout
@@ -544,6 +549,21 @@ public class LoginActivity extends AppCompatActivity implements
         }
 
         super.onBackPressed();
+    }
+
+    private void setBackgroundImage() {
+        ImageView backgroundImage = (ImageView) this.findViewById(R.id.background_image);
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        WindowManager windowmanager = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
+        windowmanager.getDefaultDisplay().getMetrics(displayMetrics);
+        int height = Math.round(displayMetrics.heightPixels / displayMetrics.density);
+        int width = Math.round(displayMetrics.widthPixels / displayMetrics.density);
+        Log.d(TAG, "displayMetrics.heightPixels: "+ displayMetrics.heightPixels);
+        Log.d(TAG, "displayMetrics.widthPixels: "+ displayMetrics.widthPixels);
+        Log.d(TAG, "height: "+ height);
+        Log.d(TAG, "width: "+ width);
+        Bitmap bitmap = StyleFactory.decodeSampledBitmapFromResource(this.getResources(), R.drawable.sjc_bg3_logo, width, height);
+        backgroundImage.setImageBitmap(bitmap);
     }
 
 }
