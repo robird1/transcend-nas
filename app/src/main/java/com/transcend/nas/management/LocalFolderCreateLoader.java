@@ -9,10 +9,9 @@ import java.io.File;
 /**
  * Created by silverhsu on 16/1/21.
  */
-public class LocalFolderCreateLoader extends AsyncTaskLoader<Boolean> {
+public class LocalFolderCreateLoader extends LocalAbstractLoader {
 
     private static final String TAG = LocalFolderCreateLoader.class.getSimpleName();
-
     private String mPath;
 
     public LocalFolderCreateLoader(Context context, String path) {

@@ -36,14 +36,11 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
 
     private boolean mLanConnect = false;
     private String mLanIP = "";
-    private Handler mHandler;
     private Thread mThread;
-    private LanCheckTask mTask;
-    private boolean isReady = false;
+    private boolean mThreadRunning = false;
     private boolean isInit = false;
 
     public LanCheckManager() {
-        mHandler = new Handler();
         mNsdManager = (NsdManager) NASApp.getContext().getSystemService(Context.NSD_SERVICE);
         mServiceList = new HashMap<>();
         mServiceInfoList = new ArrayList<>();
@@ -72,11 +69,10 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
     public void setLanConnect(boolean connect) {
         Log.d(TAG, "LanConnect : " + connect);
         mLanConnect = connect;
-        isReady = true;
     }
 
     public boolean getLanConnect() {
-        return isReady & mLanConnect;
+        return mLanConnect;
     }
 
     public void setLanIP(String ip) {
@@ -88,13 +84,9 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
     }
 
     public void stopLanCheck() {
-        isReady = false;
-        if (mTask != null && !mTask.isCancelled())
-            mTask.cancel(true);
-        mTask = null;
-
-        if (mThread != null)
+        if (mThread != null && mThread.isAlive()) {
             mThread.interrupt();
+        }
         mThread = null;
     }
 
@@ -104,39 +96,20 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
             return;
         }
 
-        boolean check = false;
-        stopLanCheck();
-
-        ConnectivityManager connectivityManager = (ConnectivityManager) NASApp.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo info = connectivityManager.getActiveNetworkInfo();
-        if (info != null && info.isAvailable()) {
-            int type = info.getType();
-            check = type == ConnectivityManager.TYPE_WIFI;
-        }
-
-        if (check) {
-            mTask = new LanCheckTask();
-            mTask.addListener(LanCheckManager.this);
-            mThread = new Thread() {
+        if (!mThreadRunning) {
+            mThreadRunning = true;
+            mThread = new Thread(new Runnable() {
+                @Override
                 public void run() {
-                    mHandler.post(runnable);
+                    LanCheckTask mTask = new LanCheckTask();
+                    mTask.addListener(LanCheckManager.this);
+                    mTask.execute();
+                    mThreadRunning = false;
                 }
-            };
+            });
             mThread.start();
-        } else {
-            setLanConnect(false, "");
         }
     }
-
-    private Runnable runnable = new Runnable() {
-        public void run() {
-            try {
-                mTask.execute();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    };
 
     @Override
     public void onLanCheckFinished(boolean success, String ip) {

@@ -78,7 +78,6 @@ public class NASApp extends MultiDexApplication {
 
     private void initServerManager() {
         ServerManager.INSTANCE.setPreference(getSharedPreferences(TAG, Context.MODE_PRIVATE));
-        LanCheckManager.getInstance().getLanConnect();
     }
 
     private void createDownloadsDirectory() {

@@ -56,7 +56,7 @@ public class ViewerPagerAdapter extends PagerAdapter {
         PhotoView pv = new PhotoView(mContext);
         pv.setDrawingCacheEnabled(false);
         pv.setOnPhotoTapListener(mOnPhotoTapListener);
-        ImageLoader.getInstance().displayImage(FileFactory.getInstance().getPhotoPath(false,path), pv);
+        FileFactory.getInstance().displayPhoto(false, path, pv);
         container.addView(pv);
         Log.w(TAG, "instantiateItem [" + position + "]: " + path);
         return pv;

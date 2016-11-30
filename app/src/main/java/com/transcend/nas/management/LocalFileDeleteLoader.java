@@ -11,10 +11,9 @@ import java.util.List;
 /**
  * Created by silverhsu on 16/2/1.
  */
-public class LocalFileDeleteLoader extends AsyncTaskLoader<Boolean> {
+public class LocalFileDeleteLoader extends LocalAbstractLoader {
 
     private static final String TAG = LocalFileDeleteLoader.class.getSimpleName();
-
     private List<String> mPaths;
 
     public LocalFileDeleteLoader(Context context, List<String> paths) {

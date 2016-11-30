@@ -1,7 +1,11 @@
 package com.transcend.nas.management.firmware;
 
+import android.graphics.Bitmap;
 import android.util.Log;
+import android.widget.ImageView;
 
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
@@ -11,7 +15,6 @@ import com.tutk.IOTC.P2PService;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by ike_lee on 2016/5/23.
@@ -102,6 +105,30 @@ public class FileFactory {
             File base = new File(root);
             File file = new File(path);
             return file.equals(base);
+        }
+    }
+
+    public void displayPhoto(boolean thumbnail, String path, ImageView view) {
+        String url = getPhotoPath(thumbnail, path);
+        if (path.startsWith(NASApp.ROOT_STG)) {
+            FileInfo.TYPE type = FileInfo.getType(path);
+            if (type.equals(FileInfo.TYPE.PHOTO)) {
+                DisplayImageOptions options = new DisplayImageOptions.Builder()
+                        .bitmapConfig(Bitmap.Config.RGB_565)
+                        .cacheInMemory(true)
+                        .cacheOnDisk(false)
+                        .build();
+                ImageLoader.getInstance().displayImage(url, view, options);
+            } else if(type.equals(FileInfo.TYPE.VIDEO)){
+                //TODO : load video thumbnail
+                //MICRO_KIND, size: 96 x 96 thumbnail
+                //Bitmap bmThumbnail = ThumbnailUtils.createVideoThumbnail(path, MediaStore.Video.Thumbnails.MICRO_KIND);
+                //view.setImageBitmap(bmThumbnail);
+            } else if(type.equals(FileInfo.TYPE.MUSIC)){
+                //TODO : load music thumbnail
+            }
+        } else {
+            ImageLoader.getInstance().displayImage(url, view);
         }
     }
 

@@ -35,7 +35,7 @@ import javax.jmdns.ServiceInfo;
 /**
  * Created by ike_lee on 2016/3/23.
  */
-public class LanCheckTask extends AsyncTask<String, String, Boolean> {
+public class LanCheckTask {
     private static final String TAG = "LanCheckTask";
 
     private static final String TYPE = "_http._tcp.local.";
@@ -58,15 +58,10 @@ public class LanCheckTask extends AsyncTask<String, String, Boolean> {
         mNASList = new ArrayList<HashMap<String, String>>();
     }
 
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-    }
-
-    @Override
-    protected Boolean doInBackground(String... params) {
+    protected void execute() {
         ConnectivityManager connectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = connectivityManager.getActiveNetworkInfo();
+        boolean result = false;
         if (info != null && info.isAvailable()) {
             int type = info.getType();
             switch (type) {
@@ -76,21 +71,10 @@ public class LanCheckTask extends AsyncTask<String, String, Boolean> {
                     if(mLock != null)
                         mLock.release();
                     //closeJmDNS();
-                    return tryLink();
+                    result = tryLink();
             }
         }
 
-        return false;
-    }
-
-    @Override
-    protected void onProgressUpdate(String... values) {
-        super.onProgressUpdate(values);
-    }
-
-    @Override
-    protected void onPostExecute(Boolean result) {
-        super.onPostExecute(result);
         if (mListener != null) {
             mListener.onLanCheckFinished(result, mTargetIp);
         }
