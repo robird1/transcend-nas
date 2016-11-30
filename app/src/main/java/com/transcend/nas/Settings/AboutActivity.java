@@ -3,8 +3,6 @@ package com.transcend.nas.settings;
 import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
@@ -52,6 +50,7 @@ public class AboutActivity extends AppCompatActivity {
         mVersion.setText(getString(R.string.app_name) + " v" + BuildConfig.VERSION_NAME);
         initToolbar();
         initFragment();
+
     }
 
     @Override
@@ -120,6 +119,8 @@ public class AboutActivity extends AppCompatActivity {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.preference_about);
+            Preference appVersionPref = findPreference(getString(R.string.pref_about_app_version));
+            appVersionPref.setSummary("v"+ BuildConfig.VERSION_NAME);
         }
 
         @Override
@@ -127,14 +128,10 @@ public class AboutActivity extends AppCompatActivity {
             int id = -1;
             if (preference.getKey().equals(getString(R.string.pref_about))) {
                 showNotificationDialog(R.string.app_name, R.layout.dialog_about);
-            } else if (preference.getKey().equals(getString(R.string.pref_about_legal))) {
-                id = R.string.legal;
             } else if (preference.getKey().equals(getString(R.string.pref_about_term_of_use))) {
-                id = R.string.termsofuse;
+                id = R.string.about_license_agreement;
             } else if (preference.getKey().equals(getString(R.string.pref_about_license))) {
-                id = R.string.licenses;
-            } else if (preference.getKey().equals(getString(R.string.pref_about_contact))) {
-                startSendMailActivity();
+                id = R.string.about_open_source;
             }
 
             if(id > 0) {
@@ -172,14 +169,14 @@ public class AboutActivity extends AppCompatActivity {
             };
         }
 
-        private void startSendMailActivity(){
-            Intent intent = new Intent();
-            intent.setAction(Intent.ACTION_SENDTO);
-            intent.setData(Uri.parse("mailto:service-tw@transcend-info.com"));
-            //intent.putExtra(Intent.EXTRA_SUBJECT, "這裡是主旨。");
-            //intent.putExtra(Intent.EXTRA_TEXT, "這是本文內容。");
-            startActivity(intent);
-        }
+//        private void startSendMailActivity(){
+//            Intent intent = new Intent();
+//            intent.setAction(Intent.ACTION_SENDTO);
+//            intent.setData(Uri.parse("mailto:service-tw@transcend-info.com"));
+//            //intent.putExtra(Intent.EXTRA_SUBJECT, "這裡是主旨。");
+//            //intent.putExtra(Intent.EXTRA_TEXT, "這是本文內容。");
+//            startActivity(intent);
+//        }
 
     }
 
@@ -203,15 +200,12 @@ public class AboutActivity extends AppCompatActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View v;
-            if(id == R.string.legal) {
-                v = inflater.inflate(R.layout.fragment_privacy_info, container, false);
-            }
-            else if(id == R.string.termsofuse){
+            if(id == R.string.about_license_agreement){
                 v = inflater.inflate(R.layout.fragment_term_of_use, container, false);
                 TextView info = (TextView) v.findViewById(R.id.info);
                 info.setText(Html.fromHtml(NASPref.readFromAssets(mContext, "NASAPPEULA.txt")));
             }
-            else if(id == R.string.licenses){
+            else if(id == R.string.about_open_source){
                 v = inflater.inflate(R.layout.fragment_license, container, false);
                 TextView info = (TextView) v.findViewById(R.id.info);
                 info.setText(Html.fromHtml(NASPref.readFromAssets(mContext, "LicensedText-SJCAndroid.txt")));

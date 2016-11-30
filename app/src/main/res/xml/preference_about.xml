@@ -3,23 +3,18 @@
     android:layout="@layout/preference_item">
 
     <Preference
-        android:key="@string/pref_about_legal"
+        android:key="@string/pref_about_app_version"
         android:layout="@layout/preference_item"
-        android:title="@string/legal" />
+        android:title="@string/app_version" />
 
     <Preference
         android:key="@string/pref_about_term_of_use"
         android:layout="@layout/preference_item"
-        android:title="@string/termsofuse" />
+        android:title="@string/about_license_agreement" />
 
     <Preference
         android:key="@string/pref_about_license"
         android:layout="@layout/preference_item"
-        android:title="@string/licenses" />
-
-    <Preference
-        android:key="@string/pref_about_contact"
-        android:layout="@layout/preference_item"
-        android:title="@string/contact" />
+        android:title="@string/about_open_source" />
 
 </PreferenceScreen>
