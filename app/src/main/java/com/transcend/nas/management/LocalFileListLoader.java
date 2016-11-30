@@ -14,10 +14,9 @@ import java.util.HashMap;
 /**
  * Created by silverhsu on 16/1/15.
  */
-public class LocalFileListLoader extends AsyncTaskLoader<Boolean> {
+public class LocalFileListLoader extends LocalAbstractLoader {
 
     private static final String TAG = LocalFileListLoader.class.getSimpleName();
-
     private ArrayList<FileInfo> mFileList;
     private String mPath;
 

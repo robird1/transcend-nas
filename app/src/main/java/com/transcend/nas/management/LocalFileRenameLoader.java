@@ -8,10 +8,9 @@ import java.io.File;
 /**
  * Created by silverhsu on 16/1/30.
  */
-public class LocalFileRenameLoader extends AsyncTaskLoader<Boolean> {
+public class LocalFileRenameLoader extends LocalAbstractLoader {
 
     private static final String TAG = LocalFileRenameLoader.class.getSimpleName();
-
     private String mPath;
     private String mName;
 

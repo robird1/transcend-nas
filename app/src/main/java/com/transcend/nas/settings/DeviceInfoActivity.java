@@ -24,9 +24,6 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static com.transcend.nas.R.drawable.ic_navigation_arrow_gray_24dp;
-import static com.transcend.nas.R.drawable.ic_navigation_arrow_white_24dp;
-
 /**
  * Created by steve_su on 2016/11/25.
  */
@@ -58,7 +55,7 @@ public class DeviceInfoActivity extends AppCompatActivity {
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.settings_toolbar);
         toolbar.setTitle("");
-        toolbar.setNavigationIcon(ic_navigation_arrow_white_24dp);
+        toolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_white_24dp);
         TextView title = (TextView) toolbar.findViewById(R.id.settings_title);
         title.setText(getString(R.string.settings_device_info_title));
         setSupportActionBar(toolbar);

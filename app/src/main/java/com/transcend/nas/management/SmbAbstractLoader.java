@@ -53,6 +53,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
     protected Runnable mWatcher;
     protected boolean success = true;
     protected int mCount = 0;
+    private NotificationCompat.Builder mBuilder;
 
     public SmbAbstractLoader(Context context) {
         super(context);
@@ -230,32 +231,42 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
     }
 
     protected void updateProgress(String type, String name, int count, int total) {
-        Log.w(TAG, "progress: " + count + "/" + total + ", " + name);
+        Log.w(TAG, mNotificationID + " progress: " + count + "/" + total + ", " + name);
+        int icon = R.mipmap.ic_launcher;
+
+        if(mBuilder == null) {
+            //add content intent
+            Intent intent = mActivity.getIntent();
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            //add delete intent
+            //Intent delete = mActivity.getIntent();
+            //delete.putExtra("id", mNotificationID);
+            //PendingIntent deleteIntent = PendingIntent.getActivity(getContext(), 0, delete, PendingIntent.FLAG_CANCEL_CURRENT);
+            mBuilder = new NotificationCompat.Builder(getContext());
+            mBuilder.setSmallIcon(icon);
+            mBuilder.setContentIntent(pendingIntent);
+            //mBuilder.setDeleteIntent(deleteIntent);
+            mBuilder.setAutoCancel(true);
+        }
+
 
         int max = (count == total) ? 0 : 100;
         int progress = (total > 100) ? count / (total / 100) : 0;
         boolean indeterminate = (total == 0);
-        int icon = R.mipmap.ic_launcher;
 
-        String title = mTotal > 0 ? String.format("(%s/%s) " + name, mCurrent, mTotal) : name;
+        String title = mTotal > 1 ? String.format("(%s/%s) " + name, mCurrent, mTotal) : name;
         String stat = String.format("%s / %s", MathUtil.getBytes(count), MathUtil.getBytes(total));
         String text = String.format("%s - %s", type, stat);
         String info = String.format("%d%%", progress);
 
+        mBuilder.setContentTitle(title);
+        mBuilder.setContentText(text);
+        mBuilder.setContentInfo(info);
+        mBuilder.setProgress(max, progress, indeterminate);
         NotificationManager ntfMgr = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        Intent intent = mActivity.getIntent();
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext());
-        builder.setSmallIcon(icon);
-        builder.setContentTitle(title);
-        builder.setContentText(text);
-        builder.setContentInfo(info);
-        builder.setProgress(max, progress, indeterminate);
-        builder.setContentIntent(pendingIntent);
-        builder.setAutoCancel(true);
-        ntfMgr.notify(mNotificationID, builder.build());
+        ntfMgr.notify(mNotificationID, mBuilder.build());
     }
 
     protected void updateResult(String type, String result, String destination) {
