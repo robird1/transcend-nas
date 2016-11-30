@@ -7,7 +7,7 @@
 
         <item
             android:id="@+id/nav_storage"
-            android:icon="@drawable/ic_storage_2b_gray_24dp"
+            android:icon="@drawable/sjc_ic_storejetcloud"
             android:title="@string/app_name" />
 
     </group>
@@ -18,12 +18,12 @@
 
         <item
             android:id="@+id/nav_device"
-            android:icon="@drawable/ic_file_download2_gray_24dp"
+            android:icon="@drawable/sjc_ic_myphone"
             android:title="@string/device" />
 
         <item
             android:id="@+id/nav_downloads"
-            android:icon="@drawable/ic_file_download_gray_24dp"
+            android:icon="@drawable/sjc_ic_download"
             android:title="@string/download" />
 
     </group>
@@ -34,17 +34,17 @@
 
         <item
             android:id="@+id/nav_settings"
-            android:icon="@drawable/ic_settings_gray_24dp"
+            android:icon="@drawable/sjc_ic_settings"
             android:title="@string/settings" />
 
         <item
             android:id="@+id/nav_help"
-            android:icon="@drawable/ic_help_outline_gray_24dp"
+            android:icon="@drawable/sjc_ic_help"
             android:title="@string/help" />
 
         <item
             android:id="@+id/nav_feedback"
-            android:icon="@drawable/icon_email_24dp"
+            android:icon="@drawable/sjc_ic_userfeedback"
             android:title="@string/feedback" />
 
         <item
