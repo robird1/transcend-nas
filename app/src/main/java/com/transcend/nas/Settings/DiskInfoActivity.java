@@ -65,7 +65,7 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
     private void init() {
         mToolbar = (Toolbar) findViewById(R.id.disk_info_toolbar);
         mToolbar.setTitle("");
-        mToolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_gray_24dp);
+        mToolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_white_24dp);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);

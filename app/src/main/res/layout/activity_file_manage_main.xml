@@ -23,13 +23,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="@color/colorActionBarBackground"
-                app:popupTheme="@style/AppTheme.PopupOverlay">
+                app:popupTheme="@style/AppTheme.PopupOverlay"
+                app:theme="@style/ToolbarTheme" >
+
+
+            <!--app:theme="@style/ToolbarTheme"-->
+            <!--app:titleTextColor="@color/colorPrimary"-->
+                <!--app:subtitleTextColor="@color/colorPrimary">-->
 
                 <android.support.v7.widget.AppCompatSpinner
                     android:id="@+id/main_dropdown"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    app:theme="@style/AppTheme.Gray" />
+                    />
 
             </android.support.v7.widget.Toolbar>
 

@@ -436,7 +436,7 @@ public class FileManageActivity extends AppCompatActivity implements
     private void initToolbar() {
         mToolbar = (Toolbar) findViewById(R.id.main_toolbar);
         mToolbar.setTitle("");
-        mToolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_gray_24dp);
+        mToolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_white_24dp);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);

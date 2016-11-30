@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.transcend.nas.connection.old.WizardActivity">
@@ -21,7 +22,8 @@
                 android:id="@+id/wizard_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="@color/colorActionBarBackground">
+                android:background="@color/colorActionBarBackground"
+                app:theme="@style/ToolbarTheme">
 
                 <TextView
                     android:id="@+id/wizard_toolbar_title"

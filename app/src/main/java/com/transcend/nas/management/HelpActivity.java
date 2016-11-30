@@ -49,7 +49,7 @@ public class HelpActivity extends AppCompatActivity {
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.settings_toolbar);
         toolbar.setTitle("");
-        toolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_gray_24dp);
+        toolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_white_24dp);
         setSupportActionBar(toolbar);
 //        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 //        getSupportActionBar().setDisplayShowHomeEnabled(true);

@@ -6,6 +6,7 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.transcend.nas.R;
@@ -43,6 +45,7 @@ public class FeedbackActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feedback);
+        initToolbar();
         mInputLayoutName = (TextInputLayout) findViewById(R.id.input_layout_name);
         mInputLayoutEmail = (TextInputLayout) findViewById(R.id.input_layout_email);
         mInputLayoutMessage = (TextInputLayout) findViewById(R.id.input_layout_message);
@@ -182,6 +185,15 @@ public class FeedbackActivity extends AppCompatActivity {
             }
         }).start();
 
+    }
+
+    private void initToolbar() {
+        Toolbar toolbar = (Toolbar) this.findViewById(R.id.feedback_toolbar);
+        toolbar.setTitle("");
+//        toolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_white_24dp);
+        setSupportActionBar(toolbar);
+        TextView title = (TextView) findViewById(R.id.feedback_toolbar_title);
+        title.setText(R.string.app_name);
     }
 
     private class MyTextWatcher implements TextWatcher {

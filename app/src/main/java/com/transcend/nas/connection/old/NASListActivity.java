@@ -132,7 +132,7 @@ public class NASListActivity extends AppCompatActivity implements LoaderManager.
     private void initToolbar() {
         mToolbar = (Toolbar) findViewById(R.id.nas_finder_toolbar);
         mToolbar.setTitle("");
-        mToolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_gray_24dp);
+        mToolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_white_24dp);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);

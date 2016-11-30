@@ -10,7 +10,7 @@
 
     <item
         android:id="@+id/file_manage_viewer_action_more"
-        android:icon="@drawable/ic_more_vert_gray_24dp"
+        android:icon="@drawable/ic_more_vert_white_24dp"
         android:title="@string/more"
         app:showAsAction="always">
 

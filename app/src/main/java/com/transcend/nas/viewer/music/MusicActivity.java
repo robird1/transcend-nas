@@ -152,7 +152,7 @@ public class MusicActivity extends AppCompatActivity implements MusicManager.Med
     private void initHeaderBar() {
         mHeaderBar = (Toolbar) findViewById(R.id.music_header_bar);
         mHeaderBar.setTitle("");
-        mHeaderBar.setNavigationIcon(R.drawable.ic_navigation_arrow_gray_24dp);
+        mHeaderBar.setNavigationIcon(R.drawable.ic_navigation_arrow_white_24dp);
         setSupportActionBar(mHeaderBar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);

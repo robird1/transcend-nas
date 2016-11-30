@@ -8,7 +8,8 @@
         android:id="@+id/music_header_bar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorActionBarBackground">
+        android:background="@color/colorActionBarBackground"
+        app:theme="@style/ToolbarTheme" >
 
         <TextView
             android:id="@+id/music_toolbar_title"
