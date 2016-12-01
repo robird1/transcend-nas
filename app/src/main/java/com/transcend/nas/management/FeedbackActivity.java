@@ -1,5 +1,6 @@
 package com.transcend.nas.management;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -18,12 +19,17 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.transcend.nas.BuildConfig;
 import com.transcend.nas.R;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * Created by steve_su on 2016/11/22.
@@ -32,7 +38,14 @@ import java.net.URL;
 public class FeedbackActivity extends AppCompatActivity {
 
     private static final String TAG = FeedbackActivity.class.getSimpleName();
+    private static final String CATEGORY_LIST_URL = "http://www.transcend-info.com/Service/SMSService.svc/web/GetSrvCategoryList";
     private static final String FEEDBACK_URL = "http://www.transcend-info.com/Service/SMSService.svc/web/ServiceMailCaseAdd";
+//    private static final String FEEDBACK_URL = "http://10.13.5.10/Service/SMSService.svc/web/ServiceMailCaseAdd";
+    private static final int ID_GET_CATEGORY_LIST = 0;
+    private static final int ID_SEND_FEEDBACK = 1;
+    private static final String KEY_SERVICE_TYPE = "service_type";
+    private static final String KEY_SERVICE_CATEGORY = "service_category";
+    private static final String PRODUCT_NAME = "StoreJet Cloud";
     private TextInputLayout mInputLayoutName;
     private TextInputLayout mInputLayoutEmail;
     private TextInputLayout mInputLayoutMessage;
@@ -40,6 +53,45 @@ public class FeedbackActivity extends AppCompatActivity {
     private EditText mEditTextEmail;
     private EditText mEditTextMessage;
     private static final String REGION = "Taiwan";
+    private Handler mHandler = new Handler()
+    {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+
+            switch (msg.what) {
+                case ID_GET_CATEGORY_LIST:
+
+                    Bundle listData = msg.getData();
+                    if (listData != null) {
+                        Log.d(TAG, "listData != null");
+                        String srvType = listData.getString(KEY_SERVICE_TYPE);
+                        String srvCategory = listData.getString(KEY_SERVICE_CATEGORY);
+                        String platformInfo = "App v" + BuildConfig.VERSION_NAME + " OS version: " + android.os.Build.VERSION.SDK_INT +
+                                " device name: " + getDeviceName();
+
+                        final String jsonData = "{\"DataModel\":{\"CustName\":\"" + mEditTextName.getText().toString() + "\"" +
+                                ",\"CustEmail\":\"" + mEditTextEmail.getText().toString() + "\"" +
+                                ",\"Region\":\"" + REGION + "\"" +
+                                ",\"ISOCode\":\"TW\"" +
+                                ",\"Request\":\"" + platformInfo + "\"" +
+                                ",\"SrvType\":\"" + srvType + "\"" +
+                                ",\"SrvCategory\":\"" + srvCategory + "\"" +
+                                ",\"ProductName \":\"" + PRODUCT_NAME + "\"" +
+                                ",\"LocalProb\":\"" + mEditTextMessage.getText().toString() + "\"}}";
+
+                        sendRequest(configurePostRequest(FEEDBACK_URL), jsonData, ID_SEND_FEEDBACK);
+
+                    }
+
+                    break;
+                case ID_SEND_FEEDBACK:
+                    Toast.makeText(FeedbackActivity.this, R.string.thank_you, Toast.LENGTH_SHORT).show();
+                    FeedbackActivity.this.finish();
+                    break;
+            }
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,13 +117,11 @@ public class FeedbackActivity extends AppCompatActivity {
     public void onClickSendButton(View view)
     {
         if (isInputValid()) {
-            final String jsonData = "{\"DataModel\":{\"CustName\":\"" + mEditTextName.getText().toString() + "\"" +
-                    ",\"CustEmail\":\"" + mEditTextEmail.getText().toString() + "\"" +
-                    ",\"Region\":\"" + REGION + "\"" +
-                    ",\"ISOCode\":\"TW\"" +
-                    ",\"LocalProb\":\"" + mEditTextMessage.getText().toString() + "\"}}";
 
-            sendRequest(configureRequest(), jsonData);
+            Button sendBtn = (Button) findViewById(R.id.btn_send);
+            sendBtn.setEnabled(false);
+
+            sendRequest(configurePostRequest(CATEGORY_LIST_URL), null, ID_GET_CATEGORY_LIST);
         }
     }
 
@@ -124,10 +174,10 @@ public class FeedbackActivity extends AppCompatActivity {
         }
     }
 
-    private HttpURLConnection configureRequest() {
+    private HttpURLConnection configurePostRequest(String requestUrl) {
         HttpURLConnection conn = null;
         try {
-            URL url = new URL(FEEDBACK_URL);
+            URL url = new URL(requestUrl);
             conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("content-type", "application/json");
@@ -142,33 +192,22 @@ public class FeedbackActivity extends AppCompatActivity {
         }
     }
 
-    private void sendRequest(final HttpURLConnection connection, final String jsonData)
+    private void sendRequest(final HttpURLConnection connection, final String jsonData, final int messageId)
     {
         if (connection == null) {
             return;
         }
 
-        final Handler handler = new Handler()
-        {
-            @Override
-            public void handleMessage(Message msg) {
-                super.handleMessage(msg);
-
-                Toast.makeText(FeedbackActivity.this, R.string.thank_you, Toast.LENGTH_SHORT).show();
-                FeedbackActivity.this.finish();
-            }
-        };
-
-        Button sendBtn = (Button) findViewById(R.id.btn_send);
-        sendBtn.setEnabled(false);
-
         new Thread(new Runnable() {
 
             @Override
             public void run() {
+                Message msg = new Message();
                 try {
                     OutputStream out = connection.getOutputStream();
-                    out.write(jsonData.getBytes());
+                    if (jsonData != null) {
+                        out.write(jsonData.getBytes());
+                    }
                     out.flush();
                     out.close();
 
@@ -176,12 +215,36 @@ public class FeedbackActivity extends AppCompatActivity {
 
                     Log.d(TAG, "param: " + jsonData);
                     Log.d(TAG, "responseCode: " + responseCode);
+                    if (responseCode == HttpsURLConnection.HTTP_OK) {
+
+                        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                        StringBuffer sb = new StringBuffer("");
+                        String line="";
+
+                        while((line = in.readLine()) != null) {
+
+                            sb.append(line);
+                            break;
+                        }
+
+                        Log.d(TAG, "get category result: " + line);
+                        in.close();
+
+                        if (messageId == ID_GET_CATEGORY_LIST) {
+                            Bundle data = new Bundle();
+                            data.putString(KEY_SERVICE_TYPE, String.valueOf(15));
+                            data.putString(KEY_SERVICE_CATEGORY, String.valueOf(384));
+                            msg.setData(data);
+                        }
+
+                    }
 
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
-                handler.sendMessage(new Message());
+                msg.what = messageId;
+                mHandler.sendMessage(msg);
             }
         }).start();
 
@@ -194,6 +257,29 @@ public class FeedbackActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         TextView title = (TextView) findViewById(R.id.feedback_toolbar_title);
         title.setText(R.string.app_name);
+    }
+
+    private String getDeviceName() {
+        String manufacturer = Build.MANUFACTURER;
+        String model = Build.MODEL;
+        if (model.startsWith(manufacturer)) {
+            return capitalize(model);
+        } else {
+            return capitalize(manufacturer) + " " + model;
+        }
+    }
+
+
+    private String capitalize(String s) {
+        if (s == null || s.length() == 0) {
+            return "";
+        }
+        char first = s.charAt(0);
+        if (Character.isUpperCase(first)) {
+            return s;
+        } else {
+            return Character.toUpperCase(first) + s.substring(1);
+        }
     }
 
     private class MyTextWatcher implements TextWatcher {
