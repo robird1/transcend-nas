@@ -43,7 +43,6 @@
                     android:background="@drawable/button_normal_blue"
                     android:text="@string/sign_up_by_facebook"
                     android:textAllCaps="false"
-                    android:textColor="@color/colorPrimary"
                     android:textSize="18sp" />
             </RelativeLayout>
 

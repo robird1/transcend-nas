@@ -4,30 +4,36 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/music_header_bar"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/app_bar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorActionBarBackground"
-        app:theme="@style/ToolbarTheme" >
+        android:layout_height="wrap_content"
+        android:elevation="0dp">
 
-        <TextView
-            android:id="@+id/music_toolbar_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/music"
-            android:textColor="@color/textColorPrimary"
-            android:textSize="20sp" />
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/music_header_bar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize">
 
-    </android.support.v7.widget.Toolbar>
+            <TextView
+                android:id="@+id/music_toolbar_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/music"
+                android:textColor="@color/colorPrimary"
+                android:textSize="20sp" />
+
+        </android.support.v7.widget.Toolbar>
+
+    </android.support.design.widget.AppBarLayout>
 
     <RelativeLayout
         android:id="@+id/music_control_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="@color/colorActionBarBackground"
+        android:background="@color/colorPrimaryDark"
         android:paddingBottom="8dp"
         android:paddingLeft="20dp"
         android:paddingRight="20dp">
@@ -38,8 +44,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="16dp"
             android:layout_marginBottom="12dp"
+            android:layout_marginTop="16dp"
             android:orientation="vertical">
 
             <TextView
@@ -127,7 +133,7 @@
                 android:layout_centerVertical="true"
                 android:layout_toLeftOf="@id/music_end_time"
                 android:layout_toRightOf="@id/music_start_time"
-                android:theme="@style/AppTheme.SeekBar" />
+                android:theme="@style/AppTheme.MusicPlayer" />
 
 
         </RelativeLayout>
@@ -139,8 +145,8 @@
             android:layout_height="44dp"
             android:layout_below="@id/music_time_layout"
             android:layout_centerHorizontal="true"
-            android:background="@drawable/player_selector"
             android:layout_marginTop="4dp"
+            android:background="@drawable/player_selector"
             android:src="@drawable/player_mode_normal" />
 
 
@@ -151,7 +157,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/music_control_layout"
-        android:layout_below="@id/music_header_bar"
+        android:layout_below="@id/app_bar"
         android:layout_centerHorizontal="true"
         android:scaleType="fitXY"
         android:src="@drawable/player_album" />
@@ -160,7 +166,7 @@
         android:id="@+id/music_toolbar_shadow"
         android:layout_width="match_parent"
         android:layout_height="6dp"
-        android:layout_below="@id/music_header_bar"
+        android:layout_below="@id/app_bar"
         android:background="@drawable/toolbar_dropshadow" />
 
     <RelativeLayout

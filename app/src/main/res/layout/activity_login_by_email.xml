@@ -5,35 +5,41 @@
     android:layout_height="match_parent"
     android:background="@color/colorPrimary">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/settings_toolbar"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/app_bar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorActionBarBackground"
-        app:theme="@style/ToolbarTheme">
+        android:layout_height="wrap_content"
+        android:elevation="0dp">
 
-        <TextView
-            android:id="@+id/settings_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/remote_access"
-            android:textColor="@color/colorPrimary"
-            android:textSize="20sp" />
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/settings_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize">
 
-    </android.support.v7.widget.Toolbar>
+            <TextView
+                android:id="@+id/settings_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/remote_access"
+                android:textColor="@color/colorPrimary"
+                android:textSize="20sp" />
+
+        </android.support.v7.widget.Toolbar>
+
+    </android.support.design.widget.AppBarLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="6dp"
-        android:layout_below="@+id/settings_toolbar"
+        android:layout_below="@+id/app_bar"
         android:background="@drawable/toolbar_dropshadow" />
 
     <RelativeLayout
         android:id="@+id/remote_access_login_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/settings_toolbar"
+        android:layout_below="@id/app_bar"
         android:visibility="gone">
 
         <LinearLayout
@@ -142,7 +148,7 @@
         android:id="@+id/remote_access_register_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/settings_toolbar"
+        android:layout_below="@+id/app_bar"
         android:visibility="gone">
 
         <LinearLayout
@@ -253,7 +259,7 @@
         android:id="@+id/remote_access_normal_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/settings_toolbar"
+        android:layout_below="@+id/app_bar"
         android:visibility="visible">
 
         <LinearLayout
@@ -385,7 +391,7 @@
         android:id="@+id/settings_progress_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/settings_toolbar"
+        android:layout_below="@+id/app_bar"
         android:clickable="true"
         android:visibility="invisible">
 

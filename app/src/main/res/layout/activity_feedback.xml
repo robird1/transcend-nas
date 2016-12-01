@@ -14,11 +14,7 @@
         <android.support.v7.widget.Toolbar
             android:id="@+id/feedback_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/colorActionBarBackground"
-            android:title="@string/feedback"
-            app:popupTheme="@style/AppTheme.PopupOverlay"
-            app:theme="@style/ToolbarTheme">
+            android:layout_height="?attr/actionBarSize">
 
             <TextView
                 android:id="@+id/feedback_toolbar_title"
@@ -34,8 +30,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/ic_navigation_arrow_white_24dp"
-                android:onClick="onClickBackImage"
-                app:theme="@style/AppTheme.Gray" />
+                android:onClick="onClickBackImage" />
 
         </android.support.v7.widget.Toolbar>
 

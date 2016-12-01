@@ -21,9 +21,7 @@
             <android.support.v7.widget.Toolbar
                 android:id="@+id/wizard_toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="@color/colorActionBarBackground"
-                app:theme="@style/ToolbarTheme">
+                android:layout_height="?attr/actionBarSize">
 
                 <TextView
                     android:id="@+id/wizard_toolbar_title"
@@ -31,7 +29,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:text="@string/wizard"
-                    android:textColor="@color/textColorPrimary"
+                    android:textColor="@color/colorPrimary"
                     android:textSize="20sp" />
 
             </android.support.v7.widget.Toolbar>

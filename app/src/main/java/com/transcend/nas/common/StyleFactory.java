@@ -114,11 +114,12 @@ public class StyleFactory {
     }
 
     public static void set_blue_button_touch_effect(Context context, Button button) {
+        button.setTextColor(Color.WHITE);
         set_button_touch_effect(context, button, TouchColor.BLUE);
     }
 
     public static void set_red_button_touch_effect(Context context, Button button) {
-        //button.setTextColor(Color.BLACK);
+        button.setTextColor(Color.WHITE);
         set_button_touch_effect(context, button, TouchColor.RED);
     }
 

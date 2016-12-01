@@ -5,37 +5,44 @@
     android:layout_height="match_parent"
     android:background="@color/colorPrimary">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/info_toolbar"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/app_bar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorActionBarBackground"
-        app:theme="@style/ToolbarTheme" >
+        android:layout_height="wrap_content"
+        android:elevation="0dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/information"
-            android:textSize="20sp" />
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/info_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize">
 
-    </android.support.v7.widget.Toolbar>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/information"
+                android:textColor="@color/colorPrimary"
+                android:textSize="20sp" />
+
+        </android.support.v7.widget.Toolbar>
+
+    </android.support.design.widget.AppBarLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="6dp"
-        android:layout_below="@+id/info_toolbar"
+        android:layout_below="@+id/app_bar"
         android:background="@drawable/toolbar_dropshadow" />
 
     <ImageView
         android:id="@+id/info_image"
         android:layout_width="128dp"
         android:layout_height="128dp"
-        android:scaleType="centerCrop"
-        android:layout_below="@id/info_toolbar"
+        android:layout_below="@id/app_bar"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="26dp"
         android:layout_marginBottom="20dp"
+        android:layout_marginTop="26dp"
+        android:scaleType="centerCrop"
         android:src="@drawable/ic_file_gray_big" />
 
     <View

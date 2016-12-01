@@ -16,8 +16,7 @@
             android:id="@+id/disk_info_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/colorActionBarBackground"
-            app:theme="@style/AppTheme.Dark" >
+            app:theme="@style/AppTheme.DropDown">
 
             <TextView
                 android:id="@+id/disk_info_toolbar_title"

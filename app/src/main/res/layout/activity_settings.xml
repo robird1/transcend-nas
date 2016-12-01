@@ -5,35 +5,40 @@
     android:layout_height="match_parent"
     android:background="@color/colorPrimary">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/settings_toolbar"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/app_bar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorActionBarBackground"
-        app:theme="@style/ToolbarTheme">
+        android:layout_height="wrap_content"
+        android:elevation="0dp">
 
-        <TextView
-            android:id="@+id/settings_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/settings"
-            android:textColor="@color/colorPrimary"
-            android:textSize="20sp" />
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/settings_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize">
 
-    </android.support.v7.widget.Toolbar>
+            <TextView
+                android:id="@+id/settings_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/settings"
+                android:textColor="@color/colorPrimary"
+                android:textSize="20sp" />
+
+        </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="6dp"
-        android:layout_below="@+id/settings_toolbar"
+        android:layout_below="@+id/app_bar"
         android:background="@drawable/toolbar_dropshadow" />
 
     <FrameLayout
         android:id="@+id/settings_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/settings_toolbar">
+        android:layout_below="@+id/app_bar">
 
     </FrameLayout>
 
@@ -41,9 +46,9 @@
         android:id="@+id/settings_progress_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/settings_toolbar"
-        android:visibility="invisible"
-        android:clickable="true">
+        android:layout_below="@+id/app_bar"
+        android:clickable="true"
+        android:visibility="invisible">
 
         <ProgressBar
             android:layout_width="wrap_content"

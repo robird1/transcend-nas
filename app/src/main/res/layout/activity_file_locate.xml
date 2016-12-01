@@ -22,8 +22,8 @@
                 android:id="@+id/locate_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:theme="@style/AppTheme.Dark"
-                app:popupTheme="@style/AppTheme.PopupOverlay">
+                app:popupTheme="@style/AppTheme.PopupOverlay"
+                app:theme="@style/AppTheme.DropDown">
 
                 <android.support.v7.widget.AppCompatSpinner
                     android:id="@+id/locate_dropdown"

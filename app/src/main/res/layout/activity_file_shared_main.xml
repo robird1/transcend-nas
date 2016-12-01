@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -22,15 +21,13 @@
                 android:id="@+id/main_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="@color/colorActionBarBackground"
                 app:popupTheme="@style/AppTheme.PopupOverlay"
-                app:theme="@style/ToolbarTheme" >
+                app:theme="@style/AppTheme.DropDown">
 
                 <android.support.v7.widget.AppCompatSpinner
                     android:id="@+id/main_dropdown"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    app:theme="@style/AppTheme.Gray" />
+                    android:layout_height="match_parent" />
 
             </android.support.v7.widget.Toolbar>
 
@@ -45,8 +42,8 @@
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/main_recycler_view"
-            android:layout_height="match_parent"
             android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_below="@+id/main_toolbar_shadow"
             android:background="@color/colorPrimary" />
 
@@ -61,8 +58,8 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="300dp"
-                android:scaleType="fitCenter"
                 android:layout_gravity="center_horizontal"
+                android:scaleType="fitCenter"
                 android:src="@drawable/image_folder_empty" />
 
             <TextView
@@ -79,8 +76,8 @@
         android:id="@+id/main_progress_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="invisible"
-        android:clickable="true">
+        android:clickable="true"
+        android:visibility="invisible">
 
         <ProgressBar
             android:layout_width="wrap_content"
