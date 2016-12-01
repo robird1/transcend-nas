@@ -15,6 +15,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,6 +24,7 @@ import android.widget.Toast;
 import com.transcend.nas.BuildConfig;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
+import com.transcend.nas.management.HelpActivity;
 import com.transcend.nas.view.NotificationDialog;
 
 /**
@@ -207,8 +210,9 @@ public class AboutActivity extends AppCompatActivity {
             }
             else if(id == R.string.about_open_source){
                 v = inflater.inflate(R.layout.fragment_license, container, false);
-                TextView info = (TextView) v.findViewById(R.id.info);
-                info.setText(Html.fromHtml(NASPref.readFromAssets(mContext, "LicensedText-SJCAndroid.txt")));
+                WebView info = (WebView) v.findViewById(R.id.info);
+                info.setWebViewClient(new MyWebViewClient());
+                info.loadUrl("file:///android_asset/open_source_statement.html");
             }
             else {
                 v = inflater.inflate(R.layout.fragment_about_info, container, false);
@@ -216,6 +220,14 @@ public class AboutActivity extends AppCompatActivity {
                 info.setText(getString(id));
             }
             return v;
+        }
+    }
+
+    private static class MyWebViewClient extends WebViewClient {
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            view.loadUrl(url);
+            return true;
         }
     }
 
