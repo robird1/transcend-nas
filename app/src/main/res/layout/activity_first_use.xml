@@ -44,37 +44,37 @@
         android:paddingBottom="@dimen/activity_vertical_margin" >
 
         <TextView
-            android:text="@string/license_agreement_text1"
+            android:text="@string/license_agreement_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/license_agreement_text1"
             android:gravity="center" />
 
-        <TextView
-            android:text="@string/license_agreement_text2_2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/license_agreement_text1"
-            android:layout_centerHorizontal="true"
-            android:textColor="@color/ccl_blue"
-            android:textSize="14sp"
-            android:id="@+id/btn_privacy_policy" />
+        <!--<TextView-->
+            <!--android:text="@string/license_agreement_text2_2"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_below="@id/license_agreement_text1"-->
+            <!--android:layout_centerHorizontal="true"-->
+            <!--android:textColor="@color/ccl_blue"-->
+            <!--android:textSize="14sp"-->
+            <!--android:id="@+id/btn_privacy_policy" />-->
 
-        <TextView
-            android:text="@string/license_agreement_text2_1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toLeftOf="@id/btn_privacy_policy"
-            android:layout_alignBottom="@id/btn_privacy_policy"
-            android:layout_marginRight="10dp" />
+        <!--<TextView-->
+            <!--android:text="@string/license_agreement_text2_1"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_toLeftOf="@id/btn_privacy_policy"-->
+            <!--android:layout_alignBottom="@id/btn_privacy_policy"-->
+            <!--android:layout_marginRight="10dp" />-->
 
-        <TextView
-            android:text="@string/license_agreement_text2_3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/btn_privacy_policy"
-            android:layout_alignBottom="@id/btn_privacy_policy"
-            android:layout_marginLeft="10dp" />
+        <!--<TextView-->
+            <!--android:text="@string/license_agreement_text2_3"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_toRightOf="@+id/btn_privacy_policy"-->
+            <!--android:layout_alignBottom="@id/btn_privacy_policy"-->
+            <!--android:layout_marginLeft="10dp" />-->
 
     </RelativeLayout>
 

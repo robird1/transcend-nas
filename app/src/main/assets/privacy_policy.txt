@@ -1,3 +1,0 @@
-Transcend Information, Inc. (“Transcend”) will collect, process and use certain non-identifying information from your experience of using the App (including, but not limited to, the type of your device, your device’s ID, IP address, your operating system, and the browser being used), through Google Analytics SDK, Facebook API or otherwise, for the purpose of improving the quality of the App.  You may reject such collection, and however, you may as a result not be able to enjoy the full function of the App.
-
-By using the App, you are deemed to have read, understood and agree to this privacy rule (the “Rule”). If you have any questions or concerns about the Rule, please contact Transcend at service-tw@transcend-info.com.

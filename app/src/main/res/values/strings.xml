@@ -311,10 +311,7 @@
     <string name="dialog_button_save">"Save"</string>
 
     <string name="btn_view_license_agreement">"View license agreement"</string>
-    <string name="license_agreement_text1">"You must agree to the Transcend license agreement"</string>
-    <string name="license_agreement_text2_1">"and"</string>
-    <string name="license_agreement_text2_2">"privacy policy"</string>
-    <string name="license_agreement_text2_3">"to continue."</string>
+    <string name="license_agreement_text">"You must agree to the Transcend license agreement to continue."</string>
     <string name="license_agreement_agree">"Agree"</string>
 
     <string name="feedback">Feedback</string>
