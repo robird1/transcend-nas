@@ -25,6 +25,7 @@
         android:textSize="18sp"
         android:singleLine="true"
         android:ellipsize="marquee"
+        android:textColor="@color/colorPrimary"
         android:marqueeRepeatLimit="marquee_forever" />
 
 </RelativeLayout>

@@ -27,6 +27,10 @@ public class StyleFactory {
     private static Handler handler;
     private static Runnable runnable;
 
+    private enum TouchColor {
+        WHITE, BLUE, RED
+    }
+
     public static void set_button_Drawable_left(final Context context, final Button button, final int imageID, final int spacing) {
         handler = new Handler();
         runnable = new Runnable() {
@@ -105,7 +109,20 @@ public class StyleFactory {
         });
     }
 
-    public static void set_white_button_touch_effect(final Context context, final Button button) {
+    public static void set_white_button_touch_effect(Context context, Button button) {
+        set_button_touch_effect(context, button, TouchColor.WHITE);
+    }
+
+    public static void set_blue_button_touch_effect(Context context, Button button) {
+        set_button_touch_effect(context, button, TouchColor.BLUE);
+    }
+
+    public static void set_red_button_touch_effect(Context context, Button button) {
+        //button.setTextColor(Color.BLACK);
+        set_button_touch_effect(context, button, TouchColor.RED);
+    }
+
+    public static void set_button_touch_effect(final Context context, final Button button, final TouchColor color) {
         button.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -114,7 +131,17 @@ public class StyleFactory {
                         button.setBackgroundResource(R.drawable.button_press);
                         break;
                     case MotionEvent.ACTION_UP:
-                        button.setBackgroundResource(R.drawable.button_normal);
+                        switch (color) {
+                            case RED:
+                                button.setBackgroundResource(R.drawable.button_normal_red);
+                                break;
+                            case BLUE:
+                                button.setBackgroundResource(R.drawable.button_normal_blue);
+                                break;
+                            default:
+                                button.setBackgroundResource(R.drawable.button_normal);
+                                break;
+                        }
                         break;
                 }
                 return false;

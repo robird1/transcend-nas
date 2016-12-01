@@ -71,15 +71,6 @@ public class LoginByEmailActivity extends AppCompatActivity implements
         initToolbar();
         initProgressView();
         initView();
-        /*String email = NASPref.getCloudUsername(mContext);
-        String pwd = NASPref.getCloudPassword(mContext);
-        if (!email.equals("") && !pwd.equals("")) {
-            Bundle arg = new Bundle();
-            arg.putString("server", NASPref.getCloudServer(mContext));
-            arg.putString("email", email);
-            arg.putString("password", pwd);
-            getLoaderManager().restartLoader(LoaderID.TUTK_LOGIN, arg, LoginByEmailActivity.this).forceLoad();
-        }*/
     }
 
     @Override
@@ -386,6 +377,7 @@ public class LoginByEmailActivity extends AppCompatActivity implements
         tlPwd.getEditText().setText("");
         Button btLogin = (Button) findViewById(R.id.remote_access_login_login);
         btLogin.setOnClickListener(this);
+        StyleFactory.set_white_button_touch_effect(this, btLogin);
         TextView tvForget = (TextView) findViewById(R.id.remote_access_login_forget);
         tvForget.setOnClickListener(this);
         StyleFactory.set_blue_text_touch_effect(this, tvForget);
@@ -407,6 +399,7 @@ public class LoginByEmailActivity extends AppCompatActivity implements
         tlPwdConfirm.getEditText().setText("");
         Button btSubmit = (Button) findViewById(R.id.remote_access_register_submit);
         btSubmit.setOnClickListener(this);
+        StyleFactory.set_white_button_touch_effect(this, btSubmit);
         TextView tvSignIn = (TextView) findViewById(R.id.remote_access_login_sign_in);
         tvSignIn.setOnClickListener(this);
         StyleFactory.set_blue_text_touch_effect(this, tvSignIn);
@@ -422,11 +415,13 @@ public class LoginByEmailActivity extends AppCompatActivity implements
         tvEmail.setText(NASPref.getCloudUsername(mContext));
         Button btContinue = (Button) findViewById(R.id.remote_access_continue_button);
         btContinue.setOnClickListener(this);
+        StyleFactory.set_white_button_touch_effect(this, btContinue);
         TextView tvResend = (TextView) findViewById(R.id.remote_access_resend_text);
         tvResend.setOnClickListener(this);
         StyleFactory.set_blue_text_touch_effect(this, tvResend);
         Button btDelete = (Button) findViewById(R.id.remote_access_delete_button);
         btDelete.setOnClickListener(this);
+        StyleFactory.set_red_button_touch_effect(this, btDelete);
     }
 
     private void updateView() {

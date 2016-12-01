@@ -569,10 +569,10 @@ public class FileManageActivity extends AppCompatActivity implements
         FileManageRecyclerAdapter.LayoutType type = NASPref.getFileViewType(this);
         switch (type) {
             case GRID:
-                menu.findItem(R.id.file_manage_viewer_action_view).setIcon(R.drawable.ic_view_list_gray_24dp);
+                menu.findItem(R.id.file_manage_viewer_action_view).setIcon(R.drawable.ic_view_list_white_24dp);
                 break;
             default:
-                menu.findItem(R.id.file_manage_viewer_action_view).setIcon(R.drawable.ic_view_module_gray_24dp);
+                menu.findItem(R.id.file_manage_viewer_action_view).setIcon(R.drawable.ic_view_module_white_24dp);
                 break;
         }
         mMediaRouteMenuItem = mCastManager.addMediaRouterButton(menu, R.id.media_route_menu_item);

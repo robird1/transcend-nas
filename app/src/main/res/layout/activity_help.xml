@@ -18,8 +18,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/settings"
-            android:textSize="20sp"
-            />
+            android:textColor="@color/colorPrimary"
+            android:textSize="20sp" />
 
     </android.support.v7.widget.Toolbar>
 
@@ -34,15 +34,15 @@
         android:id="@+id/webview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/toolbar_shadow_view"/>
+        android:layout_below="@+id/toolbar_shadow_view" />
 
     <RelativeLayout
         android:id="@+id/settings_progress_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/settings_toolbar"
-        android:visibility="invisible"
-        android:clickable="true">
+        android:clickable="true"
+        android:visibility="invisible">
 
         <ProgressBar
             android:layout_width="wrap_content"

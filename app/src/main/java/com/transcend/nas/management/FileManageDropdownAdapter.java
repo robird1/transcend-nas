@@ -133,15 +133,10 @@ public class FileManageDropdownAdapter extends BaseAdapter {
         convertView.setOnTouchListener(new OnDropdownItemTouchListener(position));
         TextView tv = ViewHolder.get(convertView, R.id.dropdown_text);
         tv.setText(mList.get(position));
-        if(position > 0){
-            tv.setTextColor(isActionLocate ? Color.WHITE : Color.GRAY);
-        }
-        else{
-            tv.setTextColor(isActionLocate ? Color.BLACK : Color.RED);
-        }
+        tv.setTextColor(Color.WHITE);
 
         ImageView iv = ViewHolder.get(convertView, R.id.dropdown_icon);
-        iv.setImageResource(isActionLocate ? R.drawable.ic_folder_white_24dp : R.drawable.ic_folder_gray_24dp);
+        iv.setImageResource(R.drawable.ic_folder_white_24dp);
         RelativeLayout.LayoutParams margins = new RelativeLayout.LayoutParams(iv.getLayoutParams());
         margins.leftMargin = Math.min(8*position,32);
         iv.setLayoutParams(margins);

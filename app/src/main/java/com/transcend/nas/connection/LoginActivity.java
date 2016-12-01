@@ -83,7 +83,7 @@ public class LoginActivity extends AppCompatActivity implements
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            switch(msg.what){
+            switch (msg.what) {
                 case FB_PROFILE_PHOTO:
                     mAccountImage.setImageBitmap(mPhotoBitmap);
                     break;
@@ -103,18 +103,15 @@ public class LoginActivity extends AppCompatActivity implements
 
         initView();
 
-        if (NASPref.getFBAccountStatus(this))
-        {
+        if (NASPref.getFBAccountStatus(this)) {
             setFBPhoto();
         }
 
     }
 
-    private void setFBPhoto()
-    {
+    private void setFBPhoto() {
         final String storedUrl = NASPref.getFBProfilePhotoUrl(this);
-        if (storedUrl != null)
-        {
+        if (storedUrl != null) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -192,7 +189,7 @@ public class LoginActivity extends AppCompatActivity implements
         mLoginLayout = (RelativeLayout) findViewById(R.id.login_layout);
         Button facebookLogin = (Button) findViewById(R.id.login_by_facebook);
         facebookLogin.setOnClickListener(this);
-        StyleFactory.set_white_button_touch_effect(this, facebookLogin);
+        StyleFactory.set_blue_button_touch_effect(this, facebookLogin);
         Button emailLogin = (Button) findViewById(R.id.login_by_email);
         emailLogin.setOnClickListener(this);
         StyleFactory.set_white_button_touch_effect(this, emailLogin);
@@ -201,7 +198,7 @@ public class LoginActivity extends AppCompatActivity implements
         TextView signInText = (TextView) findViewById(R.id.login_sign_up);
         signInText.setOnClickListener(this);
         StyleFactory.set_blue_text_touch_effect(this, signInText);
-        if(!NASPref.useFacebookLogin){
+        if (!NASPref.useFacebookLogin) {
             RelativeLayout fbLayout = (RelativeLayout) findViewById(R.id.login_fb_layout);
             fbLayout.setVisibility(View.GONE);
 //            LinearLayout orLayout = (LinearLayout) findViewById(R.id.login_or_layout);
@@ -219,7 +216,7 @@ public class LoginActivity extends AppCompatActivity implements
         TextView accountTitle = (TextView) findViewById(R.id.start_account_title);
         TextView accountContent = (TextView) findViewById(R.id.start_account_content);
         mAccountImage = (ImageView) findViewById(R.id.start_account_image);
-        if(NASPref.getFBAccountStatus(mContext))
+        if (NASPref.getFBAccountStatus(mContext))
             mAccountImage.setImageResource(R.drawable.icon_facebook_24dp);
 
         String email = NASPref.getCloudUsername(mContext);
@@ -347,7 +344,7 @@ public class LoginActivity extends AppCompatActivity implements
         mProgressView.setVisibility(View.VISIBLE);
         Log.d(TAG, "[Enter] loginFBAccount()");
 
-        if (mCallbackManager ==  null) {
+        if (mCallbackManager == null) {
             registerFBLoginCallback();
         }
 
@@ -438,7 +435,7 @@ public class LoginActivity extends AppCompatActivity implements
                     public void onCompleted(JSONObject object, GraphResponse response) {
 
                         Log.d(TAG, "[Enter] onCompleted");
-                        if(object != null) {
+                        if (object != null) {
                             Log.d(TAG, "name: " + object.optString("name"));
                             Log.d(TAG, "email: " + object.optString("email"));
                             Log.d(TAG, "user id: " + mAccessToken.getUserId());
@@ -523,7 +520,7 @@ public class LoginActivity extends AppCompatActivity implements
                     @Override
                     public void onConfirm() {
                         GoogleAnalysisFactory.getInstance(mContext).sendEvent(GoogleAnalysisFactory.VIEW.START, GoogleAnalysisFactory.ACTION.Click, GoogleAnalysisFactory.LABEL.Logout);
-                        if(NASPref.useFacebookLogin && NASPref.getFBAccountStatus(mContext))
+                        if (NASPref.useFacebookLogin && NASPref.getFBAccountStatus(mContext))
                             NASPref.logOutFB(LoginActivity.this);
                         NASPref.clearDataAfterLogout(mContext);
                         showLoginView();
@@ -558,10 +555,10 @@ public class LoginActivity extends AppCompatActivity implements
         windowmanager.getDefaultDisplay().getMetrics(displayMetrics);
         int height = Math.round(displayMetrics.heightPixels / displayMetrics.density);
         int width = Math.round(displayMetrics.widthPixels / displayMetrics.density);
-        Log.d(TAG, "displayMetrics.heightPixels: "+ displayMetrics.heightPixels);
-        Log.d(TAG, "displayMetrics.widthPixels: "+ displayMetrics.widthPixels);
-        Log.d(TAG, "height: "+ height);
-        Log.d(TAG, "width: "+ width);
+        Log.d(TAG, "displayMetrics.heightPixels: " + displayMetrics.heightPixels);
+        Log.d(TAG, "displayMetrics.widthPixels: " + displayMetrics.widthPixels);
+        Log.d(TAG, "height: " + height);
+        Log.d(TAG, "width: " + width);
         Bitmap bitmap = StyleFactory.decodeSampledBitmapFromResource(this.getResources(), R.drawable.sjc_bg3_logo, width, height);
         backgroundImage.setImageBitmap(bitmap);
     }

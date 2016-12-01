@@ -19,13 +19,11 @@
         <item name="buttonBarNegativeButtonStyle">@style/AlertDialogButtonNegative</item>
     </style>
 
-    <style name="AlertDialogButtonPositive"
-        parent="Base.Widget.AppCompat.Button.Borderless.Colored">
+    <style name="AlertDialogButtonPositive" parent="Base.Widget.AppCompat.Button.Borderless.Colored">
         <item name="android:textColor">@color/colorAccentDialog</item>
     </style>
 
-    <style name="AlertDialogButtonNegative"
-        parent="Widget.AppCompat.Button.Borderless">
+    <style name="AlertDialogButtonNegative" parent="Widget.AppCompat.Button.Borderless">
         <item name="android:textColor">@color/textColorSecondary</item>
     </style>
 
@@ -33,11 +31,16 @@
         <item name="android:background">@color/colorAccent</item>
         <item name="android:textColorSecondary">@color/colorPrimary</item>
         <item name="android:textColorTertiary">@color/colorPrimary</item>
+        <item name="android:itemTextAppearance">@style/itemTextStyle.AppTheme</item>
+    </style>
+
+    <style name="itemTextStyle.AppTheme" parent="@android:style/TextAppearance.Widget.IconMenu.Item">
+        <item name="android:textColor">@color/colorPrimary</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.ActionBar" />
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Dark" />
 
     <style name="AppTheme.Gray" parent="AppTheme">
         <item name="android:background">@color/colorActionBarBackground</item>

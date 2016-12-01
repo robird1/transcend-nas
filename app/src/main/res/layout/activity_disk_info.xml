@@ -17,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/colorActionBarBackground"
-            app:theme="@style/ToolbarTheme" >
+            app:theme="@style/AppTheme.Dark" >
 
             <TextView
                 android:id="@+id/disk_info_toolbar_title"
@@ -25,7 +25,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="@string/disk_info"
-                android:textColor="@color/textColorPrimary"
+                android:textColor="@color/colorPrimary"
                 android:textSize="18sp" />
 
             <android.support.v7.widget.AppCompatSpinner
@@ -34,8 +34,7 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:visibility="gone"
-                app:theme="@style/AppTheme.Gray" />
+                android:visibility="gone" />
 
         </android.support.v7.widget.Toolbar>
 

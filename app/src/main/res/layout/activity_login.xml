@@ -33,18 +33,17 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="24dp"
                 android:layout_marginRight="24dp"
-                android:layout_marginTop="200dp"
-                >
+                android:layout_marginTop="200dp">
 
                 <Button
                     android:id="@+id/login_by_facebook"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:background="@drawable/button_fb_login"
+                    android:background="@drawable/button_normal_blue"
                     android:text="@string/sign_up_by_facebook"
-                    android:textColor="@color/colorPrimary"
                     android:textAllCaps="false"
+                    android:textColor="@color/colorPrimary"
                     android:textSize="18sp" />
             </RelativeLayout>
 
@@ -53,15 +52,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="24dp"
                 android:layout_marginRight="24dp"
-                android:layout_marginTop="30dp"
-                >
+                android:layout_marginTop="30dp">
 
                 <Button
                     android:id="@+id/login_by_email"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:background="@drawable/button_email_login"
+                    android:background="@drawable/button_normal"
                     android:text="@string/sign_in_by_email"
                     android:textAllCaps="false"
                     android:textSize="18sp" />
@@ -126,6 +124,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="160dp"
                 android:layout_gravity="center_horizontal"
+                android:visibility="invisible"
                 android:src="@drawable/ic_logo_storejetcloud_big" />
 
             <RelativeLayout

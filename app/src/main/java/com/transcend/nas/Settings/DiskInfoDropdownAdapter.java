@@ -89,7 +89,7 @@ public class DiskInfoDropdownAdapter extends BaseAdapter {
         tv.setText(mList.get(position));
 
         ImageView iv = ViewHolder.get(convertView, R.id.dropdown_icon);
-        iv.setImageResource(R.drawable.ic_storage_gray_24dp);
+        iv.setImageResource(R.drawable.ic_storage_white_24dp);
         return convertView;
     }
 

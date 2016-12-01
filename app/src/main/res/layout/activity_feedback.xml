@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/feedback_app_bar"
@@ -15,25 +16,26 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/colorActionBarBackground"
-            app:popupTheme="@style/AppTheme.PopupOverlay"
             android:title="@string/feedback"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
             app:theme="@style/ToolbarTheme">
 
             <TextView
+                android:id="@+id/feedback_toolbar_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/feedback"
-                android:textSize="20sp"
                 android:layout_gravity="center"
-                android:id="@+id/feedback_toolbar_title" />
+                android:text="@string/feedback"
+                android:textColor="@color/colorPrimary"
+                android:textSize="20sp" />
 
             <ImageView
                 android:id="@+id/feedback_back_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/ic_navigation_arrow_white_24dp"
-                app:theme="@style/AppTheme.Gray"
-                android:onClick="onClickBackImage"/>
+                android:onClick="onClickBackImage"
+                app:theme="@style/AppTheme.Gray" />
 
         </android.support.v7.widget.Toolbar>
 
@@ -70,8 +72,8 @@
                 android:id="@+id/input_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textEmailAddress"
-                android:hint="@string/email" />
+                android:hint="@string/email"
+                android:inputType="textEmailAddress" />
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
@@ -83,18 +85,19 @@
                 android:id="@+id/input_message"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textLongMessage"
-                android:hint="@string/feedback_message" />
+                android:hint="@string/feedback_message"
+                android:inputType="textLongMessage" />
         </android.support.design.widget.TextInputLayout>
 
-        <Button android:id="@+id/btn_send"
+        <Button
+            android:id="@+id/btn_send"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="@string/send"
-            android:background="@color/colorAccent"
             android:layout_marginTop="40dp"
-            android:textColor="@android:color/white"
-            android:onClick="onClickSendButton"/>
+            android:background="@color/colorAccent"
+            android:onClick="onClickSendButton"
+            android:text="@string/send"
+            android:textColor="@android:color/white" />
 
     </LinearLayout>
 </LinearLayout>
