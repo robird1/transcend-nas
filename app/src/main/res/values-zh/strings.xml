@@ -1,17 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
- Loco xml export: Android string resources
- Project: 201608 SJC App
- Release: Working copy
- Locale: zh_TW, Chinese (Taiwan)
- Exported by: Translator TS
- Exported at: Thu, 01 Dec 2016 08:35:33 +0000
--->
-<resources>
-    <string name="Are_you_sure_to_delete_003f">確定要刪除?</string>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="access_error">存取錯誤</string>
-    <string name="activity">活動</string>
     <string name="add_device">新增 StoreJetCloud</string>
+    <string name="advanced_setting">進階設定</string>
     <string name="all_networks">Wi-Fi與行動網路</string>
     <string name="already_have_account">已有帳號?</string>
     <string name="always">總是</string>
@@ -22,43 +12,27 @@
     <string name="appwizard3_storejet_cloud_airplay_casting_your_vid">StoreJet Cloud支援AirPlay與Chromecast，可將喜愛的影片、電影或音樂投放到Apple TV或Chromecast.</string>
     <string name="auto_backup">自動備份</string>
     <string name="available">可使用</string>
-    <string name="backup_camera_roll">備份相機膠卷</string>
     <string name="backup_destination">上傳路徑</string>
     <string name="backup_device">備份裝置</string>
     <string name="backup_fail">備份失敗</string>
     <string name="backup_fail_network_unreachable">無法連線到 StoreJet Cloud</string>
     <string name="backup_fail_no_space">磁碟空間不足</string>
     <string name="backup_file">備份檔案</string>
-    <string name="backup_path">備份路徑</string>
     <string name="backup_source">備份路徑</string>
     <string name="backup_success">備份成功</string>
     <string name="backup_videos">備份影片</string>
     <string name="bind">綁定</string>
-    <!-- bind an account to nas failed -->
-    <string name="bind_fail">綁定失敗</string>
     <string name="btn_view_license_agreement">檢視授權合約</string>
     <string name="cache">快取</string>
     <string name="camera_backup">相機備份</string>
-    <string name="canceled">已取消</string>
     <string name="capacity">容量</string>
     <string name="charge_only">在充電時</string>
     <string name="choose_a_scenario">選擇設定</string>
     <string name="clean">清除</string>
-    <string name="clear_all_tasks">清除所有任務</string>
-    <string name="clear_data_warning">確定清除資料？</string>
-    <string name="clear_downloaded_data">清除已下載資料</string>
-    <string name="clear_finished_tasks">清除已完成的任務</string>
-    <string name="confirm_password">確認密碼</string>
     <string name="confirm_password_error">請確認密碼</string>
     <string name="conj_used">%1$s個已使用</string>
-    <string name="connecting">連接中</string>
     <string name="contact">聯繫我們</string>
-    <string name="contact_us">連繫我們</string>
     <string name="cut">剪下</string>
-    <string name="delete_account">刪除帳號</string>
-    <string name="delete_account_failed">刪除帳號失敗</string>
-    <string name="delete_account_failed_2">刪除帳號失敗</string>
-    <string name="delete_account_from_remote_server">從遠端伺服器刪除帳號</string>
     <string name="detail">詳細資訊</string>
     <string name="device">裝置</string>
     <string name="device_offline">離線</string>
@@ -74,7 +48,6 @@
     <string name="disk_smart">S.M.A.R.T</string>
     <string name="disk_smart_info">協助確認磁碟狀態</string>
     <string name="done">完成</string>
-    <string name="download_3rd_app">在這台裝置上找不到%s。請問您是否要從App Store下載?</string>
     <string name="duplicate_name">名稱重複</string>
     <string name="edit_mode">編輯模式</string>
     <string name="email">電子信箱</string>
@@ -83,10 +56,8 @@
     <string name="empty_email">空白信箱</string>
     <string name="empty_password">空白密碼</string>
     <string name="empty_uuid">UUID 錯誤</string>
-    <string name="enable_remote_access_service">啟動遠端存取服務</string>
     <string name="error_format">格式錯誤</string>
     <string name="exit">結束</string>
-    <string name="failed">已失敗</string>
     <string name="fb_request_email_permission">請同意提供電子信箱資訊以供登入使用</string>
     <string name="feedback">意見回饋</string>
     <string name="feedback_message">意見</string>
@@ -95,15 +66,10 @@
     <string name="file_format_image">圖片格式</string>
     <string name="file_format_video">影像格式</string>
     <string name="find_nas">尋找 StoreJet Cloud</string>
-    <string name="finished">已完成</string>
     <string name="forget_password">忘記密碼?</string>
     <string name="forget_password_send">信件已發送. 請確認你的信箱.</string>
     <string name="forget_password_title">輸入你的信箱來發送重設密碼信件</string>
     <string name="forget_password_warning">目前使用的密碼會失效無法使用,確定要發送信件?</string>
-    <string name="google_cast_error">此檔案無法撥放至Chromecast</string>
-    <!-- a button, client has already had account which is used to bind the nas -->
-    <string name="has_account">已綁定帳號</string>
-    <string name="invalid_email">無效的電子信箱</string>
     <string name="invalid_message">意見欄位不能為空</string>
     <string name="invalid_name">無效的名稱</string>
     <string name="last_modified">最後修改</string>
@@ -112,11 +78,11 @@
     <string name="license_agreement_text">您必需同意授權合約才能繼續。</string>
     <string name="licenses">許可權利</string>
     <string name="location">位置</string>
-    <string name="login_to_remote_server">登入到遠端伺服器</string>
     <string name="login_error">帳號或密碼錯誤</string>
     <string name="login_not">尚未登入</string>
     <string name="model">型號</string>
     <string name="msg_auto_backup">自動備份照片與影片到 StoreJet Cloud</string>
+    <string name="msg_backup_by_cellular">使用行動網路來備份相機照片與影片</string>
     <string name="msg_backup_scenario">選擇備份照片與影片的設置</string>
     <string name="msg_cache_cleared">已清除快取</string>
     <string name="msg_conj_deleted">%1$d個項目將被刪除</string>
@@ -129,13 +95,9 @@
     <string name="msg_paste_to">貼上..</string>
     <string name="msg_upload_to">上傳到..</string>
     <string name="music">音樂</string>
-    <string name="my_storage">我的儲存</string>
     <string name="nas_list">StoreJet Cloud 清單</string>
     <string name="nas_logout">確定登出 StoreJet Cloud?</string>
     <string name="network_error">請確認您的網路連線狀態,或是稍後再試</string>
-    <!-- create a new account  -->
-    <string name="new_account">新帳號</string>
-    <string name="new_firmware_is_released_please_update_it">請更新韌體至最新版本</string>
     <string name="new_user">新用戶</string>
     <string name="next">下一頁</string>
     <string name="no_item_selected">沒有選取項目</string>
@@ -149,12 +111,7 @@
     <string name="other">其他</string>
     <string name="password_size">密碼長度:</string>
     <string name="path">路徑</string>
-    <string name="photo_permission">StoreJet Cloud想要存取您的照片</string>
-    <string name="privacy_policy">隱私政策</string>
     <string name="register">註冊</string>
-    <string name="register_account_failed">帳號註冊失敗</string>
-    <string name="register_to_remote_server">註冊到遠端伺服器</string>
-    <string name="registered_account_has_already_existed">此帳號已被使用</string>
     <string name="remote_access">遠端存取</string>
     <string name="remote_access_active">已啟用</string>
     <string name="remote_access_always_warning">您需要啟用遠端存取, 才能使用此功能</string>
@@ -172,15 +129,11 @@
     <string name="remote_access_unbind">未綁定</string>
     <string name="remote_access_verification_expired">您的帳戶驗證已過期. 請重新註冊</string>
     <string name="resend">重送</string>
-    <!-- resend the email which is used to activate the account -->
-    <string name="resend_the_active_email">重新發送有效的電子郵件</string>
     <string name="reverse_date">日期 (反序)</string>
     <string name="reverse_name">名稱 (反序)</string>
     <string name="search_result_empty">沒有符合檔案</string>
     <string name="select_folder_error">目的地不能在被選取的項目中</string>
     <string name="send">發送</string>
-    <string name="send_password_email_failed">確認密碼郵件寄送失敗</string>
-    <string name="send_mail_error">這台裝置無法發送電子郵件，請檢查郵件設定是否正確。</string>
     <string name="settings_auto_backup_subtitle">自動備份您的相機資料夾</string>
     <string name="settings_device_info_subtitle">StoreJet Cloud 狀態</string>
     <string name="settings_device_info_title">裝置資訊</string>
@@ -200,10 +153,7 @@
     <string name="smart_passed">正常</string>
     <string name="smart_unknown">未知</string>
     <string name="sort">排序</string>
-    <string name="storage_used_size">已使用空間</string>
-    <string name="storejetcluod_com_account_for_remote_access">使用Storejetcloud.com帳號遠端存取</string>
     <string name="submit">提交</string>
-    <string name="submitStr">提交</string>
     <string name="system_info">系統資訊</string>
     <string name="temperature">溫度</string>
     <string name="thank_you">感謝您</string>
@@ -213,7 +163,6 @@
     <string name="try_search_device">搜尋裝置中</string>
     <string name="unknown_album">未知專輯</string>
     <string name="unknown_artist">未知藝人</string>
-    <string name="unknown_error">未知錯誤</string>
     <string name="unknown_format">未知格式</string>
     <string name="unknown_title">未知標題</string>
     <string name="update_firmware">請更新StoreJet Cloud韌體至最新版本</string>
@@ -222,7 +171,6 @@
     <string name="used">已使用</string>
     <string name="video">影片</string>
     <string name="view">顯示</string>
-    <string name="wait">請稍候</string>
     <string name="warning">警告</string>
     <string name="welcome_to_storejet_cloud">歡迎使用StoreJet Cloud</string>
     <string name="wifi_only">當使用Wi-Fi連線時</string>
@@ -241,8 +189,6 @@
     <string name="wizard_success">StoreJet Cloud 已準備完成</string>
     <string name="wizard_try">重試</string>
     <string name="wizard_wifi_info">將手機Wi-Fi連線到路由器網路</string>
-
-
     <string name="about">關於</string>
     <string name="account">帳號：</string>
     <string name="app_version">軟體版本</string>
@@ -262,7 +208,7 @@
     <string name="folder">資料夾</string>
     <string name="help">說明</string>
     <string name="information">資訊</string>
-    <string name="loading">載入中&#8230;</string>
+    <string name="loading">載入中...</string>
     <string name="login">登入</string>
     <string name="logout">登出</string>
     <string name="more">更多</string>
@@ -290,9 +236,4 @@
     <string name="untitled_folder">未命名資料夾</string>
     <string name="upload">上傳</string>
     <string name="uploading">上傳中</string>
-    <string name="about_open_source">開源軟體聲明</string>
-    <string name="about_license_agreement">使用者授權合約</string>
-    <string name="advanced_setting">進階設定</string>
-    <string name="msg_backup_by_cellular">使用行動網路來備份相機照片與影片</string>
-
 </resources>
