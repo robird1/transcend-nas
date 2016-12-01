@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
@@ -15,11 +17,38 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.realtek.nasfun.api.HttpClientManager;
+import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.management.FileActionLocateActivity;
 import com.transcend.nas.service.AutoBackupService;
+import com.tutk.IOTC.P2PService;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static android.R.attr.version;
+import static com.transcend.nas.R.string.location;
 
 
 /**
@@ -76,6 +105,7 @@ public class SettingBackupActivity extends AppCompatActivity {
 
     public static class BackupFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
         public final String TAG = SettingsActivity.class.getSimpleName();
+        private static final String XML_TAG_HOST_NAME = "hostname";
 
         public BackupFragment() {
 
@@ -92,6 +122,7 @@ public class SettingBackupActivity extends AppCompatActivity {
             refreshColumnBackupScenario();
             refreshColumnBackupLocation();
             refreshColumnBackupSource();
+            refreshColumnBackupDevice();
             getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
         }
 
@@ -236,6 +267,119 @@ public class SettingBackupActivity extends AppCompatActivity {
 
             Log.d(TAG,"restartService : " +enable);
         }
+
+        private void refreshColumnBackupDevice() {
+            final Handler handler = new Handler() {
+                @Override
+                public void handleMessage(Message msg) {
+                    super.handleMessage(msg);
+                    Preference pref = findPreference(getString(R.string.pref_backup_device));
+                    pref.setSummary((String) msg.obj);
+                }
+            };
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Message msg = Message.obtain();
+                    msg.obj = getDeviceName();
+                    handler.sendMessage(msg);
+                }
+            }).start();
+
+        }
+
+        private String getDeviceName() {
+            String deviceName = null;
+            HttpEntity entity = sendGetRequest();
+            InputStream inputStream = null;
+            String inputEncoding = null;
+
+            if (entity != null) {
+                try {
+                    inputStream = entity.getContent();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                inputEncoding = EntityUtils.getContentCharSet(entity);
+            }
+
+            if (inputEncoding == null) {
+                inputEncoding = HTTP.DEFAULT_CONTENT_CHARSET;
+            }
+
+            if (inputStream != null) {
+                deviceName = doParse(inputStream, inputEncoding);
+            }
+
+            return deviceName;
+        }
+
+        private HttpEntity sendGetRequest() {
+            HttpEntity entity = null;
+            Server server = ServerManager.INSTANCE.getCurrentServer();
+            String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
+            String commandURL = "http://" + hostname + "/nas/get/info";
+
+            HttpResponse response;
+            try {
+                HttpGet httpGet = new HttpGet(commandURL);
+                response = HttpClientManager.getClient().execute(httpGet);
+
+                if (response != null) {
+                    entity = response.getEntity();
+                }
+
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            } catch (ClientProtocolException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return entity;
+        }
+
+        private String doParse(InputStream inputStream, String inputEncoding)
+        {
+            String hostname = null;
+            XmlPullParserFactory factory;
+
+            try {
+                factory = XmlPullParserFactory.newInstance();
+                factory.setNamespaceAware(true);
+                XmlPullParser parser = factory.newPullParser();
+                parser.setInput(inputStream, inputEncoding);
+                int eventType = parser.getEventType();
+
+                do {
+                    String tagName = parser.getName();
+//                    Log.d(TAG, "tagName: " + tagName);
+
+                    if (eventType == XmlPullParser.START_TAG) {
+                        if (tagName.equals(XML_TAG_HOST_NAME)) {
+                            parser.next();
+//                            Log.d(TAG, "parser.getText(): " + parser.getText());
+
+                            hostname = parser.getText();
+                            break;
+                        }
+                    }
+
+                    eventType = parser.next();
+
+                } while (eventType != XmlPullParser.END_DOCUMENT);
+
+            } catch (XmlPullParserException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return hostname;
+
+        }
+
     }
 }
 

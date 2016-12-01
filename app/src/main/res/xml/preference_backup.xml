@@ -42,6 +42,13 @@
             android:layout="@layout/preference_item"
             android:summary="/"
             android:title="@string/backup_source" />
+
+        <Preference
+            android:key="@string/pref_backup_device"
+            android:layout="@layout/preference_item"
+            android:summary="@string/loading"
+            android:title="@string/backup_device" />
+
     </PreferenceCategory>
 
     <PreferenceCategory>

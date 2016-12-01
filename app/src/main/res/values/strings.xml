@@ -327,6 +327,7 @@
     <string name="pref_ip_address">IP ADDRESS</string>
     <string name="pref_setting_category">SETTING CATEGORY</string>
     <string name="pref_about_app_version">APP VERSION</string>
+    <string name="pref_backup_device">BACKUP DEVICE</string>
     <string name="settings_download_location">Download Location</string>
     <string name="dialog_clean_cache">Do you want to clean cache?</string>
     <string name="settings_auto_backup_subtitle">Auto backup your camera folder</string>
@@ -340,5 +341,5 @@
     <string name="settings_mac_address_title">MAC Address</string>
     <string name="about_open_source">Open Source Statement</string>
     <string name="about_license_agreement">End-User License Agreement</string>
-
+    <string name="backup_device">Backup Device</string>
 </resources>
