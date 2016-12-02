@@ -236,4 +236,8 @@
     <string name="untitled_folder">未命名資料夾</string>
     <string name="upload">上傳</string>
     <string name="uploading">上傳中</string>
+
+    <string name="about_open_source">開源軟體聲明</string>
+    <string name="about_license_agreement">使用者授權合約</string>
+
 </resources>

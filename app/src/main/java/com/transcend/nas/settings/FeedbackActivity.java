@@ -14,13 +14,10 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.transcend.nas.BuildConfig;
-import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 
 import java.io.BufferedReader;
@@ -42,8 +39,9 @@ public class FeedbackActivity extends AppCompatActivity {
 
     private static final String TAG = FeedbackActivity.class.getSimpleName();
     private static final String CATEGORY_LIST_URL = "http://www.transcend-info.com/Service/SMSService.svc/web/GetSrvCategoryList";
-//    private static final String FEEDBACK_URL = "http://www.transcend-info.com/Service/SMSService.svc/web/ServiceMailCaseAdd";
-    private static final String FEEDBACK_URL = "http://10.13.5.10/Service/SMSService.svc/web/ServiceMailCaseAdd";
+    private static final String FEEDBACK_URL = "http://www.transcend-info.com/Service/SMSService.svc/web/ServiceMailCaseAdd";
+//    private static final String FEEDBACK_URL = "http://10.13.5.10/Service/SMSService.svc/web/ServiceMailCaseAdd";
+    private static final int ID_ERROR_HANDLING = -1;
     private static final int ID_GET_CATEGORY_LIST = 0;
     private static final int ID_SEND_FEEDBACK = 1;
     private static final String KEY_SERVICE_TYPE = "service_type";
@@ -56,6 +54,7 @@ public class FeedbackActivity extends AppCompatActivity {
     private EditText mEditTextName;
     private EditText mEditTextEmail;
     private EditText mEditTextMessage;
+    private View mProgressBar;
     private Handler mHandler = new Handler()
     {
         @Override
@@ -70,8 +69,13 @@ public class FeedbackActivity extends AppCompatActivity {
                     }
                     break;
                 case ID_SEND_FEEDBACK:
+                    mProgressBar.setVisibility(View.INVISIBLE);
                     Toast.makeText(FeedbackActivity.this, R.string.thank_you, Toast.LENGTH_SHORT).show();
                     FeedbackActivity.this.finish();
+                    break;
+                case ID_ERROR_HANDLING:
+                    mProgressBar.setVisibility(View.INVISIBLE);
+                    Toast.makeText(FeedbackActivity.this, R.string.network_error, Toast.LENGTH_LONG).show();
                     break;
             }
         }
@@ -112,6 +116,7 @@ public class FeedbackActivity extends AppCompatActivity {
         mEditTextName.addTextChangedListener(new MyTextWatcher(mEditTextName));
         mEditTextEmail.addTextChangedListener(new MyTextWatcher(mEditTextEmail));
         mEditTextMessage.addTextChangedListener(new MyTextWatcher(mEditTextMessage));
+        mProgressBar = this.findViewById(R.id.settings_progress_view);
     }
 
     public void onClickBackImage(View view)
@@ -122,10 +127,7 @@ public class FeedbackActivity extends AppCompatActivity {
     public void onClickSendButton(View view)
     {
         if (isInputValid()) {
-
-            Button sendBtn = (Button) findViewById(R.id.btn_send);
-            sendBtn.setEnabled(false);
-
+            mProgressBar.setVisibility(View.VISIBLE);
             sendRequest(configurePostRequest(CATEGORY_LIST_URL), null, ID_GET_CATEGORY_LIST);
         }
     }
@@ -191,10 +193,12 @@ public class FeedbackActivity extends AppCompatActivity {
             conn.setConnectTimeout(10000);
 
         } catch (Exception e) {
+            Log.d(TAG, "HttpURLConnection========================================================================");
             e.printStackTrace();
-        } finally {
-            return conn;
+            doErrorHandling();
+            Log.d(TAG, "HttpURLConnection========================================================================");
         }
+        return conn;
     }
 
     private void sendRequest(final HttpURLConnection connection, final String jsonData, final int messageId)
@@ -227,14 +231,17 @@ public class FeedbackActivity extends AppCompatActivity {
                         if (messageId == ID_GET_CATEGORY_LIST) {
                             setMessageData(msg, result);
                         }
+
+                        msg.what = messageId;
+                        mHandler.sendMessage(msg);
                     }
 
                 } catch (IOException e) {
+                    Log.d(TAG, "IOException========================================================================");
                     e.printStackTrace();
+                    doErrorHandling();
+                    Log.d(TAG, "IOException========================================================================");
                 }
-
-                msg.what = messageId;
-                mHandler.sendMessage(msg);
             }
 
         }).start();
@@ -246,8 +253,6 @@ public class FeedbackActivity extends AppCompatActivity {
         toolbar.setTitle("");
 //        toolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_white_24dp);
         setSupportActionBar(toolbar);
-        TextView title = (TextView) findViewById(R.id.feedback_toolbar_title);
-        title.setText(R.string.app_name);
     }
 
     private String getDeviceName() {
@@ -275,19 +280,11 @@ public class FeedbackActivity extends AppCompatActivity {
 
     private String getResponseResult(HttpURLConnection connection) throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        StringBuffer sb = new StringBuffer("");
-        String line="";
+        String line = in.readLine();
 
-        while((line = in.readLine()) != null) {
-
-            sb.append(line);
-            break;
-        }
-
-        Log.d(TAG, "get category list result: " + sb.toString());
+        Log.d(TAG, "get category list result: " + line);
         in.close();
-
-        return sb.toString();
+        return line;
     }
 
     // TODO parse the responseData to get values
@@ -296,6 +293,12 @@ public class FeedbackActivity extends AppCompatActivity {
         data.putString(KEY_SERVICE_TYPE, String.valueOf(15));
         data.putString(KEY_SERVICE_CATEGORY, String.valueOf(384));
         msg.setData(data);
+    }
+
+    private void doErrorHandling() {
+        Message msg = new Message();
+        msg.what = ID_ERROR_HANDLING;
+        mHandler.sendMessage(msg);
     }
 
     private class MyTextWatcher implements TextWatcher {

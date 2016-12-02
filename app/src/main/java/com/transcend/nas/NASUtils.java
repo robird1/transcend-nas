@@ -22,7 +22,6 @@ import com.facebook.login.LoginManager;
 import com.realtek.nasfun.api.HttpClientManager;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
-import com.transcend.nas.settings.SettingsActivity;
 import com.tutk.IOTC.P2PService;
 
 import org.apache.http.HttpEntity;
@@ -155,7 +154,7 @@ public final class NASUtils {
      * @param isShow
      */
     public static void showProgressBar(@NonNull Activity activity, boolean isShow) {
-        if (activity != null && activity instanceof SettingsActivity) {
+        if (activity != null) {
             View progressBar = activity.findViewById(R.id.settings_progress_view);
             progressBar.setVisibility(isShow ? View.VISIBLE : View.INVISIBLE);
         }

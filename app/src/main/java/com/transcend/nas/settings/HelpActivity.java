@@ -28,8 +28,6 @@ public class HelpActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_help);
         initToolbar();
-        TextView title = (TextView) findViewById(R.id.settings_title);
-        title.setText(R.string.app_name);
         WebView webView = (WebView) findViewById(R.id.webview);
         webView.setWebViewClient(new MyWebViewClient());
         NASUtils.showProgressBar(this, true);
