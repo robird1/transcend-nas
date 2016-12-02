@@ -515,6 +515,9 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void setDrawerHeaderIcon() {
+        if(!NASPref.getFBAccountStatus(this))
+            return;
+
         final String storedUrl = NASPref.getFBProfilePhotoUrl(this);
         if (storedUrl != null) {
 

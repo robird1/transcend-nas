@@ -27,6 +27,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:key="@string/pref_firmware"
         android:layout="@layout/preference_category_widget"
         android:title="@string/app_name">
 

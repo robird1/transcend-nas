@@ -90,10 +90,9 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
-            android:background="@color/colorAccent"
+            android:background="@drawable/button_normal"
             android:onClick="onClickSendButton"
-            android:text="@string/send"
-            android:textColor="@android:color/white" />
+            android:text="@string/send" />
 
     </LinearLayout>
 

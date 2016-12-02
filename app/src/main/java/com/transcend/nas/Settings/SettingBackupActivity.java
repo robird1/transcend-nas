@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import com.realtek.nasfun.api.HttpClientManager;
 import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
@@ -263,30 +264,36 @@ public class SettingBackupActivity extends AppCompatActivity {
             Intent intent = new Intent(getActivity(), AutoBackupService.class);
             getActivity().stopService(intent);
             boolean enable = NASPref.getBackupSetting(getActivity());
-            if(enable)
+            if (enable)
                 getActivity().startService(intent);
 
-            Log.d(TAG,"restartService : " +enable);
+            Log.d(TAG, "restartService : " + enable);
         }
 
         private void refreshColumnBackupDevice() {
-            final Handler handler = new Handler() {
-                @Override
-                public void handleMessage(Message msg) {
-                    super.handleMessage(msg);
-                    Preference pref = findPreference(getString(R.string.pref_backup_device));
-                    pref.setSummary((String) msg.obj);
-                }
-            };
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    Message msg = Message.obtain();
-                    msg.obj = getDeviceName();
-                    handler.sendMessage(msg);
-                }
-            }).start();
-
+            Server server = ServerManager.INSTANCE.getCurrentServer();
+            ServerInfo info = server.getServerInfo();
+            if (info != null && info.hostName != null && !"".equals(info.hostName)) {
+                Preference pref = findPreference(getString(R.string.pref_backup_device));
+                pref.setSummary(info.hostName);
+            } else {
+                final Handler handler = new Handler() {
+                    @Override
+                    public void handleMessage(Message msg) {
+                        super.handleMessage(msg);
+                        Preference pref = findPreference(getString(R.string.pref_backup_device));
+                        pref.setSummary((String) msg.obj);
+                    }
+                };
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Message msg = Message.obtain();
+                        msg.obj = getDeviceName();
+                        handler.sendMessage(msg);
+                    }
+                }).start();
+            }
         }
 
         private String getDeviceName() {
@@ -315,8 +322,7 @@ public class SettingBackupActivity extends AppCompatActivity {
             return deviceName;
         }
 
-        private String doParse(InputStream inputStream, String inputEncoding)
-        {
+        private String doParse(InputStream inputStream, String inputEncoding) {
             String hostname = null;
             XmlPullParserFactory factory;
 

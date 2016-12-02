@@ -28,7 +28,6 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
-import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.management.FileActionLocateActivity;
 import com.transcend.nas.management.firmware.FileFactory;
@@ -52,8 +51,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.transcend.nas.R.string.pref_firmware_version;
 
 
 /**
@@ -90,11 +87,6 @@ public class SettingsActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-    }
-
     /**
      * INITIALIZATION
      */
@@ -124,7 +116,12 @@ public class SettingsActivity extends AppCompatActivity {
             getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
             refreshColumnDownloadLocation();
             refreshColumnCacheUseSize();
-            refreshFirmwareVersion();
+            if (isAdmin()) {
+                refreshFirmwareVersion();
+            } else {
+                PreferenceCategory pref = (PreferenceCategory) findPreference(getString(R.string.pref_firmware));
+                getPreferenceScreen().removePreference(pref);
+            }
             getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
         }
 
@@ -269,35 +266,13 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
         private void refreshFirmwareVersion() {
-            if (isAdmin()) {
-                if (getActivity() != null) {
-                    NASUtils.showProgressBar(getActivity(), true);
-                }
-                update();
-            } else {
-                String categoryKey = getString(R.string.pref_setting_category);
-                PreferenceCategory category = (PreferenceCategory) findPreference(categoryKey);
-                String preferenceKey = getString(pref_firmware_version);
-                Preference firmwarePref = findPreference(preferenceKey);
-                category.removePreference(firmwarePref);
-            }
-        }
-
-        private boolean isAdmin() {
-            Server server = ServerManager.INSTANCE.getCurrentServer();
-            return NASPref.defaultUserName.equals(server.getUsername());
-        }
-
-        private void update() {
-            final Handler handler = new Handler(){
+            final Handler handler = new Handler() {
                 @Override
                 public void handleMessage(Message msg) {
                     super.handleMessage(msg);
                     if (getActivity() != null) {
-                        Preference pref = findPreference(getString(pref_firmware_version));
+                        Preference pref = findPreference(getString(R.string.pref_firmware_version));
                         pref.setSummary((String) msg.obj);
-
-                        NASUtils.showProgressBar(getActivity(), false);
                     }
                 }
             };
@@ -372,8 +347,7 @@ public class SettingsActivity extends AppCompatActivity {
             return entity;
         }
 
-        private String doParse(InputStream inputStream, String inputEncoding)
-        {
+        private String doParse(InputStream inputStream, String inputEncoding) {
             String firmwareVersion = null;
             XmlPullParserFactory factory;
 
@@ -409,7 +383,11 @@ public class SettingsActivity extends AppCompatActivity {
             }
 
             return firmwareVersion;
+        }
 
+        private boolean isAdmin() {
+            Server server = ServerManager.INSTANCE.getCurrentServer();
+            return NASPref.defaultUserName.equals(server.getUsername());
         }
 
 //    private void getPostResultString(HttpEntity entity, InputStream inputStream) {

@@ -11,6 +11,9 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerInfo;
+import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 
@@ -38,7 +41,6 @@ public class DeviceInfoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         initToolbar();
-        NASUtils.showProgressBar(this, true);
         initFragment();
     }
 
@@ -73,7 +75,8 @@ public class DeviceInfoActivity extends AppCompatActivity {
         private String mIPAddress;
         private String mMACAddress;
 
-        public DeviceInfoFragment() {}
+        public DeviceInfoFragment() {
+        }
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -83,31 +86,43 @@ public class DeviceInfoActivity extends AppCompatActivity {
         }
 
         private void refreshDeviceInfo() {
+            Server server = ServerManager.INSTANCE.getCurrentServer();
+            ServerInfo info = server.getServerInfo();
+            if (info != null && info.hostName != null && info.ipAddress != null && info.mac != null) {
+                Preference prefDeviceName = findPreference(getString(R.string.pref_device_name));
+                prefDeviceName.setSummary(info.hostName);
+                Preference prefIPAddress = findPreference(getString(R.string.pref_ip_address));
+                prefIPAddress.setSummary(info.ipAddress);
+                Preference prefMACAddress = findPreference(getString(R.string.pref_mac));
+                prefMACAddress.setSummary(info.mac);
 
-            final Handler handler = new Handler(){
-                @Override
-                public void handleMessage(Message msg) {
-                    super.handleMessage(msg);
-                    if (getActivity() != null) {
-                        Preference prefDeviceName = findPreference(getString(R.string.pref_device_name));
-                        prefDeviceName.setSummary(mDeviceName);
-                        Preference prefIPAddress = findPreference(getString(R.string.pref_ip_address));
-                        prefIPAddress.setSummary(mIPAddress);
-                        Preference prefMACAddress = findPreference(getString(R.string.pref_mac));
-                        prefMACAddress.setSummary(mMACAddress);
+            } else {
+                NASUtils.showProgressBar(getActivity(), true);
+                final Handler handler = new Handler() {
+                    @Override
+                    public void handleMessage(Message msg) {
+                        super.handleMessage(msg);
+                        if (getActivity() != null) {
+                            Preference prefDeviceName = findPreference(getString(R.string.pref_device_name));
+                            prefDeviceName.setSummary(mDeviceName);
+                            Preference prefIPAddress = findPreference(getString(R.string.pref_ip_address));
+                            prefIPAddress.setSummary(mIPAddress);
+                            Preference prefMACAddress = findPreference(getString(R.string.pref_mac));
+                            prefMACAddress.setSummary(mMACAddress);
 
-                        NASUtils.showProgressBar(getActivity(), false);
+                            NASUtils.showProgressBar(getActivity(), false);
+                        }
                     }
-                }
-            };
+                };
 
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    doProcess();
-                    handler.sendMessage(new Message());
-                }
-            }).start();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        doProcess();
+                        handler.sendMessage(new Message());
+                    }
+                }).start();
+            }
 
         }
 
