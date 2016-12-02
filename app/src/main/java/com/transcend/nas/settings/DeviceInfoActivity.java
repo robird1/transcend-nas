@@ -11,7 +11,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import com.transcend.nas.NASPref;
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 
 import org.apache.http.HttpEntity;
@@ -38,7 +38,7 @@ public class DeviceInfoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         initToolbar();
-        NASPref.showProgressBar(this, true);
+        NASUtils.showProgressBar(this, true);
         initFragment();
     }
 
@@ -96,7 +96,7 @@ public class DeviceInfoActivity extends AppCompatActivity {
                         Preference prefMACAddress = findPreference(getString(R.string.pref_mac));
                         prefMACAddress.setSummary(mMACAddress);
 
-                        NASPref.showProgressBar(getActivity(), false);
+                        NASUtils.showProgressBar(getActivity(), false);
                     }
                 }
             };
@@ -112,7 +112,7 @@ public class DeviceInfoActivity extends AppCompatActivity {
         }
 
         private void doProcess() {
-            HttpEntity entity = NASPref.sendGetRequest();
+            HttpEntity entity = NASUtils.sendGetRequest();
             InputStream inputStream = null;
             String inputEncoding = null;
 

@@ -59,6 +59,7 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.common.GoogleAnalysisFactory;
 import com.transcend.nas.management.firmware.EventNotifyLoader;
@@ -75,6 +76,8 @@ import com.transcend.nas.service.AutoBackupService;
 import com.transcend.nas.service.LanCheckManager;
 import com.transcend.nas.management.firmware.TwonkyManager;
 import com.transcend.nas.settings.DiskFactory;
+import com.transcend.nas.settings.FeedbackActivity;
+import com.transcend.nas.settings.HelpActivity;
 import com.transcend.nas.settings.SettingsActivity;
 import com.transcend.nas.tutk.TutkLinkNasLoader;
 import com.transcend.nas.tutk.TutkLogoutLoader;
@@ -1804,8 +1807,8 @@ public class FileManageActivity extends AppCompatActivity implements
         //clean email and account information
         if (clear) {
             if (NASPref.useFacebookLogin && NASPref.getFBAccountStatus(this))
-                NASPref.logOutFB(this);
-            NASPref.clearDataAfterLogout(this);
+                NASUtils.logOutFB(this);
+            NASUtils.clearDataAfterLogout(this);
         }
 
         //stop auto backup service
@@ -1884,7 +1887,7 @@ public class FileManageActivity extends AppCompatActivity implements
     private void openLocalFile(Context context, FileInfo fileInfo) {
 
         Uri fileUri = Uri.fromFile(new File(fileInfo.path));
-        NASPref.showAppChooser(context, fileUri);
+        NASUtils.showAppChooser(context, fileUri);
     }
 
     private void checkCacheFileState() {

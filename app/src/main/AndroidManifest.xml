@@ -135,7 +135,7 @@
         </activity>
 
         <activity
-            android:name=".management.HelpActivity"
+            android:name=".settings.HelpActivity"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 
@@ -192,7 +192,7 @@
         </activity>
 
         <activity
-            android:name=".management.FeedbackActivity"
+            android:name=".settings.FeedbackActivity"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 

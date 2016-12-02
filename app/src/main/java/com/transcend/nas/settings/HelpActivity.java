@@ -1,4 +1,4 @@
-package com.transcend.nas.management;
+package com.transcend.nas.settings;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,7 +11,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.TextView;
 
-import com.transcend.nas.NASPref;
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 
 import java.util.Locale;
@@ -32,7 +32,7 @@ public class HelpActivity extends AppCompatActivity {
         title.setText(R.string.app_name);
         WebView webView = (WebView) findViewById(R.id.webview);
         webView.setWebViewClient(new MyWebViewClient());
-        NASPref.showProgressBar(this, true);
+        NASUtils.showProgressBar(this, true);
         webView.loadUrl(getUrl());
     }
 
@@ -80,7 +80,7 @@ public class HelpActivity extends AppCompatActivity {
 
         @Override
         public void onPageFinished(WebView view, String url) {
-            NASPref.showProgressBar(HelpActivity.this, false);
+            NASUtils.showProgressBar(HelpActivity.this, false);
         }
     }
 

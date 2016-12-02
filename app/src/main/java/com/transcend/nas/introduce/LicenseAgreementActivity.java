@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.transcend.nas.AutoLinkActivity;
 import com.transcend.nas.NASPref;
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 
 /**
@@ -25,7 +26,7 @@ public class LicenseAgreementActivity extends Activity {
         setContentView(R.layout.activity_license_agreement);
         TextView content = (TextView) findViewById(R.id.content);
 
-        CharSequence info = Html.fromHtml(NASPref.readFromAssets(this, "NASAPPEULA.txt"));
+        CharSequence info = Html.fromHtml(NASUtils.readFromAssets(this, "NASAPPEULA.txt"));
         content.setText(info);
 
         Button agreeBtn = (Button) findViewById(R.id.button_agree);

@@ -10,7 +10,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
-import com.transcend.nas.NASPref;
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.management.FileInfo;
 import com.transcend.nas.management.firmware.MediaFactory;
 
@@ -49,7 +49,7 @@ public class DocumentDownloadManager {
 
                         mDownloadListener.onComplete(Uri.parse(localUri).getPath());
 
-                        NASPref.showAppChooser(context, Uri.parse(localUri));
+                        NASUtils.showAppChooser(context, Uri.parse(localUri));
 
                         clearDownloadTaskID();
                     }
@@ -66,7 +66,7 @@ public class DocumentDownloadManager {
     public void downloadRemoteFile(Context context, FileInfo fileInfo) {
         Uri downloadUri = MediaFactory.createUri(fileInfo.path);
         Request request = new Request(downloadUri);
-        File dirFile = new File(NASPref.getCacheFilesLocation(context));
+        File dirFile = new File(NASUtils.getCacheFilesLocation(context));
 
         setRequestDestinationUri(request, dirFile, downloadUri);
 //                request.setNotificationVisibility(Request.VISIBILITY_HIDDEN);

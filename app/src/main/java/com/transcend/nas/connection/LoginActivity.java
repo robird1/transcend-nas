@@ -33,6 +33,7 @@ import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASPref;
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.common.GoogleAnalysisFactory;
 import com.transcend.nas.common.StyleFactory;
@@ -305,7 +306,7 @@ public class LoginActivity extends AppCompatActivity implements
             else
                 Toast.makeText(this, getString(R.string.error_format), Toast.LENGTH_SHORT).show();
             // remove the FB authentication if the email address is already taken
-            NASPref.logOutFB(this);
+            NASUtils.logOutFB(this);
             GoogleAnalysisFactory.getInstance(this).sendEvent(GoogleAnalysisFactory.VIEW.START, GoogleAnalysisFactory.ACTION.LoginTutk,
                     GoogleAnalysisFactory.LABEL.LoginByFacebook + "_" + status);
         }
@@ -521,8 +522,8 @@ public class LoginActivity extends AppCompatActivity implements
                     public void onConfirm() {
                         GoogleAnalysisFactory.getInstance(mContext).sendEvent(GoogleAnalysisFactory.VIEW.START, GoogleAnalysisFactory.ACTION.Click, GoogleAnalysisFactory.LABEL.Logout);
                         if (NASPref.useFacebookLogin && NASPref.getFBAccountStatus(mContext))
-                            NASPref.logOutFB(LoginActivity.this);
-                        NASPref.clearDataAfterLogout(mContext);
+                            NASUtils.logOutFB(LoginActivity.this);
+                        NASUtils.clearDataAfterLogout(mContext);
                         showLoginView();
                     }
 

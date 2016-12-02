@@ -22,6 +22,7 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.management.FileActionLocateActivity;
 import com.transcend.nas.service.AutoBackupService;
@@ -290,7 +291,7 @@ public class SettingBackupActivity extends AppCompatActivity {
 
         private String getDeviceName() {
             String deviceName = null;
-            HttpEntity entity = sendGetRequest();
+            HttpEntity entity = NASUtils.sendGetRequest();
             InputStream inputStream = null;
             String inputEncoding = null;
 
@@ -312,32 +313,6 @@ public class SettingBackupActivity extends AppCompatActivity {
             }
 
             return deviceName;
-        }
-
-        private HttpEntity sendGetRequest() {
-            HttpEntity entity = null;
-            Server server = ServerManager.INSTANCE.getCurrentServer();
-            String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
-            String commandURL = "http://" + hostname + "/nas/get/info";
-
-            HttpResponse response;
-            try {
-                HttpGet httpGet = new HttpGet(commandURL);
-                response = HttpClientManager.getClient().execute(httpGet);
-
-                if (response != null) {
-                    entity = response.getEntity();
-                }
-
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            } catch (ClientProtocolException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            return entity;
         }
 
         private String doParse(InputStream inputStream, String inputEncoding)

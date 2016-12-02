@@ -28,6 +28,7 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.management.FileActionLocateActivity;
 import com.transcend.nas.management.firmware.FileFactory;
@@ -46,7 +47,6 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -271,7 +271,7 @@ public class SettingsActivity extends AppCompatActivity {
         private void refreshFirmwareVersion() {
             if (isAdmin()) {
                 if (getActivity() != null) {
-                    NASPref.showProgressBar(getActivity(), true);
+                    NASUtils.showProgressBar(getActivity(), true);
                 }
                 update();
             } else {
@@ -297,7 +297,7 @@ public class SettingsActivity extends AppCompatActivity {
                         Preference pref = findPreference(getString(pref_firmware_version));
                         pref.setSummary((String) msg.obj);
 
-                        NASPref.showProgressBar(getActivity(), false);
+                        NASUtils.showProgressBar(getActivity(), false);
                     }
                 }
             };

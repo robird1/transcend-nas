@@ -22,9 +22,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.transcend.nas.BuildConfig;
-import com.transcend.nas.NASPref;
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
-import com.transcend.nas.management.HelpActivity;
 import com.transcend.nas.view.NotificationDialog;
 
 /**
@@ -206,7 +205,7 @@ public class AboutActivity extends AppCompatActivity {
             if(id == R.string.about_license_agreement){
                 v = inflater.inflate(R.layout.fragment_term_of_use, container, false);
                 TextView info = (TextView) v.findViewById(R.id.info);
-                info.setText(Html.fromHtml(NASPref.readFromAssets(mContext, "NASAPPEULA.txt")));
+                info.setText(Html.fromHtml(NASUtils.readFromAssets(mContext, "NASAPPEULA.txt")));
             }
             else if(id == R.string.about_open_source){
                 v = inflater.inflate(R.layout.fragment_license, container, false);
