@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.TextView;
 
 import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
@@ -22,16 +21,17 @@ import java.util.Locale;
 
 public class HelpActivity extends AppCompatActivity {
     private static final String TAG = HelpActivity.class.getSimpleName();
+    private WebView mWebView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_help);
         initToolbar();
-        WebView webView = (WebView) findViewById(R.id.webview);
-        webView.setWebViewClient(new MyWebViewClient());
+        mWebView = (WebView) findViewById(R.id.webview);
+        mWebView.setWebViewClient(new MyWebViewClient());
         NASUtils.showProgressBar(this, true);
-        webView.loadUrl(getUrl());
+        mWebView.loadUrl(getUrl());
     }
 
     @Override
@@ -78,7 +78,11 @@ public class HelpActivity extends AppCompatActivity {
 
         @Override
         public void onPageFinished(WebView view, String url) {
-            NASUtils.showProgressBar(HelpActivity.this, false);
+//            Log.d(TAG,"[Enter] onPageFinished() mWebView.getProgress(): " + mWebView.getProgress());
+            if(mWebView.getProgress() == 100) {
+                NASUtils.showProgressBar(HelpActivity.this, false);
+            }
+
         }
     }
 
