@@ -22,6 +22,8 @@ import com.facebook.login.LoginManager;
 import com.realtek.nasfun.api.HttpClientManager;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.connection.LoginHelper;
+import com.transcend.nas.connection.LoginListActivity;
 import com.tutk.IOTC.P2PService;
 
 import org.apache.http.HttpEntity;
@@ -49,6 +51,8 @@ public final class NASUtils {
     }
 
     public static void clearDataAfterLogout(Context context) {
+        clearDatabaseData(context);
+
         if (NASPref.getFBAccountStatus(context)) {
             NASPref.setCloudUsername(context, "");
             NASPref.setFBAccountStatus(context, false);
@@ -67,6 +71,15 @@ public final class NASUtils {
         NASPref.setBackupSetting(context, false);
         NASPref.setBackupLocation(context, "/homes/" + Build.MODEL + "/");
         NASPref.setBackupSource(context, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
+    }
+
+    private static void clearDatabaseData(Context context) {
+        LoginHelper loginHelper = new LoginHelper(context);
+        LoginHelper.LoginInfo account = new LoginHelper.LoginInfo();
+        account.email = NASPref.getCloudUsername(context);
+        account.uuid = NASPref.getCloudUUID(context);
+        loginHelper.deleteAccount(account);
+        loginHelper.onDestroy();
     }
 
     public static void logOutFB(Context context) {
