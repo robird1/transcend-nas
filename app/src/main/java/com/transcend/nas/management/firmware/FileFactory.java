@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.management.FileInfo;
@@ -133,6 +134,10 @@ public class FileFactory {
     }
 
     public String getPhotoPath(boolean thumbnail, String path) {
+        return getPhotoPath(false, thumbnail, path);
+    }
+
+    public String getPhotoPath(boolean forceLocal, boolean thumbnail, String path) {
         String url = "";
         if (path.startsWith(NASApp.ROOT_STG)) {
             url = "file://" + path;
@@ -165,6 +170,12 @@ public class FileFactory {
                         }
                         filepath = "/dav" + newPath;
                     }
+                }
+
+                if(forceLocal) {
+                    ServerInfo info = server.getServerInfo();
+                    if(info != null)
+                        hostname = info.ipAddress;
                 }
 
                 if (thumbnail)

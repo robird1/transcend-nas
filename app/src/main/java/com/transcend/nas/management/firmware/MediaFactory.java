@@ -5,24 +5,33 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
+import com.google.android.gms.common.images.WebImage;
 import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.utils.MimeUtil;
 import com.tutk.IOTC.P2PService;
 
+import org.apache.commons.io.FilenameUtils;
+
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by silverhsu on 16/1/25.
  */
 public class MediaFactory {
+    private static final List<String> CHROMECAST_MEDIA_SUPPORT_FORMAT = Arrays.asList("aac", "mp3", "mp4", "wav", "webm");
+
     public static void open(Activity act, String path) {
         Uri uri = createUri(path);
         String name = parseName(path);
@@ -31,6 +40,10 @@ public class MediaFactory {
     }
 
     public static Uri createUri(String path) {
+        return createUri(false, path);
+    }
+
+    public static Uri createUri(boolean forceLocal, String path) {
         Uri uri;
         if (path.startsWith(NASApp.ROOT_STG)) {
             uri = Uri.fromFile(new File(path));
@@ -63,6 +76,12 @@ public class MediaFactory {
                 }
             }
 
+            if(forceLocal) {
+                ServerInfo info = server.getServerInfo();
+                if(info != null)
+                    hostname = info.ipAddress;
+            }
+
             url = "http://" + hostname + filepath + "?session=" + hash;
             url = url.replaceAll(" ", "%20");
             uri = Uri.parse(url);
@@ -71,16 +90,22 @@ public class MediaFactory {
     }
 
     public static MediaInfo createMediaInfo(int mediaType, String path) {
-        String uri = createUri(path).toString();
-        String type = MimeUtil.getMimeType(path);
-        MediaMetadata metadata = new MediaMetadata(mediaType);
-        //metadata.addImage(new WebImage(Uri.parse(FileFactory.getInstance().getPhotoPath(true, path))));
+        MediaInfo info = null;
+        String ext = FilenameUtils.getExtension(path);
+        if (ext != null && CHROMECAST_MEDIA_SUPPORT_FORMAT.contains(ext.toLowerCase())) {
+            String uri = createUri(true, path).toString();
+            String type = MimeUtil.getMimeType(path);
+            MediaMetadata metadata = new MediaMetadata(mediaType);
+            metadata.putString(MediaMetadata.KEY_TITLE, FilenameUtils.getName(path));
+            metadata.addImage(new WebImage(Uri.parse(FileFactory.getInstance().getPhotoPath(true, true, path))));
 
-        MediaInfo info = new MediaInfo.Builder(uri)
-                .setContentType(type)
-                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
-                .setMetadata(metadata)
-                .build();
+            info = new MediaInfo.Builder(uri)
+                    .setContentType(type)
+                    .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+                    .setMetadata(metadata)
+                    .build();
+        }
+
         return info;
     }
 

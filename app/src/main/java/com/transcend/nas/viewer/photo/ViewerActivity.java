@@ -327,7 +327,7 @@ public class ViewerActivity extends AppCompatActivity implements
             }
 
             try {
-                mCastManager.sendDataMessage(FileFactory.getInstance().getPhotoPath(false, mList.get(position).path));
+                mCastManager.sendDataMessage(FileFactory.getInstance().getPhotoPath(true, false, mList.get(position).path));
             } catch (TransientNetworkDisconnectionException e) {
                 e.printStackTrace();
             } catch (NoConnectionException e) {

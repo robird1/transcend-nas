@@ -28,7 +28,7 @@
         <item name="android:textColor">@color/colorPrimary</item>
     </style>
 
-    <style name="AppTheme.DropDown" parent="AppTheme" >
+    <style name="AppTheme.DropDown" parent="ThemeOverlay.AppCompat.Dark.ActionBar" >
         <item name="android:background">@color/colorAccent</item>
         <item name="android:textColorSecondary">@color/colorPrimary</item>
     </style>

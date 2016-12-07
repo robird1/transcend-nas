@@ -426,12 +426,12 @@ public class FileManageActivity extends AppCompatActivity implements
     private void initAutoBackUpService() {
         boolean enable = NASPref.getBackupSetting(this);
         Intent intent = new Intent(this, AutoBackupService.class);
-        if(!enable) {
+        if (!enable) {
             stopService(intent);
             return;
         }
 
-        if(!ManageFactory.isServiceRunning(this, AutoBackupService.class))
+        if (!ManageFactory.isServiceRunning(this, AutoBackupService.class))
             startService(intent);
 
     }
@@ -515,7 +515,7 @@ public class FileManageActivity extends AppCompatActivity implements
     }
 
     private void setDrawerHeaderIcon() {
-        if(!NASPref.getFBAccountStatus(this))
+        if (!NASPref.getFBAccountStatus(this))
             return;
 
         final String storedUrl = NASPref.getFBProfilePhotoUrl(this);
@@ -1710,31 +1710,35 @@ public class FileManageActivity extends AppCompatActivity implements
             try {
                 //clean image
                 mCastManager.sendDataMessage("close");
+
+                MediaInfo info = MediaFactory.createMediaInfo(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK, fileInfo.path);
+                if(info != null) {
+                    mCastManager.startVideoCastControllerActivity(this, info, 0, true);
+                    return;
+                }
             } catch (TransientNetworkDisconnectionException e) {
                 e.printStackTrace();
             } catch (NoConnectionException e) {
                 e.printStackTrace();
             }
-            MediaInfo info = MediaFactory.createMediaInfo(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK, fileInfo.path);
-            mCastManager.startVideoCastControllerActivity(this, info, 0, true);
-        } else {
-            ArrayList<FileInfo> list = new ArrayList<FileInfo>();
-            for (FileInfo info : mFileList) {
-                if (FileInfo.TYPE.MUSIC.equals(info.type) && MusicActivity.checkFormatSupportOrNot(info.path)) {
-                    list.add(info);
-                }
-            }
-            MusicManager.getInstance().setMusicList(list);
-
-            Bundle args = new Bundle();
-            args.putString("path", fileInfo.path);
-            args.putString("mode", mode);
-            args.putString("root", root);
-            Intent intent = new Intent();
-            intent.setClass(FileManageActivity.this, MusicActivity.class);
-            intent.putExtras(args);
-            startActivityForResult(intent, MusicActivity.REQUEST_CODE);
         }
+
+        ArrayList<FileInfo> list = new ArrayList<FileInfo>();
+        for (FileInfo info : mFileList) {
+            if (FileInfo.TYPE.MUSIC.equals(info.type) && MusicActivity.checkFormatSupportOrNot(info.path)) {
+                list.add(info);
+            }
+        }
+        MusicManager.getInstance().setMusicList(list);
+
+        Bundle args = new Bundle();
+        args.putString("path", fileInfo.path);
+        args.putString("mode", mode);
+        args.putString("root", root);
+        Intent intent = new Intent();
+        intent.setClass(FileManageActivity.this, MusicActivity.class);
+        intent.putExtras(args);
+        startActivityForResult(intent, MusicActivity.REQUEST_CODE);
     }
 
     private void startVideoActivity(FileInfo fileInfo) {
@@ -1742,16 +1746,20 @@ public class FileManageActivity extends AppCompatActivity implements
             try {
                 //clean image
                 mCastManager.sendDataMessage("close");
+
+                MediaInfo info = MediaFactory.createMediaInfo(MediaMetadata.MEDIA_TYPE_MOVIE, fileInfo.path);
+                if(info != null) {
+                    mCastManager.startVideoCastControllerActivity(this, info, 0, true);
+                    return;
+                }
             } catch (TransientNetworkDisconnectionException e) {
                 e.printStackTrace();
             } catch (NoConnectionException e) {
                 e.printStackTrace();
             }
-            MediaInfo info = MediaFactory.createMediaInfo(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK, fileInfo.path);
-            mCastManager.startVideoCastControllerActivity(this, info, 0, true);
-        } else {
-            MediaFactory.open(this, fileInfo.path);
         }
+
+        MediaFactory.open(this, fileInfo.path);
     }
 
     private void startViewerActivity(String mode, String root, String path) {
