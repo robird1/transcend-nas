@@ -211,7 +211,7 @@ public class AboutActivity extends AppCompatActivity {
                 v = inflater.inflate(R.layout.fragment_license, container, false);
                 WebView info = (WebView) v.findViewById(R.id.info);
                 info.setWebViewClient(new MyWebViewClient());
-                info.loadUrl("file:///android_asset/open_source_statement.html");
+                info.loadUrl("file:///android_asset/open_source_statement2.html");
             }
             else {
                 v = inflater.inflate(R.layout.fragment_about_info, container, false);
