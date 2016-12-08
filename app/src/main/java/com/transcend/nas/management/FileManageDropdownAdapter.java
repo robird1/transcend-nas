@@ -1,9 +1,7 @@
 package com.transcend.nas.management;
 
 import android.graphics.Color;
-import android.net.ConnectivityManager;
 import android.os.Environment;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -11,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -40,6 +37,7 @@ public class FileManageDropdownAdapter extends BaseAdapter {
 
     private Spinner mDropdown;
     private List<String> mList;
+    private List<String> mDisplayList;
     private boolean isActionLocate = false;
 
     private OnDropdownItemSelectedListener mCallback;
@@ -51,6 +49,20 @@ public class FileManageDropdownAdapter extends BaseAdapter {
     public FileManageDropdownAdapter(boolean actionLocate) {
         isActionLocate = actionLocate;
         mList = new ArrayList<String>();
+    }
+
+    void updateDeviceName(String name) {
+        if (!isEmptyDisplayList()) {
+            mDisplayList.set(mDisplayList.size() - 1, name);
+        }
+    }
+
+    private boolean isEmptyDisplayList() {
+        if (mDisplayList != null) {
+            return  mDisplayList.isEmpty();
+        } else {
+            return true;
+        }
     }
 
     public void setOnDropdownItemSelectedListener(OnDropdownItemSelectedListener l) {
@@ -71,6 +83,7 @@ public class FileManageDropdownAdapter extends BaseAdapter {
         list = Arrays.asList(items);
         Collections.reverse(list);
         mList = list;
+        mDisplayList = new ArrayList<String>(list);
     }
 
     public String getPath(int position) {
@@ -120,7 +133,7 @@ public class FileManageDropdownAdapter extends BaseAdapter {
             View view = inflater.inflate(R.layout.dropdown, parent, false);
             convertView = ViewHolder.get(view, R.id.dropdown_text);
         }
-        ((TextView)convertView).setText(mList.get(0) + "  ");
+        ((TextView)convertView).setText(mDisplayList.get(0) + "  ");
         return convertView;
     }
 
@@ -132,7 +145,8 @@ public class FileManageDropdownAdapter extends BaseAdapter {
         }
         convertView.setOnTouchListener(new OnDropdownItemTouchListener(position));
         TextView tv = ViewHolder.get(convertView, R.id.dropdown_text);
-        tv.setText(mList.get(position));
+//        tv.setText(mList.get(position));
+        tv.setText(mDisplayList.get(position));
         tv.setTextColor(Color.WHITE);
 
         ImageView iv = ViewHolder.get(convertView, R.id.dropdown_icon);

@@ -56,6 +56,7 @@ import com.google.android.libraries.cast.companionlibrary.cast.exceptions.NoConn
 import com.google.android.libraries.cast.companionlibrary.cast.exceptions.TransientNetworkDisconnectionException;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
@@ -93,9 +94,17 @@ import com.tutk.IOTC.P2PService;
 import com.tutk.IOTC.P2PTunnelAPIs;
 import com.tutk.IOTC.sP2PTunnelSessionInfo;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.security.MessageDigest;
 import java.net.URL;
@@ -115,7 +124,8 @@ public class FileManageActivity extends AppCompatActivity implements
         ActionMode.Callback {
 
     private static final String TAG = FileManageActivity.class.getSimpleName();
-    private static final int FB_PROFILE_PHOTO = 999;
+    private static final int MESSAGE_FB_PROFILE_PHOTO = 999;
+    private static final int MESSAGE_DEVICE_NAME = 998;
 
     private static final int GRID_PORTRAIT = 3;
     private static final int GRID_LANDSCAPE = 5;
@@ -178,8 +188,18 @@ public class FileManageActivity extends AppCompatActivity implements
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case FB_PROFILE_PHOTO:
+                case MESSAGE_FB_PROFILE_PHOTO:
                     mNavHeaderIcon.setImageBitmap(mPhotoBitmap);
+                    break;
+                case MESSAGE_DEVICE_NAME:
+                    Bundle data = msg.getData();
+                    if (data != null) {
+                        String deviceName = data.getString("device_name");
+                        if (deviceName != null) {
+                            updateUI(deviceName);
+                        }
+                    }
+
                     break;
             }
         }
@@ -532,7 +552,7 @@ public class FileManageActivity extends AppCompatActivity implements
                         mPhotoBitmap = BitmapFactory.decodeStream(connection.getInputStream());
                         if (mPhotoBitmap != null) {
                             Message msg = new Message();
-                            msg.what = FB_PROFILE_PHOTO;
+                            msg.what = MESSAGE_FB_PROFILE_PHOTO;
                             mHandler.sendMessage(msg);
                         }
 
@@ -1453,6 +1473,7 @@ public class FileManageActivity extends AppCompatActivity implements
      */
     private void updateScreen() {
         mDropdownAdapter.updateList(mPath, mMode);
+        requestDeviceName();
         mDropdownAdapter.notifyDataSetChanged();
         mRecyclerAdapter.updateList(mFileList);
         mRecyclerAdapter.notifyDataSetChanged();
@@ -1960,6 +1981,94 @@ public class FileManageActivity extends AppCompatActivity implements
 
         //return complete hash
         return sb.toString();
+    }
+
+    private void requestDeviceName() {
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        ServerInfo info = server.getServerInfo();
+        if (info != null && info.hostName != null) {
+            updateUI(info.hostName);
+        } else {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    doProcess();
+                    Message msg = Message.obtain();
+                    msg.what = MESSAGE_DEVICE_NAME;
+                    Bundle data = new Bundle();
+                    data.putString("device_name", doProcess());
+                    msg.setData(data);
+                    mHandler.sendMessage(msg);
+                }
+            }).start();
+        }
+
+    }
+
+    private void updateUI(String deviceName) {
+        mNavView.getMenu().findItem(R.id.nav_storage).setTitle(deviceName);
+        if (mMode != NASApp.MODE_STG) {
+            mDropdownAdapter.updateDeviceName(deviceName);
+        }
+    }
+
+    private String doProcess() {
+        String deviceName = null;
+        HttpEntity entity = NASUtils.sendGetRequest();
+        InputStream inputStream = null;
+        String inputEncoding = null;
+
+        if (entity != null) {
+            try {
+                inputStream = entity.getContent();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            inputEncoding = EntityUtils.getContentCharSet(entity);
+        }
+
+        if (inputEncoding == null) {
+            inputEncoding = HTTP.DEFAULT_CONTENT_CHARSET;
+        }
+
+        if (inputStream != null) {
+            deviceName = doParse(inputStream, inputEncoding);
+        }
+
+        return deviceName;
+    }
+
+    private String doParse(InputStream inputStream, String inputEncoding) {
+        Log.d(TAG, "[Enter] doParse()");
+        String deviceName = null;
+        XmlPullParserFactory factory;
+        try {
+            factory = XmlPullParserFactory.newInstance();
+            factory.setNamespaceAware(true);
+            XmlPullParser parser = factory.newPullParser();
+            parser.setInput(inputStream, inputEncoding);
+            int eventType = parser.getEventType();
+
+            do {
+                String tagName = parser.getName();
+                if (eventType == XmlPullParser.START_TAG) {
+                    if (tagName.equals("hostname")) {
+                        parser.next();
+                        deviceName = parser.getText();
+                    }
+                }
+
+                eventType = parser.next();
+
+            } while (eventType != XmlPullParser.END_DOCUMENT);
+
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return deviceName;
     }
 
     /**
