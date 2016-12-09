@@ -120,65 +120,6 @@ public class MediaFactory {
         }
     }
 
-    public static void open(Activity act, Bundle args) {
-        String url = args.getString("path");
-        String[] paths = url.split("/");
-        Server server = ServerManager.INSTANCE.getCurrentServer();
-        String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
-        if (paths.length > 0) {
-            url = "http://" + hostname + "/hls/" + paths[paths.length - 1];
-        }
-        Uri uri = Uri.parse(url);
-        String type = args.getString("type");
-        String name = args.getString("name");
-        openIn(act, uri, type, name);
-    }
-
-    public static String createTranslatePath(String path) {
-        String url = path;
-        if (!path.startsWith(NASApp.ROOT_STG)) {
-            // remote
-            Server server = ServerManager.INSTANCE.getCurrentServer();
-            String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
-            String hash = server.getHash();
-            String folder = parseFolder(path);
-            String file = parseFile(path);
-            String redirect = "1";
-            url = "http://" + hostname + "/streaming.cgi?folder=" + folder + "&file=" + file + "&id=" + hash + "&redirect=" + redirect;
-        }
-
-        return url;
-    }
-
-    private static String parseFolder(String path) {
-        if (path.startsWith("/"))
-            path = path.replaceFirst("/", "");
-        String[] paths = path.split("/");
-        String folder = paths.length >= 1 ? paths[0] : "";
-        return folder;
-    }
-
-    private static String parseFile(String path) {
-        String file = "/";
-        if (path.startsWith("/"))
-            path = path.replaceFirst("/", "");
-        String[] paths = path.split("/");
-        int length = paths.length;
-        for (int i = 1; i < length; i++) {
-            if (i == length - 1)
-                file += paths[i];
-            else
-                file += paths[i] + "/";
-        }
-
-        try {
-            return URLEncoder.encode(file, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return file;
-    }
-
     private static String parseName(String path) {
         String[] paths = path.split("/");
         String name = paths.length >= 1 ? paths[paths.length - 1] : "";

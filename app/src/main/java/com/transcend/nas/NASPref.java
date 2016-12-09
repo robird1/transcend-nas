@@ -196,6 +196,19 @@ public class NASPref {
         PrefUtil.write(context, name, key, uuid);
     }
 
+    public static String getDeviceName(Context context) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_nas_name);
+        String def = "";
+        return PrefUtil.read(context, name, key, def);
+    }
+
+    public static void setDeviceName(Context context, String deviceName) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_nas_name);
+        PrefUtil.write(context, name, key, deviceName);
+    }
+
     public static String getSessionVerifiedTime(Context context) {
         String name = context.getResources().getString(R.string.pref_name);
         String key = context.getResources().getString(R.string.pref_hash_verified_time);

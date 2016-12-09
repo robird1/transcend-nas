@@ -14,6 +14,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.transcend.nas.NASApp;
+import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 
 import java.io.File;
@@ -51,20 +52,6 @@ public class FileManageDropdownAdapter extends BaseAdapter {
         mList = new ArrayList<String>();
     }
 
-    void updateDeviceName(String name) {
-        if (!isEmptyDisplayList()) {
-            mDisplayList.set(mDisplayList.size() - 1, name);
-        }
-    }
-
-    private boolean isEmptyDisplayList() {
-        if (mDisplayList != null) {
-            return  mDisplayList.isEmpty();
-        } else {
-            return true;
-        }
-    }
-
     public void setOnDropdownItemSelectedListener(OnDropdownItemSelectedListener l) {
         mCallback = l;
     }
@@ -83,7 +70,15 @@ public class FileManageDropdownAdapter extends BaseAdapter {
         list = Arrays.asList(items);
         Collections.reverse(list);
         mList = list;
+
         mDisplayList = new ArrayList<String>(list);
+        if (NASApp.MODE_SMB.equals(mode)) {
+            String device = NASPref.getDeviceName(NASApp.getContext());
+            int size = mDisplayList.size();
+            if (size > 0 && device != null && !"".equals(device)) {
+                mDisplayList.set(size - 1, device);
+            }
+        }
     }
 
     public String getPath(int position) {
@@ -145,7 +140,6 @@ public class FileManageDropdownAdapter extends BaseAdapter {
         }
         convertView.setOnTouchListener(new OnDropdownItemTouchListener(position));
         TextView tv = ViewHolder.get(convertView, R.id.dropdown_text);
-//        tv.setText(mList.get(position));
         tv.setText(mDisplayList.get(position));
         tv.setTextColor(Color.WHITE);
 

@@ -62,6 +62,7 @@ public final class NASUtils {
         NASPref.setPassword(context, "");
         NASPref.setUUID(context, "");
         NASPref.setMacAddress(context, "");
+        NASPref.setDeviceName(context, "");
         NASPref.setSerialNum(context, "");
         NASPref.setCloudPassword(context, "");
         NASPref.setCloudAuthToken(context, "");

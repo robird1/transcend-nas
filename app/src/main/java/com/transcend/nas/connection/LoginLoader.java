@@ -71,6 +71,7 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
         NASPref.setUUID(getContext(), mServer.getTutkUUID());
         NASPref.setCloudUUID(getContext(), mServer.getTutkUUID());
         NASPref.setMacAddress(getContext(), mServer.getServerInfo().mac);
+        NASPref.setDeviceName(getContext(), mServer.getServerInfo().hostName);
         NASPref.setLocalHostname(getContext(), mServer.getServerInfo().ipAddress);
 
         ShareFolderManager.getInstance().cleanRealPathMap();

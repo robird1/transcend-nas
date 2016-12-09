@@ -41,6 +41,7 @@
     <string name="pref_uuid">UUID</string>
     <string name="pref_serial_num">SERIAL NUM</string>
     <string name="pref_mac">MAC ADDRESS</string>
+    <string name="pref_nas_name">NAS NAME</string>
     <string name="pref_hash_verified_time">HASH VERIFIED TIME</string>
     <string name="pref_initial">INITIAL SETUP</string>
     <string name="pref_introduce">INTRODUCE SETUP</string>

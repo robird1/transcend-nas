@@ -71,7 +71,6 @@ import com.transcend.nas.management.firmware.MediaFactory;
 import com.transcend.nas.connection.old.StartActivity;
 import com.transcend.nas.connection.LoginActivity;
 import com.transcend.nas.connection.LoginListActivity;
-import com.transcend.nas.management.firmware.MediaManagerLoader;
 import com.transcend.nas.management.firmware.ShareFolderManager;
 import com.transcend.nas.service.AutoBackupService;
 import com.transcend.nas.service.LanCheckManager;
@@ -94,17 +93,9 @@ import com.tutk.IOTC.P2PService;
 import com.tutk.IOTC.P2PTunnelAPIs;
 import com.tutk.IOTC.sP2PTunnelSessionInfo;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.security.MessageDigest;
 import java.net.URL;
@@ -125,7 +116,6 @@ public class FileManageActivity extends AppCompatActivity implements
 
     private static final String TAG = FileManageActivity.class.getSimpleName();
     private static final int MESSAGE_FB_PROFILE_PHOTO = 999;
-    private static final int MESSAGE_DEVICE_NAME = 998;
 
     private static final int GRID_PORTRAIT = 3;
     private static final int GRID_LANDSCAPE = 5;
@@ -190,16 +180,6 @@ public class FileManageActivity extends AppCompatActivity implements
             switch (msg.what) {
                 case MESSAGE_FB_PROFILE_PHOTO:
                     mNavHeaderIcon.setImageBitmap(mPhotoBitmap);
-                    break;
-                case MESSAGE_DEVICE_NAME:
-                    Bundle data = msg.getData();
-                    if (data != null) {
-                        String deviceName = data.getString("device_name");
-                        if (deviceName != null) {
-                            updateUI(deviceName);
-                        }
-                    }
-
                     break;
             }
         }
@@ -441,6 +421,15 @@ public class FileManageActivity extends AppCompatActivity implements
         }
 
         TwonkyManager.getInstance().initTwonky();
+
+        String device = NASPref.getDeviceName(this);
+        if(device == null || "".equals(device)){
+            ServerInfo info = mServer.getServerInfo();
+            if(info != null && info.hostName != null && !"".equals(info.hostName)) {
+                device = info.hostName;
+                NASPref.setDeviceName(this, device);
+            }
+        }
     }
 
     private void initAutoBackUpService() {
@@ -526,11 +515,15 @@ public class FileManageActivity extends AppCompatActivity implements
 
         setDrawerHeaderIcon();
         mNavHeaderTitle.setText(mServer.getUsername());
+
         String email = NASPref.getCloudUsername(this);
         if (!email.equals(""))
             mNavHeaderSubtitle.setText(String.format("%s", email));
         else
             mNavHeaderSubtitle.setText(String.format("%s@%s", mServer.getUsername(), mServer.getHostname()));
+        String device = NASPref.getDeviceName(this);
+        if(device != null && !"".equals(device))
+            mNavView.getMenu().findItem(R.id.nav_storage).setTitle(device);
         mNavView.getMenu().findItem(R.id.nav_switch).setVisible(NASPref.useSwitchNas);
     }
 
@@ -1021,9 +1014,6 @@ public class FileManageActivity extends AppCompatActivity implements
             case LoaderID.TUTK_LOGOUT:
                 mProgressView.setVisibility(View.VISIBLE);
                 return new TutkLogoutLoader(this);
-            case LoaderID.MEDIA_PLAYER:
-                mProgressView.setVisibility(View.VISIBLE);
-                return new MediaManagerLoader(this, args);
             case LoaderID.EVENT_NOTIFY:
                 mProgressView.setVisibility(View.VISIBLE);
                 return new EventNotifyLoader(this, args);
@@ -1079,9 +1069,6 @@ public class FileManageActivity extends AppCompatActivity implements
                     doLoad(path);
                     return;
                 }
-            } else if (loader instanceof MediaManagerLoader) {
-                Bundle args = ((MediaManagerLoader) loader).getBundleArgs();
-                MediaFactory.open(this, args);
             } else if (loader instanceof SmbFileShareLoader) {
                 ArrayList<FileInfo> files = ((SmbFileShareLoader) loader).getShareList();
                 if (files != null && files.size() > 0)
@@ -1473,7 +1460,6 @@ public class FileManageActivity extends AppCompatActivity implements
      */
     private void updateScreen() {
         mDropdownAdapter.updateList(mPath, mMode);
-        requestDeviceName();
         mDropdownAdapter.notifyDataSetChanged();
         mRecyclerAdapter.updateList(mFileList);
         mRecyclerAdapter.notifyDataSetChanged();
@@ -1981,94 +1967,6 @@ public class FileManageActivity extends AppCompatActivity implements
 
         //return complete hash
         return sb.toString();
-    }
-
-    private void requestDeviceName() {
-        Server server = ServerManager.INSTANCE.getCurrentServer();
-        ServerInfo info = server.getServerInfo();
-        if (info != null && info.hostName != null) {
-            updateUI(info.hostName);
-        } else {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    doProcess();
-                    Message msg = Message.obtain();
-                    msg.what = MESSAGE_DEVICE_NAME;
-                    Bundle data = new Bundle();
-                    data.putString("device_name", doProcess());
-                    msg.setData(data);
-                    mHandler.sendMessage(msg);
-                }
-            }).start();
-        }
-
-    }
-
-    private void updateUI(String deviceName) {
-        mNavView.getMenu().findItem(R.id.nav_storage).setTitle(deviceName);
-        if (mMode != NASApp.MODE_STG) {
-            mDropdownAdapter.updateDeviceName(deviceName);
-        }
-    }
-
-    private String doProcess() {
-        String deviceName = null;
-        HttpEntity entity = NASUtils.sendGetRequest();
-        InputStream inputStream = null;
-        String inputEncoding = null;
-
-        if (entity != null) {
-            try {
-                inputStream = entity.getContent();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            inputEncoding = EntityUtils.getContentCharSet(entity);
-        }
-
-        if (inputEncoding == null) {
-            inputEncoding = HTTP.DEFAULT_CONTENT_CHARSET;
-        }
-
-        if (inputStream != null) {
-            deviceName = doParse(inputStream, inputEncoding);
-        }
-
-        return deviceName;
-    }
-
-    private String doParse(InputStream inputStream, String inputEncoding) {
-        Log.d(TAG, "[Enter] doParse()");
-        String deviceName = null;
-        XmlPullParserFactory factory;
-        try {
-            factory = XmlPullParserFactory.newInstance();
-            factory.setNamespaceAware(true);
-            XmlPullParser parser = factory.newPullParser();
-            parser.setInput(inputStream, inputEncoding);
-            int eventType = parser.getEventType();
-
-            do {
-                String tagName = parser.getName();
-                if (eventType == XmlPullParser.START_TAG) {
-                    if (tagName.equals("hostname")) {
-                        parser.next();
-                        deviceName = parser.getText();
-                    }
-                }
-
-                eventType = parser.next();
-
-            } while (eventType != XmlPullParser.END_DOCUMENT);
-
-        } catch (XmlPullParserException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return deviceName;
     }
 
     /**

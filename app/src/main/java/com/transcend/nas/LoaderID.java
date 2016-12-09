@@ -31,10 +31,10 @@ public class LoaderID {
     public static final int TUTK_NAS_RESEND_ACTIVATE = 23;
     public static final int TUTK_NAS_DELETE = 24;
     public static final int TUTK_NAS_LINK = 25;
-    public static final int AUTO_BACKUP = 26;
+    //public static final int AUTO_BACKUP = 26;
     public static final int WIZARD = 27;
     public static final int WIZARD_INIT = 28;
-    public static final int MEDIA_PLAYER = 29;
+    //public static final int MEDIA_PLAYER = 29;
     public static final int DISK_INFO = 30;
     public static final int DISK_INFO_TEMPERATURE = 31;
     public static final int DISK_SMART = 32;
