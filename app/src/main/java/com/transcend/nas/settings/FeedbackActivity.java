@@ -6,8 +6,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -35,7 +33,7 @@ import jcifs.util.Base64;
  * Created by steve_su on 2016/11/22.
  */
 
-public class FeedbackActivity extends AppCompatActivity {
+public class FeedbackActivity extends BaseDrawerActivity {
 
     private static final String TAG = FeedbackActivity.class.getSimpleName();
     private static final String CATEGORY_LIST_URL = "http://www.transcend-info.com/Service/SMSService.svc/web/GetSrvCategoryList";
@@ -105,8 +103,7 @@ public class FeedbackActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_feedback);
-        initToolbar();
+        super.toggleDrawerCheckedItem();
         mInputLayoutName = (TextInputLayout) findViewById(R.id.input_layout_name);
         mInputLayoutEmail = (TextInputLayout) findViewById(R.id.input_layout_email);
         mInputLayoutMessage = (TextInputLayout) findViewById(R.id.input_layout_message);
@@ -119,9 +116,19 @@ public class FeedbackActivity extends AppCompatActivity {
         mProgressBar = this.findViewById(R.id.settings_progress_view);
     }
 
-    public void onClickBackImage(View view)
-    {
-        super.onBackPressed();
+    @Override
+    public int onLayoutID() {
+        return R.layout.activity_drawer_feedback;
+    }
+
+    @Override
+    public int onToolbarID() {
+        return R.id.feedback_toolbar;
+    }
+
+    @Override
+    public DrawerMenuController.DrawerMenu onActivityDrawer() {
+        return DrawerMenuController.DrawerMenu.DRAWER_DEFAULT ;
     }
 
     public void onClickSendButton(View view)
@@ -246,13 +253,6 @@ public class FeedbackActivity extends AppCompatActivity {
 
         }).start();
 
-    }
-
-    private void initToolbar() {
-        Toolbar toolbar = (Toolbar) this.findViewById(R.id.feedback_toolbar);
-        toolbar.setTitle("");
-//        toolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_white_24dp);
-        setSupportActionBar(toolbar);
     }
 
     private String getDeviceName() {

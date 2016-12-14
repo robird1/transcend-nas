@@ -13,7 +13,6 @@ import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
@@ -56,17 +55,31 @@ import java.util.List;
 /**
  * Created by silverhsu on 16/3/2.
  */
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends BaseDrawerActivity {
     public static final int REQUEST_CODE = SettingsActivity.class.hashCode() & 0xFFFF;
     public static final String TAG = SettingsActivity.class.getSimpleName();
 
     public SettingsFragment mFragment;
 
     @Override
+    public int onLayoutID() {
+        return R.layout.activity_drawer_settings;
+    }
+
+    @Override
+    public int onToolbarID() {
+        return R.id.settings_toolbar;
+    }
+
+    @Override
+    public DrawerMenuController.DrawerMenu onActivityDrawer() {
+        return DrawerMenuController.DrawerMenu.DRAWER_DEFAULT;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
-        initToolbar();
+        super.toggleDrawerCheckedItem();
 
         mFragment = new SettingsFragment();
         getFragmentManager().beginTransaction().replace(R.id.settings_frame, mFragment).commit();
@@ -90,7 +103,8 @@ public class SettingsActivity extends AppCompatActivity {
     /**
      * INITIALIZATION
      */
-    private void initToolbar() {
+    @Override
+    protected void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.settings_toolbar);
         toolbar.setTitle("");
         toolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_white_24dp);

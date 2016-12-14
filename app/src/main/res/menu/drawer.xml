@@ -30,7 +30,7 @@
 
     <group
         android:id="@+id/nav_group_3st"
-        android:checkableBehavior="none">
+        android:checkableBehavior="single">
 
         <item
             android:id="@+id/nav_settings"

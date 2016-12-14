@@ -3,8 +3,6 @@ package com.transcend.nas.settings;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.webkit.WebView;
@@ -19,15 +17,29 @@ import java.util.Locale;
  * Created by steve_su on 2016/11/28.
  */
 
-public class HelpActivity extends AppCompatActivity {
+public class HelpActivity extends BaseDrawerActivity {
     private static final String TAG = HelpActivity.class.getSimpleName();
     private WebView mWebView;
 
     @Override
+    public int onLayoutID() {
+        return R.layout.activity_drawer_help;
+    }
+
+    @Override
+    public int onToolbarID() {
+        return R.id.settings_toolbar;
+    }
+
+    @Override
+    public DrawerMenuController.DrawerMenu onActivityDrawer() {
+        return DrawerMenuController.DrawerMenu.DRAWER_DEFAULT;
+    }
+
+    @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_help);
-        initToolbar();
+        super.toggleDrawerCheckedItem();
         mWebView = (WebView) findViewById(R.id.webview);
         mWebView.setWebViewClient(new MyWebViewClient());
         NASUtils.showProgressBar(this, true);
@@ -42,15 +54,6 @@ public class HelpActivity extends AppCompatActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void initToolbar() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.settings_toolbar);
-        toolbar.setTitle("");
-        toolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_white_24dp);
-        setSupportActionBar(toolbar);
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-//        getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
 
     @NonNull
