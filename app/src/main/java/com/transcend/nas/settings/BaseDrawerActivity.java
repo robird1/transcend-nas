@@ -4,6 +4,7 @@ import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -138,11 +139,16 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
         mDrawerController.setCheckdItem(getIntent().getIntExtra("lastSelectedItem", -1));
     }
 
-    private void startActivity(Class invokedClass, int itemId) {
-        Intent i = new Intent(this, invokedClass);
-        i.putExtra("lastSelectedItem", itemId);
-        startActivity(i);
-        finishCurrentActivity();
+    private void startActivity(final Class invokedClass, final int itemId) {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Intent i = new Intent(BaseDrawerActivity.this, invokedClass);
+                i.putExtra("lastSelectedItem", itemId);
+                startActivity(i);
+                finishCurrentActivity();
+            }
+        }, 200);
     }
 
     private void finishCurrentActivity() {
@@ -151,11 +157,16 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
         }
     }
 
-    private void startFileManageActivity(int itemId) {
-        Intent intent = new Intent(this, FileManageActivity.class);
-        intent.putExtra("selectedItemId", itemId);
-        intent.putExtra("path", getFileManagePath(itemId));
-        startActivity(intent);
+    private void startFileManageActivity(final int itemId) {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Intent intent = new Intent(BaseDrawerActivity.this, FileManageActivity.class);
+                intent.putExtra("selectedItemId", itemId);
+                intent.putExtra("path", getFileManagePath(itemId));
+                startActivity(intent);
+            }
+        }, 200);
     }
 
     private String getFileManagePath(int itemId) {
