@@ -52,6 +52,7 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
 
     @Override
     public void onBackPressed() {
+        toggleDrawerCheckedItem();
         if (mDrawerController.isDrawerOpen()) {
             mDrawerController.closeDrawer();
         } else {
