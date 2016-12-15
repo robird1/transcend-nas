@@ -133,7 +133,7 @@ public class AboutActivity extends AppCompatActivity {
             } else if (preference.getKey().equals(getString(R.string.pref_about_term_of_use))) {
                 id = R.string.about_license_agreement;
             } else if (preference.getKey().equals(getString(R.string.pref_about_license))) {
-                id = R.string.about_open_source;
+                id = R.string.open_source_statement;
             }
 
             if(id > 0) {
@@ -207,7 +207,7 @@ public class AboutActivity extends AppCompatActivity {
                 TextView info = (TextView) v.findViewById(R.id.info);
                 info.setText(Html.fromHtml(NASUtils.readFromAssets(mContext, "NASAPPEULA.txt")));
             }
-            else if(id == R.string.about_open_source){
+            else if(id == R.string.open_source_statement){
                 v = inflater.inflate(R.layout.fragment_license, container, false);
                 WebView info = (WebView) v.findViewById(R.id.info);
                 info.setWebViewClient(new MyWebViewClient());

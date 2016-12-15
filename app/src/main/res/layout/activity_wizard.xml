@@ -235,7 +235,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/ready_nas_icon"
                 android:layout_centerHorizontal="true"
-                android:text="@string/ip"
+                android:text="@string/ip_address"
                 android:textSize="@dimen/wizard_info_text_size"
                 android:textStyle="bold" />
 

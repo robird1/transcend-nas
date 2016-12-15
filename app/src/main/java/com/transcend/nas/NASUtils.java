@@ -134,46 +134,6 @@ public final class NASUtils {
         return sb.toString();
     }
 
-    public static HttpEntity sendGetRequest() {
-        HttpEntity entity = null;
-        Server server = ServerManager.INSTANCE.getCurrentServer();
-        String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
-        String commandURL = "http://" + hostname + "/nas/get/info";
-        Log.d(TAG, commandURL);
-
-        HttpResponse response;
-        try {
-            HttpGet httpGet = new HttpGet(commandURL);
-            response = HttpClientManager.getClient().execute(httpGet);
-
-            if (response != null) {
-                entity = response.getEntity();
-            }
-
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return entity;
-    }
-
-    /**
-     * Display the progress bar of the R.layout.activity_settings
-     *
-     * @param activity
-     * @param isShow
-     */
-    public static void showProgressBar(@NonNull Activity activity, boolean isShow) {
-        if (activity != null) {
-            View progressBar = activity.findViewById(R.id.settings_progress_view);
-            progressBar.setVisibility(isShow ? View.VISIBLE : View.INVISIBLE);
-        }
-    }
-
     public static void showAppChooser(final Context context, final Uri fileUri) {
         final Intent intent = new Intent(Intent.ACTION_VIEW);
         String extension = MimeTypeMap.getFileExtensionFromUrl(fileUri.toString());

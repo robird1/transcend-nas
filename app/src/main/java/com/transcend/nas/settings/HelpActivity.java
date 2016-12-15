@@ -5,8 +5,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.RelativeLayout;
 
 import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
@@ -20,6 +22,7 @@ import java.util.Locale;
 public class HelpActivity extends BaseDrawerActivity {
     private static final String TAG = HelpActivity.class.getSimpleName();
     private WebView mWebView;
+    private RelativeLayout mProgress;
 
     @Override
     public int onLayoutID() {
@@ -40,9 +43,11 @@ public class HelpActivity extends BaseDrawerActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         super.toggleDrawerCheckedItem();
+
+        mProgress = (RelativeLayout) findViewById(R.id.settings_progress_view);
+        mProgress.setVisibility(View.VISIBLE);
         mWebView = (WebView) findViewById(R.id.webview);
         mWebView.setWebViewClient(new MyWebViewClient());
-        NASUtils.showProgressBar(this, true);
         mWebView.loadUrl(getUrl());
     }
 
@@ -83,7 +88,7 @@ public class HelpActivity extends BaseDrawerActivity {
         public void onPageFinished(WebView view, String url) {
 //            Log.d(TAG,"[Enter] onPageFinished() mWebView.getProgress(): " + mWebView.getProgress());
             if(mWebView.getProgress() == 100) {
-                NASUtils.showProgressBar(HelpActivity.this, false);
+                mProgress.setVisibility(View.INVISIBLE);
             }
 
         }

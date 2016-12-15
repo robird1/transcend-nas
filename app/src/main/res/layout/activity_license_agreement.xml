@@ -6,8 +6,8 @@
     android:layout_marginRight="@dimen/activity_vertical_margin">
 
     <Button
-        android:text="@string/license_agreement_agree"
-        android:layout_width="150dp"
+        android:text="@string/agree"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:id="@+id/button_agree"
         android:layout_alignParentBottom="true"

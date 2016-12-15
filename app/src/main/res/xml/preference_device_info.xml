@@ -9,13 +9,13 @@
         android:title="@string/settings_device_name_title" />
 
     <Preference
-        android:key="@string/pref_ip_address"
+        android:key="@string/pref_device_ip"
         android:layout="@layout/preference_item"
         android:summary="@string/loading"
         android:title="@string/settings_ip_address_title" />
 
     <Preference
-        android:key="@string/pref_mac"
+        android:key="@string/pref_device_mac"
         android:layout="@layout/preference_item"
         android:summary="@string/loading"
         android:title="@string/settings_mac_address_title" />

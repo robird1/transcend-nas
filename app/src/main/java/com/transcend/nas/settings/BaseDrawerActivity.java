@@ -155,7 +155,7 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
                 i.putExtra("lastSelectedItem", itemId);
                 startActivity(i);
             }
-        }, 200);
+        }, 280);
     }
 
     private void startFileManageActivity(final int itemId) {
@@ -167,7 +167,7 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
                 intent.putExtra("path", getFileManagePath(itemId));
                 startActivity(intent);
             }
-        }, 200);
+        }, 280);
     }
 
     private String getFileManagePath(int itemId) {

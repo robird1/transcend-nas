@@ -430,13 +430,9 @@ public class FileManageActivity extends BaseDrawerActivity implements
 
         TwonkyManager.getInstance().initTwonky();
 
-        String device = NASPref.getDeviceName(this);
-        if(device == null || "".equals(device)){
-            ServerInfo info = mServer.getServerInfo();
-            if(info != null && info.hostName != null && !"".equals(info.hostName)) {
-                device = info.hostName;
-                NASPref.setDeviceName(this, device);
-            }
+        ServerInfo info = mServer.getServerInfo();
+        if(info != null && info.hostName != null && !"".equals(info.hostName)) {
+            NASPref.setDeviceName(this, info.hostName);
         }
     }
 
