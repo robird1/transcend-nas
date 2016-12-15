@@ -271,94 +271,11 @@ public class SettingBackupActivity extends AppCompatActivity {
         }
 
         private void refreshColumnBackupDevice() {
-            Server server = ServerManager.INSTANCE.getCurrentServer();
-            ServerInfo info = server.getServerInfo();
-            if (info != null && info.hostName != null && !"".equals(info.hostName)) {
+            String device = NASPref.getDeviceName(getActivity());
+            if (device != null && !"".equals(device)) {
                 Preference pref = findPreference(getString(R.string.pref_backup_device));
-                pref.setSummary(info.hostName);
-            } else {
-                final Handler handler = new Handler() {
-                    @Override
-                    public void handleMessage(Message msg) {
-                        super.handleMessage(msg);
-                        Preference pref = findPreference(getString(R.string.pref_backup_device));
-                        pref.setSummary((String) msg.obj);
-                    }
-                };
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Message msg = Message.obtain();
-                        msg.obj = getDeviceName();
-                        handler.sendMessage(msg);
-                    }
-                }).start();
+                pref.setSummary(device);
             }
-        }
-
-        private String getDeviceName() {
-            String deviceName = null;
-            HttpEntity entity = NASUtils.sendGetRequest();
-            InputStream inputStream = null;
-            String inputEncoding = null;
-
-            if (entity != null) {
-                try {
-                    inputStream = entity.getContent();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                inputEncoding = EntityUtils.getContentCharSet(entity);
-            }
-
-            if (inputEncoding == null) {
-                inputEncoding = HTTP.DEFAULT_CONTENT_CHARSET;
-            }
-
-            if (inputStream != null) {
-                deviceName = doParse(inputStream, inputEncoding);
-            }
-
-            return deviceName;
-        }
-
-        private String doParse(InputStream inputStream, String inputEncoding) {
-            String hostname = null;
-            XmlPullParserFactory factory;
-
-            try {
-                factory = XmlPullParserFactory.newInstance();
-                factory.setNamespaceAware(true);
-                XmlPullParser parser = factory.newPullParser();
-                parser.setInput(inputStream, inputEncoding);
-                int eventType = parser.getEventType();
-
-                do {
-                    String tagName = parser.getName();
-//                    Log.d(TAG, "tagName: " + tagName);
-
-                    if (eventType == XmlPullParser.START_TAG) {
-                        if (tagName.equals(XML_TAG_HOST_NAME)) {
-                            parser.next();
-//                            Log.d(TAG, "parser.getText(): " + parser.getText());
-
-                            hostname = parser.getText();
-                            break;
-                        }
-                    }
-
-                    eventType = parser.next();
-
-                } while (eventType != XmlPullParser.END_DOCUMENT);
-
-            } catch (XmlPullParserException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            return hostname;
-
         }
 
     }

@@ -3,7 +3,7 @@
     android:layout="@layout/preference_item">
 
     <PreferenceCategory
-        android:key="@string/pref_setting_category"
+        android:key="@string/pref_setting"
         android:title="@string/settings">
 
         <Preference
@@ -41,7 +41,7 @@
             android:key="@string/pref_device_info"
             android:layout="@layout/preference_item"
             android:summary="@string/settings_device_info_subtitle"
-            android:title="@string/settings_device_info_title" />
+            android:title="@string/device_information" />
 
         <Preference
             android:key="@string/pref_disk_info"

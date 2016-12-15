@@ -15,6 +15,6 @@
     <Preference
         android:key="@string/pref_about_license"
         android:layout="@layout/preference_item"
-        android:title="@string/about_open_source" />
+        android:title="@string/open_source_statement" />
 
 </PreferenceScreen>

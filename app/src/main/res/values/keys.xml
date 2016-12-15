@@ -1,0 +1,86 @@
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+
+    <string name="app_name">StoreJet Cloud</string>
+    <string name="storage_name">Storage</string>
+    <string name="downloads_name">Downloads</string>
+    <string name="shares_name">Shares</string>
+    <string name="rights_reserved">\u00A92016 Transcend Information Inc.\nAll rights reserved.</string>
+    <string name="facebook_app_id">1672519146397506</string>
+
+    <string name="pref_name">NAS PREFERENCE</string>
+
+    <string name="pref_initial">INITIAL SETUP</string>
+    <string name="pref_introduce">INTRODUCE SETUP</string>
+    <string name="pref_remote_access">REMOTE ACCESS</string>
+
+    <string name="pref_setting">SETTING</string>
+    <string name="pref_download_location">DOWNLOAD LOCATION</string>
+    <string name="pref_share_location">SHARE LOCATION</string>
+    <string name="pref_cache_size">CACHE SIZE</string>
+    <string name="pref_cache_clean">CACHE CLEAN</string>
+    <string name="pref_firmware">FIRMWARE</string>
+    <string name="pref_firmware_version">FIRMWARE VERSION</string>
+    <string name="pref_disk_info">DISK INFORMATION</string>
+    <string name="pref_device_info">DEVICE INFORMATION</string>
+    <string name="pref_device_name">DEVICE NAME</string>
+    <string name="pref_device_ip">DEVICE IP</string>
+    <string name="pref_device_mac">DEVICE MAC</string>
+
+    <string name="pref_auto_backup">AUTO BACKUP</string>
+    <string name="pref_backup_video">BACKUP VIDEO</string>
+    <string name="pref_backup_scenario">BACKUP MODE</string>
+    <string name="pref_backup_location">BACKUP LOCATION</string>
+    <string name="pref_backup_source">BACKUP SOURCE</string>
+    <string name="pref_backup_device">BACKUP DEVICE</string>
+    <string name="pref_backup_error_task">BACKUP ERROR TASK</string>
+
+    <string name="pref_about">ABOUT</string>
+    <string name="pref_about_app_version">ABOUT APP VERSION</string>
+    <string name="pref_about_legal">ABOUT LEGAL</string>
+    <string name="pref_about_term_of_use">ABOUT TERMS OF USE</string>
+    <string name="pref_about_license">ABOUT LICENSE</string>
+    <string name="pref_about_contact">ABOUT CONTACT OF US</string>
+
+    <string name="pref_hostname">HOSTNAME</string>
+    <string name="pref_username">USERNAME</string>
+    <string name="pref_password">PASSWORD</string>
+    <string name="pref_uuid">UUID</string>
+    <string name="pref_serial_num">SERIAL NUM</string>
+    <string name="pref_mac">MAC ADDRESS</string>
+    <string name="pref_nas_name">NAS NAME</string>
+    <string name="pref_hash_verified_time">HASH VERIFIED TIME</string>
+
+    <string name="pref_local_hostname">LOCAL HOSTNAME</string>
+    <string name="pref_cloud_username">CLOUD USERNAME</string>
+    <string name="pref_cloud_password">CLOUD PASSWORD</string>
+    <string name="pref_cloud_ip">CLOUD IP</string>
+    <string name="pref_cloud_token">CLOUD AUTHTOKEN</string>
+    <string name="pref_cloud_uuid">CLOUD UUID</string>
+    <string name="pref_cloud_account_status">CLOUD ACCOUNT STATUS</string>
+    <string name="pref_fb_account_status">FB ACCOUNT STATUS</string>
+
+    <string name="pref_file_sort_type">FILE SORT TYPE</string>
+    <string name="pref_file_view_type">FILE VIEW TYPE</string>
+    <string name="pref_file_picker_view_type">FILE PICKER VIEW TYPE</string>
+    <string name="pref_music_type">MUSIC TYPE</string>
+
+    <string name="pref_info_path">INFO PATH</string>
+    <string name="pref_info_name">INFO NAME</string>
+    <string name="pref_info_type">INFO TYPE</string>
+    <string name="pref_info_time">INFO TIME</string>
+    <string name="pref_info_size">INFO SIZE</string>
+
+    <string-array name="sort_items">
+        <item>@string/type</item>
+        <item>@string/date</item>
+        <item>@string/reverse_date</item>
+        <item>@string/name</item>
+        <item>@string/reverse_name</item>
+    </string-array>
+
+    <string-array name="cache_size_entries">
+        <item>100MB</item>
+        <item>200MB</item>
+        <item>500MB</item>
+    </string-array>
+</resources>

@@ -3,10 +3,9 @@ package com.transcend.nas.settings;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
@@ -15,41 +14,20 @@ import android.preference.PreferenceScreen;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.utils.StorageUtils;
-import com.realtek.nasfun.api.HttpClientManager;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.management.FileActionLocateActivity;
 import com.transcend.nas.management.firmware.FileFactory;
-import com.tutk.IOTC.P2PService;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -60,6 +38,7 @@ public class SettingsActivity extends BaseDrawerActivity {
     public static final String TAG = SettingsActivity.class.getSimpleName();
 
     public SettingsFragment mFragment;
+    public int mLoaderID = -1;
 
     @Override
     public int onLayoutID() {
@@ -83,6 +62,11 @@ public class SettingsActivity extends BaseDrawerActivity {
 
         mFragment = new SettingsFragment();
         getFragmentManager().beginTransaction().replace(R.id.settings_frame, mFragment).commit();
+
+        //start firmware version loader
+        if (mFragment.isAdmin()) {
+            getLoaderManager().restartLoader(LoaderID.FIRMWARE_VERSION, null, this).forceLoad();
+        }
     }
 
     @Override
@@ -113,9 +97,31 @@ public class SettingsActivity extends BaseDrawerActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
 
+    @Override
+    public Loader<Boolean> onCreateLoader(int id, Bundle args) {
+        switch (mLoaderID = id) {
+            case LoaderID.FIRMWARE_VERSION:
+                return new FirmwareVersionLoader(this);
+        }
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
+        if (loader instanceof FirmwareVersionLoader) {
+            String version = ((FirmwareVersionLoader) loader).getVersion();
+            if (mFragment != null && version != null && !"".equals(version))
+                mFragment.refreshFirmwareVersion(version);
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Boolean> loader) {
+
+    }
+
     public static class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
         public final String TAG = SettingsActivity.class.getSimpleName();
-        private static final String XML_TAG_FIRMWARE_VERSION = "remote_ver";
         private Toast mToast;
 
         public SettingsFragment() {
@@ -130,9 +136,7 @@ public class SettingsActivity extends BaseDrawerActivity {
             getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
             refreshColumnDownloadLocation();
             refreshColumnCacheUseSize();
-            if (isAdmin()) {
-                refreshFirmwareVersion();
-            } else {
+            if (!isAdmin()) {
                 PreferenceCategory pref = (PreferenceCategory) findPreference(getString(R.string.pref_firmware));
                 getPreferenceScreen().removePreference(pref);
             }
@@ -257,7 +261,7 @@ public class SettingsActivity extends BaseDrawerActivity {
             if (mToast != null)
                 mToast.cancel();
             mToast = Toast.makeText(getActivity(), resId, Toast.LENGTH_SHORT);
-            mToast.setGravity(Gravity.CENTER, 0, 0);
+            //mToast.setGravity(Gravity.CENTER, 0, 0);
             mToast.show();
         }
 
@@ -279,150 +283,15 @@ public class SettingsActivity extends BaseDrawerActivity {
             startActivity(intent);
         }
 
-        private void refreshFirmwareVersion() {
-            final Handler handler = new Handler() {
-                @Override
-                public void handleMessage(Message msg) {
-                    super.handleMessage(msg);
-                    if (getActivity() != null) {
-                        Preference pref = findPreference(getString(R.string.pref_firmware_version));
-                        pref.setSummary((String) msg.obj);
-                    }
-                }
-            };
-
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    String version = getFirmwareVersion();
-
-                    if (version != null) {
-                        Message msg = Message.obtain();
-                        msg.obj = version;
-                        handler.sendMessage(msg);
-                    }
-                }
-            }).start();
-        }
-
-        private String getFirmwareVersion() {
-            String firmwareVersion = null;
-            HttpEntity entity = sendPostRequest();
-            InputStream inputStream = null;
-            String inputEncoding = null;
-
-            if (entity != null) {
-                try {
-                    inputStream = entity.getContent();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                inputEncoding = EntityUtils.getContentCharSet(entity);
-            }
-
-            if (inputEncoding == null) {
-                inputEncoding = HTTP.DEFAULT_CONTENT_CHARSET;
-            }
-
-            if (inputStream != null) {
-                firmwareVersion = doParse(inputStream, inputEncoding);
-//            getPostResultString(entity, inputStream);
-            }
-
-            return firmwareVersion;
-        }
-
-        private HttpEntity sendPostRequest() {
-            HttpEntity entity = null;
-            Server server = ServerManager.INSTANCE.getCurrentServer();
-            String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
-            String commandURL = "http://" + hostname + "/nas/firmware/getversion";
-
-            HttpResponse response;
-            try {
-                HttpPost httpPost = new HttpPost(commandURL);
-                List<NameValuePair> nameValuePairs = new ArrayList<>();
-                nameValuePairs.add(new BasicNameValuePair("hash", server.getHash()));
-                httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-                response = HttpClientManager.getClient().execute(httpPost);
-
-                if (response != null) {
-                    entity = response.getEntity();
-                }
-
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            } catch (ClientProtocolException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            return entity;
-        }
-
-        private String doParse(InputStream inputStream, String inputEncoding) {
-            String firmwareVersion = null;
-            XmlPullParserFactory factory;
-
-            try {
-                factory = XmlPullParserFactory.newInstance();
-                factory.setNamespaceAware(true);
-                XmlPullParser parser = factory.newPullParser();
-                parser.setInput(inputStream, inputEncoding);
-                int eventType = parser.getEventType();
-
-                do {
-                    String tagName = parser.getName();
-//                    Log.d(TAG, "tagName: " + tagName);
-
-                    if (eventType == XmlPullParser.START_TAG) {
-                        if (tagName.equals(XML_TAG_FIRMWARE_VERSION)) {
-                            parser.next();
-//                            Log.d(TAG, "parser.getText(): " + parser.getText());
-
-                            firmwareVersion = parser.getText();
-                            break;
-                        }
-                    }
-
-                    eventType = parser.next();
-
-                } while (eventType != XmlPullParser.END_DOCUMENT);
-
-            } catch (XmlPullParserException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            return firmwareVersion;
+        private void refreshFirmwareVersion(String version) {
+            Preference pref = findPreference(getString(R.string.pref_firmware_version));
+            pref.setSummary(version);
         }
 
         private boolean isAdmin() {
             Server server = ServerManager.INSTANCE.getCurrentServer();
             return NASPref.defaultUserName.equals(server.getUsername());
         }
-
-//    private void getPostResultString(HttpEntity entity, InputStream inputStream) {
-//        Log.d(TAG, "inputStream: "+ inputStream);
-//        Log.d(TAG, "contentType: " + entity.getContentType().toString());
-//
-//        try {
-//            ByteArrayOutputStream result = new ByteArrayOutputStream();
-//            byte[] buffer = new byte[1024];
-//            int length;
-//
-//            while ((length = inputStream.read(buffer)) != -1) {
-//                result.write(buffer, 0, length);
-//            }
-//
-//            Log.d(TAG, "result: "+ result.toString("UTF-8"));
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
     }
 }
 
