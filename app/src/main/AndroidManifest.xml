@@ -121,6 +121,7 @@
 
         <activity
             android:name=".settings.SettingsActivity"
+            android:launchMode="singleTask"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 
@@ -136,6 +137,7 @@
 
         <activity
             android:name=".settings.HelpActivity"
+            android:launchMode="singleTask"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 
@@ -193,6 +195,7 @@
 
         <activity
             android:name=".settings.FeedbackActivity"
+            android:launchMode="singleTask"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 

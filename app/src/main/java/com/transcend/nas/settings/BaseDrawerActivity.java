@@ -52,6 +52,12 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        toggleDrawerCheckedItem(intent);
+    }
+
+    @Override
     public void onBackPressed() {
         toggleDrawerCheckedItem();
         if (mDrawerController.isDrawerOpen()) {
@@ -64,30 +70,28 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         final int id = item.getItemId();
-        if (id == R.id.nav_logout) {
-            showLogoutDialog();
-        } else {
-            mDrawerController.closeDrawer();
-
-            int lastSelectedItemId = getIntent().getIntExtra("lastSelectedItem", -1);
-            if (id != lastSelectedItemId) {
-                switch (id) {
-                    case R.id.nav_storage:
-                    case R.id.nav_device:
-                    case R.id.nav_downloads:
-                        startFileManageActivity(id);
-                        break;
-                    case R.id.nav_settings:
-                        startActivity(SettingsActivity.class, id);
-                        break;
-                    case R.id.nav_help:
-                        startActivity(HelpActivity.class, id);
-                        break;
-                    case R.id.nav_feedback:
-                        startActivity(FeedbackActivity.class, id);
-                        break;
-                }
-            }
+        switch (id) {
+            case R.id.nav_storage:
+            case R.id.nav_device:
+            case R.id.nav_downloads:
+                mDrawerController.closeDrawer();
+                startFileManageActivity(id);
+                break;
+            case R.id.nav_settings:
+                mDrawerController.closeDrawer();
+                startActivity(SettingsActivity.class, id);
+                break;
+            case R.id.nav_help:
+                mDrawerController.closeDrawer();
+                startActivity(HelpActivity.class, id);
+                break;
+            case R.id.nav_feedback:
+                mDrawerController.closeDrawer();
+                startActivity(FeedbackActivity.class, id);
+                break;
+            case R.id.nav_logout:
+                showLogoutDialog();
+                break;
         }
 
         return true;
@@ -136,7 +140,11 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
     }
 
     protected void toggleDrawerCheckedItem() {
-        mDrawerController.setCheckdItem(getIntent().getIntExtra("lastSelectedItem", -1));
+        toggleDrawerCheckedItem(getIntent());
+    }
+
+    protected void toggleDrawerCheckedItem(@NonNull Intent intent) {
+        mDrawerController.setCheckdItem(intent.getIntExtra("lastSelectedItem", -1));
     }
 
     private void startActivity(final Class invokedClass, final int itemId) {
@@ -146,15 +154,8 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
                 Intent i = new Intent(BaseDrawerActivity.this, invokedClass);
                 i.putExtra("lastSelectedItem", itemId);
                 startActivity(i);
-                finishCurrentActivity();
             }
         }, 200);
-    }
-
-    private void finishCurrentActivity() {
-        if (!(this instanceof FileManageActivity)) {
-            finish();
-        }
     }
 
     private void startFileManageActivity(final int itemId) {
