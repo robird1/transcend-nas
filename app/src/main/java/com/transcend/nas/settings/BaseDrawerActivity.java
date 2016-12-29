@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.transcend.nas.LoaderID;
@@ -36,11 +37,12 @@ import com.transcend.nas.viewer.music.MusicService;
 public abstract class BaseDrawerActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
         LoaderManager.LoaderCallbacks<Boolean> {
 
-//    private static final String TAG = BaseDrawerActivity.class.getSimpleName();
     private DrawerMenuController mDrawerController;
 
     public abstract int onLayoutID();
+
     public abstract int onToolbarID();
+
     public abstract DrawerMenuController.DrawerMenu onActivityDrawer();
 
     @Override
@@ -112,7 +114,7 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
     public void onLoadFinished(Loader<Boolean> loader, Boolean isSuccess) {
         if (isSuccess) {
             if (loader instanceof TutkLogoutLoader) {
-                startSignInActivity(true);
+                startSignInActivity();
             }
         }
     }
@@ -125,7 +127,7 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
     protected void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(onToolbarID());
         toolbar.setTitle("");
-//        toolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_white_24dp);
+        //toolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_white_24dp);
         setSupportActionBar(toolbar);
     }
 
@@ -144,7 +146,7 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
     }
 
     protected void toggleDrawerCheckedItem(@NonNull Intent intent) {
-        mDrawerController.setCheckdItem(intent.getIntExtra("lastSelectedItem", -1));
+        mDrawerController.setCheckdItem(intent.getIntExtra("lastSelectedItem", R.id.nav_storage));
     }
 
     private void startActivity(final Class invokedClass, final int itemId) {
@@ -201,15 +203,10 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
         };
     }
 
-    protected void startSignInActivity(boolean clear) {
-        boolean isRunning = false;
+    protected void clearDataAfterSwitch() {
+        NASPref.clearDataAfterSwitch(this);
 
-        //clean email and account information
-        if (clear) {
-            if (NASPref.useFacebookLogin && NASPref.getFBAccountStatus(this))
-                NASUtils.logOutFB(this);
-            NASUtils.clearDataAfterLogout(this);
-        }
+        boolean isRunning = false;
 
         //stop auto backup service
         isRunning = ManageFactory.isServiceRunning(this, AutoBackupService.class);
@@ -237,6 +234,19 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
         //clean lan check
         LanCheckManager.getInstance().setLanConnect(false, "");
         LanCheckManager.getInstance().setInit(false);
+    }
+
+    protected void clearDataAfterLogout() {
+        clearDataAfterSwitch();
+
+        //clean email and account information
+        if (NASPref.useFacebookLogin && NASPref.getFBAccountStatus(this))
+            NASUtils.logOutFB(this);
+        NASUtils.clearDataAfterLogout(this);
+    }
+
+    protected void startSignInActivity() {
+        clearDataAfterLogout();
 
         //show SignIn activity
         Intent intent = new Intent();

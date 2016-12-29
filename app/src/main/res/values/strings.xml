@@ -185,7 +185,7 @@
     <string name="rename">Rename</string>
     <string name="resend">Resend</string>
     <string name="reverse_date">Date (Reverse)</string>
-    <string name="reverse_name">Nome (Inverti)</string>
+    <string name="reverse_name">Name (Reverse)</string>
     <string name="search">Search</string>
     <string name="search_result_empty">No match file</string>
     <string name="select_folder_error">Destination can\'t be the selected list</string>

@@ -164,7 +164,6 @@
     <orderEntry type="library" exported="" name="jmdns-3.4.1" level="project" />
     <orderEntry type="library" exported="" name="firebase-analytics-9.0.0" level="project" />
     <orderEntry type="module" module-name="facebook-android-sdk-4.15.0" exported="" />
-    <orderEntry type="module" module-name="CastCompanionLibrary" exported="" />
     <orderEntry type="library" exported="" name="android-android-24" level="project" />
     <orderEntry type="library" exported="" name="org.apache.http.legacy-android-24" level="project" />
     <orderEntry type="library" exported="" name="facebook-android-sdk-4.15.0-unspecified" level="project" />

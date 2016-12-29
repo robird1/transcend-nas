@@ -102,8 +102,9 @@ public class SettingsActivity extends BaseDrawerActivity {
         switch (mLoaderID = id) {
             case LoaderID.FIRMWARE_VERSION:
                 return new FirmwareVersionLoader(this);
+            default:
+                return super.onCreateLoader(id, args);
         }
-        return null;
     }
 
     @Override
@@ -112,6 +113,8 @@ public class SettingsActivity extends BaseDrawerActivity {
             String version = ((FirmwareVersionLoader) loader).getVersion();
             if (mFragment != null && version != null && !"".equals(version))
                 mFragment.refreshFirmwareVersion(version);
+        } else {
+            super.onLoadFinished(loader, success);
         }
     }
 

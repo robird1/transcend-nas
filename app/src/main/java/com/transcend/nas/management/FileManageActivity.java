@@ -59,12 +59,10 @@ import com.transcend.nas.connection.LoginListActivity;
 import com.transcend.nas.management.firmware.EventNotifyLoader;
 import com.transcend.nas.management.firmware.FileFactory;
 import com.transcend.nas.management.firmware.MediaFactory;
-import com.transcend.nas.management.firmware.ShareFolderManager;
 import com.transcend.nas.management.firmware.TwonkyManager;
 import com.transcend.nas.service.AutoBackupService;
 import com.transcend.nas.service.LanCheckManager;
 import com.transcend.nas.settings.BaseDrawerActivity;
-import com.transcend.nas.settings.DiskFactory;
 import com.transcend.nas.settings.DrawerMenuController;
 import com.transcend.nas.tutk.TutkLinkNasLoader;
 import com.transcend.nas.tutk.TutkLogoutLoader;
@@ -73,7 +71,6 @@ import com.transcend.nas.viewer.document.DocumentDownloadManager;
 import com.transcend.nas.viewer.document.OpenWithUploadHandler;
 import com.transcend.nas.viewer.music.MusicActivity;
 import com.transcend.nas.viewer.music.MusicManager;
-import com.transcend.nas.viewer.music.MusicService;
 import com.transcend.nas.viewer.photo.ViewerActivity;
 import com.tutk.IOTC.P2PService;
 import com.tutk.IOTC.P2PTunnelAPIs;
@@ -175,20 +172,12 @@ public class FileManageActivity extends BaseDrawerActivity implements
             initFabs();
             initProgressView();
             initActionModeView();
-            initDownloadManager();
             initAutoBackUpService();
 
-            checkCurrentSelectedItem(getIntent());
-
-            doRefresh();
+            onReceiveIntent(getIntent());
             NASPref.setInitial(this, true);
-            // Get intent, action and MIME type
-            Intent intent = getIntent();
-            onReceiveIntent(intent);
-
-
         } else {
-            startSignInActivity(true);
+            startSignInActivity();
         }
     }
 
@@ -196,7 +185,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
         Log.d(TAG, "[Enter] checkCurrentSelectedItem()");
 
         int selectedItemId = intent.getIntExtra("selectedItemId", -1);
-        Log.d(TAG, "item ID of FileManageActivity: "+ selectedItemId);
+        Log.d(TAG, "item ID of FileManageActivity: " + selectedItemId);
         switch (selectedItemId) {
             case R.id.nav_storage:
                 GoogleAnalysisFactory.getInstance(this).sendScreen(GoogleAnalysisFactory.VIEW.BROWSER_REMOTE);
@@ -216,6 +205,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
             default:
                 GoogleAnalysisFactory.getInstance(this).sendScreen(GoogleAnalysisFactory.VIEW.BROWSER_REMOTE);
                 mDevice = false;
+                mPath = NASApp.ROOT_SMB;
                 break;
         }
     }
@@ -223,7 +213,6 @@ public class FileManageActivity extends BaseDrawerActivity implements
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        checkCurrentSelectedItem(intent);
         onReceiveIntent(intent);
         Log.w(TAG, "onNewIntent");
     }
@@ -236,10 +225,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
             mCastManager.incrementUiCounter();
         }
 
-        if (mOriginMD5Checksum != null) {
-            checkCacheFileState();
-        }
-
+        checkCacheFileState();
         super.onResume();
         Log.w(TAG, "onResume");
     }
@@ -263,6 +249,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
     @Override
     protected void onDestroy() {
         P2PService.getInstance().removeP2PListener(this);
+        destroyDownloadManager();
         super.onDestroy();
         Log.w(TAG, "onDestroy");
 
@@ -312,37 +299,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
             }
         } else if (requestCode == LoginListActivity.REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                boolean isRunning = false;
-
-                //clean email and account information
-                NASPref.clearDataAfterSwitch(this);
-
-                //stop auto backup service
-                isRunning = ManageFactory.isServiceRunning(this, AutoBackupService.class);
-                if (isRunning) {
-                    Intent intent = new Intent(FileManageActivity.this, AutoBackupService.class);
-                    stopService(intent);
-                }
-
-                //stop music service
-                isRunning = ManageFactory.isServiceRunning(this, MusicService.class);
-                if (isRunning) {
-                    Intent intent = new Intent(FileManageActivity.this, MusicService.class);
-                    stopService(intent);
-                }
-
-                //clean disk info
-                DiskFactory.getInstance().cleanDiskDevices();
-
-                //clean path map
-                ShareFolderManager.getInstance().cleanRealPathMap();
-
-                //clean twonky map
-                TwonkyManager.getInstance().cleanTwonky();
-
-                //clean lan check
-                LanCheckManager.getInstance().setLanConnect(false, "");
-                LanCheckManager.getInstance().setInit(false);
+                clearDataAfterSwitch();
 
                 if (Build.VERSION.SDK_INT >= 11) {
                     recreate();
@@ -364,19 +321,21 @@ public class FileManageActivity extends BaseDrawerActivity implements
     }
 
     private void onReceiveIntent(Intent intent) {
-        if (intent == null) {
-            Log.d(TAG, "onReceiveIntent Empty");
-            return;
+        checkCurrentSelectedItem(intent);
+        if (intent != null) {
+            String action = intent.getAction();
+            String type = intent.getType();
+            Log.d(TAG, "onReceiveIntent : " + action + ", " + type);
+            // Handle other intents, such as being started from the home screen
+            String path = intent.getStringExtra("path");
+            Log.d(TAG, "onReceiveIntent path : " + path);
+            if (path != null && !path.equals("")) {
+                doLoad(path);
+                return;
+            }
         }
 
-        String action = intent.getAction();
-        String type = intent.getType();
-        Log.d(TAG, "onReceiveIntent Other " + action + ", " + type);
-        // Handle other intents, such as being started from the home screen
-        String path = intent.getStringExtra("path");
-        if (path != null && !path.equals("")) {
-            doLoad(path);
-        }
+        doRefresh();
     }
 
 
@@ -431,7 +390,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
         TwonkyManager.getInstance().initTwonky();
 
         ServerInfo info = mServer.getServerInfo();
-        if(info != null && info.hostName != null && !"".equals(info.hostName)) {
+        if (info != null && info.hostName != null && !"".equals(info.hostName)) {
             NASPref.setDeviceName(this, info.hostName);
         }
     }
@@ -768,13 +727,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
     @Override
     public void onBackPressed() {
         Log.w(TAG, "[Enter] onBackPressed()");
-
-        if (mDownloadManager != null) {
-            Log.w(TAG, "[Enter] mDownloadManager.cancel()");
-
-            mDownloadManager.cancel();
-        }
-
+        destroyDownloadManager();
         toggleDrawerCheckedItem();
         if (mDrawerController.isDrawerOpen()) {
             mDrawerController.closeDrawer();
@@ -961,7 +914,8 @@ public class FileManageActivity extends BaseDrawerActivity implements
                     return;
                 }
             } else if (loader instanceof TutkLogoutLoader) {
-                startSignInActivity(true);
+                startSignInActivity();
+                return;
             } else if (loader instanceof EventNotifyLoader) {
                 Bundle args = ((EventNotifyLoader) loader).getBundleArgs();
                 String path = args.getString("path");
@@ -1008,7 +962,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
                     if (uuid == null || "".equals(uuid)) {
                         uuid = NASPref.getCloudUUID(this);
                         if (uuid == null || "".equals(uuid)) {
-                            startSignInActivity(false);
+                            startSignInActivity();
                             return;
                         }
                     }
@@ -1602,7 +1556,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
                 mCastManager.sendDataMessage("close");
 
                 MediaInfo info = MediaFactory.createMediaInfo(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK, fileInfo.path);
-                if(info != null) {
+                if (info != null) {
                     mCastManager.startVideoCastControllerActivity(this, info, 0, true);
                     return;
                 }
@@ -1638,7 +1592,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
                 mCastManager.sendDataMessage("close");
 
                 MediaInfo info = MediaFactory.createMediaInfo(MediaMetadata.MEDIA_TYPE_MOVIE, fileInfo.path);
-                if(info != null) {
+                if (info != null) {
                     mCastManager.startVideoCastControllerActivity(this, info, 0, true);
                     return;
                 }
@@ -1711,6 +1665,12 @@ public class FileManageActivity extends BaseDrawerActivity implements
         });
     }
 
+    private void destroyDownloadManager() {
+        if (mDownloadManager != null) {
+            mDownloadManager.cancel();
+        }
+    }
+
     public void openFileBy3rdApp(Context context, FileInfo fileInfo) {
         if (fileInfo.isLocalFile()) {
             openLocalFile(context, fileInfo);
@@ -1719,12 +1679,14 @@ public class FileManageActivity extends BaseDrawerActivity implements
                 mProgressView.setVisibility(View.VISIBLE);
             }
 
+            if (mDownloadManager == null)
+                initDownloadManager();
+
             mDownloadManager.downloadRemoteFile(context, fileInfo);
         }
     }
 
     private void openLocalFile(Context context, FileInfo fileInfo) {
-
         Uri fileUri = Uri.fromFile(new File(fileInfo.path));
         NASUtils.showAppChooser(context, fileUri);
     }
