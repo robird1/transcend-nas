@@ -47,4 +47,8 @@ public class LoaderID {
     public static final int SMB_FILE_DELETE_AFTER_UPLOAD = 39;
     public static final int FIRMWARE_VERSION = 40;
     public static final int FIRMWARE_INFORMATION = 41;
+    public static final int OTG_FILE_RENAME = 42;
+    public static final int OTG_FILE_DELETE = 43;
+    public static final int OTG_FILE_COPY = 44;
+
 }

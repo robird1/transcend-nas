@@ -20,6 +20,7 @@ import com.transcend.nas.R;
 import com.transcend.nas.common.ManageFactory;
 import com.transcend.nas.connection.LoginActivity;
 import com.transcend.nas.connection.old.StartActivity;
+import com.transcend.nas.management.ExternalStorageController;
 import com.transcend.nas.management.FileManageActivity;
 import com.transcend.nas.management.firmware.ShareFolderManager;
 import com.transcend.nas.management.firmware.TwonkyManager;
@@ -36,7 +37,7 @@ import com.transcend.nas.viewer.music.MusicService;
 public abstract class BaseDrawerActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
         LoaderManager.LoaderCallbacks<Boolean> {
 
-//    private static final String TAG = BaseDrawerActivity.class.getSimpleName();
+    private static final String TAG = BaseDrawerActivity.class.getSimpleName();
     private DrawerMenuController mDrawerController;
 
     public abstract int onLayoutID();
@@ -76,6 +77,10 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
             case R.id.nav_downloads:
                 mDrawerController.closeDrawer();
                 startFileManageActivity(id);
+                break;
+            case R.id.nav_sdcard:
+                mDrawerController.closeDrawer();
+                new ExternalStorageController(this).onDrawerItemSelected(this, id);
                 break;
             case R.id.nav_settings:
                 mDrawerController.closeDrawer();
@@ -139,7 +144,7 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
         return mDrawerController;
     }
 
-    protected void toggleDrawerCheckedItem() {
+    public void toggleDrawerCheckedItem() {
         toggleDrawerCheckedItem(getIntent());
     }
 
@@ -158,7 +163,7 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
         }, 280);
     }
 
-    private void startFileManageActivity(final int itemId) {
+    public void startFileManageActivity(final int itemId) {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -176,6 +181,8 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
                 return NASApp.ROOT_SMB;
             case R.id.nav_device:
                 return NASApp.ROOT_STG;
+            case R.id.nav_sdcard:
+                return NASApp.ROOT_SD;
             case R.id.nav_downloads:
                 return NASPref.getDownloadLocation(this);
             default:

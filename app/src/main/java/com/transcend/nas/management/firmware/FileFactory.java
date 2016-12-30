@@ -1,5 +1,6 @@
 package com.transcend.nas.management.firmware;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
 import android.widget.ImageView;
@@ -10,12 +11,15 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.management.FileInfo;
 import com.tutk.IOTC.P2PService;
 
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+
+import static android.R.attr.mode;
 
 /**
  * Created by ike_lee on 2016/5/23.
@@ -99,10 +103,14 @@ public class FileFactory {
         }
     }
 
-    public boolean isTopDirectory(String mode, String root, String path) {
+    public boolean isTopDirectory(Context context, String mode, String root, String path) {
         if (NASApp.MODE_SMB.equals(mode)) {
             return path.equals(root);
         } else {
+            if (NASUtils.isSDCardPath(context, path)) {
+                root = NASUtils.getSDLocation(context);
+            }
+
             File base = new File(root);
             File file = new File(path);
             return file.equals(base);

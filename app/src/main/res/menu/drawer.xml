@@ -22,6 +22,11 @@
             android:title="@string/device" />
 
         <item
+            android:id="@+id/nav_sdcard"
+            android:icon="@drawable/sjc_ic_myphone"
+            android:title="@string/drawer_sdcard" />
+
+        <item
             android:id="@+id/nav_downloads"
             android:icon="@drawable/sjc_ic_download"
             android:title="@string/download" />

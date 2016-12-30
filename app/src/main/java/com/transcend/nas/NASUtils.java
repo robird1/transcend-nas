@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.storage.StorageManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
@@ -32,9 +33,15 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by steve_su on 2016/12/2.
@@ -133,6 +140,86 @@ public final class NASUtils {
 
         return sb.toString();
     }
+
+    public static List<File> getStoragePath(Context mContext) {
+        List<File> stgList = new ArrayList<File>();
+        StorageManager mStorageManager = (StorageManager) mContext.getSystemService(Context.STORAGE_SERVICE);
+        Class<?> storageVolumeClazz = null;
+        try {
+            storageVolumeClazz = Class.forName("android.os.storage.StorageVolume");
+            Method getVolumeList = null;
+            Method getPath = null;
+            Method isRemovable = null;
+            try {
+                getVolumeList = mStorageManager.getClass().getMethod("getVolumeList");
+                getPath = storageVolumeClazz.getMethod("getPath");
+                isRemovable = storageVolumeClazz.getMethod("isRemovable");
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            }
+
+            Method getSubSystem = null;
+            try {
+                getSubSystem = storageVolumeClazz.getMethod("getSubSystem");
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            }
+            Object result = getVolumeList.invoke(mStorageManager);
+            final int length = Array.getLength(result);
+            for (int i = 0; i < length; i++) {
+                Object storageVolumeElement = Array.get(result, i);
+                String path = (String) getPath.invoke(storageVolumeElement);
+                String subSystem = "";
+                if (getSubSystem != null) {
+                    subSystem = (String) getSubSystem.invoke(storageVolumeElement);
+                }
+                if (!subSystem.contains("usb")) {
+                    if (!path.toLowerCase().contains("private")) {
+                        stgList.add(new File(path));
+                    }
+
+                }
+
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return stgList;
+    }
+
+    public static boolean isSDCardPath(Context context, String path) {
+//        List<File> stgList = NASUtils.getStoragePath(context);
+//        if (stgList.size() > 1) {
+//            for (File sd : stgList) {
+//                if ((!sd.getAbsolutePath().contains(NASApp.ROOT_STG)) && (!sd.getAbsolutePath().toLowerCase().contains("usb"))) {
+//                    Log.d(TAG, "current path: "+ path);
+//                    Log.d(TAG, "sd.getAbsolutePath(): "+ sd.getAbsolutePath());
+//                    return path.contains(sd.getAbsolutePath());
+//                }
+//            }
+//        }
+        String location = getSDLocation(context);
+        return location != null && path.contains(location);
+    }
+
+    public static String getSDLocation(Context context) {
+        List<File> stgList = NASUtils.getStoragePath(context);
+        if (stgList.size() > 1) {
+            for (File sd : stgList) {
+                if ((!sd.getAbsolutePath().contains(NASApp.ROOT_STG)) && (!sd.getAbsolutePath().toLowerCase().contains("usb"))) {
+                    Log.d(TAG, "sd.getAbsolutePath(): "+ sd.getAbsolutePath());
+                    return sd.getAbsolutePath();
+                }
+            }
+        }
+
+        return null;
+    }
+
 
     public static void showAppChooser(final Context context, final Uri fileUri) {
         final Intent intent = new Intent(Intent.ACTION_VIEW);

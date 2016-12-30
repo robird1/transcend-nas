@@ -1,5 +1,6 @@
 package com.transcend.nas.management;
 
+import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -28,6 +29,7 @@ import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.transcend.nas.NASApp;
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.LoaderID;
 import com.transcend.nas.management.firmware.FileFactory;
@@ -37,7 +39,10 @@ import com.transcend.nas.viewer.photo.ViewerActivity;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by silverhsu on 16/2/2.
@@ -69,6 +74,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
     private ArrayList<FileInfo> mFileList;
     private int mLoaderID;
 
+    private Map<String, String> mDeviceMap = new HashMap();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,13 +89,51 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         initProgressView();
         doRefresh();
         toast(getHintResId(), Toast.LENGTH_SHORT);
+        checkExternalDeviceCount();
+
     }
 
-    /**
-     *
-     * INITIALIZATION
-     *
-     */
+    private void checkExternalDeviceCount() {
+        List<File> stgList = NASUtils.getStoragePath(this);
+        if (stgList.size() > 1) {
+            ArrayList<String> list = new ArrayList<>();
+            Iterator iterator = stgList.iterator();
+            while (iterator.hasNext()) {
+                File f = (File) iterator.next();
+                list.add(f.getName());
+                Log.d(TAG, "device: "+ f.getName());
+                mDeviceMap.put(f.getName(), f.getAbsolutePath());
+            }
+
+            Intent i = new Intent(this, FileActionLocateShowDeviceActivity.class);
+            i.putStringArrayListExtra("device_list", list);
+            startActivityForResult(i, FileActionLocateShowDeviceActivity.REQUEST_CODE);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.w(TAG, "onActivityResult");
+
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == FileActionLocateShowDeviceActivity.REQUEST_CODE) {
+                String device = data.getStringExtra("selected_device");
+                Log.d(TAG, "selected device: "+ device);
+                mPath = mDeviceMap.get(device);
+
+                doRefresh();
+            }
+        } else {
+            finish();
+        }
+    }
+
+        /**
+         *
+         * INITIALIZATION
+         *
+         */
     private void initData() {
         Bundle args = getIntent().getExtras();
         mMode = args.getString("mode");
@@ -109,7 +153,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
     }
 
     private void initDropdown() {
-        mDropdownAdapter = new FileManageDropdownAdapter(true);
+        mDropdownAdapter = new FileManageDropdownAdapter(this, true);
         mDropdownAdapter.setOnDropdownItemSelectedListener(this);
         mDropdownAdapter.updateList(mPath, mMode);
         mDropdown = (AppCompatSpinner)findViewById(R.id.locate_dropdown);
@@ -272,6 +316,9 @@ public class FileActionLocateActivity extends AppCompatActivity implements
             return mPath.equals(mRoot);
         }
         else  {
+            if (NASUtils.isSDCardPath(this, mPath)) {
+                mRoot = NASUtils.getSDLocation(this);
+            }
             File root = new File(mRoot);
             File file = new File(mPath);
             return file.equals(root);
