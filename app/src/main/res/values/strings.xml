@@ -253,4 +253,7 @@
     <string name="wizard_success">StoreJet Cloud is Ready</string>
     <string name="wizard_try">Try Again</string>
     <string name="wizard_wifi_info">Connect device Wi-Fi to router network</string>
+
+    <string name="drawer_sdcard">SD Card</string>
+
 </resources>

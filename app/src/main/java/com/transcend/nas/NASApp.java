@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Environment;
 import android.support.multidex.MultiDexApplication;
+import android.support.v4.provider.DocumentFile;
 import android.util.Log;
 
 import com.facebook.FacebookSdk;
@@ -29,6 +30,8 @@ public class NASApp extends MultiDexApplication {
 
     public static final String ROOT_SMB = "/";
     public static final String ROOT_STG = Environment.getExternalStorageDirectory().getAbsolutePath();
+    public static String ROOT_SD;
+    public static DocumentFile sdDir;
 
     public static final String MODE_SMB = "SMB";
     public static final String MODE_STG = "STG";

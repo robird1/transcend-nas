@@ -105,6 +105,11 @@
         </activity>
 
         <activity
+            android:name=".management.FileActionLocateShowDeviceActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
+
+        <activity
             android:name=".management.FileActionPickerActivity"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>

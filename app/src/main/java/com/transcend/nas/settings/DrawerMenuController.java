@@ -115,6 +115,10 @@ public class DrawerMenuController {
         mToggle.setToolbarNavigationClickListener(l);
     }
 
+    public NavigationView getNavigationView() {
+        return mNavView;
+    }
+
     private void setNavigationViewTitle(View navHeader) {
         TextView navHeaderTitle = (TextView) navHeader.findViewById(R.id.drawer_header_title);
         navHeaderTitle.setText(ServerManager.INSTANCE.getCurrentServer().getUsername());

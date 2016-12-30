@@ -33,9 +33,9 @@ public class LocalAbstractLoader extends AsyncTaskLoader<Boolean> {
 
     private static final String TAG = LocalAbstractLoader.class.getSimpleName();
     private Activity mActivity;
-    private HandlerThread mThread;
-    private Handler mHandler;
-    private Runnable mWatcher;
+    protected HandlerThread mThread;
+    protected Handler mHandler;
+    protected Runnable mWatcher;
     private String mType = "";
 
     protected int mNotificationID = 0;
@@ -115,7 +115,11 @@ public class LocalAbstractLoader extends AsyncTaskLoader<Boolean> {
         Log.w(TAG, "progress: " + count + "/" + total + ", " + name);
 
         int max = (count == total) ? 0 : 100;
-        int progress = (total > 0) ? count / (total / 100) : 0;
+//        int progress = (total > 0) ? count / (total / 100) : 0;
+        int progress = 0;
+        if (total > 100 && count > 0)
+            progress = (total > 0) ? count / (total / 100) : 0;
+
         boolean indeterminate = (total == 0);
         int icon = R.mipmap.ic_launcher;
 

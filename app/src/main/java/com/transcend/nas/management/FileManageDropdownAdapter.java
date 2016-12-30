@@ -1,7 +1,9 @@
 package com.transcend.nas.management;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Environment;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -15,6 +17,7 @@ import android.widget.TextView;
 
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 
 import java.io.File;
@@ -42,12 +45,14 @@ public class FileManageDropdownAdapter extends BaseAdapter {
     private boolean isActionLocate = false;
 
     private OnDropdownItemSelectedListener mCallback;
+    private Context mContext;
 
     public interface OnDropdownItemSelectedListener {
         void onDropdownItemSelected(int position);
     }
 
-    public FileManageDropdownAdapter(boolean actionLocate) {
+    public FileManageDropdownAdapter(Context context, boolean actionLocate) {
+        mContext = context;
         isActionLocate = actionLocate;
         mList = new ArrayList<String>();
     }
@@ -61,9 +66,15 @@ public class FileManageDropdownAdapter extends BaseAdapter {
             path = PREFIX_REMOTE + path;
         }
         else {
-            File storage = Environment.getExternalStorageDirectory();
-            String root = storage.getAbsolutePath();
-            path = path.replaceFirst(root, PREFIX_LOCAL);
+            if (!NASUtils.isSDCardPath(mContext, path)) {
+                File storage = Environment.getExternalStorageDirectory();
+                String root = storage.getAbsolutePath();
+                path = path.replaceFirst(root, PREFIX_LOCAL);
+            } else {
+                path = path.replaceFirst(NASUtils.getSDLocation(mContext), mContext.getResources().getString(R.string.drawer_sdcard));
+            }
+
+//            Log.d(TAG, "path: "+ path);
         }
         List<String> list = new ArrayList<String>();
         String[] items = path.split("/");
@@ -94,12 +105,19 @@ public class FileManageDropdownAdapter extends BaseAdapter {
             path = path.replaceFirst(PREFIX_REMOTE, "");
         }
         else {
-            File storage = Environment.getExternalStorageDirectory();
-            String root = storage.getAbsolutePath();
-            path = path.replaceFirst(PREFIX_LOCAL, root);
-            if(path.endsWith("/")){
-                path = path.substring(0, path.length()-1);
+            String sdCard = mContext.getResources().getString(R.string.drawer_sdcard);
+            if (!path.startsWith(sdCard)) {
+                File storage = Environment.getExternalStorageDirectory();
+                String root = storage.getAbsolutePath();
+                path = path.replaceFirst(PREFIX_LOCAL, root);
+            } else {
+                path = path.replaceFirst(sdCard, NASUtils.getSDLocation(mContext));
             }
+
+            if (path.endsWith("/")) {
+                path = path.substring(0, path.length() - 1);
+            }
+
         }
         return path;
     }
