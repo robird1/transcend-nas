@@ -1,4 +1,4 @@
-package com.transcend.nas.management;
+package com.transcend.nas.management.externalstorage;
 
 import android.content.Context;
 
@@ -9,8 +9,8 @@ import com.transcend.nas.settings.BaseDrawerActivity;
  * Created by steve_su on 2016/12/26.
  */
 
-public class ExternalStorageKitKat extends AbstractExternalStorage {
-    public ExternalStorageKitKat(Context context) {
+public class ExternalStorageJellyBean extends AbstractExternalStorage {
+    public ExternalStorageJellyBean(Context context) {
         super(context);
     }
 
@@ -19,5 +19,4 @@ public class ExternalStorageKitKat extends AbstractExternalStorage {
         NASApp.ROOT_SD = getSDLocation();
         activity.startFileManageActivity(itemId);
     }
-
 }

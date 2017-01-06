@@ -10,7 +10,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 
 import com.transcend.nas.LoaderID;
@@ -21,7 +20,7 @@ import com.transcend.nas.R;
 import com.transcend.nas.common.ManageFactory;
 import com.transcend.nas.connection.LoginActivity;
 import com.transcend.nas.connection.old.StartActivity;
-import com.transcend.nas.management.ExternalStorageController;
+import com.transcend.nas.management.externalstorage.ExternalStorageController;
 import com.transcend.nas.management.FileManageActivity;
 import com.transcend.nas.management.firmware.ShareFolderManager;
 import com.transcend.nas.management.firmware.TwonkyManager;

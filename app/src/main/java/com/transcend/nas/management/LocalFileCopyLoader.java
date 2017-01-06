@@ -76,7 +76,10 @@ public class LocalFileCopyLoader extends LocalAbstractLoader {
     private void copyDirectory(File source, String destination) throws IOException  {
         String name = createUniqueName(source, destination);
         File target = new File(destination, name);
-        target.mkdirs();
+        boolean isSuccess = target.mkdirs();
+        if (!isSuccess) {
+            throw new IOException();
+        }
         File[] files = source.listFiles();
         for (File file : files) {
             if (!file.isHidden())

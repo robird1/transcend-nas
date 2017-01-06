@@ -254,6 +254,9 @@
     <string name="wizard_try">Try Again</string>
     <string name="wizard_wifi_info">Connect device Wi-Fi to router network</string>
 
-    <string name="drawer_sdcard">SD Card</string>
+    <string name="sdcard">SD Card</string>
+    <string name="dialog_request_write_permission">Please select root folder to grant write permission</string>
+    <string name="dialog_grant_permission_failed">Selected folder is not the root folder of SD card</string>
+    <string name="dialog_write_operation_not_allowed">Operation failed due to the limitation of Android 4.4. Please upgrade system to operate on SD card.</string>
 
 </resources>

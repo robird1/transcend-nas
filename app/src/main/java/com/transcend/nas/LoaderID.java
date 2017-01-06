@@ -50,5 +50,8 @@ public class LoaderID {
     public static final int OTG_FILE_RENAME = 42;
     public static final int OTG_FILE_DELETE = 43;
     public static final int OTG_FILE_COPY = 44;
+    public static final int OTG_FILE_MOVE = 45;
+    public static final int OTG_FILE_DOWNLOAD = 46;
+    public static final int OTG_LOCAL_NEW_FOLDER = 47;
 
 }

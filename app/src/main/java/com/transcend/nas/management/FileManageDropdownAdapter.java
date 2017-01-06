@@ -3,7 +3,6 @@ package com.transcend.nas.management;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Environment;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -26,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static com.transcend.nas.NASUtils.getDeviceName;
 
 /**
  * Created by silverhsu on 16/1/12.
@@ -69,12 +70,10 @@ public class FileManageDropdownAdapter extends BaseAdapter {
             if (!NASUtils.isSDCardPath(mContext, path)) {
                 File storage = Environment.getExternalStorageDirectory();
                 String root = storage.getAbsolutePath();
-                path = path.replaceFirst(root, PREFIX_LOCAL);
+                path = path.replaceFirst(root, getDeviceName());
             } else {
-                path = path.replaceFirst(NASUtils.getSDLocation(mContext), mContext.getResources().getString(R.string.drawer_sdcard));
+                path = path.replaceFirst(NASUtils.getSDLocation(mContext), mContext.getResources().getString(R.string.sdcard));
             }
-
-//            Log.d(TAG, "path: "+ path);
         }
         List<String> list = new ArrayList<String>();
         String[] items = path.split("/");
@@ -105,11 +104,11 @@ public class FileManageDropdownAdapter extends BaseAdapter {
             path = path.replaceFirst(PREFIX_REMOTE, "");
         }
         else {
-            String sdCard = mContext.getResources().getString(R.string.drawer_sdcard);
+            String sdCard = mContext.getResources().getString(R.string.sdcard);
             if (!path.startsWith(sdCard)) {
                 File storage = Environment.getExternalStorageDirectory();
                 String root = storage.getAbsolutePath();
-                path = path.replaceFirst(PREFIX_LOCAL, root);
+                path = path.replaceFirst(getDeviceName(), root);
             } else {
                 path = path.replaceFirst(sdCard, NASUtils.getSDLocation(mContext));
             }

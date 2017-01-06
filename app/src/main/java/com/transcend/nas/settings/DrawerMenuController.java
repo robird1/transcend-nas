@@ -16,12 +16,15 @@ import android.widget.TextView;
 
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 
 import java.io.IOException;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
+
+import static com.transcend.nas.R.string.device;
 
 /**
  * Created by steve_su on 2016/12/12.
@@ -83,7 +86,8 @@ public class DrawerMenuController {
         setNavigationViewTitle(navHeader);
         setNavigationViewSubtitle(navHeader);
         setDrawerHeaderIcon();
-        setDeviceName();
+        setRemoteDeviceName();
+        setLocalDeviceName();
         mNavView.getMenu().findItem(R.id.nav_switch).setVisible(NASPref.useSwitchNas);
     }
 
@@ -134,10 +138,14 @@ public class DrawerMenuController {
                     ServerManager.INSTANCE.getCurrentServer().getHostname()));
     }
 
-    private void setDeviceName() {
+    private void setRemoteDeviceName() {
         String device = NASPref.getDeviceName(mActivity);
         if(device != null && !"".equals(device))
             mNavView.getMenu().findItem(R.id.nav_storage).setTitle(device);
+    }
+
+    private void setLocalDeviceName() {
+        mNavView.getMenu().findItem(R.id.nav_device).setTitle(NASUtils.getDeviceName());
     }
 
     private void setDrawerHeaderIcon() {

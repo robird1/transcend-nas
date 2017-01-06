@@ -1,31 +1,16 @@
 package com.transcend.nas.management;
 
-import android.app.Activity;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.AsyncTaskLoader;
 import android.content.Context;
-import android.content.Intent;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import com.transcend.nas.R;
 import com.transcend.nas.common.CustomNotificationManager;
-import com.transcend.nas.management.firmware.FileFactory;
-import com.transcend.nas.utils.MathUtil;
 
-import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.List;
-
-import jcifs.smb.SmbException;
 
 /**
  * Created by silverhsu on 16/2/18.
@@ -77,7 +62,10 @@ public class LocalFileMoveLoader extends LocalAbstractLoader {
     private void moveDirectory(File source, String destination) throws IOException  {
         String name = createUniqueName(source, destination);
         File target = new File(destination, name);
-        target.mkdirs();
+        boolean isSuccess = target.mkdirs();
+        if (!isSuccess) {
+            throw new IOException();
+        }
         File[] files = source.listFiles();
         for (File file : files) {
             if (!file.isHidden())
@@ -95,7 +83,10 @@ public class LocalFileMoveLoader extends LocalAbstractLoader {
                 moveFile(file, path);
             mCurrent++;
         }
-        source.delete();
+        isSuccess = source.delete();
+        if (!isSuccess) {
+            throw new IOException();
+        }
     }
 
     private void moveFile(File source, String destination) throws IOException {
@@ -103,7 +94,12 @@ public class LocalFileMoveLoader extends LocalAbstractLoader {
         File target = new File(destination, name);
         int total = (int) source.length();
         startProgressWatcher(name, target, total);
-        source.renameTo(target);
+//        source.renameTo(target);
+        FileUtils.copyFile(source, target);
+        boolean isSuccess = source.delete();
+        if (!isSuccess) {
+            throw new IOException();
+        }
         closeProgressWatcher();
         updateProgress(name, total, total);
     }

@@ -27,8 +27,7 @@ public class LocalFolderCreateLoader extends LocalAbstractLoader {
     private boolean createNewFolder() {
         File dir = new File(mPath);
         if (!dir.exists()) {
-            boolean b = dir.mkdirs();
-            return true;
+            return dir.mkdirs();
         }
         return false;
     }

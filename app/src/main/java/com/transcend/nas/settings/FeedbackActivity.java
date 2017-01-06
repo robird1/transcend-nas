@@ -29,6 +29,8 @@ import javax.net.ssl.HttpsURLConnection;
 
 import jcifs.util.Base64;
 
+import static com.transcend.nas.NASUtils.getDeviceName;
+
 /**
  * Created by steve_su on 2016/11/22.
  */
@@ -253,29 +255,6 @@ public class FeedbackActivity extends BaseDrawerActivity {
 
         }).start();
 
-    }
-
-    private String getDeviceName() {
-        String manufacturer = Build.MANUFACTURER;
-        String model = Build.MODEL;
-        if (model.startsWith(manufacturer)) {
-            return capitalize(model);
-        } else {
-            return capitalize(manufacturer) + " " + model;
-        }
-    }
-
-
-    private String capitalize(String s) {
-        if (s == null || s.length() == 0) {
-            return "";
-        }
-        char first = s.charAt(0);
-        if (Character.isUpperCase(first)) {
-            return s;
-        } else {
-            return Character.toUpperCase(first) + s.substring(1);
-        }
     }
 
     private String getResponseResult(HttpURLConnection connection) throws IOException {

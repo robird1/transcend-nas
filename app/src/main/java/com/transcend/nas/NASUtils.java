@@ -192,16 +192,6 @@ public final class NASUtils {
     }
 
     public static boolean isSDCardPath(Context context, String path) {
-//        List<File> stgList = NASUtils.getStoragePath(context);
-//        if (stgList.size() > 1) {
-//            for (File sd : stgList) {
-//                if ((!sd.getAbsolutePath().contains(NASApp.ROOT_STG)) && (!sd.getAbsolutePath().toLowerCase().contains("usb"))) {
-//                    Log.d(TAG, "current path: "+ path);
-//                    Log.d(TAG, "sd.getAbsolutePath(): "+ sd.getAbsolutePath());
-//                    return path.contains(sd.getAbsolutePath());
-//                }
-//            }
-//        }
         String location = getSDLocation(context);
         return location != null && path.contains(location);
     }
@@ -216,10 +206,30 @@ public final class NASUtils {
                 }
             }
         }
-
         return null;
     }
 
+    public static String getDeviceName() {
+        String manufacturer = Build.MANUFACTURER;
+        String model = Build.MODEL;
+        if (model.startsWith(manufacturer)) {
+            return capitalize(model);
+        } else {
+            return capitalize(manufacturer) + " " + model;
+        }
+    }
+
+    private static String capitalize(String s) {
+        if (s == null || s.length() == 0) {
+            return "";
+        }
+        char first = s.charAt(0);
+        if (Character.isUpperCase(first)) {
+            return s;
+        } else {
+            return Character.toUpperCase(first) + s.substring(1);
+        }
+    }
 
     public static void showAppChooser(final Context context, final Uri fileUri) {
         final Intent intent = new Intent(Intent.ACTION_VIEW);

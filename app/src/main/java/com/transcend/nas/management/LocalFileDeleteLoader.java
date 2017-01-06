@@ -1,11 +1,9 @@
 package com.transcend.nas.management;
 
-import android.content.AsyncTaskLoader;
 import android.content.Context;
 
 import java.io.File;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -23,28 +21,38 @@ public class LocalFileDeleteLoader extends LocalAbstractLoader {
 
     @Override
     public Boolean loadInBackground() {
-        return delete();
+        try {
+            return delete();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
-    private boolean delete() {
+    private boolean delete() throws IOException {
+        boolean isSuccess;
         for (String path : mPaths) {
             File target = new File(path);
             if (target.isDirectory())
-                deleteDirectory(target);
+                isSuccess = deleteDirectory(target);
             else
-                target.delete();
+                isSuccess = target.delete();
+
+            if (!isSuccess) {
+                throw new IOException();
+            }
         }
         return true;
     }
 
-    private void deleteDirectory(File dir) {
+    private boolean deleteDirectory(File dir) {
         for (File target : dir.listFiles()) {
             if (target.isDirectory())
                 deleteDirectory(target);
             else
                 target.delete();
         }
-        dir.delete();
+        return dir.delete();
     }
 
 }

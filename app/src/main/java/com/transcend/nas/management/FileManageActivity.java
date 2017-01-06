@@ -9,8 +9,6 @@ import android.content.res.TypedArray;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -59,6 +57,14 @@ import com.transcend.nas.R;
 import com.transcend.nas.common.GoogleAnalysisFactory;
 import com.transcend.nas.common.ManageFactory;
 import com.transcend.nas.connection.LoginListActivity;
+import com.transcend.nas.management.externalstorage.ExternalStorageController;
+import com.transcend.nas.management.externalstorage.ExternalStorageLollipop;
+import com.transcend.nas.management.externalstorage.OTGFileCopyLoader;
+import com.transcend.nas.management.externalstorage.OTGFileDeleteLoader;
+import com.transcend.nas.management.externalstorage.OTGFileDownloadLoader;
+import com.transcend.nas.management.externalstorage.OTGFileMoveLoader;
+import com.transcend.nas.management.externalstorage.OTGFileRenameLoader;
+import com.transcend.nas.management.externalstorage.OTGLocalFolderCreateLoader;
 import com.transcend.nas.management.firmware.EventNotifyLoader;
 import com.transcend.nas.management.firmware.FileFactory;
 import com.transcend.nas.management.firmware.MediaFactory;
@@ -88,7 +94,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.transcend.nas.NASUtils.isSDCardPath;
-import static com.transcend.nas.management.ExternalStorageLollipop.PREF_DEFAULT_URISD;
 
 public class FileManageActivity extends BaseDrawerActivity implements
         FileManageDropdownAdapter.OnDropdownItemSelectedListener,
@@ -102,6 +107,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
     private static final int GRID_PORTRAIT = 3;
     private static final int GRID_LANDSCAPE = 5;
 
+    private Context mContext;
     private int[] RETRY_CMD = new int[]{LoaderID.SMB_FILE_LIST, LoaderID.SMB_FILE_RENAME, LoaderID.SMB_FILE_DELETE,
             LoaderID.SMB_NEW_FOLDER, LoaderID.EVENT_NOTIFY};
     private Toolbar mToolbar;
@@ -149,6 +155,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
     private String mOriginMD5Checksum;
 
     private DrawerMenuController mDrawerController;
+    private ExternalStorageController mStorageController;
 
     @Override
     public int onLayoutID() {
@@ -168,7 +175,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        Log.w(TAG, "onCreate");
+        Log.w(TAG, "onCreate");
 
         String password = NASPref.getPassword(this);
         if (password != null && !password.equals("")) {
@@ -179,6 +186,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
             initProgressView();
             initActionModeView();
             initAutoBackUpService();
+            initExternalStorageController();
 
             onReceiveIntent(getIntent());
             NASPref.setInitial(this, true);
@@ -188,8 +196,6 @@ public class FileManageActivity extends BaseDrawerActivity implements
     }
 
     private void checkCurrentSelectedItem(Intent intent) {
-//        Log.d(TAG, "[Enter] checkCurrentSelectedItem()");
-
         int selectedItemId = intent.getIntExtra("selectedItemId", -1);
 
         switch (selectedItemId) {
@@ -220,7 +226,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         onReceiveIntent(intent);
-//        Log.w(TAG, "onNewIntent");
+        Log.w(TAG, "onNewIntent");
     }
 
     @Override
@@ -233,7 +239,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
 
         checkCacheFileState();
         super.onResume();
-//        Log.w(TAG, "onResume");
+        Log.w(TAG, "onResume");
     }
 
     @Override
@@ -243,13 +249,13 @@ public class FileManageActivity extends BaseDrawerActivity implements
             mCastManager.removeVideoCastConsumer(mCastConsumer);
         }
         super.onPause();
-//        Log.w(TAG, "onPause");
+        Log.w(TAG, "onPause");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-//        Log.w(TAG, "onStop");
+        Log.w(TAG, "onStop");
     }
 
     @Override
@@ -257,7 +263,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
         P2PService.getInstance().removeP2PListener(this);
         destroyDownloadManager();
         super.onDestroy();
-//        Log.w(TAG, "onDestroy");
+        Log.w(TAG, "onDestroy");
 
     }
 
@@ -321,9 +327,11 @@ public class FileManageActivity extends BaseDrawerActivity implements
             }
         }
         else if (requestCode == ExternalStorageLollipop.REQUEST_CODE) {
-            Log.d(TAG, "[Enter] requestCode == ExternalStorageLollipop.REQUEST_CODE");
-
-            new ExternalStorageController(this).onActivityResult(this, data);
+            if (resultCode == RESULT_OK) {
+                new ExternalStorageController(this).onActivityResult(this, data);
+            } else {
+                toggleDrawerCheckedItem();
+            }
 
         }
     }
@@ -341,7 +349,6 @@ public class FileManageActivity extends BaseDrawerActivity implements
             Log.d(TAG, "onReceiveIntent : " + action + ", " + type);
             // Handle other intents, such as being started from the home screen
             String path = intent.getStringExtra("path");
-            Log.d(TAG, "onReceiveIntent path : " + path);
             if (path != null && !path.equals("")) {
                 doLoad(path);
                 return;
@@ -356,6 +363,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
      * INITIALIZATION
      */
     private void init() {
+        mContext = this;
         mMode = NASApp.MODE_SMB;
         mPath = mRoot = NASApp.ROOT_SMB;
         mFileList = new ArrayList<FileInfo>();
@@ -370,7 +378,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
                 if (resourceId > 0) {
                     reason = getString(resourceId);
                 }
-//                Log.e(TAG, "Action failed, reason:  " + reason + ", status code: " + statusCode);
+                Log.e(TAG, "Action failed, reason:  " + reason + ", status code: " + statusCode);
             }
 
             @Override
@@ -386,7 +394,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
 
             @Override
             public void onConnectionSuspended(int cause) {
-//                Log.d(TAG, "onConnectionSuspended() was called with cause: " + cause);
+                Log.d(TAG, "onConnectionSuspended() was called with cause: " + cause);
             }
         };
 
@@ -489,6 +497,10 @@ public class FileManageActivity extends BaseDrawerActivity implements
         mEditorModeTitle = (TextView) mEditorModeView.findViewById(R.id.action_mode_custom_title);
     }
 
+    private void initExternalStorageController() {
+        mStorageController = new ExternalStorageController(mContext);
+    }
+
     /**
      * DROPDOWN ITEM CONTROL
      */
@@ -497,7 +509,6 @@ public class FileManageActivity extends BaseDrawerActivity implements
         Log.w(TAG, "onDropdownItemSelected: " + position);
         if (position > 0) {
             String path = mDropdownAdapter.getPath(position);
-            Log.d(TAG, "path: "+ path);
             doLoad(path);
         }
     }
@@ -568,8 +579,6 @@ public class FileManageActivity extends BaseDrawerActivity implements
             } else if (FileInfo.TYPE.MUSIC.equals(fileInfo.type)) {
                 startMusicActivity(mMode, mRoot, fileInfo);
             } else {
-//                Log.d(TAG, "class name: " + this.getClass().getSimpleName());
-
                 openFileBy3rdApp(this, mFileInfo = fileInfo);
             }
         } else {
@@ -649,6 +658,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
         return false;
     }
 
+    // TODO remove the case R.id.file_manage_editor_action_new_folder
     @Override
     public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
         boolean isEmpty = (getSelectedCount() == 0);
@@ -741,7 +751,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
      */
     @Override
     public void onBackPressed() {
-//        Log.w(TAG, "[Enter] onBackPressed()");
+        Log.w(TAG, "[Enter] onBackPressed()");
 
         destroyDownloadManager();
         toggleDrawerCheckedItem();
@@ -775,7 +785,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-//        Log.w(TAG, "onConfigurationChanged");
+        Log.w(TAG, "onConfigurationChanged");
         if (mRecyclerView.getLayoutManager() instanceof GridLayoutManager)
             updateGridView(true);
         resizeToolbar();
@@ -787,17 +797,17 @@ public class FileManageActivity extends BaseDrawerActivity implements
      */
     @Override
     public void onTunnelStatusChanged(int nErrCode, int nSID) {
-        //Log.d("ike", "TEST " + nErrCode + "," + nSID);
+        Log.d("ike", "TEST " + nErrCode + "," + nSID);
     }
 
     @Override
     public void onTunnelSessionInfoChanged(sP2PTunnelSessionInfo object) {
-        //Log.d("ike", "TEST CHANGE ");
+        Log.d("ike", "TEST CHANGE ");
     }
 
     public boolean setRecordCommand(int id, Bundle args) {
         if (id == LoaderID.TUTK_NAS_LINK) {
-//            Log.w(TAG, "TUTK_NAS_LINK don't need to record");
+            Log.w(TAG, "TUTK_NAS_LINK don't need to record");
             return false;
         }
 
@@ -818,7 +828,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
             cleanRecordCommand();
         }
 
-//        Log.w(TAG, "Previous Loader ID: " + id);
+        Log.w(TAG, "Previous Loader ID: " + id);
         return record;
     }
 
@@ -867,10 +877,12 @@ public class FileManageActivity extends BaseDrawerActivity implements
             case LoaderID.SMB_FILE_COPY:
                 return new SmbFileCopyLoader(this, paths, path);
             case LoaderID.LOCAL_FILE_COPY:
+                mProgressView.setVisibility(View.VISIBLE);
                 return new LocalFileCopyLoader(this, paths, path);
             case LoaderID.SMB_FILE_MOVE:
                 return new SmbFileMoveLoader(this, paths, path);
             case LoaderID.LOCAL_FILE_MOVE:
+                mProgressView.setVisibility(View.VISIBLE);
                 return new LocalFileMoveLoader(this, paths, path);
             case LoaderID.SMB_FILE_DOWNLOAD:
                 return new SmbFileDownloadLoader(this, paths, path);
@@ -889,16 +901,24 @@ public class FileManageActivity extends BaseDrawerActivity implements
             case LoaderID.SMB_FILE_SHARE:
                 mSmbFileShareLoader = new SmbFileShareLoader(this, paths, path);
                 return mSmbFileShareLoader;
-            case LoaderID.OTG_FILE_RENAME:
+            case LoaderID.OTG_FILE_RENAME:                                           // SD
                 mProgressView.setVisibility(View.VISIBLE);
-                DocumentFile file = findRightDocumentFile(getRootFolderSD(), path);
-                Log.d(TAG, "selected DocumentFile uri: "+ file.getUri());
-                return new OTGFileRenameLoader(this, file, name);
-            case LoaderID.OTG_FILE_DELETE:
+                return new OTGFileRenameLoader(this, new ExternalStorageLollipop(this).getSDFileLocation(path), name);
+            case LoaderID.OTG_FILE_DELETE:                                           // SD
                 mProgressView.setVisibility(View.VISIBLE);
-                return new OTGFileDeleteLoader(this, getSelectedDocumentFile());
-            case LoaderID.OTG_FILE_COPY:
-                return new OTGFileCopyLoader(this, getSrcDocumentFiles(paths), findRightDocumentFile(getSDRootFolder(), path));
+                return new OTGFileDeleteLoader(this, getSelectedDocumentFiles());
+            case LoaderID.OTG_FILE_COPY:                                             //  primary -> SD, SD -> SD
+                mProgressView.setVisibility(View.VISIBLE);
+                return new OTGFileCopyLoader(this, getSrcDocumentFiles(), new ExternalStorageLollipop(this).getSDFileLocation(path));
+            case LoaderID.OTG_FILE_MOVE:                                             // primary <-> SD, SD -> SD
+                mProgressView.setVisibility(View.VISIBLE);
+                return new OTGFileMoveLoader(this, getSelectedDocumentFiles(), new ExternalStorageLollipop(this).getDestination(path));
+            case LoaderID.OTG_FILE_DOWNLOAD:                                         // remote -> SD
+                mProgressView.setVisibility(View.VISIBLE);
+                return new OTGFileDownloadLoader(this, paths, path, new ExternalStorageLollipop(this).getSDFileLocation(path));
+            case LoaderID.OTG_LOCAL_NEW_FOLDER:
+                mProgressView.setVisibility(View.VISIBLE);
+                return new OTGLocalFolderCreateLoader(this, new ExternalStorageLollipop(this).getSDFileLocation(path), name);
         }
         return null;
     }
@@ -907,7 +927,6 @@ public class FileManageActivity extends BaseDrawerActivity implements
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
         Log.w(TAG, "onLoaderFinished: " + loader.getClass().getSimpleName() + " " + success);
         if (success) {
-            Log.d(TAG, "[Enter] onLoaderFinished() SUCCESS");
             if (loader instanceof SmbFileListLoader) {
                 //file list change, stop previous image loader
                 ImageLoader.getInstance().stop();
@@ -927,9 +946,6 @@ public class FileManageActivity extends BaseDrawerActivity implements
                 mMode = NASApp.MODE_STG;
                 mPath = ((LocalFileListLoader) loader).getPath();
                 mRoot = isSDCardPath(this, mPath) ? NASUtils.getSDLocation(this): NASApp.ROOT_STG;
-                Log.d(TAG, "mPath: "+ mPath);
-                Log.d(TAG, "mRoot: "+ mRoot);
-
                 mFileList = ((LocalFileListLoader) loader).getFileList();
                 Collections.sort(mFileList, FileInfoSort.comparator(this));
                 FileFactory.getInstance().addFileTypeSortRule(mFileList);
@@ -937,7 +953,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
                 enableFabEdit(true);
                 updateScreen();
             } else if (loader instanceof TutkLinkNasLoader) {
-//                Log.w(TAG, "Remote Access connect success, start execute previous loader : " + mPreviousLoaderID);
+                Log.w(TAG, "Remote Access connect success, start execute previous loader : " + mPreviousLoaderID);
                 if (mPreviousLoaderArgs != null && mPreviousLoaderID >= 0) {
                     mPreviousLoaderArgs.putBoolean("retry", true);
                     getLoaderManager().restartLoader(mPreviousLoaderID, mPreviousLoaderArgs, this).forceLoad();
@@ -966,7 +982,6 @@ public class FileManageActivity extends BaseDrawerActivity implements
                 mOpenWithUploadHandler.setTempFilePath(mOpenWithUploadHandler.getRemoteFileDirPath().concat(fileName));
                 getLoaderManager().restartLoader(LoaderID.SMB_FILE_DELETE_AFTER_UPLOAD, args, this).forceLoad();
             } else if ((loader instanceof SmbFileDeleteLoader) && ((SmbFileDeleteLoader) loader).isDeleteAfterUpload()) {
-//                Log.d(TAG, "[Enter] (loader instanceof SmbFileDeleteLoader)");
                 Bundle args = new Bundle();
                 args.putString("path", mOpenWithUploadHandler.getTempFilePath());
                 args.putString("name", mFileInfo.name);
@@ -981,8 +996,6 @@ public class FileManageActivity extends BaseDrawerActivity implements
                 }
             }
         } else {
-            Log.d(TAG, "[Enter] onLoaderFinished() FAIL");
-
             if (!LanCheckManager.getInstance().getLanConnect() && mPreviousLoaderID > 0 && mPreviousLoaderArgs != null) {
                 if (mLoaderID == LoaderID.TUTK_NAS_LINK) {
                     cleanRecordCommand();
@@ -1003,19 +1016,20 @@ public class FileManageActivity extends BaseDrawerActivity implements
                     return;
                 }
             } else {
-                Log.d(TAG, "[Enter] else bracket");
-
                 checkEmptyView();
                 if (loader instanceof SmbAbstractLoader) {
                     LanCheckManager.getInstance().startLanCheck();
                     Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
                 } else {
-                    Log.d(TAG, "[Enter] else bracket");
-
                     if (loader instanceof EventNotifyLoader)
                         LanCheckManager.getInstance().startLanCheck();
                     Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
                 }
+            }
+
+            if (loader instanceof LocalFileCopyLoader || loader instanceof LocalFileMoveLoader || loader instanceof LocalFileRenameLoader ||
+                    loader instanceof LocalFileDeleteLoader || loader instanceof LocalFolderCreateLoader) {
+                mStorageController.handleWriteOperationFailed();
             }
         }
 
@@ -1025,7 +1039,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
 
     @Override
     public void onLoaderReset(Loader<Boolean> loader) {
-//        Log.w(TAG, "onLoaderReset: " + loader.getClass().getSimpleName());
+        Log.w(TAG, "onLoaderReset: " + loader.getClass().getSimpleName());
     }
 
 
@@ -1046,7 +1060,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
     /**
      * FILE BROWSER
      */
-    void doLoad(String path) {
+    public void doLoad(String path) {
         int id = path.startsWith("/storage")
                 ? LoaderID.LOCAL_FILE_LIST : LoaderID.SMB_FILE_LIST;
 
@@ -1059,7 +1073,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
     }
 
     private void doRefresh() {
-//        Log.w(TAG, "doRefresh");
+        Log.w(TAG, "doRefresh");
         doLoad(mPath);
     }
 
@@ -1141,27 +1155,21 @@ public class FileManageActivity extends BaseDrawerActivity implements
     }
 
     private void doUpload(String dest, ArrayList<String> paths) {
-//        Log.d(TAG, "[Enter] doUpload()");
-
         int id = LoaderID.LOCAL_FILE_UPLOAD;
         Bundle args = new Bundle();
         args.putStringArrayList("paths", paths);
         args.putString("path", dest);
         getLoaderManager().restartLoader(id, args, FileManageActivity.this).forceLoad();
-//        Log.w(TAG, "doUpload: " + paths.size() + " item(s) to " + dest);
-
-        Log.d(TAG, "source file path: " + paths.get(0));
-        Log.d(TAG, "destination file path: " + dest);
-
+        Log.w(TAG, "doUpload: " + paths.size() + " item(s) to " + dest);
     }
 
     private void doDownload(String dest, ArrayList<String> paths) {
-        int id = LoaderID.SMB_FILE_DOWNLOAD;
+        int id = mStorageController.isWritePermissionRequired(dest) ? LoaderID.OTG_FILE_DOWNLOAD : LoaderID.SMB_FILE_DOWNLOAD;
         Bundle args = new Bundle();
         args.putStringArrayList("paths", paths);
         args.putString("path", dest);
         getLoaderManager().restartLoader(id, args, FileManageActivity.this).forceLoad();
-//        Log.w(TAG, "doDownload: " + paths.size() + " item(s) to " + dest);
+        Log.w(TAG, "doDownload: " + paths.size() + " item(s) to " + dest);
     }
 
     private void doRename() {
@@ -1184,7 +1192,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
                     return;
                 int id = (NASApp.MODE_SMB.equals(mMode))
                         ? LoaderID.SMB_FILE_RENAME
-                        : isSDCardPath(FileManageActivity.this, mPath) ? LoaderID.OTG_FILE_RENAME: LoaderID.LOCAL_FILE_RENAME;
+                        : mStorageController.isWritePermissionRequired(mPath) ? LoaderID.OTG_FILE_RENAME: LoaderID.LOCAL_FILE_RENAME;
                 Bundle args = new Bundle();
                 args.putString("path", path);
                 args.putString("name", newName);
@@ -1258,7 +1266,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
             mShareDialog = null;
         }
 
-//        Log.w(TAG, "doShare: " + files.size() + " item(s)");
+        Log.w(TAG, "doShare: " + files.size() + " item(s)");
     }
 
     private void doCopy(String dest) {
@@ -1272,12 +1280,12 @@ public class FileManageActivity extends BaseDrawerActivity implements
 
         int id = (NASApp.MODE_SMB.equals(mMode))
                 ? LoaderID.SMB_FILE_COPY
-                : isSDCardPath(this, dest) ? LoaderID.OTG_FILE_COPY: LoaderID.LOCAL_FILE_COPY;
+                : mStorageController.isWritePermissionRequired(dest) ? LoaderID.OTG_FILE_COPY: LoaderID.LOCAL_FILE_COPY;
         Bundle args = new Bundle();
         args.putStringArrayList("paths", paths);
         args.putString("path", dest);
         getLoaderManager().restartLoader(id, args, FileManageActivity.this).forceLoad();
-//        Log.w(TAG, "doCopy: " + paths.size() + " item(s) to " + dest);
+        Log.w(TAG, "doCopy: " + paths.size() + " item(s) to " + dest);
     }
 
     private void doMove(String dest) {
@@ -1291,12 +1299,13 @@ public class FileManageActivity extends BaseDrawerActivity implements
 
         int id = (NASApp.MODE_SMB.equals(mMode))
                 ? LoaderID.SMB_FILE_MOVE
-                : LoaderID.LOCAL_FILE_MOVE;
+                : mStorageController.isWritePermissionRequired(paths.get(0), dest) ? LoaderID.OTG_FILE_MOVE: LoaderID.LOCAL_FILE_MOVE;
+
         Bundle args = new Bundle();
         args.putStringArrayList("paths", paths);
         args.putString("path", dest);
         getLoaderManager().restartLoader(id, args, FileManageActivity.this).forceLoad();
-//        Log.w(TAG, "doMove: " + paths.size() + " item(s) to " + dest);
+        Log.w(TAG, "doMove: " + paths.size() + " item(s) to " + dest);
     }
 
     private void doDelete() {
@@ -1311,15 +1320,16 @@ public class FileManageActivity extends BaseDrawerActivity implements
             public void onConfirm(ArrayList<String> paths) {
                 int id = (NASApp.MODE_SMB.equals(mMode))
                         ? LoaderID.SMB_FILE_DELETE
-                        : isSDCardPath(FileManageActivity.this, mPath) ? LoaderID.OTG_FILE_DELETE: LoaderID.LOCAL_FILE_DELETE;
+                        : mStorageController.isWritePermissionRequired(mPath) ? LoaderID.OTG_FILE_DELETE: LoaderID.LOCAL_FILE_DELETE;
                 Bundle args = new Bundle();
                 args.putStringArrayList("paths", paths);
                 getLoaderManager().restartLoader(id, args, FileManageActivity.this).forceLoad();
-//                Log.w(TAG, "doDelete: " + paths.size() + " items");
+                Log.w(TAG, "doDelete: " + paths.size() + " items");
             }
         };
     }
 
+    // TODO duplicated method in FileActionLocateActivity
     private void doNewFolder() {
         List<String> folderNames = new ArrayList<String>();
         for (FileInfo file : mFileList) {
@@ -1330,17 +1340,21 @@ public class FileManageActivity extends BaseDrawerActivity implements
             @Override
             public void onConfirm(String newName) {
                 int id = (NASApp.MODE_SMB.equals(mMode))
-                        ? LoaderID.SMB_NEW_FOLDER
-                        : LoaderID.LOCAL_NEW_FOLDER;
+                        ? LoaderID.SMB_NEW_FOLDER :
+                        (mStorageController.isWritePermissionRequired(mPath) ? LoaderID.OTG_LOCAL_NEW_FOLDER : LoaderID.LOCAL_NEW_FOLDER);
+
                 StringBuilder builder = new StringBuilder(mPath);
                 if (!mPath.endsWith("/"))
                     builder.append("/");
-                builder.append(newName);
+                if (!mStorageController.isWritePermissionRequired(mPath)) {
+                    builder.append(newName);
+                }
                 String path = builder.toString();
                 Bundle args = new Bundle();
                 args.putString("path", path);
+                args.putString("name", newName);
                 getLoaderManager().restartLoader(id, args, FileManageActivity.this).forceLoad();
-//                Log.w(TAG, "doNewFolder: " + path);
+                Log.w(TAG, "doNewFolder: " + path);
             }
         };
     }
@@ -1501,7 +1515,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
             id = R.id.nav_sdcard;
         }
         mDrawerController.setCheckdItem(id);
-//        Log.w(TAG, "toggleDrawerCheckedItem: " + mMode);
+        Log.w(TAG, "toggleDrawerCheckedItem: " + mMode);
     }
 
     private void toast(int resId) {
@@ -1693,8 +1707,6 @@ public class FileManageActivity extends BaseDrawerActivity implements
                     @Override
                     public void run() {
                         mOriginMD5Checksum = getMD5Checksum();
-
-//                        Log.d(TAG, "mOriginMD5Checksum: " + mOriginMD5Checksum);
                     }
                 }).start();
 
@@ -1732,8 +1744,6 @@ public class FileManageActivity extends BaseDrawerActivity implements
     }
 
     private void checkCacheFileState() {
-//        Log.d(TAG, "[Enter] checkCacheFileState() ");
-
         if (mOriginMD5Checksum != null) {
             String checksum = getMD5Checksum();
             if (checksum != null && !mOriginMD5Checksum.equals(checksum)) {
@@ -1746,13 +1756,10 @@ public class FileManageActivity extends BaseDrawerActivity implements
     }
 
     private String getMD5Checksum() {
-//        Log.d(TAG, "[Enter] getMD5Checksum()");
-
         String checksum = null;
         try {
             MessageDigest md5Digest = MessageDigest.getInstance("MD5");
             checksum = getFileChecksum(md5Digest, new File(mDownloadFilePath));
-//            Log.d(TAG, "checksum: " + checksum);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1773,7 +1780,6 @@ public class FileManageActivity extends BaseDrawerActivity implements
         while ((bytesCount = fis.read(byteArray)) != -1) {
             digest.update(byteArray, 0, bytesCount);
         }
-        ;
 
         //close the stream; We don't need it now.
         fis.close();
@@ -1799,99 +1805,45 @@ public class FileManageActivity extends BaseDrawerActivity implements
         }
     }
 
-    private DocumentFile getRootFolderSD() {
-        if (Build.VERSION.SDK_INT >= 19) {
-            String uriTree = (String) PreferenceManager.getDefaultSharedPreferences(this).getAll().get(PREF_DEFAULT_URISD);
-            this.getContentResolver().takePersistableUriPermission(Uri.parse(uriTree),
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
-            return DocumentFile.fromTreeUri(this, Uri.parse(uriTree));
-        }
-        return null;
-    }
-
-    // TODO request write permisson if needed
-    private DocumentFile findRightDocumentFile(DocumentFile sdFile, String sdPath) {
-//        String mSharePreference = (String) PreferenceManager.getDefaultSharedPreferences(this).getAll().get(PREF_DEFAULT_URISD);
-//        String[] splitSharePreference = mSharePreference.split("@@@@");
-//        getContentResolver().takePersistableUriPermission(Uri.parse(splitSharePreference[1]),
-//                Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-//        Constant.sdDir = sdDir = DocumentFile.fromTreeUri(this, Uri.parse(splitSharePreference[1]));
-
-        if (sdPath.equals(NASApp.ROOT_SD)) {//root path
-            return sdFile;
-        } else {
-            String[] splitPath = sdPath.split("/");
-            if (splitPath.length > 3) {
-                for (int index = 3; index < splitPath.length; index++) {
-                    sdFile = sdFile.findFile(splitPath[index]);
-                }
-                return sdFile;
-
-            } else {
-                return sdFile;
-            }
-        }
-    }
-
-    private ArrayList<DocumentFile> extractDocumentFiles(ArrayList<String> srcPaths, ArrayList<String> selectedFileNames) {
-        ArrayList<DocumentFile> sourceFiles = new ArrayList<>();
-        File device;
-        boolean isSDCardPath = NASUtils.isSDCardPath(this, srcPaths.get(0));
-        if (!isSDCardPath) {
-            device = new File(NASApp.ROOT_STG);
-        } else {
-            device = new File(NASUtils.getSDLocation(this));
-        }
-
-        if (device.exists()) {
-            DocumentFile document = DocumentFile.fromFile(device);
-            for (String s : selectedFileNames) {
-                DocumentFile file = document.findFile(s);
-                Log.d(TAG, "file.getUri(): " + file.getUri());
-                sourceFiles.add(file);
-            }
-        }
-
-        return sourceFiles;
-    }
-
-    private ArrayList<DocumentFile> getSelectedDocumentFile() {
-        Log.d(TAG, "[Enter] getSelectedDocumentFile()");
-        DocumentFile pickedDir = findRightDocumentFile(getRootFolderSD(), mPath);
-        Log.d(TAG, "mPath: "+ pickedDir.getUri());
-        Log.d(TAG, "pickedDir: "+ pickedDir.getUri());
+    private ArrayList<DocumentFile> getSelectedDocumentFiles() {
         ArrayList<DocumentFile> files = new ArrayList<>();
-        for (FileInfo file : mFileList) {
-            if (file.checked) {
-                files.add(pickedDir.findFile(file.name));
+        if (NASUtils.isSDCardPath(this, mPath)) {
+            DocumentFile pickedDir = new ExternalStorageLollipop(this).getSDFileLocation(mPath);
+            for (FileInfo file : mFileList) {
+                if (file.checked) {
+                    files.add(pickedDir.findFile(file.name));
+                }
             }
+
+        } else {
+            files = getSrcDocumentFiles();
         }
         return files;
     }
 
-    private ArrayList<DocumentFile> getSrcDocumentFiles(ArrayList<String> srcPaths) {
-        Log.d(TAG, "[Enter] getSrcDocumentFiles()");
+    private ArrayList<DocumentFile> getSrcDocumentFiles() {
         ArrayList<String> selectedNames = new ArrayList<String>();
         for (FileInfo file : mFileList) {
             if (file.checked) {
                 selectedNames.add(file.name);
             }
         }
-        return extractDocumentFiles(srcPaths, selectedNames);
+        return extractDocumentFiles(selectedNames);
     }
 
-    private DocumentFile getSDRootFolder() {
-        String temp = (String) PreferenceManager.getDefaultSharedPreferences(this).getAll().get(PREF_DEFAULT_URISD);
-        if (Build.VERSION.SDK_INT >= 19) {
-            Log.d(TAG, "uri: "+ temp);
-            Uri uriTree = Uri.parse(temp);
-            this.getContentResolver().takePersistableUriPermission(uriTree,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+    private ArrayList<DocumentFile> extractDocumentFiles(ArrayList<String> selectedFileNames) {
+        ArrayList<DocumentFile> sourceFiles = new ArrayList<>();
+        File file = new File(mPath);
 
-            return DocumentFile.fromTreeUri(this, uriTree);
+        if (file.exists()) {
+            DocumentFile document = DocumentFile.fromFile(file);
+            for (String s : selectedFileNames) {
+                DocumentFile d = document.findFile(s);
+                sourceFiles.add(d);
+            }
         }
-        return null;
+        return sourceFiles;
     }
 
     /**

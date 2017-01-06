@@ -28,10 +28,13 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
-import com.transcend.nas.LoaderID;
+import com.transcend.nas.management.externalstorage.ExternalStorageController;
+import com.transcend.nas.management.externalstorage.ExternalStorageLollipop;
+import com.transcend.nas.management.externalstorage.OTGLocalFolderCreateLoader;
 import com.transcend.nas.management.firmware.FileFactory;
 import com.transcend.nas.management.firmware.MediaFactory;
 import com.transcend.nas.viewer.photo.ViewerActivity;
@@ -40,9 +43,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import static com.transcend.nas.NASUtils.getDeviceName;
 
 /**
  * Created by silverhsu on 16/2/2.
@@ -89,26 +93,12 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         initProgressView();
         doRefresh();
         toast(getHintResId(), Toast.LENGTH_SHORT);
-        checkExternalDeviceCount();
 
-    }
-
-    private void checkExternalDeviceCount() {
-        List<File> stgList = NASUtils.getStoragePath(this);
-        if (stgList.size() > 1) {
-            ArrayList<String> list = new ArrayList<>();
-            Iterator iterator = stgList.iterator();
-            while (iterator.hasNext()) {
-                File f = (File) iterator.next();
-                list.add(f.getName());
-                Log.d(TAG, "device: "+ f.getName());
-                mDeviceMap.put(f.getName(), f.getAbsolutePath());
-            }
-
-            Intent i = new Intent(this, FileActionLocateShowDeviceActivity.class);
-            i.putStringArrayListExtra("device_list", list);
-            startActivityForResult(i, FileActionLocateShowDeviceActivity.REQUEST_CODE);
+        String type = getIntent().getStringExtra("type");
+        if (type != null && !type.equals(NASApp.ACT_UPLOAD)) {
+            checkExternalDeviceCount();
         }
+
     }
 
     @Override
@@ -318,7 +308,10 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         else  {
             if (NASUtils.isSDCardPath(this, mPath)) {
                 mRoot = NASUtils.getSDLocation(this);
+            } else {
+                mRoot = NASApp.ROOT_STG;
             }
+
             File root = new File(mRoot);
             File file = new File(mPath);
             return file.equals(root);
@@ -345,6 +338,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
     public Loader<Boolean> onCreateLoader(int id, Bundle args) {
         mProgressView.setVisibility(View.VISIBLE);
         String path = args.getString("path");
+        String name = args.getString("name");
         switch (mLoaderID = id) {
             case LoaderID.SMB_FILE_LIST:
                 return new SmbFileListLoader(this, path);
@@ -354,6 +348,8 @@ public class FileActionLocateActivity extends AppCompatActivity implements
                 return new SmbFolderCreateLoader(this, path);
             case LoaderID.LOCAL_NEW_FOLDER:
                 return new LocalFolderCreateLoader(this, path);
+            case LoaderID.OTG_LOCAL_NEW_FOLDER:
+                return new OTGLocalFolderCreateLoader(this, new ExternalStorageLollipop(this).getSDFileLocation(path), name);
         }
         return null;
     }
@@ -410,6 +406,8 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         if(!success){
             if(loader instanceof SmbAbstractLoader)
                 Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
+            else if (loader instanceof LocalFolderCreateLoader)
+                new ExternalStorageController(this).handleWriteOperationFailed();
             else
                 Toast.makeText(this, getString(R.string.error), Toast.LENGTH_SHORT).show();
         }
@@ -442,6 +440,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         doLoad(mPath);
     }
 
+    // TODO duplicated method in FileManageActivity
     private void doNewFolder() {
         List<String> folderNames = new ArrayList<String>();
         for (FileInfo file : mFileList) {
@@ -451,16 +450,21 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         new FileActionNewFolderDialog(this, folderNames) {
             @Override
             public void onConfirm(String newName) {
+                ExternalStorageController storageController = new ExternalStorageController(FileActionLocateActivity.this);
                 int id = (NASApp.MODE_SMB.equals(mMode))
-                        ? LoaderID.SMB_NEW_FOLDER
-                        : LoaderID.LOCAL_NEW_FOLDER;
+                        ? LoaderID.SMB_NEW_FOLDER :
+                        (storageController.isWritePermissionRequired(mPath) ? LoaderID.OTG_LOCAL_NEW_FOLDER : LoaderID.LOCAL_NEW_FOLDER);
+
                 StringBuilder builder = new StringBuilder(mPath);
                 if (!mPath.endsWith("/"))
                     builder.append("/");
-                builder.append(newName);
+                if (!storageController.isWritePermissionRequired(mPath)) {
+                    builder.append(newName);
+                }
                 String path = builder.toString();
                 Bundle args = new Bundle();
                 args.putString("path", path);
+                args.putString("name", newName);
                 getLoaderManager().restartLoader(id, args, FileActionLocateActivity.this).forceLoad();
                 Log.w(TAG, "doNewFolder: " + path);
             }
@@ -554,6 +558,28 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         intent.putExtras(bundle);
         setResult(RESULT_OK, intent);
         finish();
+    }
+
+    private void checkExternalDeviceCount() {
+        List<File> stgList = NASUtils.getStoragePath(this);
+        if (stgList.size() > 1) {
+            ArrayList<String> list = new ArrayList<>();
+            for (int i = 0; i < stgList.size(); i++) {
+                String name;
+                if (i == 0) {
+                    name = getDeviceName();
+                } else {
+                    name = stgList.get(i).getName();
+                }
+                list.add(name);
+                Log.d(TAG, "device: " + name);
+                mDeviceMap.put(name, stgList.get(i).getAbsolutePath());
+            }
+
+            Intent i = new Intent(this, FileActionLocateShowDeviceActivity.class);
+            i.putStringArrayListExtra("device_list", list);
+            startActivityForResult(i, FileActionLocateShowDeviceActivity.REQUEST_CODE);
+        }
     }
 
 }
