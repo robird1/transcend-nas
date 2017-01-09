@@ -13,7 +13,6 @@ import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import com.transcend.nas.R;
-import com.transcend.nas.management.LocalAbstractLoader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,7 +23,7 @@ import java.util.ArrayList;
  * Created by steve_su on 2016/12/29.
  */
 
-public class OTGFileCopyLoader extends LocalAbstractLoader {
+public class OTGFileCopyLoader extends AbstractOTGMoveLoader {
 
     private static final String TAG = OTGFileCopyLoader.class.getSimpleName();
 
@@ -72,7 +71,7 @@ public class OTGFileCopyLoader extends LocalAbstractLoader {
     private void copyDirectoryTask(Context context, DocumentFile srcFileItem, DocumentFile destFileItem) throws IOException {
         try {
             if (srcFileItem.length() > 0 && destFileItem.length() > 0) {
-                DocumentFile destDirectory = destFileItem.createDirectory(srcFileItem.getName());
+                DocumentFile destDirectory = destFileItem.createDirectory(createUniqueName(srcFileItem, destFileItem));
                 DocumentFile[] files = srcFileItem.listFiles();
                 for (DocumentFile file : files) {
                     if (file.isDirectory()) {
@@ -91,7 +90,7 @@ public class OTGFileCopyLoader extends LocalAbstractLoader {
 
         if (srcFileItem.length() > 0 && destFileItem.length() > 0) {
             try {
-                DocumentFile destfile = destFileItem.createFile(srcFileItem.getType(), srcFileItem.getName());
+                DocumentFile destfile = destFileItem.createFile(srcFileItem.getType(), createUniqueName(srcFileItem, destFileItem));
                 int total = (int) srcFileItem.length();
                 startProgressWatcher(destfile, total);
                 copyFile(context, srcFileItem, destfile);

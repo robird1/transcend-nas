@@ -13,7 +13,6 @@ import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import com.transcend.nas.R;
-import com.transcend.nas.management.LocalAbstractLoader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,7 +23,7 @@ import java.util.ArrayList;
  * Created by steve_su on 2016/12/30.
  */
 
-public class OTGFileMoveLoader extends LocalAbstractLoader {
+public class OTGFileMoveLoader extends AbstractOTGMoveLoader {
 
     private static final String TAG = OTGFileMoveLoader.class.getSimpleName();
 
@@ -67,7 +66,7 @@ public class OTGFileMoveLoader extends LocalAbstractLoader {
     }
 
     private void copyDirectoryTask(Context context, DocumentFile srcFileItem, DocumentFile destFileItem) throws IOException {
-        DocumentFile destDirectory = destFileItem.createDirectory(srcFileItem.getName());
+        DocumentFile destDirectory = destFileItem.createDirectory(createUniqueName(srcFileItem, destFileItem));
         DocumentFile[] files = srcFileItem.listFiles();
         for (DocumentFile file : files) {
             if (file.isDirectory()) {
@@ -80,7 +79,7 @@ public class OTGFileMoveLoader extends LocalAbstractLoader {
     }
 
     private void copyFileTask(Context context, DocumentFile srcFileItem, DocumentFile destFileItem) throws IOException {
-        DocumentFile destfile = destFileItem.createFile(srcFileItem.getType(), srcFileItem.getName());
+        DocumentFile destfile = destFileItem.createFile(srcFileItem.getType(), createUniqueName(srcFileItem, destFileItem));
         int total = (int) srcFileItem.length();
         startProgressWatcher(destfile, total);
         copyFile(context, srcFileItem, destfile);
@@ -90,8 +89,8 @@ public class OTGFileMoveLoader extends LocalAbstractLoader {
 
     public boolean copyFile(Context context, DocumentFile srcFileItem, DocumentFile destFileItem) {
         if (srcFileItem.isFile()) {
-            OutputStream out = null;
-            InputStream in = null;
+            OutputStream out;
+            InputStream in;
             ContentResolver resolver = context.getContentResolver();
             try {
                 in = resolver.openInputStream(srcFileItem.getUri());
@@ -103,9 +102,7 @@ public class OTGFileMoveLoader extends LocalAbstractLoader {
                 }
                 in.close();
                 out.close();
-                Log.d(TAG, "srcFileItem.getUri(): ================================================================== " + srcFileItem.getUri());
-                boolean result = srcFileItem.delete();
-                Log.d(TAG, "srcFileItem.delete() ================================================================== result: "+ result);
+                srcFileItem.delete();
             } catch (IOException e) {
                 e.printStackTrace();
                 Log.d(TAG, "IOException ===========================================================================");

@@ -17,35 +17,23 @@ import java.util.List;
  */
 
 public abstract class AbstractExternalStorage {
-    private static final String TAG = AbstractExternalStorage.class.getSimpleName();
     private Context mContext;
 
     public AbstractExternalStorage(Context context) {
         mContext = context;
     }
 
-
-    protected String getSDLocation() {
-        List<File> stgList = NASUtils.getStoragePath(mContext);
-        if (stgList.size() > 1) {
-            for (File sd : stgList) {
-                if ((!sd.getAbsolutePath().contains(NASApp.ROOT_STG)) && (!sd.getAbsolutePath().toLowerCase().contains("usb"))) {
-                    Log.d(TAG, "sd.getAbsolutePath(): "+ sd.getAbsolutePath());
-                    return sd.getAbsolutePath();
-                }
-            }
-        }
-
-        return null;
-    }
-
     public boolean isWritePermissionNotGranted() {
         return false;
     }
 
-    public boolean isWritePermissionRequired(String... path) {return false;}
+    public boolean isWritePermissionRequired(String... path) {
+        return false;
+    }
 
-    public void handleWriteOperationFailed() {}
+    public void handleWriteOperationFailed() {
+
+    }
 
     protected Context getContext() {
         return mContext;

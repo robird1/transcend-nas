@@ -3,6 +3,7 @@ package com.transcend.nas.management.externalstorage;
 import android.content.Context;
 
 import com.transcend.nas.NASApp;
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.settings.BaseDrawerActivity;
 
 /**
@@ -16,7 +17,7 @@ public class ExternalStorageJellyBean extends AbstractExternalStorage {
 
     @Override
     protected void onNavigationItemSelected(BaseDrawerActivity activity, int itemId) {
-        NASApp.ROOT_SD = getSDLocation();
+        NASApp.ROOT_SD = NASUtils.getSDLocation(getContext());
         activity.startFileManageActivity(itemId);
     }
 }

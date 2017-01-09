@@ -1,5 +1,6 @@
 package com.transcend.nas.management.externalstorage;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,6 +25,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.transcend.nas.NASUtils.getSDLocation;
 import static com.transcend.nas.NASUtils.isSDCardPath;
 
 /**
@@ -49,8 +51,8 @@ public class ExternalStorageLollipop extends AbstractExternalStorage {
         } else {
             Uri treeUri = Uri.parse(getSDLocationUri());
             Log.d(TAG, "treeUri: "+ treeUri);
-            Log.d(TAG, "getSDLocation(): "+ getSDLocation());
-            NASApp.ROOT_SD = getSDLocation();
+            Log.d(TAG, "getSDLocation(): "+ getSDLocation(mContext));
+            NASApp.ROOT_SD = getSDLocation(mContext);
             activity.startFileManageActivity(itemId);
         }
     }
@@ -63,7 +65,7 @@ public class ExternalStorageLollipop extends AbstractExternalStorage {
 
         boolean isValid = checkSelectedFolder(data);
         if (isValid) {
-            activity.doLoad(getSDLocation());
+            activity.doLoad(getSDLocation(mContext));
         } else {
             Toast.makeText(mContext, R.string.dialog_grant_permission_failed, Toast.LENGTH_LONG).show();
             requestPermissionDialog(activity);
@@ -90,26 +92,25 @@ public class ExternalStorageLollipop extends AbstractExternalStorage {
         return false;
     }
 
+    @TargetApi(19)
     public boolean checkSelectedFolder(Intent data) {
         boolean isValid = false;
         Uri uriTree = data.getData();
         Log.d(TAG, "uriTree.toString(): " + uriTree.toString());
         if (!uriTree.toString().contains("primary")) {
             if (isRootFolder(uriTree)) {
-                if (Build.VERSION.SDK_INT >= 19) {
-                    mContext.getContentResolver().takePersistableUriPermission(uriTree,
-                            Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                    DocumentFile pickedDir = DocumentFile.fromTreeUri(mContext, uriTree);
-                    //jerry
-                    boolean isSDFile = isSDFile(pickedDir);
-                    Log.d(TAG, "isSDFile: " + isSDFile);
-                    if (isSDFile) {
-                        storeSDLocationUri(uriTree);
-                        NASApp.sdDir = pickedDir;
-                        Log.d(TAG, "NASApp.sdDir: " + NASApp.sdDir);
+                mContext.getContentResolver().takePersistableUriPermission(uriTree,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                DocumentFile pickedDir = DocumentFile.fromTreeUri(mContext, uriTree);
+                //jerry
+                boolean isSDFile = isSDFile(pickedDir);
+                Log.d(TAG, "isSDFile: " + isSDFile);
+                if (isSDFile) {
+                    storeSDLocationUri(uriTree);
+                    NASApp.sdDir = pickedDir;
+                    Log.d(TAG, "NASApp.sdDir: " + NASApp.sdDir);
 
-                        isValid = true;
-                    }
+                    isValid = true;
                 }
             }
         }
@@ -148,15 +149,13 @@ public class ExternalStorageLollipop extends AbstractExternalStorage {
         }
     }
 
+    @TargetApi(19)
     private DocumentFile getRootFolderSD() {
-        if (Build.VERSION.SDK_INT >= 19) {
-            String uriTree = (String) PreferenceManager.getDefaultSharedPreferences(mContext).getAll().get(PREF_DEFAULT_URISD);
-            mContext.getContentResolver().takePersistableUriPermission(Uri.parse(uriTree),
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        String uriTree = (String) PreferenceManager.getDefaultSharedPreferences(mContext).getAll().get(PREF_DEFAULT_URISD);
+        mContext.getContentResolver().takePersistableUriPermission(Uri.parse(uriTree),
+                Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
-            return DocumentFile.fromTreeUri(mContext, Uri.parse(uriTree));
-        }
-        return null;
+        return DocumentFile.fromTreeUri(mContext, Uri.parse(uriTree));
     }
 
     /**
@@ -172,24 +171,17 @@ public class ExternalStorageLollipop extends AbstractExternalStorage {
             splitURI = uriTree.toString().split("%");
         }
 
-        for (int i = 0; i < splitURI.length; i++) {
-            Log.d(TAG, "splitURI[i]: " + splitURI[i]);
-        }
-
         return (splitURI.length == 2) && (splitURI[1].length() <= 2);
     }
 
     private boolean isSDFile(DocumentFile sdDir) {
-        Log.d(TAG, "[Enter] isSDFile()");
         List<File> stgList = NASUtils.getStoragePath(mContext);
         boolean isSDFile = false;
         if (stgList.size() > 1) {//has sd card
             for (File sd : stgList) {
                 if ((!sd.getAbsolutePath().contains(NASApp.ROOT_STG)) && (!sd.getAbsolutePath().toLowerCase().contains("usb"))) {
                     try {
-                        ArrayList<String> tmpFile = getSDCardFileName(getSDLocation());
-                        Log.d(TAG, "getSDLocation(): "+ getSDLocation());
-
+                        ArrayList<String> tmpFile = getSDCardFileName(getSDLocation(mContext));
                         DocumentFile[] tmpDFile = sdDir.listFiles();
                         isSDFile = doFileNameCompare(tmpDFile, tmpFile);
                     } catch (Exception e) {

@@ -1,6 +1,5 @@
 package com.transcend.nas;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -12,7 +11,6 @@ import android.os.Environment;
 import android.os.storage.StorageManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import android.view.View;
 import android.webkit.MimeTypeMap;
 
 import com.facebook.AccessToken;
@@ -20,26 +18,13 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
-import com.realtek.nasfun.api.HttpClientManager;
-import com.realtek.nasfun.api.Server;
-import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.connection.LoginHelper;
-import com.transcend.nas.connection.LoginListActivity;
-import com.tutk.IOTC.P2PService;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpGet;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -142,52 +127,68 @@ public final class NASUtils {
     }
 
     public static List<File> getStoragePath(Context mContext) {
+        Log.d(TAG, "[Enter] getStoragePath()");
         List<File> stgList = new ArrayList<File>();
         StorageManager mStorageManager = (StorageManager) mContext.getSystemService(Context.STORAGE_SERVICE);
         Class<?> storageVolumeClazz = null;
         try {
-            storageVolumeClazz = Class.forName("android.os.storage.StorageVolume");
-            Method getVolumeList = null;
-            Method getPath = null;
-            Method isRemovable = null;
-            try {
-                getVolumeList = mStorageManager.getClass().getMethod("getVolumeList");
-                getPath = storageVolumeClazz.getMethod("getPath");
-                isRemovable = storageVolumeClazz.getMethod("isRemovable");
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-            }
-
-            Method getSubSystem = null;
-            try {
-                getSubSystem = storageVolumeClazz.getMethod("getSubSystem");
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-            }
-            Object result = getVolumeList.invoke(mStorageManager);
-            final int length = Array.getLength(result);
-            for (int i = 0; i < length; i++) {
-                Object storageVolumeElement = Array.get(result, i);
-                String path = (String) getPath.invoke(storageVolumeElement);
-                String subSystem = "";
-                if (getSubSystem != null) {
-                    subSystem = (String) getSubSystem.invoke(storageVolumeElement);
+//            storageVolumeClazz = Class.forName("android.os.storage.StorageVolume");
+//            Method getVolumeList = null;
+//            Method getPath = null;
+//            Method isRemovable = null;
+//            try {
+//                getVolumeList = mStorageManager.getClass().getMethod("getVolumeList");
+//                getPath = storageVolumeClazz.getMethod("getPath");
+//                isRemovable = storageVolumeClazz.getMethod("isRemovable");
+//            } catch (NoSuchMethodException e) {
+//                e.printStackTrace();
+//            }
+//
+//            Method getSubSystem = null;
+//            try {
+//                getSubSystem = storageVolumeClazz.getMethod("getSubSystem");
+//            } catch (NoSuchMethodException e) {
+//                e.printStackTrace();
+//            }
+//            Object result = getVolumeList.invoke(mStorageManager);
+//            final int length = Array.getLength(result);
+//            for (int i = 0; i < length; i++) {
+//                Object storageVolumeElement = Array.get(result, i);
+//                String path = (String) getPath.invoke(storageVolumeElement);
+//                String subSystem = "";
+//                if (getSubSystem != null) {
+//                    subSystem = (String) getSubSystem.invoke(storageVolumeElement);
+//                }
+//                Log.d(TAG, "subSystem: "+ subSystem);
+//                if (!subSystem.contains("usb")) {
+//                    if (!path.toLowerCase().contains("private")) {
+//                        stgList.add(new File(path));
+//                    }
+//
+//                }
+//
+//            }
+            String[] paths = (String[]) mStorageManager.getClass().getMethod("getVolumePaths").invoke(mStorageManager);
+            for (String p: paths) {
+                String status = (String) mStorageManager.getClass().getMethod("getVolumeState", String.class).invoke(mStorageManager, p);
+                if (Environment.MEDIA_MOUNTED.equals(status)) {
+                    stgList.add(new File(p));
                 }
-                if (!subSystem.contains("usb")) {
-                    if (!path.toLowerCase().contains("private")) {
-                        stgList.add(new File(path));
-                    }
-
-                }
-
             }
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
+        }
+//        catch (ClassNotFoundException e) {
+//            e.printStackTrace();
+//        }
+        catch (InvocationTargetException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
         }
+//        for (File sd : stgList) {
+//            Log.d(TAG, "sd.getAbsolutePath(): "+ sd.getAbsolutePath());
+//        }
         return stgList;
     }
 
@@ -198,12 +199,10 @@ public final class NASUtils {
 
     public static String getSDLocation(Context context) {
         List<File> stgList = NASUtils.getStoragePath(context);
-        if (stgList.size() > 1) {
-            for (File sd : stgList) {
-                if ((!sd.getAbsolutePath().contains(NASApp.ROOT_STG)) && (!sd.getAbsolutePath().toLowerCase().contains("usb"))) {
-                    Log.d(TAG, "sd.getAbsolutePath(): "+ sd.getAbsolutePath());
-                    return sd.getAbsolutePath();
-                }
+        for (File sd : stgList) {
+            if ((!sd.getAbsolutePath().contains(NASApp.ROOT_STG)) && (!sd.getAbsolutePath().toLowerCase().contains("usb"))) {
+                Log.d(TAG, "sd.getAbsolutePath(): "+ sd.getAbsolutePath());
+                return sd.getAbsolutePath();
             }
         }
         return null;
