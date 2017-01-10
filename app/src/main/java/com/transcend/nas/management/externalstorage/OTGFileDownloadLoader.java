@@ -1,7 +1,6 @@
 package com.transcend.nas.management.externalstorage;
 
 import android.annotation.TargetApi;
-import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
@@ -18,6 +17,7 @@ import com.transcend.nas.R;
 import com.transcend.nas.common.CustomNotificationManager;
 import com.transcend.nas.management.SmbAbstractLoader;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -85,47 +85,35 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
     }
 
     private void downloadDirectoryTask(Context context, SmbFile srcFileItem, DocumentFile destFileItem) throws IOException {
-        try {
-            String dirName = createLocalUniqueName(srcFileItem, getPath(context, destFileItem.getUri()));
-            DocumentFile destDirectory = destFileItem.createDirectory(dirName);
-            SmbFile[] files = srcFileItem.listFiles();
-            for (SmbFile file : files) {
-                Log.d(TAG, "file.getPath(): "+ file.getPath());
-                if (file.isDirectory()) {
-                    downloadDirectoryTask(mActivity, file, destDirectory);
-                } else {
-                    downloadFileTask(mActivity, file, destDirectory);
-                }
+        String dirName = createLocalUniqueName(srcFileItem, getPath(context, destFileItem.getUri()));
+        DocumentFile destDirectory = destFileItem.createDirectory(dirName);
+        SmbFile[] files = srcFileItem.listFiles();
+        for (SmbFile file : files) {
+            Log.d(TAG, "file.getPath(): "+ file.getPath());
+            if (file.isDirectory()) {
+                downloadDirectoryTask(mActivity, file, destDirectory);
+            } else {
+                downloadFileTask(mActivity, file, destDirectory);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
     private void downloadFileTask(Context context, SmbFile srcFileItem, DocumentFile destFileItem) throws IOException {
         Log.d(TAG, "[Enter] downloadFileTask()");
-        try {
-            String fileName = createLocalUniqueName(srcFileItem, getPath(context, destFileItem.getUri()));
-            DocumentFile destfile = destFileItem.createFile(null, fileName);
-            int total = (int) srcFileItem.length();
+        String fileName = createLocalUniqueName(srcFileItem, getPath(context, destFileItem.getUri()));
+        DocumentFile destfile = destFileItem.createFile(null, fileName);
+        int total = (int) srcFileItem.length();
 //                startProgressWatcher(destfile, total);
-            downloadFile(context, srcFileItem, destfile);
+        downloadFile(context, srcFileItem, destfile);
 //                closeProgressWatcher();
 //                updateProgress(destfile.getName(), total, total);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     public boolean downloadFile(Context context, SmbFile srcFileItem, DocumentFile destFileItem) throws IOException {
         if (srcFileItem.isFile()) {
-            OutputStream out;
-            InputStream in;
-            ContentResolver resolver = context.getContentResolver();
             try {
-                String urlPath = srcFileItem.getURL().getPath();
-                in = resolver.openInputStream(Uri.parse(urlPath));
-                out = resolver.openOutputStream(destFileItem.getUri());
+                InputStream in = srcFileItem.getInputStream();
+                OutputStream out = context.getContentResolver().openOutputStream(destFileItem.getUri());
                 byte[] buf = new byte[8192];
                 int len;
                 while ((len = in.read(buf)) != -1) {
@@ -133,23 +121,22 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
                 }
                 in.close();
                 out.close();
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                Log.d(TAG, "[Enter] FileNotFoundException");
+                throw new FileNotFoundException();
             } catch (IOException e) {
                 e.printStackTrace();
-                Log.d(TAG, "IOException =================================================================");
-
+                Log.d(TAG, "[Enter] IOException");
+                throw new IOException();
             }
             return true;
         } else if (srcFileItem.isDirectory()) {
             return true;
         } else {
-            try {
-                throw new Exception("item is not a file");
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
-            }
+            throw new FileNotFoundException("item is not a file");
         }
-
     }
 
     /**

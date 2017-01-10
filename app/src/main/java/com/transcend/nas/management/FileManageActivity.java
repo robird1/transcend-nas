@@ -877,12 +877,10 @@ public class FileManageActivity extends BaseDrawerActivity implements
             case LoaderID.SMB_FILE_COPY:
                 return new SmbFileCopyLoader(this, paths, path);
             case LoaderID.LOCAL_FILE_COPY:
-                mProgressView.setVisibility(View.VISIBLE);
                 return new LocalFileCopyLoader(this, paths, path);
             case LoaderID.SMB_FILE_MOVE:
                 return new SmbFileMoveLoader(this, paths, path);
             case LoaderID.LOCAL_FILE_MOVE:
-                mProgressView.setVisibility(View.VISIBLE);
                 return new LocalFileMoveLoader(this, paths, path);
             case LoaderID.SMB_FILE_DOWNLOAD:
                 return new SmbFileDownloadLoader(this, paths, path);
@@ -908,13 +906,10 @@ public class FileManageActivity extends BaseDrawerActivity implements
                 mProgressView.setVisibility(View.VISIBLE);
                 return new OTGFileDeleteLoader(this, getSelectedDocumentFiles());
             case LoaderID.OTG_FILE_COPY:                                             //  primary -> SD, SD -> SD
-                mProgressView.setVisibility(View.VISIBLE);
                 return new OTGFileCopyLoader(this, getSrcDocumentFiles(), new ExternalStorageLollipop(this).getSDFileLocation(path));
             case LoaderID.OTG_FILE_MOVE:                                             // primary <-> SD, SD -> SD
-                mProgressView.setVisibility(View.VISIBLE);
                 return new OTGFileMoveLoader(this, getSelectedDocumentFiles(), new ExternalStorageLollipop(this).getDestination(path));
             case LoaderID.OTG_FILE_DOWNLOAD:                                         // remote -> SD
-                mProgressView.setVisibility(View.VISIBLE);
                 return new OTGFileDownloadLoader(this, paths, path, new ExternalStorageLollipop(this).getSDFileLocation(path));
             case LoaderID.OTG_LOCAL_NEW_FOLDER:
                 mProgressView.setVisibility(View.VISIBLE);

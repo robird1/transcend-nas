@@ -421,6 +421,7 @@ public class LoginActivity extends AppCompatActivity implements
                 Log.d(TAG, "[Enter] onError()");
                 Log.d(TAG, exception.toString());
                 mProgressView.setVisibility(View.INVISIBLE);
+                Toast.makeText(mContext, R.string.network_error, Toast.LENGTH_SHORT).show();
             }
         });
     }
