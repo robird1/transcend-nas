@@ -489,7 +489,6 @@ public class FileManageActivity extends BaseDrawerActivity implements
         super.initDrawer();
         mDrawerController = getDrawerController();
         mDrawerController.setToolbarNavigationClickListener(this);
-        checkExternalStorageCount();
     }
 
     private void initActionModeView() {
@@ -1013,8 +1012,12 @@ public class FileManageActivity extends BaseDrawerActivity implements
             } else {
                 checkEmptyView();
                 if (loader instanceof SmbAbstractLoader) {
-                    LanCheckManager.getInstance().startLanCheck();
-                    Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
+                    if ((loader instanceof SmbFileDownloadLoader) && isDownloadLocationNotExist()) {
+                        Toast.makeText(this, R.string.download_location_error, Toast.LENGTH_LONG).show();
+                    } else {
+                        LanCheckManager.getInstance().startLanCheck();
+                        Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
+                    }
                 } else {
                     if (loader instanceof EventNotifyLoader)
                         LanCheckManager.getInstance().startLanCheck();
@@ -1793,14 +1796,6 @@ public class FileManageActivity extends BaseDrawerActivity implements
         return sb.toString();
     }
 
-    private void checkExternalStorageCount() {
-        List<File> stgList = NASUtils.getStoragePath(this);
-        if (stgList.size() > 1) {
-            mDrawerController.getNavigationView().getMenu().findItem(R.id.nav_sdcard).setVisible(true);
-        }
-    }
-
-
     private ArrayList<DocumentFile> getSelectedDocumentFiles() {
         ArrayList<DocumentFile> files = new ArrayList<>();
         if (NASUtils.isSDCardPath(this, mPath)) {
@@ -1839,6 +1834,21 @@ public class FileManageActivity extends BaseDrawerActivity implements
             }
         }
         return sourceFiles;
+    }
+
+    private boolean isDownloadLocationNotExist() {
+        boolean isNotExist = false;
+        String location = NASPref.getDownloadLocation(this);
+        File file = new File(location);
+        if (!file.exists()) {
+            isNotExist = true;
+        } else {                                 // Enter this block if SD card has been removed
+            File[] files = file.listFiles();
+            if (files == null) {
+                isNotExist = true;
+            }
+        }
+        return isNotExist;
     }
 
     /**

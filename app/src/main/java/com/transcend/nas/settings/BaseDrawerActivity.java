@@ -22,6 +22,7 @@ import com.transcend.nas.connection.LoginActivity;
 import com.transcend.nas.connection.old.StartActivity;
 import com.transcend.nas.management.externalstorage.ExternalStorageController;
 import com.transcend.nas.management.FileManageActivity;
+import com.transcend.nas.management.externalstorage.SDCardReceiver;
 import com.transcend.nas.management.firmware.ShareFolderManager;
 import com.transcend.nas.management.firmware.TwonkyManager;
 import com.transcend.nas.service.AutoBackupService;
@@ -35,7 +36,7 @@ import com.transcend.nas.viewer.music.MusicService;
  */
 
 public abstract class BaseDrawerActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
-        LoaderManager.LoaderCallbacks<Boolean> {
+        LoaderManager.LoaderCallbacks<Boolean>, SDCardReceiver.SDCardObserver {
 
 
     private static final String TAG = BaseDrawerActivity.class.getSimpleName();
@@ -53,6 +54,13 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
         setContentView(onLayoutID());
         initToolbar();
         initDrawer();
+        SDCardReceiver.registerObserver(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        SDCardReceiver.unregisterObserver(this);
+        super.onDestroy();
     }
 
     @Override
@@ -128,6 +136,16 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
     @Override
     public void onLoaderReset(Loader<Boolean> loader) {
 
+    }
+
+    @Override
+    public void notifyMounted() {
+        mDrawerController.setSDItem(true);
+    }
+
+    @Override
+    public void notifyUnmounted() {
+        mDrawerController.setSDItem(false);
     }
 
     protected void initToolbar() {

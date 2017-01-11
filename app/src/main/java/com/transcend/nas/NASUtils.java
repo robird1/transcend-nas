@@ -130,44 +130,8 @@ public final class NASUtils {
         Log.d(TAG, "[Enter] getStoragePath()");
         List<File> stgList = new ArrayList<File>();
         StorageManager mStorageManager = (StorageManager) mContext.getSystemService(Context.STORAGE_SERVICE);
-        Class<?> storageVolumeClazz = null;
         try {
-//            storageVolumeClazz = Class.forName("android.os.storage.StorageVolume");
-//            Method getVolumeList = null;
-//            Method getPath = null;
-//            Method isRemovable = null;
-//            try {
-//                getVolumeList = mStorageManager.getClass().getMethod("getVolumeList");
-//                getPath = storageVolumeClazz.getMethod("getPath");
-//                isRemovable = storageVolumeClazz.getMethod("isRemovable");
-//            } catch (NoSuchMethodException e) {
-//                e.printStackTrace();
-//            }
-//
-//            Method getSubSystem = null;
-//            try {
-//                getSubSystem = storageVolumeClazz.getMethod("getSubSystem");
-//            } catch (NoSuchMethodException e) {
-//                e.printStackTrace();
-//            }
-//            Object result = getVolumeList.invoke(mStorageManager);
-//            final int length = Array.getLength(result);
-//            for (int i = 0; i < length; i++) {
-//                Object storageVolumeElement = Array.get(result, i);
-//                String path = (String) getPath.invoke(storageVolumeElement);
-//                String subSystem = "";
-//                if (getSubSystem != null) {
-//                    subSystem = (String) getSubSystem.invoke(storageVolumeElement);
-//                }
-//                Log.d(TAG, "subSystem: "+ subSystem);
-//                if (!subSystem.contains("usb")) {
-//                    if (!path.toLowerCase().contains("private")) {
-//                        stgList.add(new File(path));
-//                    }
-//
-//                }
-//
-//            }
+
             String[] paths = (String[]) mStorageManager.getClass().getMethod("getVolumePaths").invoke(mStorageManager);
             for (String p: paths) {
                 String status = (String) mStorageManager.getClass().getMethod("getVolumeState", String.class).invoke(mStorageManager, p);
@@ -175,20 +139,16 @@ public final class NASUtils {
                     stgList.add(new File(p));
                 }
             }
-        }
-//        catch (ClassNotFoundException e) {
-//            e.printStackTrace();
-//        }
-        catch (InvocationTargetException e) {
+        } catch (InvocationTargetException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
-//        for (File sd : stgList) {
-//            Log.d(TAG, "sd.getAbsolutePath(): "+ sd.getAbsolutePath());
-//        }
+        for (File sd : stgList) {
+            Log.d(TAG, "sd.getAbsolutePath(): "+ sd.getAbsolutePath());
+        }
         return stgList;
     }
 

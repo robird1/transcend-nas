@@ -258,5 +258,6 @@
     <string name="dialog_request_write_permission">請選擇根目錄以授與寫入權限</string>
     <string name="dialog_grant_permission_failed">選擇的目錄非SD卡之根目錄</string>
     <string name="dialog_write_operation_not_allowed">因Android 4.4的寫入限制以致操作失敗</string>
+    <string name="download_location_error">請檢查下載位置，所設定的位置不存在</string>
 
 </resources>

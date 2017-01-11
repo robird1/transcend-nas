@@ -11,7 +11,6 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -20,6 +19,7 @@ import android.widget.Toast;
 import com.transcend.nas.R;
 import com.transcend.nas.management.externalstorage.ExternalStorageController;
 import com.transcend.nas.management.externalstorage.ExternalStorageLollipop;
+import com.transcend.nas.management.externalstorage.SDCardReceiver;
 import com.transcend.nas.management.externalstorage.ViewerPagerAdapterSD;
 import com.transcend.nas.viewer.photo.ViewerPager;
 
@@ -29,10 +29,13 @@ import java.util.ArrayList;
  * Created by steve_su on 2016/12/28.
  */
 
-public class FileActionLocateShowDeviceActivity extends AppCompatActivity implements FileManageRecyclerAdapter.OnRecyclerItemCallbackListener {
+public class FileActionLocateShowDeviceActivity extends AppCompatActivity implements FileManageRecyclerAdapter.OnRecyclerItemCallbackListener, SDCardReceiver.SDCardObserver {
     private static final String TAG = FileActionLocateShowDeviceActivity.class.getSimpleName();
     public static final int REQUEST_CODE = FileActionLocateShowDeviceActivity.class.hashCode() & 0xFFFF;
+    private static final int POSITION_PRIMARY_STORAGE = 0;
+    private static final int POSITION_SD_CARD = 1;
     private ArrayList<FileInfo> mFileList;
+    private RecyclerView mRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,86 +45,30 @@ public class FileActionLocateShowDeviceActivity extends AppCompatActivity implem
         initToolbar();
         initRecyclerView();
         disableFabs();
+
+        SDCardReceiver.registerObserver(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        SDCardReceiver.unregisterObserver(this);
+        super.onDestroy();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.d(TAG, "onActivityResult");
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == ExternalStorageLollipop.REQUEST_CODE) {
                 boolean isSelectedFolderValid = new ExternalStorageLollipop(this).checkSelectedFolder(data);
                 if (isSelectedFolderValid == true) {
-                    backToLocateActvity(1);
+                    backToLocateActvity(POSITION_SD_CARD);
                 } else {
                     Toast.makeText(this, R.string.dialog_grant_permission_failed, Toast.LENGTH_LONG).show();
                     requestPermissionDialog();
                 }
             }
         }
-    }
-
-    private void initData() {
-        mFileList = new ArrayList<>();
-        ArrayList<String> deviceList = getIntent().getStringArrayListExtra("device_list");
-        for (String device : deviceList) {
-            FileInfo file = new FileInfo();
-            file.name = device;
-            file.path = "";
-            file.time = "";
-            file.type = FileInfo.TYPE.DIR;
-            mFileList.add(file);
-        }
-    }
-
-    private void initToolbar() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.locate_toolbar);
-        toolbar.setTitle(R.string.storage_name);
-        toolbar.setNavigationIcon(R.drawable.ic_close_white_24dp);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-    }
-
-    private void initRecyclerView() {
-        FileManageRecyclerAdapter adapter = new FileManageRecyclerAdapter(mFileList);
-        adapter.setOnRecyclerItemCallbackListener(this);
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.locate_recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(adapter);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-    }
-
-    private void disableFabs() {
-        FloatingActionButton fabControl = (FloatingActionButton) findViewById(R.id.locate_fab_control);
-        fabControl.setVisibility(View.INVISIBLE);
-    }
-
-    @Override
-    public void onRecyclerItemClick(int position) {
-        Log.d(TAG, "[Enter] onRecyclerItemClick");
-        Log.d(TAG, "position: "+ position);
-        if (position == 0) {
-            backToLocateActvity(position);
-        } else {
-            ExternalStorageController controller = new ExternalStorageController(this);
-            if (controller.isWritePermissionNotGranted() == true) {
-                Toast.makeText(this, R.string.dialog_request_write_permission, Toast.LENGTH_LONG).show();
-                requestPermissionDialog();
-            } else {
-                backToLocateActvity(position);
-            }
-        }
-
-    }
-
-    private void backToLocateActvity(int position) {
-        FileInfo fileInfo = mFileList.get(position);
-        Intent i = new Intent();
-        i.putExtra("selected_device", fileInfo.name);
-
-        this.setResult(Activity.RESULT_OK, i);
-        finish();
     }
 
     @Override
@@ -152,6 +99,82 @@ public class FileActionLocateShowDeviceActivity extends AppCompatActivity implem
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onRecyclerItemClick(int position) {
+        if (position == POSITION_PRIMARY_STORAGE) {
+            backToLocateActvity(position);
+        } else {
+            ExternalStorageController controller = new ExternalStorageController(this);
+            if (controller.isWritePermissionNotGranted() == true) {
+                Toast.makeText(this, R.string.dialog_request_write_permission, Toast.LENGTH_LONG).show();
+                requestPermissionDialog();
+            } else {
+                backToLocateActvity(position);
+            }
+        }
+
+    }
+
+    /**
+     * It will not show this activity when there is only one device.
+     */
+    @Override
+    public void notifyMounted() {
+
+    }
+
+    @Override
+    public void notifyUnmounted() {
+        mFileList.remove(POSITION_SD_CARD);
+        mRecyclerView.getAdapter().notifyItemChanged(POSITION_SD_CARD);
+        mRecyclerView.getAdapter().notifyItemRangeRemoved(POSITION_SD_CARD, 1);
+    }
+
+    private void initData() {
+        mFileList = new ArrayList<>();
+        ArrayList<String> deviceList = getIntent().getStringArrayListExtra("device_list");
+        for (String device : deviceList) {
+            FileInfo file = new FileInfo();
+            file.name = device;
+            file.path = "";
+            file.time = "";
+            file.type = FileInfo.TYPE.DIR;
+            mFileList.add(file);
+        }
+    }
+
+    private void initToolbar() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.locate_toolbar);
+        toolbar.setTitle(R.string.storage_name);
+        toolbar.setNavigationIcon(R.drawable.ic_close_white_24dp);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+    }
+
+    private void initRecyclerView() {
+        FileManageRecyclerAdapter adapter = new FileManageRecyclerAdapter(mFileList);
+        adapter.setOnRecyclerItemCallbackListener(this);
+        mRecyclerView = (RecyclerView) findViewById(R.id.locate_recycler_view);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.setAdapter(adapter);
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+    }
+
+    private void disableFabs() {
+        FloatingActionButton fabControl = (FloatingActionButton) findViewById(R.id.locate_fab_control);
+        fabControl.setVisibility(View.INVISIBLE);
+    }
+
+    private void backToLocateActvity(int position) {
+        FileInfo fileInfo = mFileList.get(position);
+        Intent i = new Intent();
+        i.putExtra("selected_device", fileInfo.name);
+
+        this.setResult(Activity.RESULT_OK, i);
+        finish();
     }
 
     private void requestPermissionDialog() {

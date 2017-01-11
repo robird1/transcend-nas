@@ -19,19 +19,19 @@ import com.transcend.nas.NASPref;
 import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
-
-import static com.transcend.nas.R.string.device;
 
 /**
  * Created by steve_su on 2016/12/12.
  */
 
 public class DrawerMenuController {
-//    private static final String TAG = DrawerMenuController.class.getSimpleName();
+    //    private static final String TAG = DrawerMenuController.class.getSimpleName();
     private static final int MESSAGE_FB_PROFILE_PHOTO = 999;
     private AppCompatActivity mActivity;
     private Toolbar mToolbar;
@@ -57,13 +57,19 @@ public class DrawerMenuController {
         DRAWER_DEFAULT(R.id.drawer_layout, R.id.navigation_view);
 
         private int mDrawerLayoutId, mNavigationViewId;
+
         DrawerMenu(int drawerLayoutId, int navigationViewId) {
             mDrawerLayoutId = drawerLayoutId;
             mNavigationViewId = navigationViewId;
         }
 
-        public int getDrawerLayoutId() { return mDrawerLayoutId;}
-        public int getNavigationViewId() { return mNavigationViewId;}
+        public int getDrawerLayoutId() {
+            return mDrawerLayoutId;
+        }
+
+        public int getNavigationViewId() {
+            return mNavigationViewId;
+        }
     }
 
     DrawerMenuController(AppCompatActivity activity, Toolbar toolbar, NavigationView.OnNavigationItemSelectedListener listener) {
@@ -89,6 +95,7 @@ public class DrawerMenuController {
         setRemoteDeviceName();
         setLocalDeviceName();
         mNavView.getMenu().findItem(R.id.nav_switch).setVisible(NASPref.useSwitchNas);
+        checkSDCardItem();
     }
 
     public void setDrawerLockMode(int lockMode) {
@@ -123,6 +130,10 @@ public class DrawerMenuController {
         return mNavView;
     }
 
+    public void setSDItem(boolean isVisible) {
+        getNavigationView().getMenu().findItem(R.id.nav_sdcard).setVisible(isVisible);
+    }
+
     private void setNavigationViewTitle(View navHeader) {
         TextView navHeaderTitle = (TextView) navHeader.findViewById(R.id.drawer_header_title);
         navHeaderTitle.setText(ServerManager.INSTANCE.getCurrentServer().getUsername());
@@ -140,7 +151,7 @@ public class DrawerMenuController {
 
     private void setRemoteDeviceName() {
         String device = NASPref.getDeviceName(mActivity);
-        if(device != null && !"".equals(device))
+        if (device != null && !"".equals(device))
             mNavView.getMenu().findItem(R.id.nav_storage).setTitle(device);
     }
 
@@ -177,4 +188,12 @@ public class DrawerMenuController {
         }
     }
 
+    private void checkSDCardItem() {
+        List<File> stgList = NASUtils.getStoragePath(mActivity);
+        if (stgList.size() > 1) {
+            setSDItem(true);
+        } else {
+            setSDItem(false);
+        }
+    }
 }

@@ -29,6 +29,8 @@ import com.transcend.nas.R;
 import com.transcend.nas.management.FileActionLocateActivity;
 import com.transcend.nas.management.firmware.FileFactory;
 
+import java.io.File;
+
 
 /**
  * Created by silverhsu on 16/3/2.
@@ -226,11 +228,25 @@ public class SettingsActivity extends BaseDrawerActivity {
             args.putString("mode", NASApp.MODE_STG);
             args.putString("type", NASApp.ACT_DIRECT);
             args.putString("root", NASApp.ROOT_STG);
-            args.putString("path", NASPref.getDownloadLocation(getActivity()));
+            args.putString("path", getDownloadLocation());
             Intent intent = new Intent();
             intent.setClass(getActivity(), FileActionLocateActivity.class);
             intent.putExtras(args);
             startActivityForResult(intent, FileActionLocateActivity.REQUEST_CODE);
+        }
+
+        private String getDownloadLocation() {
+            String location = NASPref.getDownloadLocation(getActivity());
+            File file = new File(location);
+            if (!file.exists()) {
+                location = NASApp.ROOT_STG;
+            } else {                                 // Enter this block if SD card has been removed
+                File[] files = file.listFiles();
+                if (files == null) {
+                    location = NASApp.ROOT_STG;
+                }
+            }
+            return location;
         }
 
         private void startBackupActivity() {

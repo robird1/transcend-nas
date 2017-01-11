@@ -1,15 +1,10 @@
 package com.transcend.nas.management;
 
-import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.util.Log;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
 
 /**
  * Created by silverhsu on 16/1/15.
@@ -38,6 +33,8 @@ public class LocalFileListLoader extends LocalAbstractLoader {
         if (!dir.exists())
             return false;
         File files[] = dir.listFiles();
+        if (files == null)
+            return false;
         Log.w(TAG, "LocalFile[] size: " + files.length);
         for (File file : files) {
             if (file.isHidden())
