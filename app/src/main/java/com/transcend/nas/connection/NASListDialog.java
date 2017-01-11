@@ -5,11 +5,15 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
@@ -37,15 +41,18 @@ public abstract class NASListDialog implements View.OnClickListener {
     private Button mDlgBtnNeu;
     private RelativeLayout mProgressView;
     private ListView mListView;
+    private SimpleAdapter mListViewAdapter;
     private RelativeLayout mEmptyView;
     private int mSelect = -1;
     private ArrayList<HashMap<String, String>> mList;
+    private boolean mCheckList[];
     private boolean isEmpty = false;
 
 
     public NASListDialog(Context context, ArrayList<HashMap<String, String>> list) {
         mActivity = (AppCompatActivity) context;
         mList = list;
+        initCheckList();
         initDialog();
         initListView();
         initEmptyView();
@@ -58,9 +65,9 @@ public abstract class NASListDialog implements View.OnClickListener {
         builder.setTitle(mActivity.getString(R.string.find_nas));
         builder.setView(R.layout.dialog_list);
         builder.setCancelable(true);
-        builder.setPositiveButton(R.string.wizard_try, null);
+        builder.setPositiveButton(R.string.ok, null);
         builder.setNegativeButton(R.string.cancel, null);
-        //builder.setNeutralButton(R.string.wizard_try, null);
+        builder.setNeutralButton(R.string.wizard_try, null);
         builder.setOnKeyListener(new DialogInterface.OnKeyListener() {
             @Override
             public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
@@ -81,8 +88,18 @@ public abstract class NASListDialog implements View.OnClickListener {
         mDialog.setCanceledOnTouchOutside(false);
     }
 
+    private void initCheckList() {
+        if (mList != null) {
+            int size = mList.size();
+            mCheckList = new boolean[size];
+            for (int i = 0; i < size; i++) {
+                mCheckList[i] = (i == 0);
+            }
+        }
+    }
+
     private void initListView() {
-        if(mListView == null) {
+        if (mListView == null) {
             mListView = (ListView) mDialog.findViewById(R.id.dialog_list_view);
             mListView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
             mListView.setSelector(R.color.colorSelected);
@@ -98,19 +115,57 @@ public abstract class NASListDialog implements View.OnClickListener {
                 myListData.add(item);
             }
 
-            mListView.setAdapter(new SimpleAdapter(mActivity,
-                            myListData,
-                            android.R.layout.simple_list_item_2,
-                            new String[]{ID_TITLE, ID_SUBTITLE},
-                            new int[]{android.R.id.text1, android.R.id.text2})
-            );
+            mListViewAdapter = new SimpleAdapter(mActivity,
+                    myListData,
+                    R.layout.listitem_checkbox,
+                    new String[]{ID_TITLE, ID_SUBTITLE},
+                    new int[]{R.id.listitem_checkbox_title, R.id.llistitem_checkbox_subtitle}) {
+                @Override
+                public View getView(int position, View convertView, ViewGroup parent) {
+                    View view = super.getView(position, convertView, parent);
+                    CheckBox check = (CheckBox) view.findViewById(R.id.listitem_checkbox_icon);
+                    check.setChecked(mCheckList[position]);
+                    return view;
+                }
+            };
+
+            mListView.setAdapter(mListViewAdapter);
             mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    mSelect = position;
-                    onClick(mDlgBtnPos);
+                    if(mSelect == position) {
+                        onClick(mDlgBtnPos);
+                    } else {
+                        CheckBox check = (CheckBox) view.findViewById(R.id.listitem_checkbox_icon);
+                        check.setChecked(true);
+
+                        if(0 <= mSelect && mSelect < mCheckList.length) {
+                            mCheckList[mSelect] = false;
+                            View previous = mListView.getChildAt(mSelect);
+                            if (previous != null) {
+                                CheckBox tmp = (CheckBox) previous.findViewById(R.id.listitem_checkbox_icon);
+                                if (tmp != null) {
+                                    tmp.setChecked(false);
+                                }
+                            }
+                        }
+
+                        mSelect = position;
+                        mCheckList[position] = true;
+                    }
                 }
             });
+
+            if(!isEmpty) {
+                int defaultValue = 0;
+                mSelect = defaultValue;
+                mCheckList[defaultValue] = true;
+
+                //because we have checkbox in layout, call requestFocusFromTouch first
+                mListView.requestFocusFromTouch();
+                mListView.setSelection(defaultValue);
+
+            }
         }
     }
 
@@ -125,13 +180,14 @@ public abstract class NASListDialog implements View.OnClickListener {
 
     public void updateListView(ArrayList<HashMap<String, String>> list) {
         mSelect = -1;
-        if(list == null) {
+        if (list == null) {
             mDialog.setTitle(mActivity.getString(R.string.find_nas));
             showProgress();
         } else {
             mList = list;
             isEmpty = mList.size() == 0;
             mDialog.setTitle(mActivity.getString(isEmpty ? R.string.wizard_setup_found_error : R.string.add_device));
+            initCheckList();
             initListView();
             initEmptyView();
             hideProgress();
@@ -149,9 +205,11 @@ public abstract class NASListDialog implements View.OnClickListener {
                 args.putString("hostname", item.get("hostname"));
                 onConfirm(args);
             } else {
-                Bundle args = new Bundle();
-                args.putBoolean("refresh", true);
-                onConfirm(args);
+                //Bundle args = new Bundle();
+                //args.putBoolean("refresh", true);
+                //onConfirm(args);
+                hideProgress();
+                onCancel();
             }
         } else if (v.equals(mDlgBtnNeg)) {
             hideProgress();

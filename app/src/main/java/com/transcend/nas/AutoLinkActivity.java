@@ -41,7 +41,7 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
         setContentView(R.layout.activity_welcome);
         ImageView logo = (ImageView) findViewById(R.id.welcome_image);
         mTextView = (TextView) findViewById(R.id.welcome_text);
-        mTextView.startAnimation(AnimFactory.getInstance().getBlinkAnimation());
+        mTextView.setText(getString(R.string.try_search_device));
 
         boolean isFirstUse = NASPref.getIsFirstUse(this);
         if(isFirstUse) {
@@ -62,6 +62,7 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
                     Bundle args = getAccountInfo(false);
                     if (args != null) {
                         GoogleAnalysisFactory.getInstance(this).sendScreen(GoogleAnalysisFactory.VIEW.AUTO_LINK);
+                        mTextView.startAnimation(AnimFactory.getInstance().getBlinkAnimation());
                         getLoaderManager().initLoader(LoaderID.AUTO_LINK, args, this).forceLoad();
                         return;
                     }
@@ -93,6 +94,7 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
                 mTextView.setText(getString(R.string.try_auto_connect));
                 return new AutoLinkLoader(this, args);
             case LoaderID.TUTK_NAS_LINK:
+                mTextView.setText(getString(R.string.try_remote_access));
                 return new TutkLinkNasLoader(this, args);
             case LoaderID.NAS_LIST:
                 mTextView.setText(getString(R.string.try_search_device));
@@ -191,13 +193,6 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
         }
     }
 
-    private void startFileManageActivity() {
-        Intent intent = new Intent();
-        intent.setClass(AutoLinkActivity.this, FileManageActivity.class);
-        startActivity(intent);
-        finish();
-    }
-
     private void startRemoteAccessListLoader() {
         String server = NASPref.getCloudServer(this);
         String token = NASPref.getCloudAuthToken(this);
@@ -231,6 +226,14 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
 
     private void startNASListLoader() {
         getLoaderManager().restartLoader(LoaderID.NAS_LIST, null, this).forceLoad();
+    }
+
+    private void startFileManageActivity() {
+        mTextView.clearAnimation();
+        Intent intent = new Intent();
+        intent.setClass(AutoLinkActivity.this, FileManageActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void startGuideActivity() {
@@ -274,6 +277,7 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
 
     //new page
     private void startLoginActivity() {
+        mTextView.clearAnimation();
         Intent intent = new Intent();
         intent.setClass(AutoLinkActivity.this, LoginActivity.class);
         startActivity(intent);
@@ -282,6 +286,7 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
 
     //new page
     private void startLoginListActivity(ArrayList<HashMap<String, String>> list, boolean isRemoteAccess) {
+        mTextView.clearAnimation();
         Intent intent = new Intent();
         intent.setClass(AutoLinkActivity.this, LoginListActivity.class);
         intent.putExtra("NASList", list);

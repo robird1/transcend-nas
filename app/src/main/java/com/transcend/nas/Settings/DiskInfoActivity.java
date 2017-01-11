@@ -31,6 +31,7 @@ import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.transcend.nas.R;
 import com.transcend.nas.LoaderID;
+import com.transcend.nas.common.AnimFactory;
 import com.transcend.nas.management.firmware.FileFactory;
 
 import java.util.ArrayList;
@@ -52,6 +53,7 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
     private List<DiskStructDevice> mDevices;
     private List<View> mViews;
     private boolean isInit = false;
+    private boolean isEmpty = false;
     private int mCurrentIndex = 0;
 
     @Override
@@ -92,6 +94,9 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
     }
 
     private void setDeviceData(List<DiskStructDevice> devices) {
+        if(mViews == null)
+            isEmpty = true;
+
         mViews = new ArrayList<>();
         List<String> titles = new ArrayList<>();
         for (DiskStructDevice device : devices) {
@@ -217,9 +222,12 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
                                     chart.setDescription("");
                                     chart.getLegend().setEnabled(false);
                                     chart.setCenterText(FileFactory.getInstance().getFileSize((long) device.availableSize) + "\n" + getString(R.string.available));
-                                    if (!isInit)
+                                    if (!isEmpty)
                                         chart.animateY(1000, Easing.EasingOption.EaseInOutQuad);
+                                    else if(isEmpty && !isInit)
+                                        chart.startAnimation(AnimFactory.getInstance().getAlphaAnimation());
                                     isInit = false;
+                                    isEmpty = false;
                                 } else {
                                     chart.setVisibility(View.GONE);
                                     layout.setVisibility(View.VISIBLE);
@@ -370,6 +378,7 @@ public class DiskInfoActivity extends AppCompatActivity implements LoaderManager
                 Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
                 return;
             }
+
 
             mDevices = tmp.getDevices();
             if (mDevices != null && mDevices.size() > 0) {
