@@ -2,6 +2,7 @@ package com.transcend.nas.management.firmware;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -13,13 +14,12 @@ import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASUtils;
 import com.transcend.nas.management.FileInfo;
+import com.transcend.nas.management.externalstorage.ExternalStorageController;
 import com.tutk.IOTC.P2PService;
 
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-
-import static android.R.attr.mode;
 
 /**
  * Created by ike_lee on 2016/5/23.
@@ -117,9 +117,9 @@ public class FileFactory {
         }
     }
 
-    public void displayPhoto(boolean thumbnail, String path, ImageView view) {
-        String url = getPhotoPath(thumbnail, path);
-        if (path.startsWith(NASApp.ROOT_STG)) {
+    public void displayPhoto(Context context, boolean thumbnail, String path, ImageView view) {
+        String url = getPhotoPath(context, thumbnail, path);
+        if (path.startsWith(NASApp.ROOT_STG) || NASUtils.isSDCardPath(context, path)) {
             FileInfo.TYPE type = FileInfo.getType(path);
             if (type.equals(FileInfo.TYPE.PHOTO)) {
                 DisplayImageOptions options = new DisplayImageOptions.Builder()
@@ -141,14 +141,19 @@ public class FileFactory {
         }
     }
 
-    public String getPhotoPath(boolean thumbnail, String path) {
-        return getPhotoPath(false, thumbnail, path);
+    public String getPhotoPath(Context context, boolean thumbnail, String path) {
+        return getPhotoPath(context, false, thumbnail, path);
     }
 
-    public String getPhotoPath(boolean forceLocal, boolean thumbnail, String path) {
+    public String getPhotoPath(Context context, boolean forceLocal, boolean thumbnail, String path) {
         String url = "";
         if (path.startsWith(NASApp.ROOT_STG)) {
             url = "file://" + path;
+        } else if (NASUtils.isSDCardPath(context, path)) {
+            Uri uri = new ExternalStorageController(context).getSDFileUri(path);
+            if (uri != null) {
+                url = uri.toString();
+            }
         } else {
             //First, try twonky image, and try webdav image when twonky image empty
             url = TwonkyManager.getInstance().getUrlFromPath(thumbnail, path);

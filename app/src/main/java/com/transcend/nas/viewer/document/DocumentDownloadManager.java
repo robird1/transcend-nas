@@ -64,7 +64,7 @@ public class DocumentDownloadManager {
     }
 
     public void downloadRemoteFile(Context context, FileInfo fileInfo) {
-        Uri downloadUri = MediaFactory.createUri(fileInfo.path);
+        Uri downloadUri = MediaFactory.createUri(context, fileInfo.path);
         Request request = new Request(downloadUri);
         File dirFile = new File(NASUtils.getCacheFilesLocation(context));
 

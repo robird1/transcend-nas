@@ -2,6 +2,8 @@ package com.transcend.nas.management.externalstorage;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.support.v4.provider.DocumentFile;
 import android.util.Log;
 
 import com.transcend.nas.NASApp;
@@ -33,6 +35,10 @@ public abstract class AbstractExternalStorage {
 
     public void handleWriteOperationFailed() {
 
+    }
+
+    public Uri getSDFileUri(String path) {
+       return Uri.fromFile(new File(path));
     }
 
     protected Context getContext() {

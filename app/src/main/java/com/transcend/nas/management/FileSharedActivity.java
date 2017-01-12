@@ -206,7 +206,7 @@ public class FileSharedActivity extends AppCompatActivity implements
 
     private void initRecyclerView() {
         FileManageRecyclerAdapter.LayoutType type = NASPref.getFileViewType(this);
-        mRecyclerAdapter = new FileManageRecyclerAdapter(mFileList);
+        mRecyclerAdapter = new FileManageRecyclerAdapter(this, mFileList);
         mRecyclerAdapter.setOnRecyclerItemCallbackListener(this);
         mRecyclerView = (RecyclerView) findViewById(R.id.main_recycler_view);
         switch (type) {

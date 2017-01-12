@@ -56,7 +56,7 @@ public class MusicLoader extends AsyncTask<String, String, Boolean> {
     @Override
     protected Boolean doInBackground(String... params) {
         try {
-            Uri uri = MediaFactory.createUri(mPath);
+            Uri uri = MediaFactory.createUri(mContext, mPath);
             mMediaPlayer = MediaPlayer.create(mContext, uri);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 MediaMetadataRetriever mmr = new MediaMetadataRetriever();

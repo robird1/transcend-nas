@@ -1,5 +1,6 @@
 package com.transcend.nas.management;
 
+import android.content.Context;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
@@ -9,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.nostra13.universalimageloader.core.ImageLoader;
 import com.transcend.nas.R;
 import com.transcend.nas.management.firmware.FileFactory;
 
@@ -23,6 +23,7 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
     private static final int ITEM_VIEW_TYPE_CONTENT = 0;
     private static final int ITEM_VIEW_TYPE_FOOTER  = 1;
 
+    private Context mContext;
     private ArrayList<FileInfo> mList;
     private LayoutType mLayoutType = LayoutType.LIST;
 
@@ -39,7 +40,8 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
         void onRecyclerItemIconClick(int position);
     }
 
-    public FileManageRecyclerAdapter(ArrayList<FileInfo> list) {
+    public FileManageRecyclerAdapter(Context context, ArrayList<FileInfo> list) {
+        mContext = context;
         updateList(list);
     }
 
@@ -109,7 +111,7 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
                 holder.indicate.setVisibility( fileInfo.type.equals(FileInfo.TYPE.VIDEO) ? View.VISIBLE : View.GONE);
             }
             if (fileInfo.type.equals(FileInfo.TYPE.PHOTO) || fileInfo.type.equals(FileInfo.TYPE.VIDEO) || fileInfo.type.equals(FileInfo.TYPE.MUSIC) )
-                FileFactory.getInstance().displayPhoto(true, path, holder.icon);
+                FileFactory.getInstance().displayPhoto(mContext, true, path, holder.icon);
 
 
             holder.itemView.setSelected(fileInfo.checked);

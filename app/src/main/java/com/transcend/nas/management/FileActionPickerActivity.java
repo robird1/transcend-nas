@@ -120,7 +120,7 @@ public class FileActionPickerActivity extends AppCompatActivity implements
 
     private void initRecyclerView() {
         FileManageRecyclerAdapter.LayoutType type = NASPref.getFilePickerViewType(this);
-        mRecyclerAdapter = new FileManageRecyclerAdapter(mFileList);
+        mRecyclerAdapter = new FileManageRecyclerAdapter(this, mFileList);
         mRecyclerAdapter.setOnRecyclerItemCallbackListener(this);
         mRecyclerView = (RecyclerView)findViewById(R.id.locate_recycler_view);
         switch (type) {

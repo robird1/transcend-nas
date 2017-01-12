@@ -449,7 +449,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
 
     private void initRecyclerView() {
         FileManageRecyclerAdapter.LayoutType type = NASPref.getFileViewType(this);
-        mRecyclerAdapter = new FileManageRecyclerAdapter(mFileList);
+        mRecyclerAdapter = new FileManageRecyclerAdapter(this, mFileList);
         mRecyclerAdapter.setOnRecyclerItemCallbackListener(this);
         mRecyclerView = (RecyclerView) findViewById(R.id.main_recycler_view);
         switch (type) {
@@ -1607,7 +1607,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
                 //clean image
                 mCastManager.sendDataMessage("close");
 
-                MediaInfo info = MediaFactory.createMediaInfo(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK, fileInfo.path);
+                MediaInfo info = MediaFactory.createMediaInfo(this, MediaMetadata.MEDIA_TYPE_MUSIC_TRACK, fileInfo.path);
                 if (info != null) {
                     mCastManager.startVideoCastControllerActivity(this, info, 0, true);
                     return;
@@ -1643,7 +1643,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
                 //clean image
                 mCastManager.sendDataMessage("close");
 
-                MediaInfo info = MediaFactory.createMediaInfo(MediaMetadata.MEDIA_TYPE_MOVIE, fileInfo.path);
+                MediaInfo info = MediaFactory.createMediaInfo(this, MediaMetadata.MEDIA_TYPE_MOVIE, fileInfo.path);
                 if (info != null) {
                     mCastManager.startVideoCastControllerActivity(this, info, 0, true);
                     return;
@@ -1724,6 +1724,8 @@ public class FileManageActivity extends BaseDrawerActivity implements
     public void openFileBy3rdApp(Context context, FileInfo fileInfo) {
         if (fileInfo.isLocalFile()) {
             openLocalFile(context, fileInfo);
+        } else if (NASUtils.isSDCardPath(context, fileInfo.path)) {
+            openSDCardFile(context, fileInfo);
         } else {
             if (mProgressView != null) {
                 mProgressView.setVisibility(View.VISIBLE);
@@ -1739,6 +1741,13 @@ public class FileManageActivity extends BaseDrawerActivity implements
     private void openLocalFile(Context context, FileInfo fileInfo) {
         Uri fileUri = Uri.fromFile(new File(fileInfo.path));
         NASUtils.showAppChooser(context, fileUri);
+    }
+
+    private void openSDCardFile(Context context, FileInfo fileInfo) {
+        Uri uri = new ExternalStorageController(context).getSDFileUri(fileInfo.path);
+        if (uri != null) {
+            NASUtils.showAppChooser(context, uri);
+        }
     }
 
     private void checkCacheFileState() {

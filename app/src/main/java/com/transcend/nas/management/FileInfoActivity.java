@@ -80,7 +80,7 @@ public class FileInfoActivity extends AppCompatActivity {
         else if (fileInfo.type.equals(FileInfo.TYPE.MUSIC))
             ivImage.setImageResource(R.drawable.ic_audiotrack_gray_big);
         if (fileInfo.type.equals(FileInfo.TYPE.PHOTO) || fileInfo.type.equals(FileInfo.TYPE.VIDEO) || fileInfo.type.equals(FileInfo.TYPE.MUSIC))
-            FileFactory.getInstance().displayPhoto(true, fileInfo.path, ivImage);
+            FileFactory.getInstance().displayPhoto(this, true, fileInfo.path, ivImage);
     }
 
     private void initFragment() {

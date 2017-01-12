@@ -152,7 +152,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
     }
 
     private void initRecyclerView() {
-        mRecyclerAdapter = new FileManageRecyclerAdapter(mFileList);
+        mRecyclerAdapter = new FileManageRecyclerAdapter(this, mFileList);
         mRecyclerAdapter.setOnRecyclerItemCallbackListener(this);
         mRecyclerView = (RecyclerView)findViewById(R.id.locate_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));

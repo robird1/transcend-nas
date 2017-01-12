@@ -92,6 +92,15 @@ public class ExternalStorageLollipop extends AbstractExternalStorage {
         return false;
     }
 
+    @Override
+    public Uri getSDFileUri(String path) {
+        DocumentFile file = getSDFileLocation(path);
+        if (file != null) {
+            return file.getUri();
+        }
+        return null;
+    }
+
     @TargetApi(19)
     public boolean checkSelectedFolder(Intent data) {
         boolean isValid = false;

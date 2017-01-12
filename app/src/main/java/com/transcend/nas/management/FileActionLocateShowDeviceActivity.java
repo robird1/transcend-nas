@@ -155,7 +155,7 @@ public class FileActionLocateShowDeviceActivity extends AppCompatActivity implem
     }
 
     private void initRecyclerView() {
-        FileManageRecyclerAdapter adapter = new FileManageRecyclerAdapter(mFileList);
+        FileManageRecyclerAdapter adapter = new FileManageRecyclerAdapter(this, mFileList);
         adapter.setOnRecyclerItemCallbackListener(this);
         mRecyclerView = (RecyclerView) findViewById(R.id.locate_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));

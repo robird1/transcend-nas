@@ -19,6 +19,7 @@ import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
 import com.transcend.nas.connection.LoginHelper;
+import com.transcend.nas.utils.MimeUtil;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,6 +28,9 @@ import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.R.attr.data;
+import static android.R.attr.mimeType;
 
 /**
  * Created by steve_su on 2016/12/2.
@@ -191,21 +195,35 @@ public final class NASUtils {
     }
 
     public static void showAppChooser(final Context context, final Uri fileUri) {
-        final Intent intent = new Intent(Intent.ACTION_VIEW);
-        String extension = MimeTypeMap.getFileExtensionFromUrl(fileUri.toString());
-        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-        Log.d(TAG, "extension: " + extension);
-        Log.d(TAG, "mimeType: " + mimeType);
-
-        intent.setDataAndType(fileUri, mimeType);
+        Log.d(TAG, "[Enter] showAppChooser");
+        final Intent intent = getIntentUri(context, fileUri);
+//        String extension = MimeTypeMap.getFileExtensionFromUrl(fileUri.toString());
+//        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+//        Log.d(TAG, "extension: " + extension);
+//        Log.d(TAG, "mimeType: " + mimeType);
+//
+//        intent.setDataAndType(fileUri, mimeType);
 
         try {
-            Log.d(TAG, "decoded path"+ fileUri.getPath());
+            Log.d(TAG, "decoded path: "+ fileUri.getPath());
             context.startActivity(intent);
         } catch (ActivityNotFoundException e) {
+            Log.d(TAG, "[Enter] ActivityNotFoundException");
             new AlertDialog.Builder(context).setTitle(R.string.open_with).setItems(getItemList(context),
                     getClickListener(context, fileUri, intent)).create().show();
         }
+    }
+
+    public static Intent getIntentUri(Context context, Uri uri) {
+        context.grantUriPermission(context.getPackageName(), uri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        String type = MimeUtil.getMimeType(uri.getPath());
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
+        intent.setDataAndType(uri, type);
+        return intent;
     }
 
     @NonNull

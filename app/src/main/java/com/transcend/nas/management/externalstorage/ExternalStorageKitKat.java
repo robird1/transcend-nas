@@ -2,6 +2,8 @@ package com.transcend.nas.management.externalstorage;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.net.Uri;
+import android.support.v4.provider.DocumentFile;
 import android.support.v7.app.AlertDialog;
 
 import com.transcend.nas.NASApp;
@@ -38,6 +40,15 @@ public class ExternalStorageKitKat extends AbstractExternalStorage {
                         })
                 .setCancelable(false)
                 .show();
+    }
+
+    @Override
+    public Uri getSDFileUri(String path) {
+        DocumentFile file = new ExternalStorageLollipop(getContext()).getSDFileLocation(path);
+        if (file != null) {
+            return file.getUri();
+        }
+        return null;
     }
 
 }

@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.os.Bundle;
+import android.support.v4.provider.DocumentFile;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -28,6 +29,7 @@ import com.google.android.libraries.cast.companionlibrary.cast.exceptions.NoConn
 import com.google.android.libraries.cast.companionlibrary.cast.exceptions.TransientNetworkDisconnectionException;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.LoaderID;
 import com.transcend.nas.management.FileActionDeleteDialog;
@@ -39,6 +41,9 @@ import com.transcend.nas.management.LocalFileUploadLoader;
 import com.transcend.nas.management.SmbAbstractLoader;
 import com.transcend.nas.management.SmbFileDeleteLoader;
 import com.transcend.nas.management.SmbFileDownloadLoader;
+import com.transcend.nas.management.externalstorage.ExternalStorageController;
+import com.transcend.nas.management.externalstorage.ExternalStorageLollipop;
+import com.transcend.nas.management.externalstorage.OTGFileDeleteLoader;
 import com.transcend.nas.management.firmware.FileFactory;
 
 import java.util.ArrayList;
@@ -327,7 +332,7 @@ public class ViewerActivity extends AppCompatActivity implements
             }
 
             try {
-                mCastManager.sendDataMessage(FileFactory.getInstance().getPhotoPath(true, false, mList.get(position).path));
+                mCastManager.sendDataMessage(FileFactory.getInstance().getPhotoPath(this, false, mList.get(position).path));
             } catch (TransientNetworkDisconnectionException e) {
                 e.printStackTrace();
             } catch (NoConnectionException e) {
@@ -349,7 +354,7 @@ public class ViewerActivity extends AppCompatActivity implements
     private void doDelete() {
         ArrayList<String> paths = new ArrayList<String>();
         int position = mPager.getCurrentItem();
-        FileInfo info = mList.get(position);
+        final FileInfo info = mList.get(position);
         paths.add(info.path);
 
         new FileActionDeleteDialog(this, paths) {
@@ -357,7 +362,7 @@ public class ViewerActivity extends AppCompatActivity implements
             public void onConfirm(ArrayList<String> paths) {
                 int id = (NASApp.MODE_SMB.equals(mMode))
                         ? LoaderID.SMB_FILE_DELETE
-                        : LoaderID.LOCAL_FILE_DELETE;
+                        : new ExternalStorageController(ViewerActivity.this).isWritePermissionRequired(info.path) ? LoaderID.OTG_FILE_DELETE: LoaderID.LOCAL_FILE_DELETE;
                 Bundle args = new Bundle();
                 args.putStringArrayList("paths", paths);
                 getLoaderManager().restartLoader(id, args, ViewerActivity.this).forceLoad();
@@ -431,6 +436,9 @@ public class ViewerActivity extends AppCompatActivity implements
             case LoaderID.LOCAL_FILE_DELETE:
                 mProgressView.setVisibility(View.VISIBLE);
                 return new LocalFileDeleteLoader(this, paths);
+            case LoaderID.OTG_FILE_DELETE:                                           // SD
+                mProgressView.setVisibility(View.VISIBLE);
+                return new OTGFileDeleteLoader(this, getSelectedDocumentFiles(paths));
         }
         return null;
     }
@@ -447,7 +455,7 @@ public class ViewerActivity extends AppCompatActivity implements
         }
 
         if (success) {
-            if (loader instanceof SmbFileDeleteLoader || loader instanceof LocalFileDeleteLoader) {
+            if (loader instanceof SmbFileDeleteLoader || loader instanceof LocalFileDeleteLoader || loader instanceof OTGFileDeleteLoader) {
                 evenDelete = true;
                 int position = mPager.getCurrentItem();
                 mList.remove(position);
@@ -559,4 +567,15 @@ public class ViewerActivity extends AppCompatActivity implements
             }
         }
     }
+
+    private ArrayList<DocumentFile> getSelectedDocumentFiles(ArrayList list) {
+        ArrayList<DocumentFile> files = new ArrayList<>();
+        String filePath = (String) list.get(0);
+        if (NASUtils.isSDCardPath(this, filePath)) {
+            DocumentFile d = new ExternalStorageLollipop(this).getSDFileLocation(filePath);
+            files.add(d);
+        }
+        return files;
+    }
+
 }

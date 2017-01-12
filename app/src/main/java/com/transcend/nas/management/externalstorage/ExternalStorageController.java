@@ -2,6 +2,7 @@ package com.transcend.nas.management.externalstorage;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 
@@ -40,6 +41,10 @@ public class ExternalStorageController {
 
     public void handleWriteOperationFailed() {
         mInstance.handleWriteOperationFailed();
+    }
+
+    public Uri getSDFileUri(String path) {
+        return mInstance.getSDFileUri(path);
     }
 
     private AbstractExternalStorage getInstance() {
