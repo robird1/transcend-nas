@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 
 import com.transcend.nas.NASApp;
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.management.firmware.MediaFactory;
 
 import java.util.HashMap;
@@ -60,7 +61,7 @@ public class MusicLoader extends AsyncTask<String, String, Boolean> {
             mMediaPlayer = MediaPlayer.create(mContext, uri);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-                if (mPath.startsWith(NASApp.ROOT_STG)) {
+                if (mPath.startsWith(NASApp.ROOT_STG) || NASUtils.isSDCardPath(mContext, mPath)) {
                     mmr.setDataSource(mPath);
                 } else {
                     if (Build.VERSION.SDK_INT >= 14)

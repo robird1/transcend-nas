@@ -4,6 +4,7 @@ import android.app.LoaderManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.provider.DocumentFile;
 import android.support.v4.view.ViewPager;
@@ -27,11 +28,11 @@ import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCa
 import com.google.android.libraries.cast.companionlibrary.cast.exceptions.CastException;
 import com.google.android.libraries.cast.companionlibrary.cast.exceptions.NoConnectionException;
 import com.google.android.libraries.cast.companionlibrary.cast.exceptions.TransientNetworkDisconnectionException;
+import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
-import com.transcend.nas.LoaderID;
 import com.transcend.nas.management.FileActionDeleteDialog;
 import com.transcend.nas.management.FileActionLocateActivity;
 import com.transcend.nas.management.FileInfo;
@@ -449,8 +450,13 @@ public class ViewerActivity extends AppCompatActivity implements
         if (!success) {
             if (loader instanceof SmbAbstractLoader)
                 Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
-            else
-                Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+            else {
+                if (loader instanceof LocalFileDeleteLoader && (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT)) {
+                    Toast.makeText(this, getString(R.string.dialog_write_operation_not_allowed), Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+                }
+            }
             return;
         }
 
