@@ -136,7 +136,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
     private void initToolbar() {
         mToolbar = (Toolbar)findViewById(R.id.locate_toolbar);
         mToolbar.setTitle("");
-        mToolbar.setNavigationIcon(R.drawable.ic_close_white_24dp);
+        mToolbar.setNavigationIcon(R.drawable.ic_toolbar_close_white);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -164,11 +164,11 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         mFabControl = (FloatingActionButton) findViewById(R.id.locate_fab_control);
         mFabControl.setOnClickListener(this);
         if (NASApp.ACT_COPY.equals(mType) || NASApp.ACT_MOVE.equals(mType))
-            mFabControl.setImageResource(R.drawable.ic_content_copy_white_24dp);
+            mFabControl.setImageResource(R.drawable.ic_toolbar_copy_white);
         if (NASApp.ACT_UPLOAD.equals(mType))
-            mFabControl.setImageResource(R.drawable.ic_file_upload_white_24dp);
+            mFabControl.setImageResource(R.drawable.ic_toolbar_upload_white);
         if (NASApp.ACT_DOWNLOAD.equals(mType))
-            mFabControl.setImageResource(R.drawable.ic_file_download_white_24dp);
+            mFabControl.setImageResource(R.drawable.ic_toolbar_download_white);
     }
 
     private void initProgressView() {

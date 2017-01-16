@@ -131,7 +131,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
     private void initToolbar() {
         mToolbar = (Toolbar) findViewById(R.id.nas_finder_toolbar);
         mToolbar.setTitle("");
-        mToolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_white_24dp);
+        mToolbar.setNavigationIcon(R.drawable.ic_navi_backaarow_white);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);

@@ -51,7 +51,7 @@ public class DeviceInfoActivity extends AppCompatActivity implements LoaderManag
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.settings_toolbar);
         toolbar.setTitle("");
-        toolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_white_24dp);
+        toolbar.setNavigationIcon(R.drawable.ic_navi_backaarow_white);
         TextView title = (TextView) toolbar.findViewById(R.id.settings_title);
         title.setText(getString(R.string.device_information));
         setSupportActionBar(toolbar);

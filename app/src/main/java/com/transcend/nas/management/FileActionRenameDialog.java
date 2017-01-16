@@ -50,7 +50,7 @@ public abstract class FileActionRenameDialog implements TextWatcher, View.OnClic
     private void initDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         builder.setTitle(mContext.getResources().getString(R.string.rename));
-        builder.setIcon(R.drawable.ic_rename_gray_24dp);
+        builder.setIcon(R.drawable.ic_toolbar_rename_gray);
         builder.setView(R.layout.dialog_rename);
         builder.setNegativeButton(R.string.cancel, null);
         builder.setPositiveButton(R.string.confirm, null);

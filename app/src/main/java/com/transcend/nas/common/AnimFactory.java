@@ -45,7 +45,7 @@ public class AnimFactory {
     public Animation getBlinkAnimation() {
         Animation anim = new AlphaAnimation(1.0f, 0.0f);
         anim.setDuration(1000); //You can manage the blinking time with this parameter
-        anim.setStartOffset(100);
+        anim.setStartOffset(200);
         anim.setRepeatMode(Animation.REVERSE);
         anim.setRepeatCount(Animation.INFINITE);
         return anim;

@@ -39,7 +39,7 @@
                 android:layout_centerVertical="true"
                 android:background="@drawable/player_selector"
                 android:padding="2dp"
-                android:src="@drawable/ic_close_white_24dp" />
+                android:src="@drawable/ic_toolbar_close_white" />
 
             <ImageView
                 android:id="@+id/music_next"

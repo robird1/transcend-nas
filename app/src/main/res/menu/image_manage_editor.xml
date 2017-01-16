@@ -10,13 +10,13 @@
 
     <item
         android:id="@+id/image_manage_editor_action_download"
-        android:icon="@drawable/ic_file_download_white_24dp"
+        android:icon="@drawable/ic_toolbar_download_white"
         android:title="@string/download"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/image_manage_editor_action_upload"
-        android:icon="@drawable/ic_file_upload_white_24dp"
+        android:icon="@drawable/ic_toolbar_upload_white"
         android:title="@string/upload"
         app:showAsAction="always" />
 

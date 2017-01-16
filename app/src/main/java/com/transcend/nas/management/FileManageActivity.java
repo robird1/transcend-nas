@@ -1,5 +1,6 @@
 package com.transcend.nas.management;
 
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -22,6 +23,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.transition.Explode;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -30,6 +32,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -433,7 +436,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
     protected void initToolbar() {
         mToolbar = (Toolbar) findViewById(R.id.main_toolbar);
         mToolbar.setTitle("");
-        mToolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_white_24dp);
+        mToolbar.setNavigationIcon(R.drawable.ic_navi_backaarow_white);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -524,10 +527,10 @@ public class FileManageActivity extends BaseDrawerActivity implements
         FileManageRecyclerAdapter.LayoutType type = NASPref.getFileViewType(this);
         switch (type) {
             case GRID:
-                menu.findItem(R.id.file_manage_viewer_action_view).setIcon(R.drawable.ic_view_list_white_24dp);
+                menu.findItem(R.id.file_manage_viewer_action_view).setIcon(R.drawable.ic_toolbar_list_white);
                 break;
             default:
-                menu.findItem(R.id.file_manage_viewer_action_view).setIcon(R.drawable.ic_view_module_white_24dp);
+                menu.findItem(R.id.file_manage_viewer_action_view).setIcon(R.drawable.ic_toolbar_module_white);
                 break;
         }
         mMediaRouteMenuItem = mCastManager.addMediaRouterButton(menu, R.id.media_route_menu_item);
@@ -649,7 +652,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
         getMenuInflater().inflate(R.menu.file_manage_editor, menu);
         MenuItem item = menu.findItem(R.id.file_manage_editor_action_transmission);
         item.setTitle(NASApp.MODE_SMB.equals(mMode) ? R.string.download : R.string.upload);
-        item.setIcon(NASApp.MODE_SMB.equals(mMode) ? R.drawable.ic_file_download_white_24dp : R.drawable.ic_file_upload_white_24dp);
+        item.setIcon(NASApp.MODE_SMB.equals(mMode) ? R.drawable.ic_toolbar_download_white : R.drawable.ic_toolbar_upload_white);
     }
 
     @Override
@@ -1211,6 +1214,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
         } else {
             Bundle value = new Bundle();
             value.putString(ProgressDialog.DIALOG_TITLE, getString(R.string.share));
+            value.putInt(ProgressDialog.DIALOG_ICON, R.drawable.ic_toolbar_share_gray);
             //String format = getResources().getString(files.size() <= 1 ? R.string.msg_file_selected : R.string.msg_files_selected);
             //value.putString(ProgressDialog.DIALOG_MESSAGE, String.format(format, files.size()));
             mShareDialog = new ProgressDialog(this, value) {
@@ -1408,14 +1412,14 @@ public class FileManageActivity extends BaseDrawerActivity implements
     }
 
     private void enableFabEdit(boolean enabled) {
-        mFab.setImageResource(R.drawable.ic_edit_white_24dp);
+        mFab.setImageResource(R.drawable.ic_floating_edit_white);
         mFab.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
     }
 
     private void toggleFabSelectAll(boolean selectAll) {
         int resId = selectAll
-                ? R.drawable.ic_clear_all_white_24dp
-                : R.drawable.ic_done_all_white_24dp;
+                ? R.drawable.ic_floating_unselectall_white
+                : R.drawable.ic_floating_selectall_white;
         mFab.setImageResource(resId);
         mFab.setVisibility(View.VISIBLE);
     }
@@ -1544,7 +1548,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
             String format = getString(count <= 1 ? R.string.msg_file_selected : R.string.msg_files_selected);
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.download);
-            builder.setIcon(R.drawable.ic_file_download_gray_24dp);
+            builder.setIcon(R.drawable.ic_toolbar_download_gray);
             builder.setMessage(String.format(format, count));
             builder.setNegativeButton(R.string.cancel, null);
             builder.setPositiveButton(R.string.confirm, null);
@@ -1634,7 +1638,10 @@ public class FileManageActivity extends BaseDrawerActivity implements
         Intent intent = new Intent();
         intent.setClass(FileManageActivity.this, MusicActivity.class);
         intent.putExtras(args);
-        startActivityForResult(intent, MusicActivity.REQUEST_CODE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            startActivityForResult(intent, MusicActivity.REQUEST_CODE, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
+        else
+            startActivityForResult(intent, MusicActivity.REQUEST_CODE);
     }
 
     private void startVideoActivity(FileInfo fileInfo) {
@@ -1673,7 +1680,10 @@ public class FileManageActivity extends BaseDrawerActivity implements
         Intent intent = new Intent();
         intent.setClass(FileManageActivity.this, ViewerActivity.class);
         intent.putExtras(args);
-        startActivityForResult(intent, ViewerActivity.REQUEST_CODE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            startActivityForResult(intent, ViewerActivity.REQUEST_CODE, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
+        else
+            startActivityForResult(intent, ViewerActivity.REQUEST_CODE);
     }
 
     private void startFileInfoActivity(FileInfo info) {
@@ -1682,7 +1692,10 @@ public class FileManageActivity extends BaseDrawerActivity implements
         Intent intent = new Intent();
         intent.setClass(FileManageActivity.this, FileInfoActivity.class);
         intent.putExtras(args);
-        startActivityForResult(intent, FileInfoActivity.REQUEST_CODE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            startActivityForResult(intent, FileInfoActivity.REQUEST_CODE, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
+        else
+            startActivityForResult(intent, FileInfoActivity.REQUEST_CODE);
     }
 
     private void startLoginListActivity() {

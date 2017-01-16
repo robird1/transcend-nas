@@ -40,7 +40,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_weight="1"
-                android:src="@drawable/ic_delete_white_24dp" />
+                android:src="@drawable/ic_toolbar_delete_white" />
 
             <ImageView
                 android:id="@+id/viewer_action_info"
@@ -48,7 +48,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_weight="1"
-                android:src="@drawable/ic_info_white_24dp" />
+                android:src="@drawable/ic_toolbar_info_white" />
 
             <ImageView
                 android:id="@+id/viewer_action_download"
@@ -56,7 +56,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_weight="1"
-                android:src="@drawable/ic_file_download_white_24dp" />
+                android:src="@drawable/ic_toolbar_download_white" />
 
             <ImageView
                 android:id="@+id/viewer_action_upload"
@@ -64,7 +64,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_weight="1"
-                android:src="@drawable/ic_file_upload_white_24dp" />
+                android:src="@drawable/ic_toolbar_upload_white" />
 
         </LinearLayout>
 

@@ -201,7 +201,7 @@ public class ViewerActivity extends AppCompatActivity implements
     private void initHeaderBar() {
         mHeaderBar = (Toolbar) findViewById(R.id.viewer_header_bar);
         mHeaderBar.setTitle("");
-        mHeaderBar.setNavigationIcon(R.drawable.ic_navigation_arrow_white_24dp);
+        mHeaderBar.setNavigationIcon(R.drawable.ic_navi_backaarow_white);
         setSupportActionBar(mHeaderBar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -216,10 +216,10 @@ public class ViewerActivity extends AppCompatActivity implements
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        mInfo.setImageResource(R.drawable.ic_info_gray_24dp);
+                        mInfo.setImageResource(R.drawable.ic_toolbar_info_gray);
                         break;
                     case MotionEvent.ACTION_UP:
-                        mInfo.setImageResource(R.drawable.ic_info_white_24dp);
+                        mInfo.setImageResource(R.drawable.ic_toolbar_info_white);
                         break;
                 }
                 return false;
@@ -233,10 +233,10 @@ public class ViewerActivity extends AppCompatActivity implements
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        mDelete.setImageResource(R.drawable.ic_delete_gray_24dp);
+                        mDelete.setImageResource(R.drawable.ic_toolbar_delete_gray);
                         break;
                     case MotionEvent.ACTION_UP:
-                        mDelete.setImageResource(R.drawable.ic_delete_white_24dp);
+                        mDelete.setImageResource(R.drawable.ic_toolbar_delete_white);
                         break;
                 }
                 return false;
@@ -251,10 +251,10 @@ public class ViewerActivity extends AppCompatActivity implements
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        mDownload.setImageResource(R.drawable.ic_file_download_gray_24dp);
+                        mDownload.setImageResource(R.drawable.ic_toolbar_download_gray);
                         break;
                     case MotionEvent.ACTION_UP:
-                        mDownload.setImageResource(R.drawable.ic_file_download_white_24dp);
+                        mDownload.setImageResource(R.drawable.ic_toolbar_download_white);
                         break;
                 }
                 return false;
@@ -270,10 +270,10 @@ public class ViewerActivity extends AppCompatActivity implements
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        mUpload.setImageResource(R.drawable.ic_file_upload_gray_24dp);
+                        mUpload.setImageResource(R.drawable.ic_toolbar_upload_gray);
                         break;
                     case MotionEvent.ACTION_UP:
-                        mUpload.setImageResource(R.drawable.ic_file_upload_white_24dp);
+                        mUpload.setImageResource(R.drawable.ic_toolbar_upload_white);
                         break;
                 }
                 return false;
@@ -526,7 +526,7 @@ public class ViewerActivity extends AppCompatActivity implements
         if (NASApp.ACT_DOWNLOAD.equals(type) && NASPref.useDefaultDownloadFolder) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.download);
-            builder.setIcon(R.drawable.ic_file_download_gray_24dp);
+            builder.setIcon(R.drawable.ic_toolbar_download_gray);
             builder.setMessage(String.format(getString(R.string.msg_file_selected), 1));
             builder.setNegativeButton(R.string.cancel, null);
             builder.setPositiveButton(R.string.confirm, null);

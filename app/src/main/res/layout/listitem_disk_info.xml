@@ -86,7 +86,7 @@
             android:paddingRight="20dp"
             android:paddingTop="20dp"
             android:rotation="180"
-            android:src="@drawable/ic_navigation_arrow_gray_24dp" />
+            android:src="@drawable/ic_navi_backaarow_gray" />
 
         <TextView
             android:id="@+id/listitem_disk_info_smart"

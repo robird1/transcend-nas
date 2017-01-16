@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rotate xmlns:android="http://schemas.android.com/apk/res/android"
-    android:drawable="@drawable/ic_navigation_arrow_white_24dp"
+    android:drawable="@drawable/ic_navi_backaarow_white"
     android:visible="true"
     android:fromDegrees="180"
     android:toDegrees="180"

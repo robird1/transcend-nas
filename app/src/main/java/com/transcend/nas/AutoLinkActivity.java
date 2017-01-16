@@ -91,7 +91,8 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
     public Loader onCreateLoader(int id, Bundle args) {
         switch (mLoaderID = id) {
             case LoaderID.AUTO_LINK:
-                mTextView.setText(getString(R.string.try_auto_connect));
+                boolean isRemote = args.getBoolean("RemoteAccess");
+                mTextView.setText(isRemote ? getString(R.string.try_auto_connect) : getString(R.string.try_search_device));
                 return new AutoLinkLoader(this, args);
             case LoaderID.TUTK_NAS_LINK:
                 mTextView.setText(getString(R.string.try_remote_access));

@@ -34,7 +34,7 @@ public abstract class FileActionDeleteDialog implements View.OnClickListener {
         String message = String.format(format, mPaths.size());
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         builder.setTitle(mContext.getResources().getString(R.string.delete));
-        builder.setIcon(R.drawable.ic_delete_gray_24dp);
+        builder.setIcon(R.drawable.ic_toolbar_delete_gray);
         builder.setMessage(message);
         builder.setNegativeButton(R.string.cancel, null);
         builder.setPositiveButton(R.string.confirm, null);

@@ -11,7 +11,7 @@
         <item name="alertDialogTheme">@style/AppDialog</item>
         <item name="windowActionModeOverlay">true</item>
         <item name="actionModeBackground">@color/colorAccent</item>
-        <item name="actionModeCloseDrawable">@drawable/ic_close_white_24dp</item>
+        <item name="actionModeCloseDrawable">@drawable/ic_toolbar_close_white</item>
     </style>
 
     <style name="AppDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
@@ -42,6 +42,10 @@
     <style name="AppTheme.RadioButton" parent="Theme.AppCompat.Light">
         <item name="colorControlNormal">@color/colorRadioButtonUnCheck</item>
         <item name="colorControlActivated">@color/colorRadioButtonCheck</item>
+    </style>
+
+    <style name="AppTheme.SplashTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@drawable/app_launch</item>
     </style>
 
 </resources>

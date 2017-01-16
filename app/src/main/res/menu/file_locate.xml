@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/file_locate_action_new_folder"
-        android:icon="@drawable/ic_create_new_folder_white_24dp"
+        android:icon="@drawable/ic_toolbar_newfolder_white"
         android:title="@string/msg_new_folder"
         app:showAsAction="always" />
 

@@ -23,6 +23,7 @@ public abstract class ProgressDialog implements View.OnClickListener {
     public abstract void onCancel();
     public static String DIALOG_TITLE = "title";
     public static String DIALOG_MESSAGE = "message";
+    public static String DIALOG_ICON = "icon";
 
     private AppCompatActivity mActivity;
     private AlertDialog mDialog;
@@ -30,6 +31,7 @@ public abstract class ProgressDialog implements View.OnClickListener {
     private Button mDlgBtnNeg;
     private String mTitle;
     private String mMessage;
+    private int mIcon;
     private RelativeLayout mProgressView;
     private int mLayoutID = R.layout.dialog_progress;
 
@@ -41,6 +43,7 @@ public abstract class ProgressDialog implements View.OnClickListener {
         mActivity = (AppCompatActivity)context;
         mTitle = args.getString(DIALOG_TITLE);
         mMessage = args.getString(DIALOG_MESSAGE);
+        mIcon = args.getInt(DIALOG_ICON);
         initDialog(showPositiveButton, showNegativeButton);
     }
 
@@ -48,6 +51,9 @@ public abstract class ProgressDialog implements View.OnClickListener {
         AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
         builder.setCancelable(true);
         builder.setView(mLayoutID);
+
+        if(mIcon > 0)
+            builder.setIcon(mIcon);
 
         if(mTitle != null && !mTitle.equals(""))
             builder.setTitle(mTitle);

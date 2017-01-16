@@ -148,7 +148,7 @@ public class FileActionLocateShowDeviceActivity extends AppCompatActivity implem
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.locate_toolbar);
         toolbar.setTitle(R.string.storage_name);
-        toolbar.setNavigationIcon(R.drawable.ic_close_white_24dp);
+        toolbar.setNavigationIcon(R.drawable.ic_toolbar_close_white);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);

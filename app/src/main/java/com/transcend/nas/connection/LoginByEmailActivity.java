@@ -336,7 +336,7 @@ public class LoginByEmailActivity extends AppCompatActivity implements
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.settings_toolbar);
         toolbar.setTitle("");
-        toolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_white_24dp);
+        toolbar.setNavigationIcon(R.drawable.ic_navi_backaarow_white);
         mTitle = (TextView) toolbar.findViewById(R.id.settings_title);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

@@ -89,7 +89,7 @@ public class TwonkyManager {
                 smbSharedList.add(realPath);
 
             addTwonkySharedFolder(smbSharedList);
-            doTwonkyRescan(false);
+            //doTwonkyRescan(false);
         }
 
         //old version
@@ -111,11 +111,16 @@ public class TwonkyManager {
         //url = twonkyUrl + (thumbnail ? "?scale=192x192" : "");
 
         String value = "http://" + getTwonkyIP() + "/rpc/get_thumbnail?path=";
-        path = ShareFolderManager.getInstance().getRealPath(path);
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        String username = server.getUsername();
+        String realPath = ShareFolderManager.getInstance().getRealPath(path);
+        if(path.equals(realPath) && path.startsWith("/" + username + "/"))
+            realPath = "/home" + path;
+
         if (thumbnail)
-            value += path;
+            value += realPath;
         else
-            value += path + "&scale=orig";
+            value += realPath + "&scale=orig";
         return value;
     }
 

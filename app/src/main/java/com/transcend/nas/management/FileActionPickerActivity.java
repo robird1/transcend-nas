@@ -103,7 +103,7 @@ public class FileActionPickerActivity extends AppCompatActivity implements
     private void initToolbar() {
         mToolbar = (Toolbar)findViewById(R.id.locate_toolbar);
         mToolbar.setTitle("");
-        mToolbar.setNavigationIcon(R.drawable.ic_close_white_24dp);
+        mToolbar.setNavigationIcon(R.drawable.ic_toolbar_close_white);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -141,9 +141,9 @@ public class FileActionPickerActivity extends AppCompatActivity implements
         mFabControl = (FloatingActionButton) findViewById(R.id.locate_fab_control);
         mFabControl.setOnClickListener(this);
         if (NASApp.ACT_PICK_UPLOAD.equals(mType))
-            mFabControl.setImageResource(R.drawable.ic_file_upload_white_24dp);
+            mFabControl.setImageResource(R.drawable.ic_toolbar_upload_white);
         if (NASApp.ACT_PICK_DOWNLOAD.equals(mType))
-            mFabControl.setImageResource(R.drawable.ic_file_download_white_24dp);
+            mFabControl.setImageResource(R.drawable.ic_toolbar_download_white);
     }
 
     private void initProgressView() {
@@ -217,17 +217,17 @@ public class FileActionPickerActivity extends AppCompatActivity implements
         getMenuInflater().inflate(R.menu.file_picker, menu);
         int count = getSelectedCount();
         if(mFileList != null && mFileList.size() == count && count > 0)
-            menu.findItem(R.id.file_picker_action_selected_all).setIcon(R.drawable.ic_clear_all_white_24dp);
+            menu.findItem(R.id.file_picker_action_selected_all).setIcon(R.drawable.ic_floating_unselectall_white);
         else
-            menu.findItem(R.id.file_picker_action_selected_all).setIcon(R.drawable.ic_done_all_white_24dp);
+            menu.findItem(R.id.file_picker_action_selected_all).setIcon(R.drawable.ic_floating_selectall_white);
 
         FileManageRecyclerAdapter.LayoutType type = NASPref.getFilePickerViewType(this);
         switch (type) {
             case GRID:
-                menu.findItem(R.id.file_picker_viewer_action_view).setIcon(R.drawable.ic_view_list_white_24dp);
+                menu.findItem(R.id.file_picker_viewer_action_view).setIcon(R.drawable.ic_toolbar_list_white);
                 break;
             default:
-                menu.findItem(R.id.file_picker_viewer_action_view).setIcon(R.drawable.ic_view_module_white_24dp);
+                menu.findItem(R.id.file_picker_viewer_action_view).setIcon(R.drawable.ic_toolbar_module_white);
                 break;
         }
         return true;

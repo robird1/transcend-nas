@@ -103,7 +103,7 @@ public class StartActivity extends AppCompatActivity implements LoaderManager.Lo
     private void initFindButton() {
         bnFind = (Button) findViewById(R.id.activity_find_nas_button);
         bnFind.setOnClickListener(this);
-        StyleFactory.set_button_Drawable_left(this, bnFind, R.drawable.ic_search_white_24dp, 50);
+        StyleFactory.set_button_Drawable_left(this, bnFind, R.drawable.ic_toolbar_search_white, 50);
     }
 
     private void initProgressView() {

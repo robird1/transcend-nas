@@ -3,11 +3,13 @@ package com.transcend.nas;
 import android.app.Application;
 import android.content.Context;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.support.multidex.MultiDexApplication;
 import android.support.v4.provider.DocumentFile;
 import android.util.Log;
 
 import com.facebook.FacebookSdk;
+import com.google.android.exoplayer.util.Clock;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
 import com.google.android.libraries.cast.companionlibrary.cast.CastConfiguration;
@@ -20,6 +22,7 @@ import com.transcend.nas.service.LanCheckManager;
 
 import java.io.File;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by silverhsu on 16/1/6.
@@ -48,18 +51,22 @@ public class NASApp extends MultiDexApplication {
 
     private static Context mContext;
     private Tracker mTracker;
+    private long SPLASH_SCREEN_TIME = 1000;
 
     @Override
     public void onCreate() {
         super.onCreate();
         mContext = getApplicationContext();
+        long start = System.currentTimeMillis();
         initServerManager();
         initImageLoader();
         createDownloadsDirectory();
         createSharesDirectory();
         initChromeCastManager();
-
         FacebookSdk.sdkInitialize(getApplicationContext());
+        long duration = SPLASH_SCREEN_TIME - (System.currentTimeMillis() - start);
+        if(duration > 0)
+            SystemClock.sleep(duration);
     }
 
     @Override

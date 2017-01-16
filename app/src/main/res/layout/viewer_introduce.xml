@@ -37,7 +37,7 @@
         android:layout_above="@id/introduce_title"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:src="@drawable/ic_info_gray_24dp" />
+        android:src="@drawable/ic_toolbar_info_gray" />
 
 
 </RelativeLayout>

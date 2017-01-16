@@ -31,7 +31,7 @@
             android:layout_height="match_parent"
             android:rotation="180"
             android:padding="20dp"
-            android:src="@drawable/ic_navigation_arrow_gray_24dp" />
+            android:src="@drawable/ic_navi_backaarow_gray" />
 
     </FrameLayout>
 
@@ -48,7 +48,7 @@
             android:layout_height="match_parent"
             android:padding="20dp"
             android:visibility="invisible"
-            android:src="@drawable/ic_delete_gray_24dp" />
+            android:src="@drawable/ic_toolbar_delete_gray" />
 
     </FrameLayout>
 

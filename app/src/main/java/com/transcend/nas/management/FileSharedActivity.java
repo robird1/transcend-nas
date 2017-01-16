@@ -190,7 +190,7 @@ public class FileSharedActivity extends AppCompatActivity implements
     private void initToolbar() {
         mToolbar = (Toolbar) findViewById(R.id.main_toolbar);
         mToolbar.setTitle("");
-        mToolbar.setNavigationIcon(R.drawable.ic_close_gray_24dp);
+        mToolbar.setNavigationIcon(R.drawable.ic_toolbar_close_gray);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -249,10 +249,10 @@ public class FileSharedActivity extends AppCompatActivity implements
         FileManageRecyclerAdapter.LayoutType type = NASPref.getFileViewType(this);
         switch (type) {
             case GRID:
-                menu.findItem(R.id.file_manage_viewer_action_view).setIcon(R.drawable.ic_view_list_gray_24dp);
+                menu.findItem(R.id.file_manage_viewer_action_view).setIcon(R.drawable.ic_toolbar_list_gray);
                 break;
             default:
-                menu.findItem(R.id.file_manage_viewer_action_view).setIcon(R.drawable.ic_view_module_gray_24dp);
+                menu.findItem(R.id.file_manage_viewer_action_view).setIcon(R.drawable.ic_toolbar_module_gray);
                 break;
         }
         return true;

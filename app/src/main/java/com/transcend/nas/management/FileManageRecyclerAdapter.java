@@ -97,11 +97,11 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
             }
             if(holder.info != null){
                 if (fileInfo.type.equals(FileInfo.TYPE.DIR)) {
-                    holder.info.setImageResource(R.drawable.ic_navigation_arrow_gray_24dp);
+                    holder.info.setImageResource(R.drawable.ic_navi_backaarow_gray);
                     holder.info.setRotation(180);
                 }
                 else {
-                    holder.info.setImageResource(R.drawable.ic_info_gray_24dp);
+                    holder.info.setImageResource(R.drawable.ic_toolbar_info_gray);
                     holder.info.setRotation(0);
                 }
             }

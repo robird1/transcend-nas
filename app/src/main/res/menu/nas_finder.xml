@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/action_refresh_nas_finder"
-        android:icon="@drawable/ic_sync_white_24dp"
+        android:icon="@drawable/ic_toolbar_sync_white"
         android:title="@string/app_name"
         app:showAsAction="always" />
 
