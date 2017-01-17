@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.transcend.nas.introduce.BasicViewerPager
+        android:id="@+id/guide_view_pager"
+        android:layout_width="wrap_content"
+        android:layout_height="290dp" />
+
+    <RadioGroup
+        android:id="@+id/guide_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/guide_view_pager"
+        android:layout_centerHorizontal="true"
+        android:background="@android:color/transparent"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:theme="@style/AppTheme.RadioButton" />
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:theme="@style/AppTheme.RadioButton" />
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:theme="@style/AppTheme.RadioButton" />
+    </RadioGroup>
+
+</RelativeLayout>

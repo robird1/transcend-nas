@@ -3,10 +3,12 @@ package com.transcend.nas.connection;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -14,14 +16,21 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 
 import com.transcend.nas.R;
+import com.transcend.nas.introduce.BasicPagerAdapter;
+import com.transcend.nas.introduce.BasicViewerPager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by ikelee on 16/8/31.
@@ -42,7 +51,10 @@ public abstract class NASListDialog implements View.OnClickListener {
     private RelativeLayout mProgressView;
     private ListView mListView;
     private SimpleAdapter mListViewAdapter;
-    private RelativeLayout mEmptyView;
+    private BasicViewerPager mEmptyView;
+    private BasicPagerAdapter mBasicPagerAdapter;
+    private RadioGroup mIndicator;
+    private final int mTotal = 3;
     private int mSelect = -1;
     private ArrayList<HashMap<String, String>> mList;
     private boolean mCheckList[];
@@ -133,13 +145,13 @@ public abstract class NASListDialog implements View.OnClickListener {
             mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    if(mSelect == position) {
+                    if (mSelect == position) {
                         onClick(mDlgBtnPos);
                     } else {
                         CheckBox check = (CheckBox) view.findViewById(R.id.listitem_checkbox_icon);
                         check.setChecked(true);
 
-                        if(0 <= mSelect && mSelect < mCheckList.length) {
+                        if (0 <= mSelect && mSelect < mCheckList.length) {
                             mCheckList[mSelect] = false;
                             View previous = mListView.getChildAt(mSelect);
                             if (previous != null) {
@@ -156,7 +168,7 @@ public abstract class NASListDialog implements View.OnClickListener {
                 }
             });
 
-            if(!isEmpty) {
+            if (!isEmpty) {
                 int defaultValue = 0;
                 mSelect = defaultValue;
                 mCheckList[defaultValue] = true;
@@ -164,15 +176,69 @@ public abstract class NASListDialog implements View.OnClickListener {
                 //because we have checkbox in layout, call requestFocusFromTouch first
                 mListView.requestFocusFromTouch();
                 mListView.setSelection(defaultValue);
-
             }
+            mDlgBtnNeg.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
         }
     }
 
     private void initEmptyView() {
-        mEmptyView = (RelativeLayout) mDialog.findViewById(R.id.dialog_list_empty_view);
+        //mEmptyView = (RelativeLayout) mDialog.findViewById(R.id.dialog_list_empty_view);
+        if(mEmptyView == null) {
+            String[] titles = new String[]{mActivity.getString(R.string.wizard_ethernet_info) + ".\n" + mActivity.getString(R.string.wizard_plug_info),
+                    mActivity.getString(R.string.wizard_power_info), mActivity.getString(R.string.wizard_wifi_info)};
+            int[] images = new int[]{R.drawable.img_popup_wificonnect_step1, R.drawable.img_popup_wificonnect_step2,
+                    R.drawable.img_popup_wificonnect_step3};
+            List<View> views = new ArrayList<>();
+            LayoutInflater mInflater = mActivity.getLayoutInflater().from(mActivity);
+            for (int i = 0; i < mTotal; i++) {
+                View view = mInflater.inflate(R.layout.viewer_indicator, null);
+                TextView title = (TextView) view.findViewById(R.id.indicator_title);
+                title.setText(titles[i]);
+                ImageView image = (ImageView) view.findViewById(R.id.indicator_image);
+                image.setImageResource(images[i]);
+                views.add(view);
+            }
+
+            mBasicPagerAdapter = new BasicPagerAdapter();
+            mBasicPagerAdapter.setContentList(views);
+
+            mEmptyView = (BasicViewerPager) mDialog.findViewById(R.id.guide_view_pager);
+            mEmptyView.setAdapter(mBasicPagerAdapter);
+            mEmptyView.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+                }
+
+                @Override
+                public void onPageSelected(int position) {
+                    setIndicator(position);
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int state) {
+
+                }
+            });
+        }
+
+        if(mIndicator == null) {
+            mIndicator = (RadioGroup) mDialog.findViewById(R.id.guide_indicator);
+        }
+
         mEmptyView.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+        mIndicator.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+        mEmptyView.setCurrentItem(0);
+        setIndicator(0);
     }
+
+    private void setIndicator(int index) {
+        for (int i = 0; i < mTotal; i++) {
+            RadioButton button = (RadioButton) mIndicator.getChildAt(i);
+            button.setChecked(i == index);
+        }
+    }
+
 
     private void initProgressView() {
         mProgressView = (RelativeLayout) mDialog.findViewById(R.id.dialog_list_progress_view);

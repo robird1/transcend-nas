@@ -23,6 +23,7 @@ public class GoogleAnalysisFactory {
         public static String START_EMAIL_LOGIN = "LoginByEmailActivity";
         public static String START_NAS_LIST = "LoginListActivity";
         public static String BROWSER_LOCAL = "LocalFileManageActivity";
+        public static String BROWSER_LOCAL_SDCARD = "LocalSdcardFileManageActivity";
         public static String BROWSER_LOCAL_DOWNLOAD = "LocalDownloadFileManageActivity";
         public static String BROWSER_REMOTE = "NasFileManageActivity";
     }

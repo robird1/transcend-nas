@@ -131,7 +131,7 @@ public final class NASUtils {
     }
 
     public static List<File> getStoragePath(Context mContext) {
-        Log.d(TAG, "[Enter] getStoragePath()");
+        //Log.d(TAG, "[Enter] getStoragePath()");
         List<File> stgList = new ArrayList<File>();
         StorageManager mStorageManager = (StorageManager) mContext.getSystemService(Context.STORAGE_SERVICE);
         try {
@@ -150,9 +150,9 @@ public final class NASUtils {
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
-        for (File sd : stgList) {
-            Log.d(TAG, "sd.getAbsolutePath(): "+ sd.getAbsolutePath());
-        }
+        //for (File sd : stgList) {
+        //    Log.d(TAG, "sd.getAbsolutePath(): "+ sd.getAbsolutePath());
+        //}
         return stgList;
     }
 
@@ -165,7 +165,7 @@ public final class NASUtils {
         List<File> stgList = NASUtils.getStoragePath(context);
         for (File sd : stgList) {
             if ((!sd.getAbsolutePath().contains(NASApp.ROOT_STG)) && (!sd.getAbsolutePath().toLowerCase().contains("usb"))) {
-                Log.d(TAG, "sd.getAbsolutePath(): "+ sd.getAbsolutePath());
+                //Log.d(TAG, "sd.getAbsolutePath(): "+ sd.getAbsolutePath());
                 return sd.getAbsolutePath();
             }
         }

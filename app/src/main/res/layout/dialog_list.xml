@@ -4,7 +4,10 @@
     android:layout_height="match_parent"
     android:focusable="true"
     android:focusableInTouchMode="true"
-    android:padding="24dp">
+    android:paddingBottom="6dp"
+    android:paddingLeft="24dp"
+    android:paddingRight="24dp"
+    android:paddingTop="18dp">
 
     <ListView
         android:id="@+id/dialog_list_view"
@@ -15,7 +18,7 @@
 
     <include
         android:id="@+id/dialog_list_empty_view"
-        layout="@layout/view_guide"
+        layout="@layout/view_guide_2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

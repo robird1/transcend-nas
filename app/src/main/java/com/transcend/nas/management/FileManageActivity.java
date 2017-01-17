@@ -135,7 +135,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
     private String mMode;
     private String mRoot;
     private String mPath;
-    private boolean mDevice = false;
+    private boolean isDownloadFolder = false;
     private ArrayList<FileInfo> mFileList;
     private Server mServer;
     private int mLoaderID;
@@ -148,7 +148,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
 
     private SmbFileShareLoader mSmbFileShareLoader;
 
-//    private DocumentDownloadManager mDownloadManager;
+    //    private DocumentDownloadManager mDownloadManager;
     private FileInfo mFileInfo;
     private String mDownloadFilePath;
     private OpenWithUploadHandler mOpenWithUploadHandler;
@@ -202,22 +202,31 @@ public class FileManageActivity extends BaseDrawerActivity implements
         switch (selectedItemId) {
             case R.id.nav_storage:
                 GoogleAnalysisFactory.getInstance(this).sendScreen(GoogleAnalysisFactory.VIEW.BROWSER_REMOTE);
-                mDevice = false;
+                isDownloadFolder = false;
                 mPath = NASApp.ROOT_SMB;
                 break;
             case R.id.nav_device:
                 GoogleAnalysisFactory.getInstance(this).sendScreen(GoogleAnalysisFactory.VIEW.BROWSER_LOCAL);
-                mDevice = true;
+                isDownloadFolder = false;
                 mPath = NASApp.ROOT_STG;
+                break;
+            case R.id.nav_sdcard:
+                GoogleAnalysisFactory.getInstance(this).sendScreen(GoogleAnalysisFactory.VIEW.BROWSER_LOCAL_SDCARD);
+                isDownloadFolder = false;
+                String location = NASUtils.getSDLocation(this);
+                if (location != null)
+                    mPath = location;
+                else
+                    mPath = NASApp.ROOT_STG;
                 break;
             case R.id.nav_downloads:
                 GoogleAnalysisFactory.getInstance(this).sendScreen(GoogleAnalysisFactory.VIEW.BROWSER_LOCAL_DOWNLOAD);
-                mDevice = false;
+                isDownloadFolder = true;
                 mPath = NASPref.getDownloadLocation(this);
                 break;
             default:
                 GoogleAnalysisFactory.getInstance(this).sendScreen(GoogleAnalysisFactory.VIEW.BROWSER_REMOTE);
-                mDevice = false;
+                isDownloadFolder = false;
                 mPath = NASApp.ROOT_SMB;
                 break;
         }
@@ -326,8 +335,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
             } else {
                 LanCheckManager.getInstance().setInit(true);
             }
-        }
-        else if (requestCode == ExternalStorageLollipop.REQUEST_CODE) {
+        } else if (requestCode == ExternalStorageLollipop.REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 new ExternalStorageController(this).onActivityResult(this, data);
             } else {
@@ -509,6 +517,13 @@ public class FileManageActivity extends BaseDrawerActivity implements
         Log.w(TAG, "onDropdownItemSelected: " + position);
         if (position > 0) {
             String path = mDropdownAdapter.getPath(position);
+            if (isDownloadFolder) {
+                String download = NASPref.getDownloadLocation(this);
+                if (download.contains(path) && !download.equals(path)) {
+                    mDrawerController.setCheckdItem(isSDCardPath(this, path) ? R.id.nav_sdcard : R.id.nav_device);
+                    isDownloadFolder = false;
+                }
+            }
             doLoad(path);
         }
     }
@@ -615,6 +630,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
     public void onRecyclerItemIconClick(int position) {
         if (mPath.equals(NASApp.ROOT_SMB))
             return;
+
         if (mEditorMode == null) {
             startEditorMode();
         }
@@ -765,8 +781,12 @@ public class FileManageActivity extends BaseDrawerActivity implements
             return;
         }
         if (!FileFactory.getInstance().isTopDirectory(this, mMode, mRoot, mPath)) {
-            String parent = new File(mPath).getParent();
-            doLoad(parent);
+            if (isDownloadFolder && FileFactory.getInstance().isTopDirectory(this, mMode, NASPref.getDownloadLocation(this), mPath)) {
+                mDrawerController.openDrawer();
+            } else {
+                String parent = new File(mPath).getParent();
+                doLoad(parent);
+            }
         } else {
             mDrawerController.openDrawer();
         }
@@ -940,7 +960,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
                 ImageLoader.getInstance().stop();
                 mMode = NASApp.MODE_STG;
                 mPath = ((LocalFileListLoader) loader).getPath();
-                mRoot = isSDCardPath(this, mPath) ? NASUtils.getSDLocation(this): NASApp.ROOT_STG;
+                mRoot = isSDCardPath(this, mPath) ? NASUtils.getSDLocation(this) : NASApp.ROOT_STG;
                 mFileList = ((LocalFileListLoader) loader).getFileList();
                 Collections.sort(mFileList, FileInfoSort.comparator(this));
                 FileFactory.getInstance().addFileTypeSortRule(mFileList);
@@ -1191,7 +1211,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
                     return;
                 int id = (NASApp.MODE_SMB.equals(mMode))
                         ? LoaderID.SMB_FILE_RENAME
-                        : mStorageController.isWritePermissionRequired(mPath) ? LoaderID.OTG_FILE_RENAME: LoaderID.LOCAL_FILE_RENAME;
+                        : mStorageController.isWritePermissionRequired(mPath) ? LoaderID.OTG_FILE_RENAME : LoaderID.LOCAL_FILE_RENAME;
                 Bundle args = new Bundle();
                 args.putString("path", path);
                 args.putString("name", newName);
@@ -1280,7 +1300,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
 
         int id = (NASApp.MODE_SMB.equals(mMode))
                 ? LoaderID.SMB_FILE_COPY
-                : mStorageController.isWritePermissionRequired(dest) ? LoaderID.OTG_FILE_COPY: LoaderID.LOCAL_FILE_COPY;
+                : mStorageController.isWritePermissionRequired(dest) ? LoaderID.OTG_FILE_COPY : LoaderID.LOCAL_FILE_COPY;
         Bundle args = new Bundle();
         args.putStringArrayList("paths", paths);
         args.putString("path", dest);
@@ -1299,7 +1319,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
 
         int id = (NASApp.MODE_SMB.equals(mMode))
                 ? LoaderID.SMB_FILE_MOVE
-                : mStorageController.isWritePermissionRequired(paths.get(0), dest) ? LoaderID.OTG_FILE_MOVE: LoaderID.LOCAL_FILE_MOVE;
+                : mStorageController.isWritePermissionRequired(paths.get(0), dest) ? LoaderID.OTG_FILE_MOVE : LoaderID.LOCAL_FILE_MOVE;
 
         Bundle args = new Bundle();
         args.putStringArrayList("paths", paths);
@@ -1320,7 +1340,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
             public void onConfirm(ArrayList<String> paths) {
                 int id = (NASApp.MODE_SMB.equals(mMode))
                         ? LoaderID.SMB_FILE_DELETE
-                        : mStorageController.isWritePermissionRequired(mPath) ? LoaderID.OTG_FILE_DELETE: LoaderID.LOCAL_FILE_DELETE;
+                        : mStorageController.isWritePermissionRequired(mPath) ? LoaderID.OTG_FILE_DELETE : LoaderID.LOCAL_FILE_DELETE;
                 Bundle args = new Bundle();
                 args.putStringArrayList("paths", paths);
                 getLoaderManager().restartLoader(id, args, FileManageActivity.this).forceLoad();
@@ -1367,7 +1387,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
         mDropdownAdapter.notifyDataSetChanged();
         mRecyclerAdapter.updateList(mFileList);
         mRecyclerAdapter.notifyDataSetChanged();
-        mDrawerController.setDrawerIndicatorEnabled(mPath.equals(mRoot));
+        mDrawerController.setDrawerIndicatorEnabled(mPath.equals(mRoot) || (isDownloadFolder && mPath.equals(NASPref.getDownloadLocation(this))));
         checkEmptyView();
         invalidateOptionsMenu();
     }
@@ -1508,12 +1528,21 @@ public class FileManageActivity extends BaseDrawerActivity implements
 
     @Override
     public void toggleDrawerCheckedItem() {
-        int id = NASApp.MODE_SMB.equals(mMode) ? R.id.nav_storage :
-                mDevice ? R.id.nav_device : R.id.nav_downloads;
-
-        if (mRoot.equals(NASUtils.getSDLocation(this))) {
-            id = R.id.nav_sdcard;
+        int id;
+        if(NASApp.MODE_SMB.equals(mMode)) {
+            id = R.id.nav_storage;
+        } else {
+            if(isDownloadFolder) {
+                id = R.id.nav_downloads;
+            } else {
+                if(mRoot.equals(NASUtils.getSDLocation(this))) {
+                    id = R.id.nav_sdcard;
+                } else {
+                    id = R.id.nav_device;
+                }
+            }
         }
+
         mDrawerController.setCheckdItem(id);
         Log.w(TAG, "toggleDrawerCheckedItem: " + mMode);
     }

@@ -247,7 +247,7 @@ public class ExternalStorageLollipop extends AbstractExternalStorage {
     private void requestPermissionDialog(final BaseDrawerActivity activity) {
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         builder.setTitle(mContext.getResources().getString(R.string.sdcard));
-        builder.setIcon(R.drawable.ic_sdcard_gray_24dp);
+        builder.setIcon(R.drawable.ic_drawer_sdcard);
         builder.setView(R.layout.dialog_connect_sd);
         builder.setNegativeButton(R.string.cancel, null);
         builder.setPositiveButton(R.string.confirm, null);
