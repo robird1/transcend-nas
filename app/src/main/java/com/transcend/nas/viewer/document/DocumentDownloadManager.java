@@ -29,7 +29,7 @@ public class DocumentDownloadManager {
     }
 
     private DocumentDownloadManager(Context context) {
-        mDownloadManager = (DownloadManager) context.getSystemService(context.DOWNLOAD_SERVICE);
+        mDownloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
     }
 
     public static synchronized DocumentDownloadManager getInstance(Context context) {

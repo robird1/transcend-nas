@@ -75,9 +75,10 @@ public class FileInfo implements Serializable {
     }
 
     public boolean isLocalFile() {
-        if (path != null); {
+        if (path != null) {
             return path.startsWith(Environment.getExternalStorageDirectory().getPath());
         }
+        return false;
     }
 
     public void openLocalFile(Context context) {
