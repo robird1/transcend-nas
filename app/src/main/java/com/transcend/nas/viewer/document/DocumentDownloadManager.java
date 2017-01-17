@@ -2,11 +2,7 @@ package com.transcend.nas.viewer.document;
 
 import android.app.DownloadManager;
 import android.app.DownloadManager.Request;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
@@ -23,83 +19,65 @@ import java.io.File;
 public class DocumentDownloadManager {
 
     private static final String TAG = DocumentDownloadManager.class.getSimpleName();
+    private static DocumentDownloadManager mInstance;
     private DownloadManager mDownloadManager;
     private long mDownloadId;
-    private OnFinishLisener mDownloadListener;
+    private OnFinishListener mOnFinishListener;
 
-    public interface OnFinishLisener {
-        void onComplete(String destPath);
+    public interface OnFinishListener {
+        void onComplete(Uri destUri);
     }
 
-    public void initialize(Context context) {
+    private DocumentDownloadManager(Context context) {
         mDownloadManager = (DownloadManager) context.getSystemService(context.DOWNLOAD_SERVICE);
-
-        context.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Log.d(TAG, "[Enter] onReceive()");
-
-                DownloadManager.Query query = new DownloadManager.Query();
-                query.setFilterById(mDownloadId);
-                Cursor c = mDownloadManager.query(query);
-                if (c.moveToFirst()) {
-                    if (DownloadManager.STATUS_SUCCESSFUL == c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))) {
-
-                        String localUri = c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
-
-                        mDownloadListener.onComplete(Uri.parse(localUri).getPath());
-
-                        NASUtils.showAppChooser(context, Uri.parse(localUri));
-
-                        clearDownloadTaskID();
-                    }
-                }
-            }
-        }, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-
     }
 
-    public void setOnFinishLisener(OnFinishLisener listener) {
-        mDownloadListener = listener;
+    public static synchronized DocumentDownloadManager getInstance(Context context) {
+        if (mInstance == null) {
+            mInstance = new DocumentDownloadManager(context);
+        }
+        return mInstance;
     }
 
-    public void downloadRemoteFile(Context context, FileInfo fileInfo) {
+    public void setOnFinishListener(OnFinishListener listener) {
+        mOnFinishListener = listener;
+    }
+
+    public void start(Context context, FileInfo fileInfo) {
         Uri downloadUri = MediaFactory.createUri(context, fileInfo.path);
         Request request = new Request(downloadUri);
-        File dirFile = new File(NASUtils.getCacheFilesLocation(context));
-
-        setRequestDestinationUri(request, dirFile, downloadUri);
+        setRequestDestinationUri(request, new File(NASUtils.getCacheFilesLocation(context)), downloadUri);
 //                request.setNotificationVisibility(Request.VISIBILITY_HIDDEN);
-
-        start(request);
+        enqueue(request);
     }
 
     public long cancel() {
-        Log.d(TAG, "[Enter] cancel()");
         long cancelId = 0L;
-
         if (mDownloadId != 0L) {
             cancelId = mDownloadManager.remove(mDownloadId);
         }
-        Log.d(TAG, "cancelId: " + cancelId);
-
         return cancelId;
     }
 
+    DownloadManager getManager() {
+        return mDownloadManager;
+    }
+
+    long getDownloadId() {
+        return mDownloadId;
+    }
+
+    OnFinishListener getOnFinishListener() {
+        return mOnFinishListener;
+    }
+
     private void setRequestDestinationUri(Request request, File dirFile, Uri downloadUri) {
-        Log.d(TAG, "[Enter] setRequestDestinationUri()");
-
         String filePath = dirFile.toString().concat("/").concat(downloadUri.getLastPathSegment());
-
         deleteExistFile(filePath);
-
-        Uri fileUri = Uri.fromFile(new File(filePath));
-        request.setDestinationUri(fileUri);
+        request.setDestinationUri(Uri.fromFile(new File(filePath)));
     }
 
     private void deleteExistFile(String filePath) {
-        Log.d(TAG, "[Enter] deleteExistFile()");
-
         File tempFile = new File(filePath);
         if (tempFile.exists()) {
             Log.d(TAG, "tempFile.delete()");
@@ -107,11 +85,11 @@ public class DocumentDownloadManager {
         }
     }
 
-    private void start(Request request) {
+    private void enqueue(Request request) {
         mDownloadId = mDownloadManager.enqueue(request);
     }
 
-    private void clearDownloadTaskID() {
+    void clearDownloadTaskID() {
         mDownloadId = 0L;
     }
 

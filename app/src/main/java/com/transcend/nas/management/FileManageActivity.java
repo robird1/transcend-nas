@@ -23,7 +23,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.transition.Explode;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -32,7 +31,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -150,7 +148,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
 
     private SmbFileShareLoader mSmbFileShareLoader;
 
-    private DocumentDownloadManager mDownloadManager;
+//    private DocumentDownloadManager mDownloadManager;
     private FileInfo mFileInfo;
     private String mDownloadFilePath;
     private OpenWithUploadHandler mOpenWithUploadHandler;
@@ -190,7 +188,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
             initActionModeView();
             initAutoBackUpService();
             initExternalStorageController();
-
+            initDownloadManager();
             onReceiveIntent(getIntent());
             NASPref.setInitial(this, true);
         } else {
@@ -264,7 +262,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
     @Override
     protected void onDestroy() {
         P2PService.getInstance().removeP2PListener(this);
-        destroyDownloadManager();
+        clearDownloadTask();
         super.onDestroy();
         Log.w(TAG, "onDestroy");
 
@@ -755,7 +753,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
     public void onBackPressed() {
         Log.w(TAG, "[Enter] onBackPressed()");
 
-        destroyDownloadManager();
+        clearDownloadTask();
         toggleDrawerCheckedItem();
         if (mDrawerController.isDrawerOpen()) {
             mDrawerController.closeDrawer();
@@ -1707,12 +1705,10 @@ public class FileManageActivity extends BaseDrawerActivity implements
     }
 
     private void initDownloadManager() {
-        mDownloadManager = new DocumentDownloadManager();
-        mDownloadManager.initialize(this);
-        mDownloadManager.setOnFinishLisener(new DocumentDownloadManager.OnFinishLisener() {
+        DocumentDownloadManager.getInstance(this).setOnFinishListener(new DocumentDownloadManager.OnFinishListener() {
             @Override
-            public void onComplete(String destPath) {
-                mDownloadFilePath = destPath;
+            public void onComplete(Uri destUri) {
+                mDownloadFilePath = destUri.getPath();
 
                 new Thread(new Runnable() {
                     @Override
@@ -1724,42 +1720,27 @@ public class FileManageActivity extends BaseDrawerActivity implements
                 if (mProgressView != null) {
                     mProgressView.setVisibility(View.INVISIBLE);
                 }
+
+                NASUtils.showAppChooser(FileManageActivity.this, destUri);
             }
         });
     }
 
-    private void destroyDownloadManager() {
-        if (mDownloadManager != null) {
-            mDownloadManager.cancel();
-        }
+    private void clearDownloadTask() {
+        DocumentDownloadManager.getInstance(this).cancel();
     }
 
     public void openFileBy3rdApp(Context context, FileInfo fileInfo) {
         if (fileInfo.isLocalFile()) {
-            openLocalFile(context, fileInfo);
+            fileInfo.openLocalFile(context);
         } else if (NASUtils.isSDCardPath(context, fileInfo.path)) {
-            openSDCardFile(context, fileInfo);
+            fileInfo.openSDCardFile(context);
         } else {
             if (mProgressView != null) {
                 mProgressView.setVisibility(View.VISIBLE);
             }
 
-            if (mDownloadManager == null)
-                initDownloadManager();
-
-            mDownloadManager.downloadRemoteFile(context, fileInfo);
-        }
-    }
-
-    private void openLocalFile(Context context, FileInfo fileInfo) {
-        Uri fileUri = Uri.fromFile(new File(fileInfo.path));
-        NASUtils.showAppChooser(context, fileUri);
-    }
-
-    private void openSDCardFile(Context context, FileInfo fileInfo) {
-        Uri uri = new ExternalStorageController(context).getSDFileUri(fileInfo.path);
-        if (uri != null) {
-            NASUtils.showAppChooser(context, uri);
+            DocumentDownloadManager.getInstance(this).start(context, fileInfo);
         }
     }
 

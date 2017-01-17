@@ -1,9 +1,14 @@
 package com.transcend.nas.management;
 
+import android.content.Context;
+import android.net.Uri;
 import android.os.Environment;
 
+import com.transcend.nas.NASUtils;
+import com.transcend.nas.management.externalstorage.ExternalStorageController;
 import com.transcend.nas.utils.MimeUtil;
 
+import java.io.File;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -69,13 +74,22 @@ public class FileInfo implements Serializable {
         return lastModifiedTime;
     }
 
-    public boolean isLocalFile()
-    {
-        if (path != null);
-        {
+    public boolean isLocalFile() {
+        if (path != null); {
             return path.startsWith(Environment.getExternalStorageDirectory().getPath());
         }
     }
 
+    public void openLocalFile(Context context) {
+        Uri fileUri = Uri.fromFile(new File(path));
+        NASUtils.showAppChooser(context, fileUri);
+    }
+
+    public void openSDCardFile(Context context) {
+        Uri uri = new ExternalStorageController(context).getSDFileUri(path);
+        if (uri != null) {
+            NASUtils.showAppChooser(context, uri);
+        }
+    }
 
 }
