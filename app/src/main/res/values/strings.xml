@@ -259,5 +259,6 @@
     <string name="dialog_grant_permission_failed">Selected folder is not the root folder of SD card</string>
     <string name="dialog_write_operation_not_allowed">Operation failed due to the writing limitation of Android 4.4</string>
     <string name="download_location_error">Please check your download location, the target destination does not exist</string>
+    <string name="toast_invalid_name">The input name contains invalid character</string>
 
 </resources>

@@ -704,9 +704,6 @@ public class FileManageActivity extends BaseDrawerActivity implements
                 if (isEmpty) toast(R.string.no_item_selected);
                 else doDelete();
                 break;
-            case R.id.file_manage_editor_action_new_folder:
-                doNewFolder();
-                break;
         }
         return false;
     }
@@ -1345,36 +1342,6 @@ public class FileManageActivity extends BaseDrawerActivity implements
                 args.putStringArrayList("paths", paths);
                 getLoaderManager().restartLoader(id, args, FileManageActivity.this).forceLoad();
                 Log.w(TAG, "doDelete: " + paths.size() + " items");
-            }
-        };
-    }
-
-    // TODO duplicated method in FileActionLocateActivity
-    private void doNewFolder() {
-        List<String> folderNames = new ArrayList<String>();
-        for (FileInfo file : mFileList) {
-            if (file.type.equals(FileInfo.TYPE.DIR))
-                folderNames.add(file.name);
-        }
-        new FileActionNewFolderDialog(this, folderNames) {
-            @Override
-            public void onConfirm(String newName) {
-                int id = (NASApp.MODE_SMB.equals(mMode))
-                        ? LoaderID.SMB_NEW_FOLDER :
-                        (mStorageController.isWritePermissionRequired(mPath) ? LoaderID.OTG_LOCAL_NEW_FOLDER : LoaderID.LOCAL_NEW_FOLDER);
-
-                StringBuilder builder = new StringBuilder(mPath);
-                if (!mPath.endsWith("/"))
-                    builder.append("/");
-                if (!mStorageController.isWritePermissionRequired(mPath)) {
-                    builder.append(newName);
-                }
-                String path = builder.toString();
-                Bundle args = new Bundle();
-                args.putString("path", path);
-                args.putString("name", newName);
-                getLoaderManager().restartLoader(id, args, FileManageActivity.this).forceLoad();
-                Log.w(TAG, "doNewFolder: " + path);
             }
         };
     }

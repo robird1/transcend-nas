@@ -440,7 +440,6 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         doLoad(mPath);
     }
 
-    // TODO duplicated method in FileManageActivity
     private void doNewFolder() {
         List<String> folderNames = new ArrayList<String>();
         for (FileInfo file : mFileList) {

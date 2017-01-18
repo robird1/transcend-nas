@@ -8,6 +8,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.transcend.nas.R;
 
@@ -100,8 +101,12 @@ public abstract class FileActionRenameDialog implements TextWatcher, View.OnClic
         if (v.equals(mDlgBtnPos)) {
             if (mFieldName.getEditText() == null) return;
             String name = addExtension(mFieldName.getEditText().getText().toString());
-            onConfirm(name);
-            mDialog.dismiss();
+            if (!new FileNameChecker(name).isValid()) {
+                Toast.makeText(mContext, R.string.toast_invalid_name, Toast.LENGTH_SHORT).show();
+            } else {
+                onConfirm(name);
+                mDialog.dismiss();
+            }
         }
     }
 

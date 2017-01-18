@@ -11,6 +11,7 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.transcend.nas.R;
 
@@ -90,8 +91,12 @@ public abstract class FileActionNewFolderDialog implements TextWatcher, View.OnC
         if (v.equals(mDlgBtnPos)) {
             if (mFieldName.getEditText() == null) return;
             String name = mFieldName.getEditText().getText().toString();
-            onConfirm(name);
-            mDialog.dismiss();
+            if (!new FileNameChecker(name).isValid()) {
+                Toast.makeText(mContext, R.string.toast_invalid_name, Toast.LENGTH_SHORT).show();
+            } else {
+                onConfirm(name);
+                mDialog.dismiss();
+            }
         }
     }
 
@@ -100,7 +105,7 @@ public abstract class FileActionNewFolderDialog implements TextWatcher, View.OnC
         String name = mContext.getResources().getString(R.string.untitled_folder);
         String unique = name;
         while (mFolderNames.contains(unique)) {
-            unique = String.format(name + " (%d)", index++);
+            unique = String.format(name + "_%d", index++);
         }
         return unique;
     }
