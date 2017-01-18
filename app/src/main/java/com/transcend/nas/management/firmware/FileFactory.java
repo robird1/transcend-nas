@@ -127,6 +127,10 @@ public class FileFactory {
                         .cacheInMemory(true)
                         .cacheOnDisk(false)
                         .build();
+
+                if (!url.startsWith("content://")) {
+                    url = Uri.decode(url);
+                }
                 ImageLoader.getInstance().displayImage(url, view, options);
             } else if(type.equals(FileInfo.TYPE.VIDEO)){
                 //TODO : load video thumbnail
