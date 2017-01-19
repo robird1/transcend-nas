@@ -13,6 +13,7 @@ import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASUtils;
+import com.transcend.nas.R;
 import com.transcend.nas.management.FileInfo;
 import com.transcend.nas.management.externalstorage.ExternalStorageController;
 import com.tutk.IOTC.P2PService;
@@ -141,7 +142,17 @@ public class FileFactory {
                 //TODO : load music thumbnail
             }
         } else {
-            ImageLoader.getInstance().displayImage(url, view);
+            if(thumbnail) {
+                ImageLoader.getInstance().displayImage(url, view);
+            } else {
+                DisplayImageOptions options = new DisplayImageOptions.Builder()
+                        .bitmapConfig(Bitmap.Config.RGB_565)
+                        .cacheInMemory(true)
+                        .cacheOnDisk(true)
+                        .showImageOnLoading(R.drawable.ic_image_white_big)
+                        .build();
+                ImageLoader.getInstance().displayImage(url, view, options);
+            }
         }
     }
 

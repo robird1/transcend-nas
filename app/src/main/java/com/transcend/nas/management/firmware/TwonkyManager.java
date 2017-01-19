@@ -31,11 +31,13 @@ public class TwonkyManager {
     private HashMap<String, String> mImageMap;
     private HashMap<String, String> mFolderMap;
     private Set<String> mCacheMap;
+    private boolean useTwonkyServer = false;
 
     public TwonkyManager() {
         mImageMap = new HashMap<>();
         mFolderMap = new HashMap<>();
         mCacheMap = new HashSet<>();
+        initTwonky();
     }
 
     public static TwonkyManager getInstance() {
@@ -56,25 +58,29 @@ public class TwonkyManager {
     }
 
     public boolean initTwonky() {
-        String firmware = NASPref.defaultFirmwareVersion;
-        Server server = ServerManager.INSTANCE.getCurrentServer();
-        ServerInfo info = server.getServerInfo();
-        if (info != null)
-            firmware = info.firmwareVer;
+        if(NASPref.useTwonkyServer) {
+            String firmware = NASPref.defaultFirmwareVersion;
+            Server server = ServerManager.INSTANCE.getCurrentServer();
+            ServerInfo info = server.getServerInfo();
+            if (info != null)
+                firmware = info.firmwareVer;
 
-        if (NASPref.useTwonkyServer && firmware != null && !firmware.equals("")) {
-            int version = Integer.parseInt(firmware);
-            NASPref.useTwonkyServer = version >= NASPref.useTwonkyMinFirmwareVersion;
+            if (firmware != null && !firmware.equals("")) {
+                int version = Integer.parseInt(firmware);
+                useTwonkyServer = version >= NASPref.useTwonkyMinFirmwareVersion;
+            } else {
+                useTwonkyServer = false;
+            }
+            Log.d(TAG, "Firmware version : " + firmware + ", Use Twonky Thumbnail : " + useTwonkyServer);
         } else {
-            NASPref.useTwonkyServer = false;
+            useTwonkyServer = false;
         }
-        Log.d(TAG, "Firmware version : " + firmware + ", Use Twonky Thumbnail : " + NASPref.useTwonkyServer);
 
-        return NASPref.useTwonkyServer;
+        return useTwonkyServer;
     }
 
     public void updateTwonky(String path) {
-        if (!NASPref.useTwonkyServer)
+        if (!useTwonkyServer)
             return;
 
         if (path.equals(NASApp.ROOT_SMB)) {
@@ -103,7 +109,7 @@ public class TwonkyManager {
     }
 
     public String getUrlFromPath(boolean thumbnail, String path) {
-        if (!NASPref.useTwonkyServer)
+        if (!useTwonkyServer)
             return null;
 
         //old version

@@ -117,13 +117,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
     private RecyclerView mRecyclerView;
     private LinearLayout mRecyclerEmptyView;
     private FileManageRecyclerAdapter mRecyclerAdapter;
-    /*// expanded fabs
-    private FloatingActionButton mFabControl;
-    private FloatingActionButton mFabNewFolder;
-    private FloatingActionButton mFabNewFile;
-    /*/
     private FloatingActionButton mFab;
-    //*/
     private RelativeLayout mProgressView;
     private Snackbar mSnackbar;
     private ActionMode mEditorMode;
@@ -476,17 +470,8 @@ public class FileManageActivity extends BaseDrawerActivity implements
     }
 
     private void initFabs() {
-        /*// expanded fabs
-        mFabControl = (FloatingActionButton) findViewById(R.id.main_fab_control);
-        mFabControl.setOnClickListener(this);
-        mFabNewFolder = (FloatingActionButton) findViewById(R.id.main_fab_new_folder);
-        mFabNewFolder.setOnClickListener(this);
-        mFabNewFile = (FloatingActionButton) findViewById(R.id.main_fab_new_file);
-        mFabNewFile.setOnClickListener(this);
-        /*/
         mFab = (FloatingActionButton) findViewById(R.id.main_fab);
         mFab.setOnClickListener(this);
-        //*/
     }
 
     private void initProgressView() {
@@ -647,11 +632,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
         initMenu(menu);
         updateEditorModeTitle(0);
         toggleEditorModeAction(0);
-        /*// expanded fabs
-        toggleSelectFabs(false);
-        /*/
         toggleFabSelectAll(false);
-        //*/
         toast(R.string.edit_mode);
         return true;
     }
@@ -674,36 +655,37 @@ public class FileManageActivity extends BaseDrawerActivity implements
         return false;
     }
 
-    // TODO remove the case R.id.file_manage_editor_action_new_folder
     @Override
     public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
         boolean isEmpty = (getSelectedCount() == 0);
-        switch (item.getItemId()) {
-            case R.id.file_manage_editor_action_transmission:
-                String type = NASApp.MODE_SMB.equals(mMode) ? NASApp.ACT_DOWNLOAD : NASApp.ACT_UPLOAD;
-                if (isEmpty) toast(R.string.no_item_selected);
-                else startFileActionLocateActivity(type);
-                break;
-            case R.id.file_manage_editor_action_rename:
-                if (isEmpty) toast(R.string.no_item_selected);
-                else doRename();
-                break;
-            case R.id.file_manage_editor_action_share:
-                if (isEmpty) toast(R.string.no_item_selected);
-                else doShare();
-                break;
-            case R.id.file_manage_editor_action_copy:
-                if (isEmpty) toast(R.string.no_item_selected);
-                else startFileActionLocateActivity(NASApp.ACT_COPY);
-                break;
-            case R.id.file_manage_editor_action_cut:
-                if (isEmpty) toast(R.string.no_item_selected);
-                else startFileActionLocateActivity(NASApp.ACT_MOVE);
-                break;
-            case R.id.file_manage_editor_action_delete:
-                if (isEmpty) toast(R.string.no_item_selected);
-                else doDelete();
-                break;
+        int id = item.getItemId();
+        if(isEmpty && id != R.id.file_manage_editor_action_new_folder) {
+            toast(R.string.no_item_selected);
+        } else {
+            switch (id) {
+                case R.id.file_manage_editor_action_transmission:
+                    String type = NASApp.MODE_SMB.equals(mMode) ? NASApp.ACT_DOWNLOAD : NASApp.ACT_UPLOAD;
+                    startFileActionLocateActivity(type);
+                    break;
+                case R.id.file_manage_editor_action_rename:
+                    doRename();
+                    break;
+                case R.id.file_manage_editor_action_share:
+                    doShare();
+                    break;
+                case R.id.file_manage_editor_action_copy:
+                    startFileActionLocateActivity(NASApp.ACT_COPY);
+                    break;
+                case R.id.file_manage_editor_action_cut:
+                    startFileActionLocateActivity(NASApp.ACT_MOVE);
+                    break;
+                case R.id.file_manage_editor_action_delete:
+                    doDelete();
+                    break;
+                case R.id.file_manage_editor_action_new_folder:
+                    doNewFolder();
+                    break;
+            }
         }
         return false;
     }
@@ -713,11 +695,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
         mDrawerController.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
         mEditorMode = null;
         clearAllSelection();
-        /*/ expanded fabs
-        resetActionFabs();
-        /*/
         enableFabEdit(true);
-        //*/
     }
 
 
@@ -727,27 +705,12 @@ public class FileManageActivity extends BaseDrawerActivity implements
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            /*// expanded fabs
-            case R.id.main_fab_control:
-                if (mEditorMode == null)
-                    toggleActionFabs();
-                else
-                    toggleSelectAll();
-                break;
-            case R.id.main_fab_new_folder:
-                doNewFolder();
-                break;
-            case R.id.main_fab_new_file:
-                doNewFile();
-                break;
-            /*/
             case R.id.main_fab:
                 if (mEditorMode == null)
                     startEditorMode();
                 else
                     toggleSelectAll();
                 break;
-            //*/
             default:
                 if (v instanceof ImageButton && v.getParent() instanceof Toolbar) {
                     // setToolbarNavigationClickListener
@@ -975,6 +938,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
                 startSignInActivity();
                 return;
             } else if (loader instanceof EventNotifyLoader) {
+                TwonkyManager.getInstance().initTwonky();
                 Bundle args = ((EventNotifyLoader) loader).getBundleArgs();
                 String path = args.getString("path");
                 if (path != null && !path.equals("")) {
@@ -1142,6 +1106,35 @@ public class FileManageActivity extends BaseDrawerActivity implements
         };
     }
 
+    private void doNewFolder() {
+        List<String> folderNames = new ArrayList<String>();
+        for (FileInfo file : mFileList) {
+            if (file.type.equals(FileInfo.TYPE.DIR))
+                folderNames.add(file.name);
+        }
+        new FileActionNewFolderDialog(this, folderNames) {
+            @Override
+            public void onConfirm(String newName) {
+                int id = (NASApp.MODE_SMB.equals(mMode))
+                        ? LoaderID.SMB_NEW_FOLDER :
+                        (mStorageController.isWritePermissionRequired(mPath) ? LoaderID.OTG_LOCAL_NEW_FOLDER : LoaderID.LOCAL_NEW_FOLDER);
+
+                StringBuilder builder = new StringBuilder(mPath);
+                if (!mPath.endsWith("/"))
+                    builder.append("/");
+                if (!mStorageController.isWritePermissionRequired(mPath)) {
+                    builder.append(newName);
+                }
+                String path = builder.toString();
+                Bundle args = new Bundle();
+                args.putString("path", path);
+                args.putString("name", newName);
+                getLoaderManager().restartLoader(id, args, FileManageActivity.this).forceLoad();
+                Log.w(TAG, "doNewFolder: " + path);
+            }
+        };
+    }
+
 
     /**
      * FILE EDITOR
@@ -1283,6 +1276,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
             mShareDialog = null;
         }
 
+        closeEditorMode();
         Log.w(TAG, "doShare: " + files.size() + " item(s)");
     }
 
