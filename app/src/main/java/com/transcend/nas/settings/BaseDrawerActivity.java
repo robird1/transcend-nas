@@ -180,6 +180,7 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
                 Intent i = new Intent(BaseDrawerActivity.this, invokedClass);
                 i.putExtra("lastSelectedItem", itemId);
                 startActivity(i);
+                overridePendingTransition(0, 0);
             }
         }, 280);
     }
@@ -192,6 +193,7 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
                 intent.putExtra("selectedItemId", itemId);
                 intent.putExtra("path", getFileManagePath(itemId));
                 startActivity(intent);
+                overridePendingTransition(0, 0);
             }
         }, 280);
     }
