@@ -139,15 +139,6 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         return mType;
     }
 
-    protected int getSize(SmbFile file) {
-        int total = 0;
-        do {
-            total = file.getContentLength();
-            Log.w(TAG, "file size: " + total);
-        } while (total == 0);
-        return total;
-    }
-
     protected String createRemoteUniqueName(SmbFile source, String destination) throws MalformedURLException, SmbException {
         final boolean isDirectory= source.isDirectory();
         SmbFile dir = new SmbFile(destination);

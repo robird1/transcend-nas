@@ -92,7 +92,7 @@ public class SmbFileCopyLoader extends SmbAbstractLoader {
     private void copyFile(SmbFile source, String destination) throws MalformedURLException, SmbException {
         String name = createRemoteUniqueName(source, destination);
         SmbFile target = new SmbFile(destination, name);
-        int total = getSize(source);
+        int total = source.getContentLength();
         startProgressWatcher(name, target, total);
         source.copyTo(target);
         closeProgressWatcher();
