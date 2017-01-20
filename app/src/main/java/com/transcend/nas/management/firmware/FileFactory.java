@@ -142,17 +142,7 @@ public class FileFactory {
                 //TODO : load music thumbnail
             }
         } else {
-            if(thumbnail) {
-                ImageLoader.getInstance().displayImage(url, view);
-            } else {
-                DisplayImageOptions options = new DisplayImageOptions.Builder()
-                        .bitmapConfig(Bitmap.Config.RGB_565)
-                        .cacheInMemory(true)
-                        .cacheOnDisk(true)
-                        .showImageOnLoading(R.drawable.ic_image_white_big)
-                        .build();
-                ImageLoader.getInstance().displayImage(url, view, options);
-            }
+            ImageLoader.getInstance().displayImage(url, view);
         }
     }
 
