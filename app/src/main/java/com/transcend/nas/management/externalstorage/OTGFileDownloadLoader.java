@@ -16,11 +16,10 @@ import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.common.CustomNotificationManager;
 import com.transcend.nas.management.SmbAbstractLoader;
+import com.transcend.nas.viewer.document.FileDownloadManager;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 
 import jcifs.smb.SmbFile;
@@ -34,10 +33,6 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
 
     private List<String> mSrcs;
     private String mDest;
-
-    private OutputStream mOS;
-    private InputStream mIS;
-
     private DocumentFile mDestFileItem;
 
     public OTGFileDownloadLoader(Context context, List<String> srcs, String dest, DocumentFile destFileItem) {
@@ -60,13 +55,6 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
             e.printStackTrace();
             setException(e);
             updateResult(mType, getContext().getString(R.string.error), mDest);
-        } finally {
-            try {
-                if (mOS != null) mOS.close();
-                if (mIS != null) mIS.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
         return false;
     }
@@ -100,37 +88,16 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
 
     private void downloadFileTask(Context context, SmbFile srcFileItem, DocumentFile destFileItem) throws IOException {
         Log.d(TAG, "[Enter] downloadFileTask()");
-        String fileName = createLocalUniqueName(srcFileItem, getPath(context, destFileItem.getUri()));
-        DocumentFile destfile = destFileItem.createFile(null, fileName);
-        int total = (int) srcFileItem.length();
-//                startProgressWatcher(destfile, total);
-        downloadFile(context, srcFileItem, destfile);
-//                closeProgressWatcher();
-//                updateProgress(destfile.getName(), total, total);
+        String destPath = getPath(context, destFileItem.getUri());
+        String fileName = createLocalUniqueName(srcFileItem, destPath);
+        downloadFile(context, srcFileItem, destPath, fileName);
     }
 
-    public boolean downloadFile(Context context, SmbFile srcFileItem, DocumentFile destFileItem) throws IOException {
+    public boolean downloadFile(Context context, SmbFile srcFileItem, String destPath, String uniqueName) throws IOException {
+        Log.d(TAG, "[Enter] downloadFile");
         if (srcFileItem.isFile()) {
-            try {
-                InputStream in = srcFileItem.getInputStream();
-                OutputStream out = context.getContentResolver().openOutputStream(destFileItem.getUri());
-                byte[] buf = new byte[8192];
-                int len;
-                while ((len = in.read(buf)) != -1) {
-                    out.write(buf, 0, len);
-                }
-                in.close();
-                out.close();
-
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                Log.d(TAG, "[Enter] FileNotFoundException");
-                throw new FileNotFoundException();
-            } catch (IOException e) {
-                e.printStackTrace();
-                Log.d(TAG, "[Enter] IOException");
-                throw new IOException();
-            }
+            String srcPath = srcFileItem.getPath().split(mServer.getHostname())[1];
+            FileDownloadManager.getInstance(context).start(context, srcPath, destPath, uniqueName);
             return true;
         } else if (srcFileItem.isDirectory()) {
             return true;

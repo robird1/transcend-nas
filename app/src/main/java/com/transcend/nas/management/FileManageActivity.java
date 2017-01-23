@@ -77,7 +77,7 @@ import com.transcend.nas.settings.DrawerMenuController;
 import com.transcend.nas.tutk.TutkLinkNasLoader;
 import com.transcend.nas.tutk.TutkLogoutLoader;
 import com.transcend.nas.view.ProgressDialog;
-import com.transcend.nas.viewer.document.DocumentDownloadManager;
+import com.transcend.nas.viewer.document.FileDownloadManager;
 import com.transcend.nas.viewer.document.OpenWithUploadHandler;
 import com.transcend.nas.viewer.music.MusicActivity;
 import com.transcend.nas.viewer.music.MusicManager;
@@ -142,7 +142,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
 
     private SmbFileShareLoader mSmbFileShareLoader;
 
-    //    private DocumentDownloadManager mDownloadManager;
+    //    private FileDownloadManager mDownloadManager;
     private FileInfo mFileInfo;
     private String mDownloadFilePath;
     private OpenWithUploadHandler mOpenWithUploadHandler;
@@ -862,8 +862,8 @@ public class FileManageActivity extends BaseDrawerActivity implements
                 return new SmbFileMoveLoader(this, paths, path);
             case LoaderID.LOCAL_FILE_MOVE:
                 return new LocalFileMoveLoader(this, paths, path);
-            case LoaderID.SMB_FILE_DOWNLOAD:
-                return new SmbFileDownloadLoader(this, paths, path);
+            case LoaderID.FILE_DOWNLOAD:
+                return new FileDownloadLoader(this, paths, path);
             case LoaderID.LOCAL_FILE_UPLOAD:
                 return new LocalFileUploadLoader(this, paths, path);
             case LoaderID.LOCAL_FILE_UPLOAD_OPEN_WITH:
@@ -994,7 +994,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
             } else {
                 checkEmptyView();
                 if (loader instanceof SmbAbstractLoader) {
-                    if ((loader instanceof SmbFileDownloadLoader) && isDownloadLocationNotExist()) {
+                    if ((loader instanceof FileDownloadLoader) && isDownloadLocationNotExist()) {
                         Toast.makeText(this, R.string.download_location_error, Toast.LENGTH_LONG).show();
                     } else {
                         LanCheckManager.getInstance().startLanCheck();
@@ -1173,7 +1173,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
     }
 
     private void doDownload(String dest, ArrayList<String> paths) {
-        int id = mStorageController.isWritePermissionRequired(dest) ? LoaderID.OTG_FILE_DOWNLOAD : LoaderID.SMB_FILE_DOWNLOAD;
+        int id = mStorageController.isWritePermissionRequired(dest) ? LoaderID.OTG_FILE_DOWNLOAD : LoaderID.FILE_DOWNLOAD;
         Bundle args = new Bundle();
         args.putStringArrayList("paths", paths);
         args.putString("path", dest);
@@ -1695,7 +1695,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
     }
 
     private void initDownloadManager() {
-        DocumentDownloadManager.getInstance(this).setOnFinishListener(new DocumentDownloadManager.OnFinishListener() {
+        FileDownloadManager.getInstance(this).setOnFinishListener(new FileDownloadManager.OnFinishListener() {
             @Override
             public void onComplete(Uri destUri) {
                 mDownloadFilePath = destUri.getPath();
@@ -1717,7 +1717,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
     }
 
     private void clearDownloadTask() {
-        DocumentDownloadManager.getInstance(this).cancel();
+        FileDownloadManager.getInstance(this).cancel();
     }
 
     public void openFileBy3rdApp(Context context, FileInfo fileInfo) {
@@ -1730,7 +1730,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
                 mProgressView.setVisibility(View.VISIBLE);
             }
 
-            DocumentDownloadManager.getInstance(this).start(context, fileInfo);
+            FileDownloadManager.getInstance(this).start(context, fileInfo);
         }
     }
 

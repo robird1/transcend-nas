@@ -14,7 +14,7 @@ public class LoaderID {
     public static final int SMB_FILE_DELETE = 6;
     public static final int SMB_FILE_COPY = 7;
     public static final int SMB_FILE_MOVE = 8;
-    public static final int SMB_FILE_DOWNLOAD = 9;
+    public static final int FILE_DOWNLOAD = 9;
     public static final int LOCAL_FILE_UPLOAD = 10;
     public static final int LOCAL_FILE_LIST = 16;
     public static final int LOCAL_NEW_FOLDER = 11;
