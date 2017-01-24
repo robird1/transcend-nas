@@ -1,10 +1,14 @@
 package com.transcend.nas.management;
 
 import android.content.Context;
+import android.util.Log;
 
+import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.R;
 import com.transcend.nas.common.CustomNotificationManager;
 import com.transcend.nas.viewer.document.FileDownloadManager;
+import com.tutk.IOTC.P2PService;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +21,7 @@ import jcifs.smb.SmbFile;
  */
 public class FileDownloadLoader extends SmbAbstractLoader {
 
+    private static final String TAG = FileDownloadLoader.class.getSimpleName();
     private Context mContext;
     private List<String> mSrcs;
     private String mDest;
@@ -82,8 +87,13 @@ public class FileDownloadLoader extends SmbAbstractLoader {
     }
 
     private void downloadFile(SmbFile source, String destination) throws IOException {
+        Log.d(TAG, "[Enter] downloadFile");
         String name = createLocalUniqueName(source, destination);
-        String srcPath = source.getPath().split(mServer.getHostname())[1];
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        String hostName = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.SMB);
+        Log.d(TAG, "hostName: "+ hostName);
+        String srcPath = source.getPath().split(hostName)[1];
+        Log.d(TAG, "srcPath: "+ srcPath);
         FileDownloadManager.getInstance(mContext).start(mContext, srcPath, destination, name);
     }
 

@@ -14,6 +14,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.provider.DocumentFile;
+import android.support.v4.util.TimeUtils;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.view.ActionMode;
@@ -93,6 +94,7 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static com.transcend.nas.NASUtils.isSDCardPath;
 
@@ -151,6 +153,8 @@ public class FileManageActivity extends BaseDrawerActivity implements
 
     private DrawerMenuController mDrawerController;
     private ExternalStorageController mStorageController;
+
+    private long mTime;
 
     @Override
     public int onLayoutID() {
@@ -863,6 +867,9 @@ public class FileManageActivity extends BaseDrawerActivity implements
             case LoaderID.LOCAL_FILE_MOVE:
                 return new LocalFileMoveLoader(this, paths, path);
             case LoaderID.FILE_DOWNLOAD:
+                Log.d(TAG, "[Enter] onCreateLoader() LoaderID.FILE_DOWNLOAD");
+                mTime = System.currentTimeMillis();
+                Log.d(TAG, "download start time: "+ FileInfo.getTime(mTime));
                 return new FileDownloadLoader(this, paths, path);
             case LoaderID.LOCAL_FILE_UPLOAD:
                 return new LocalFileUploadLoader(this, paths, path);
@@ -902,6 +909,12 @@ public class FileManageActivity extends BaseDrawerActivity implements
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
         Log.w(TAG, "onLoaderFinished: " + loader.getClass().getSimpleName() + " " + success);
         if (success) {
+            if (loader instanceof FileDownloadLoader) {
+                Log.d(TAG, "[Enter] onLoadFinished() FileDownloadLoader");
+                Log.d(TAG, "download end time: "+ FileInfo.getTime(System.currentTimeMillis()));
+                long diff = System.currentTimeMillis() - mTime;
+                Log.d(TAG, "spend time: "+ TimeUnit.MILLISECONDS.toMinutes(diff));
+            }
             if (loader instanceof SmbFileListLoader) {
                 //file list change, stop previous image loader
                 ImageLoader.getInstance().stop();
