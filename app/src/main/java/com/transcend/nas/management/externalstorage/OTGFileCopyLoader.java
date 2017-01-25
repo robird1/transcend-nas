@@ -1,18 +1,12 @@
 package com.transcend.nas.management.externalstorage;
 
 import android.app.Activity;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.support.v4.provider.DocumentFile;
-import android.support.v7.app.NotificationCompat;
-import android.util.Log;
 
 import com.transcend.nas.R;
+import com.transcend.nas.common.CustomNotificationManager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,6 +30,11 @@ public class OTGFileCopyLoader extends AbstractOTGMoveLoader {
         mActivity = (Activity) context;
         mSrcDocumentFileList = src;
         mDesDocumentFile = des;
+
+        setType(getContext().getString(R.string.copy));
+        mTotal = src.size();
+        mCurrent = 0;
+        mNotificationID = CustomNotificationManager.getInstance().queryNotificationID();
     }
 
     @Override
@@ -45,7 +44,7 @@ public class OTGFileCopyLoader extends AbstractOTGMoveLoader {
         } catch (IOException e) {
             e.printStackTrace();
             closeProgressWatcher();
-            updateResult(getContext().getString(R.string.error));
+            updateResult(getContext().getString(R.string.error), null);
         }
         return false;
     }
@@ -59,8 +58,9 @@ public class OTGFileCopyLoader extends AbstractOTGMoveLoader {
                 } else {
                     copyFileTask(mActivity, file, mDesDocumentFile);
                 }
+                mCurrent++;
             }
-            updateResult(getContext().getString(R.string.done));
+            updateResult(getContext().getString(R.string.done), null);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -73,12 +73,15 @@ public class OTGFileCopyLoader extends AbstractOTGMoveLoader {
             if (srcFileItem.length() > 0 && destFileItem.length() > 0) {
                 DocumentFile destDirectory = destFileItem.createDirectory(createUniqueName(srcFileItem, destFileItem));
                 DocumentFile[] files = srcFileItem.listFiles();
+                mTotal += files.length;
+
                 for (DocumentFile file : files) {
                     if (file.isDirectory()) {
                         copyDirectoryTask(mActivity, file, destDirectory);
                     } else {//is file
                         copyFileTask(mActivity, file, destDirectory);
                     }
+                    mCurrent++;
                 }
             }
         } catch (Exception e) {
@@ -134,52 +137,4 @@ public class OTGFileCopyLoader extends AbstractOTGMoveLoader {
 
     }
 
-    private void startProgressWatcher(final DocumentFile target, final int total) {
-        try {
-            mThread = new HandlerThread(TAG);
-            mThread.start();
-            mHandler = new Handler(mThread.getLooper());
-            mHandler.post(mWatcher = new Runnable() {
-                @Override
-                public void run() {
-                    int count = 0;
-                    if (target != null)
-                        count = (int) target.length();
-                    if (mHandler != null) {
-                        mHandler.postDelayed(mWatcher, 1000);
-                        updateProgress(target.getName(), count, total);
-                    }
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void updateResult(String result) {
-        try {
-            Log.w(TAG, "result: " + result);
-
-            int icon = R.mipmap.ic_launcher;
-            String name = getContext().getResources().getString(R.string.app_name);
-            String type = getContext().getResources().getString(R.string.copy);
-            String text = String.format("%s - %s", type, result);
-
-            NotificationManager ntfMgr = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-            Intent intent = mActivity.getIntent();
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext());
-            builder.setSmallIcon(icon);
-            builder.setContentTitle(name);
-            builder.setContentText(text);
-            builder.setContentIntent(pendingIntent);
-            builder.setAutoCancel(true);
-            ntfMgr.notify(0, builder.build());
-        } catch (Exception e) {
-
-        }
-
-    }
 }

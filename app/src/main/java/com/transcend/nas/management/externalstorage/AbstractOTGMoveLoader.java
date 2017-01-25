@@ -1,6 +1,8 @@
 package com.transcend.nas.management.externalstorage;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.support.v4.provider.DocumentFile;
 
 import com.transcend.nas.management.LocalAbstractLoader;
@@ -18,8 +20,12 @@ import jcifs.smb.SmbException;
  */
 
 public class AbstractOTGMoveLoader extends LocalAbstractLoader {
+    private static final String TAG = AbstractOTGMoveLoader.class.getSimpleName();
+    private Context mContext;
+
     public AbstractOTGMoveLoader(Context context) {
         super(context);
+        mContext = context;
     }
 
     protected String createUniqueName(DocumentFile source, DocumentFile dest) throws MalformedURLException, SmbException {
@@ -35,6 +41,28 @@ public class AbstractOTGMoveLoader extends LocalAbstractLoader {
             unique = String.format(prefix + "_%d" + suffix, index++);
         }
         return unique;
+    }
+
+    protected void startProgressWatcher(final DocumentFile target, final int total) {
+        try {
+            mThread = new HandlerThread(TAG);
+            mThread.start();
+            mHandler = new Handler(mThread.getLooper());
+            mHandler.post(mWatcher = new Runnable() {
+                @Override
+                public void run() {
+                    int count = 0;
+                    if (target != null)
+                        count = (int) target.length();
+                    if (mHandler != null) {
+                        mHandler.postDelayed(mWatcher, 1000);
+                        updateProgress(target.getName(), count, total);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

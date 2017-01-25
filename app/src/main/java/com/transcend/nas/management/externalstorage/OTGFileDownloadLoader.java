@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import jcifs.smb.SmbFile;
 
@@ -34,21 +36,21 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
 
     private List<String> mSrcs;
     private String mDest;
-
-    private OutputStream mOS;
-    private InputStream mIS;
-
     private DocumentFile mDestFileItem;
+
+    private boolean mForbidden;
+    private Timer mTimer;
 
     public OTGFileDownloadLoader(Context context, List<String> srcs, String dest, DocumentFile destFileItem) {
         super(context);
         mSrcs = srcs;
         mDest = dest;
+        mDestFileItem = destFileItem;
+
         mNotificationID = CustomNotificationManager.getInstance().queryNotificationID();
         mType = getContext().getString(R.string.download);
         mTotal = mSrcs.size();
         mCurrent = 0;
-        mDestFileItem = destFileItem;
     }
 
     @Override
@@ -60,13 +62,6 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
             e.printStackTrace();
             setException(e);
             updateResult(mType, getContext().getString(R.string.error), mDest);
-        } finally {
-            try {
-                if (mOS != null) mOS.close();
-                if (mIS != null) mIS.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
         return false;
     }
@@ -88,6 +83,8 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
         String dirName = createLocalUniqueName(srcFileItem, getPath(context, destFileItem.getUri()));
         DocumentFile destDirectory = destFileItem.createDirectory(dirName);
         SmbFile[] files = srcFileItem.listFiles();
+        mTotal += files.length;
+
         for (SmbFile file : files) {
             Log.d(TAG, "file.getPath(): "+ file.getPath());
             if (file.isDirectory()) {
@@ -95,6 +92,7 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
             } else {
                 downloadFileTask(mActivity, file, destDirectory);
             }
+            mCurrent++;
         }
     }
 
@@ -102,11 +100,8 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
         Log.d(TAG, "[Enter] downloadFileTask()");
         String fileName = createLocalUniqueName(srcFileItem, getPath(context, destFileItem.getUri()));
         DocumentFile destfile = destFileItem.createFile(null, fileName);
-        int total = (int) srcFileItem.length();
-//                startProgressWatcher(destfile, total);
+        updateProgress(mType, fileName, 0, srcFileItem.getContentLength());
         downloadFile(context, srcFileItem, destfile);
-//                closeProgressWatcher();
-//                updateProgress(destfile.getName(), total, total);
     }
 
     public boolean downloadFile(Context context, SmbFile srcFileItem, DocumentFile destFileItem) throws IOException {
@@ -116,11 +111,15 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
                 OutputStream out = context.getContentResolver().openOutputStream(destFileItem.getUri());
                 byte[] buf = new byte[8192];
                 int len;
+                int count = 0;
                 while ((len = in.read(buf)) != -1) {
                     out.write(buf, 0, len);
+                    count += len;
+                    updateProgressPerSecond(destFileItem.getName(), count, srcFileItem.getContentLength());
                 }
                 in.close();
                 out.close();
+                updateProgressPerSecond(destFileItem.getName(), count, srcFileItem.getContentLength());
 
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -137,6 +136,20 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
         } else {
             throw new FileNotFoundException("item is not a file");
         }
+    }
+
+    private void updateProgressPerSecond(String name, int count, int total) {
+        if (mForbidden)
+            return;
+        mForbidden = true;
+        updateProgress(mType, name, count, total);
+        mTimer = new Timer();
+        mTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                mForbidden = false;
+            }
+        }, 1000);
     }
 
     /**
