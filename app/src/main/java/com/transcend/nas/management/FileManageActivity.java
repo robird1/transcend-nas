@@ -14,7 +14,6 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.provider.DocumentFile;
-import android.support.v4.util.TimeUtils;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.view.ActionMode;
@@ -979,7 +978,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
                 doRefresh();
                 if (loader instanceof SmbAbstractLoader) {
                     String type = ((SmbAbstractLoader) loader).getType();
-                    if (type != null && !type.equals("")) {
+                    if (type != null && !type.equals("") && !type.equals(mContext.getString(R.string.download))) {
                         Toast.makeText(FileManageActivity.this, type + " - " + getString(R.string.done), Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -1708,7 +1707,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
     }
 
     private void initDownloadManager() {
-        FileDownloadManager.getInstance(this).setOnFinishListener(new FileDownloadManager.OnFinishListener() {
+        FileDownloadManager.getInstance(this).setOpenFileListener(new FileDownloadManager.OpenFileListener() {
             @Override
             public void onComplete(Uri destUri) {
                 mDownloadFilePath = destUri.getPath();

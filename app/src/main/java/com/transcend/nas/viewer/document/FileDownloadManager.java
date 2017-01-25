@@ -11,6 +11,9 @@ import com.transcend.nas.management.FileInfo;
 import com.transcend.nas.management.firmware.MediaFactory;
 
 import java.io.File;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static android.media.CamcorderProfile.get;
 
 /**
  * Created by steve_su on 2016/11/1.
@@ -22,9 +25,11 @@ public class FileDownloadManager {
     private static FileDownloadManager mInstance;
     private DownloadManager mDownloadManager;
     private long mDownloadId;
-    private OnFinishListener mOnFinishListener;
+    private OpenFileListener mOpenFileListener;
+    static ConcurrentHashMap<Long, Integer> mDownloadIdMap = new ConcurrentHashMap <>();
+    static ConcurrentHashMap<Integer, Integer> mTaskIdMap = new ConcurrentHashMap <>();
 
-    public interface OnFinishListener {
+    public interface OpenFileListener {
         void onComplete(Uri destUri);
     }
 
@@ -39,15 +44,13 @@ public class FileDownloadManager {
         return mInstance;
     }
 
-    public void setOnFinishListener(OnFinishListener listener) {
-        mOnFinishListener = listener;
+    public void setOpenFileListener(OpenFileListener l) {
+        mOpenFileListener = l;
     }
 
     /**
      * For downloading temporary file. i.e. open file by 3rd app.
      *
-     * @param context
-     * @param fileInfo
      */
     public void start(Context context, FileInfo fileInfo) {
         Uri downloadUri = MediaFactory.createUri(context, fileInfo.path);
@@ -62,19 +65,28 @@ public class FileDownloadManager {
     /**
      * For downloading file from NAS.
      *
-     * @param context
-     * @param srcPath
-     * @param destPath
-     * @param localUniqueName
      */
-    public void start(Context context, String srcPath, String destPath, String localUniqueName) {
+    public void start(Context context, String srcPath, String destPath, String localUniqueName, int taskId) {
         Log.d(TAG, "[Enter] start");
-        Log.d(TAG, "path: "+ srcPath);
+//        Log.d(TAG, "path: "+ srcPath);
         Uri downloadUri = MediaFactory.createUri(context, srcPath);
-        Log.d(TAG, "downloadUri: "+ downloadUri);
+//        Log.d(TAG, "downloadUri: "+ downloadUri);
         Request request = new Request(downloadUri);
         setRequestDestinationUri(request, new File(destPath), localUniqueName);
-        enqueue(request);
+
+        int filesCount;
+        if (mTaskIdMap.containsKey(taskId)) {
+            filesCount = mTaskIdMap.get(taskId) + 1;
+        } else {
+            filesCount = 1;
+        }
+        mTaskIdMap.put(taskId, filesCount);
+
+        long downloadId = enqueue(request);
+        mDownloadIdMap.put(downloadId, taskId);
+
+        Log.d(TAG, "[Enter] mDownloadIdMap.put() downloadId: "+ downloadId+ " taskId: "+ taskId+ " filesCount: "+ filesCount);
+
     }
 
     private void setRequestDestinationUri(Request request, File dirFile, String localUniqueName) {
@@ -82,6 +94,7 @@ public class FileDownloadManager {
         request.setDestinationUri(Uri.fromFile(new File(filePath)));
     }
 
+    //TODO check this method
     public long cancel() {
         long cancelId = 0L;
         if (mDownloadId != 0L) {
@@ -94,8 +107,8 @@ public class FileDownloadManager {
         return mDownloadManager;
     }
 
-    OnFinishListener getOnFinishListener() {
-        return mOnFinishListener;
+    OpenFileListener getOpenFileListener() {
+        return mOpenFileListener;
     }
 
     private void setRequestDestinationUri(Request request, File dirFile, Uri downloadUri) {
@@ -112,11 +125,12 @@ public class FileDownloadManager {
         }
     }
 
-    private void enqueue(Request request) {
-        mDownloadId = mDownloadManager.enqueue(request);
+    private long enqueue(Request request) {
+        return mDownloadId = mDownloadManager.enqueue(request);
     }
 
-    void clearDownloadTaskID() {
+    //TODO check this method
+    void clearDownloadQueue() {
         mDownloadId = 0L;
     }
 

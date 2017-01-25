@@ -97,7 +97,7 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
         Log.d(TAG, "[Enter] downloadFile");
         if (srcFileItem.isFile()) {
             String srcPath = srcFileItem.getPath().split(mServer.getHostname())[1];
-            FileDownloadManager.getInstance(context).start(context, srcPath, destPath, uniqueName);
+            FileDownloadManager.getInstance(context).start(context, srcPath, destPath, uniqueName, mNotificationID);
             return true;
         } else if (srcFileItem.isDirectory()) {
             return true;

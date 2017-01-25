@@ -1,6 +1,7 @@
 package com.transcend.nas.management;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 
 import com.realtek.nasfun.api.Server;
@@ -26,12 +27,16 @@ public class FileDownloadLoader extends SmbAbstractLoader {
     private List<String> mSrcs;
     private String mDest;
 
+//    private boolean mForbidden;
+//    private Timer mTimer;
+
     public FileDownloadLoader(Context context, List<String> srcs, String dest) {
         super(context);
         mContext = context;
         mSrcs = srcs;
         mDest = dest;
         mNotificationID = CustomNotificationManager.getInstance().queryNotificationID();
+        Log.d(TAG, "mNotificationID: "+ mNotificationID);
         mType = getContext().getString(R.string.download);
         mTotal = mSrcs.size();
         mCurrent = 0;
@@ -59,7 +64,7 @@ public class FileDownloadLoader extends SmbAbstractLoader {
                 downloadFile(source, mDest);
             mCurrent++;
         }
-        updateResult(mType, getContext().getString(R.string.done), mDest);
+//        updateResult(mType, getContext().getString(R.string.done), mDest);
         return true;
     }
 
@@ -88,13 +93,31 @@ public class FileDownloadLoader extends SmbAbstractLoader {
 
     private void downloadFile(SmbFile source, String destination) throws IOException {
         Log.d(TAG, "[Enter] downloadFile");
+//        int total = source.getContentLength();
+//        int count = 0;
+
         String name = createLocalUniqueName(source, destination);
         Server server = ServerManager.INSTANCE.getCurrentServer();
         String hostName = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.SMB);
         Log.d(TAG, "hostName: "+ hostName);
         String srcPath = source.getPath().split(hostName)[1];
         Log.d(TAG, "srcPath: "+ srcPath);
-        FileDownloadManager.getInstance(mContext).start(mContext, srcPath, destination, name);
+
+//        updateProgressPerSecond(name, count, total);
+        FileDownloadManager.getInstance(mContext).start(mContext, srcPath, destination, name, mNotificationID);
     }
 
+//    private void updateProgressPerSecond(String name, int count, int total) {
+//        if (mForbidden)
+//            return;
+//        mForbidden = true;
+//        updateProgress(mType, name, count, total);
+//        mTimer = new Timer();
+//        mTimer.schedule(new TimerTask() {
+//            @Override
+//            public void run() {
+//                mForbidden = false;
+//            }
+//        }, 1000);
+//    }
 }

@@ -1,14 +1,24 @@
 package com.transcend.nas.viewer.document;
 
 import android.app.DownloadManager;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import com.transcend.nas.NASUtils;
+import com.transcend.nas.R;
+import com.transcend.nas.common.CustomNotificationManager;
+import com.transcend.nas.management.FileManageActivity;
+
+import static com.transcend.nas.NASApp.getContext;
+import static com.transcend.nas.viewer.document.FileDownloadManager.mDownloadIdMap;
+import static com.transcend.nas.viewer.document.FileDownloadManager.mTaskIdMap;
 
 /**
  * Created by steve_su on 2017/1/17.
@@ -16,33 +26,38 @@ import com.transcend.nas.NASUtils;
 
 public class FileDownloadReceiver extends BroadcastReceiver {
     private static final String TAG = FileDownloadReceiver.class.getSimpleName();
+    private Context mContext;
+    private long mDownloadId;
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d(TAG, " ");
         Log.d(TAG, "[Enter] onReceive");
+        mContext = context;
         if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(intent.getAction())) {
-            long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L);
-            Log.d(TAG, "downloadId: "+ downloadId);
+            mDownloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L);
             DownloadManager.Query query = new DownloadManager.Query();
-            query.setFilterById(downloadId);
+            query.setFilterById(mDownloadId);
             Cursor c = FileDownloadManager.getInstance(context).getManager().query(query);
             if (c.moveToFirst()) {
-                doAction(context, c);
+                doAction(c);
             }
         }
     }
 
-    private void doAction(Context context, Cursor c) {
+    private void doAction(Cursor c) {
         switch (c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))) {
             case DownloadManager.STATUS_SUCCESSFUL:
                 Log.d(TAG, "[Enter] DownloadManager.STATUS_SUCCESSFUL");
                 String uri = c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
                 Log.d(TAG, "uri: "+ uri);
-                if (uri.contains(NASUtils.getCacheFilesLocation(context))) {
-                    notify(context, uri);
+                if (uri.contains(NASUtils.getCacheFilesLocation(mContext))) {
+                    notifyOpenFileListener(uri);
+                } else {
+                    checkNotifyService();
                 }
-                FileDownloadManager.getInstance(context).clearDownloadTaskID();
+
+                //TODO check this statement
+                FileDownloadManager.getInstance(mContext).clearDownloadQueue();
                 break;
             case DownloadManager.STATUS_FAILED:
                 Log.d(TAG, "[Enter] DownloadManager.STATUS_FAILED");
@@ -55,10 +70,62 @@ public class FileDownloadReceiver extends BroadcastReceiver {
         }
     }
 
-    private void notify(Context context, String localUri) {
-        FileDownloadManager.OnFinishListener listener = FileDownloadManager.getInstance(context).getOnFinishListener();
+    private void checkNotifyService() {
+        int taskId;
+        if (mDownloadIdMap.containsKey(mDownloadId)) {
+            taskId = mDownloadIdMap.get(mDownloadId);
+        } else {
+            return;
+        }
+
+        int remainTaskFiles;
+        if (mTaskIdMap.containsKey(taskId)) {
+            remainTaskFiles = mTaskIdMap.get(taskId) - 1;
+        } else {
+            return;
+        }
+
+        Log.d(TAG, "taskId: "+ taskId + " remainTaskFiles: "+ remainTaskFiles);
+        mTaskIdMap.put(taskId, remainTaskFiles);
+
+        if (remainTaskFiles == 0) {
+            invokeNotifyService(mContext.getString(R.string.download), mContext.getString(R.string.done), null, taskId);
+            mTaskIdMap.remove(taskId);
+            mDownloadIdMap.remove(mDownloadId);
+        }
+    }
+
+    private void notifyOpenFileListener(String localUri) {
+        FileDownloadManager.OpenFileListener listener = FileDownloadManager.getInstance(mContext).getOpenFileListener();
         if (listener != null) {
             listener.onComplete(Uri.parse(localUri));
         }
     }
+
+    private void invokeNotifyService(String type, String result, String destination, int taskId) {
+        Log.w(TAG, "result: " + result);
+
+        int icon = R.mipmap.ic_launcher;
+        String name = getContext().getResources().getString(R.string.app_name);
+        String text = String.format("%s - %s", type, result);
+
+        NotificationManager ntfMgr = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        Intent intent = new Intent();
+        intent.setClass(getContext(), FileManageActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        if(destination != null && !destination.equals(""))
+            intent.putExtra("path", destination);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext());
+        builder.setSmallIcon(icon);
+        builder.setContentTitle(name);
+        builder.setContentText(text);
+        builder.setContentIntent(pendingIntent);
+        builder.setAutoCancel(true);
+        ntfMgr.notify(taskId, builder.build());
+        CustomNotificationManager.getInstance().releaseNotificationID(taskId);
+    }
+
 }
