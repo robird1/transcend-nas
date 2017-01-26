@@ -12,6 +12,7 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
+import com.transcend.nas.NASPref;
 import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.management.FileInfo;
@@ -116,6 +117,13 @@ public class FileFactory {
             File file = new File(path);
             return file.equals(base);
         }
+    }
+
+    public boolean isDownloadDirectory(Context context , String path){
+        String download = NASPref.getDownloadLocation(context);
+        File base = new File(download);
+        File file = new File(path);
+        return file.equals(base);
     }
 
     public void displayPhoto(Context context, boolean thumbnail, String path, ImageView view) {

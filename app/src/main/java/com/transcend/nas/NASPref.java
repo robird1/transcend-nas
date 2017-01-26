@@ -37,6 +37,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -416,7 +417,9 @@ public class NASPref {
         String name = context.getResources().getString(R.string.pref_name);
         String key = context.getResources().getString(R.string.pref_download_location);
         String def = getDefaultDownloadLocation(context);
-        return PrefUtil.read(context, name, key, def);
+        String path = PrefUtil.read(context, name, key, def);
+        File download = new File(path);
+        return (download != null && download.exists()) ? path : def;
     }
 
     public static void setDownloadLocation(Context context, String path) {

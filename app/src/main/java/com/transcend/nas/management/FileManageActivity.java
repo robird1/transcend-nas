@@ -197,31 +197,22 @@ public class FileManageActivity extends BaseDrawerActivity implements
             case R.id.nav_storage:
                 GoogleAnalysisFactory.getInstance(this).sendScreen(GoogleAnalysisFactory.VIEW.BROWSER_REMOTE);
                 isDownloadFolder = false;
-                mPath = NASApp.ROOT_SMB;
                 break;
             case R.id.nav_device:
                 GoogleAnalysisFactory.getInstance(this).sendScreen(GoogleAnalysisFactory.VIEW.BROWSER_LOCAL);
                 isDownloadFolder = false;
-                mPath = NASApp.ROOT_STG;
                 break;
             case R.id.nav_sdcard:
                 GoogleAnalysisFactory.getInstance(this).sendScreen(GoogleAnalysisFactory.VIEW.BROWSER_LOCAL_SDCARD);
                 isDownloadFolder = false;
-                String location = NASUtils.getSDLocation(this);
-                if (location != null)
-                    mPath = location;
-                else
-                    mPath = NASApp.ROOT_STG;
                 break;
             case R.id.nav_downloads:
                 GoogleAnalysisFactory.getInstance(this).sendScreen(GoogleAnalysisFactory.VIEW.BROWSER_LOCAL_DOWNLOAD);
                 isDownloadFolder = true;
-                mPath = NASPref.getDownloadLocation(this);
                 break;
             default:
                 GoogleAnalysisFactory.getInstance(this).sendScreen(GoogleAnalysisFactory.VIEW.BROWSER_REMOTE);
                 isDownloadFolder = false;
-                mPath = NASApp.ROOT_SMB;
                 break;
         }
     }
@@ -659,7 +650,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
     public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
         boolean isEmpty = (getSelectedCount() == 0);
         int id = item.getItemId();
-        if(isEmpty && id != R.id.file_manage_editor_action_new_folder) {
+        if(isEmpty && id != R.id.file_manage_editor_action_new_folder && id != R.id.file_manage_editor_action_more) {
             toast(R.string.no_item_selected);
         } else {
             switch (id) {
@@ -741,7 +732,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
             return;
         }
         if (!FileFactory.getInstance().isTopDirectory(this, mMode, mRoot, mPath)) {
-            if (isDownloadFolder && FileFactory.getInstance().isTopDirectory(this, mMode, NASPref.getDownloadLocation(this), mPath)) {
+            if (isDownloadFolder && FileFactory.getInstance().isDownloadDirectory(this, mPath)) {
                 mDrawerController.openDrawer();
             } else {
                 String parent = new File(mPath).getParent();
@@ -1026,7 +1017,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
     private boolean doEventNotify(boolean update, String path) {
         Long lastTime = Long.parseLong(NASPref.getSessionVerifiedTime(this));
         Long currTime = System.currentTimeMillis();
-        if (!path.startsWith(NASApp.ROOT_STG) && currTime - lastTime >= 180000) {
+        if (!path.startsWith("/storage") && currTime - lastTime >= 180000) {
             Bundle args = new Bundle();
             args.putString("path", update ? path : "");
             getLoaderManager().restartLoader(LoaderID.EVENT_NOTIFY, args, this).forceLoad();

@@ -44,7 +44,7 @@ public class OTGFileCopyLoader extends AbstractOTGMoveLoader {
         } catch (IOException e) {
             e.printStackTrace();
             closeProgressWatcher();
-            updateResult(getContext().getString(R.string.error), null);
+            updateResult(getContext().getString(R.string.error), DocumentFileHelper.getPath(mActivity, mDesDocumentFile.getUri()));
         }
         return false;
     }
@@ -60,7 +60,7 @@ public class OTGFileCopyLoader extends AbstractOTGMoveLoader {
                 }
                 mCurrent++;
             }
-            updateResult(getContext().getString(R.string.done), null);
+            updateResult(getContext().getString(R.string.done), DocumentFileHelper.getPath(mActivity, mDesDocumentFile.getUri()));
             return true;
         } catch (Exception e) {
             e.printStackTrace();
