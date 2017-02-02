@@ -193,7 +193,7 @@ public class SettingBackupActivity extends AppCompatActivity {
             args.putString("mode", NASApp.MODE_SMB);
             args.putString("type", NASApp.ACT_DIRECT);
             args.putString("root", NASApp.ROOT_SMB);
-            args.putString("path", NASPref.getBackupLocation(getActivity()));
+            args.putString("path", NASApp.ROOT_SMB);
             Intent intent = new Intent();
             intent.setClass(getActivity(), FileActionLocateActivity.class);
             intent.putExtras(args);

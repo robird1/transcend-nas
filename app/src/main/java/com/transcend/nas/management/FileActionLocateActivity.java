@@ -94,8 +94,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         doRefresh();
         toast(getHintResId(), Toast.LENGTH_SHORT);
 
-        String type = getIntent().getStringExtra("type");
-        if (type != null && !type.equals(NASApp.ACT_UPLOAD)) {
+        if (!NASApp.MODE_SMB.equals(mMode)) {
             checkExternalDeviceCount();
         }
 
