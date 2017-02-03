@@ -77,8 +77,10 @@ import com.transcend.nas.settings.DrawerMenuController;
 import com.transcend.nas.tutk.TutkLinkNasLoader;
 import com.transcend.nas.tutk.TutkLogoutLoader;
 import com.transcend.nas.view.ProgressDialog;
-import com.transcend.nas.viewer.document.FileDownloadManager;
+import com.transcend.nas.viewer.document.AbstractDownloadManager;
+import com.transcend.nas.viewer.document.DownloadFactory;
 import com.transcend.nas.viewer.document.OpenWithUploadHandler;
+import com.transcend.nas.viewer.document.TempFileDownloadManager;
 import com.transcend.nas.viewer.music.MusicActivity;
 import com.transcend.nas.viewer.music.MusicManager;
 import com.transcend.nas.viewer.photo.ViewerActivity;
@@ -143,7 +145,6 @@ public class FileManageActivity extends BaseDrawerActivity implements
 
     private SmbFileShareLoader mSmbFileShareLoader;
 
-    //    private FileDownloadManager mDownloadManager;
     private FileInfo mFileInfo;
     private String mDownloadFilePath;
     private OpenWithUploadHandler mOpenWithUploadHandler;
@@ -1707,7 +1708,9 @@ public class FileManageActivity extends BaseDrawerActivity implements
     }
 
     private void initDownloadManager() {
-        FileDownloadManager.getInstance(this).setOpenFileListener(new FileDownloadManager.OpenFileListener() {
+        TempFileDownloadManager manager = (TempFileDownloadManager) DownloadFactory.getManager(mContext, DownloadFactory.Type.TEMPORARY);
+        manager.setOpenFileListener(new TempFileDownloadManager.OpenFileListener() {
+
             @Override
             public void onComplete(Uri destUri) {
                 mDownloadFilePath = destUri.getPath();
@@ -1729,7 +1732,7 @@ public class FileManageActivity extends BaseDrawerActivity implements
     }
 
     private void clearDownloadTask() {
-        FileDownloadManager.getInstance(this).cancel();
+        DownloadFactory.getManager(mContext, DownloadFactory.Type.TEMPORARY).cancel();
     }
 
     public void openFileBy3rdApp(Context context, FileInfo fileInfo) {
@@ -1742,7 +1745,9 @@ public class FileManageActivity extends BaseDrawerActivity implements
                 mProgressView.setVisibility(View.VISIBLE);
             }
 
-            FileDownloadManager.getInstance(this).start(context, fileInfo);
+            Bundle data = new Bundle();
+            data.putString(AbstractDownloadManager.KEY_SOURCE_PATH, fileInfo.path);
+            DownloadFactory.getManager(mContext, DownloadFactory.Type.TEMPORARY).start(data);
         }
     }
 

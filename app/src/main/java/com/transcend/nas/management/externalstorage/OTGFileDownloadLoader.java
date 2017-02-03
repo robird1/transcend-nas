@@ -6,6 +6,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
@@ -16,7 +17,8 @@ import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.common.CustomNotificationManager;
 import com.transcend.nas.management.SmbAbstractLoader;
-import com.transcend.nas.viewer.document.FileDownloadManager;
+import com.transcend.nas.viewer.document.AbstractDownloadManager;
+import com.transcend.nas.viewer.document.DownloadFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -97,7 +99,12 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
         Log.d(TAG, "[Enter] downloadFile");
         if (srcFileItem.isFile()) {
             String srcPath = srcFileItem.getPath().split(mServer.getHostname())[1];
-            FileDownloadManager.getInstance(context).start(context, srcPath, destPath, uniqueName, mNotificationID);
+            Bundle data = new Bundle();
+            data.putString(AbstractDownloadManager.KEY_SOURCE_PATH, srcPath);
+            data.putString(AbstractDownloadManager.KEY_TARGET_PATH, destPath);
+            data.putString(AbstractDownloadManager.KEY_FILE_NAME, uniqueName);
+            data.putInt(AbstractDownloadManager.KEY_TASK_ID, mNotificationID);
+            DownloadFactory.getManager(context, DownloadFactory.Type.TEMPORARY).start(data);
             return true;
         } else if (srcFileItem.isDirectory()) {
             return true;

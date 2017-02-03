@@ -1,14 +1,15 @@
 package com.transcend.nas.management;
 
 import android.content.Context;
-import android.net.Uri;
+import android.os.Bundle;
 import android.util.Log;
 
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.R;
 import com.transcend.nas.common.CustomNotificationManager;
-import com.transcend.nas.viewer.document.FileDownloadManager;
+import com.transcend.nas.viewer.document.AbstractDownloadManager;
+import com.transcend.nas.viewer.document.DownloadFactory;
 import com.tutk.IOTC.P2PService;
 
 import java.io.File;
@@ -104,7 +105,12 @@ public class FileDownloadLoader extends SmbAbstractLoader {
         Log.d(TAG, "srcPath: "+ srcPath);
 
 //        updateProgressPerSecond(name, count, total);
-        FileDownloadManager.getInstance(mContext).start(mContext, srcPath, destination, name, mNotificationID);
+        Bundle data = new Bundle();
+        data.putString(AbstractDownloadManager.KEY_SOURCE_PATH, srcPath);
+        data.putString(AbstractDownloadManager.KEY_TARGET_PATH, destination);
+        data.putString(AbstractDownloadManager.KEY_FILE_NAME, name);
+        data.putInt(AbstractDownloadManager.KEY_TASK_ID, mNotificationID);
+        DownloadFactory.getManager(mContext, DownloadFactory.Type.PERSIST).start(data);
     }
 
 //    private void updateProgressPerSecond(String name, int count, int total) {
