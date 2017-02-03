@@ -6,6 +6,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
@@ -16,14 +17,12 @@ import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.common.CustomNotificationManager;
 import com.transcend.nas.management.SmbAbstractLoader;
+import com.transcend.nas.viewer.document.AbstractDownloadManager;
+import com.transcend.nas.viewer.document.DownloadFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import jcifs.smb.SmbFile;
 
@@ -38,19 +37,15 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
     private String mDest;
     private DocumentFile mDestFileItem;
 
-    private boolean mForbidden;
-    private Timer mTimer;
-
     public OTGFileDownloadLoader(Context context, List<String> srcs, String dest, DocumentFile destFileItem) {
         super(context);
         mSrcs = srcs;
         mDest = dest;
-        mDestFileItem = destFileItem;
-
         mNotificationID = CustomNotificationManager.getInstance().queryNotificationID();
         mType = getContext().getString(R.string.download);
         mTotal = mSrcs.size();
         mCurrent = 0;
+        mDestFileItem = destFileItem;
     }
 
     @Override
@@ -80,11 +75,9 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
     }
 
     private void downloadDirectoryTask(Context context, SmbFile srcFileItem, DocumentFile destFileItem) throws IOException {
-        String dirName = createLocalUniqueName(srcFileItem, DocumentFileHelper.getPath(context, destFileItem.getUri()));
+        String dirName = createLocalUniqueName(srcFileItem, getPath(context, destFileItem.getUri()));
         DocumentFile destDirectory = destFileItem.createDirectory(dirName);
         SmbFile[] files = srcFileItem.listFiles();
-        mTotal += files.length;
-
         for (SmbFile file : files) {
             Log.d(TAG, "file.getPath(): "+ file.getPath());
             if (file.isDirectory()) {
@@ -92,44 +85,26 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
             } else {
                 downloadFileTask(mActivity, file, destDirectory);
             }
-            mCurrent++;
         }
     }
 
     private void downloadFileTask(Context context, SmbFile srcFileItem, DocumentFile destFileItem) throws IOException {
         Log.d(TAG, "[Enter] downloadFileTask()");
-        String fileName = createLocalUniqueName(srcFileItem, DocumentFileHelper.getPath(context, destFileItem.getUri()));
-        DocumentFile destfile = destFileItem.createFile(null, fileName);
-        updateProgress(mType, fileName, 0, srcFileItem.getContentLength());
-        downloadFile(context, srcFileItem, destfile);
+        String destPath = getPath(context, destFileItem.getUri());
+        String fileName = createLocalUniqueName(srcFileItem, destPath);
+        downloadFile(context, srcFileItem, destPath, fileName);
     }
 
-    public boolean downloadFile(Context context, SmbFile srcFileItem, DocumentFile destFileItem) throws IOException {
+    public boolean downloadFile(Context context, SmbFile srcFileItem, String destPath, String uniqueName) throws IOException {
+        Log.d(TAG, "[Enter] downloadFile");
         if (srcFileItem.isFile()) {
-            try {
-                InputStream in = srcFileItem.getInputStream();
-                OutputStream out = context.getContentResolver().openOutputStream(destFileItem.getUri());
-                byte[] buf = new byte[8192];
-                int len;
-                int count = 0;
-                while ((len = in.read(buf)) != -1) {
-                    out.write(buf, 0, len);
-                    count += len;
-                    updateProgressPerSecond(destFileItem.getName(), count, srcFileItem.getContentLength());
-                }
-                in.close();
-                out.close();
-                updateProgressPerSecond(destFileItem.getName(), count, srcFileItem.getContentLength());
-
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                Log.d(TAG, "[Enter] FileNotFoundException");
-                throw new FileNotFoundException();
-            } catch (IOException e) {
-                e.printStackTrace();
-                Log.d(TAG, "[Enter] IOException");
-                throw new IOException();
-            }
+            String srcPath = srcFileItem.getPath().split(mServer.getHostname())[1];
+            Bundle data = new Bundle();
+            data.putString(AbstractDownloadManager.KEY_SOURCE_PATH, srcPath);
+            data.putString(AbstractDownloadManager.KEY_TARGET_PATH, destPath);
+            data.putString(AbstractDownloadManager.KEY_FILE_NAME, uniqueName);
+            data.putInt(AbstractDownloadManager.KEY_TASK_ID, mNotificationID);
+            DownloadFactory.getManager(context, DownloadFactory.Type.TEMPORARY).start(data);
             return true;
         } else if (srcFileItem.isDirectory()) {
             return true;
@@ -138,17 +113,140 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
         }
     }
 
-    private void updateProgressPerSecond(String name, int count, int total) {
-        if (mForbidden)
-            return;
-        mForbidden = true;
-        updateProgress(mType, name, count, total);
-        mTimer = new Timer();
-        mTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                mForbidden = false;
+    /**
+     * Get a file path from a Uri. This will get the the path for Storage Access
+     * Framework Documents, as well as the _data field for the MediaStore and
+     * other file-based ContentProviders.
+     *
+     * @param context The context.
+     * @param uri The Uri to query.
+     * @author paulburke
+     */
+    @TargetApi(19)
+    public String getPath(final Context context, final Uri uri) {
+        Log.d(TAG, "[Enter] getPath()");
+
+        final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+
+        // DocumentProvider
+        if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
+            // ExternalStorageProvider
+            if (isExternalStorageDocument(uri)) {
+                final String docId = DocumentsContract.getDocumentId(uri);
+                final String[] split = docId.split(":");
+                final String type = split[0];
+
+                if ("primary".equalsIgnoreCase(type)) {
+                    return Environment.getExternalStorageDirectory() + "/" + split[1];
+                } else {
+                    Log.d(TAG, "split.length: "+ split.length);
+                    String path = NASUtils.getSDLocation(context).concat("/");
+                    if (split.length != 1) {
+                        path = path.concat(split[1]);
+                    }
+                    Log.d(TAG, "destination path: "+ path);
+                    return path;
+                }
             }
-        }, 1000);
+            // DownloadsProvider
+            else if (isDownloadsDocument(uri)) {
+
+                final String id = DocumentsContract.getDocumentId(uri);
+                final Uri contentUri = ContentUris.withAppendedId(
+                        Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+
+                return getDataColumn(context, contentUri, null, null);
+            }
+            // MediaProvider
+            else if (isMediaDocument(uri)) {
+                final String docId = DocumentsContract.getDocumentId(uri);
+                final String[] split = docId.split(":");
+                final String type = split[0];
+
+                Uri contentUri = null;
+                if ("image".equals(type)) {
+                    contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                } else if ("video".equals(type)) {
+                    contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+                } else if ("audio".equals(type)) {
+                    contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                }
+
+                final String selection = "_id=?";
+                final String[] selectionArgs = new String[] {
+                        split[1]
+                };
+
+                return getDataColumn(context, contentUri, selection, selectionArgs);
+            }
+        }
+        // MediaStore (and general)
+        else if ("content".equalsIgnoreCase(uri.getScheme())) {
+            return getDataColumn(context, uri, null, null);
+        }
+        // File
+        else if ("file".equalsIgnoreCase(uri.getScheme())) {
+            return uri.getPath();
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the value of the data column for this Uri. This is useful for
+     * MediaStore Uris, and other file-based ContentProviders.
+     *
+     * @param context The context.
+     * @param uri The Uri to query.
+     * @param selection (Optional) Filter used in the query.
+     * @param selectionArgs (Optional) Selection arguments used in the query.
+     * @return The value of the _data column, which is typically a file path.
+     */
+    public String getDataColumn(Context context, Uri uri, String selection,
+                                       String[] selectionArgs) {
+
+        Cursor cursor = null;
+        final String column = "_data";
+        final String[] projection = {
+                column
+        };
+
+        try {
+            cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs,
+                    null);
+            if (cursor != null && cursor.moveToFirst()) {
+                final int column_index = cursor.getColumnIndexOrThrow(column);
+                return cursor.getString(column_index);
+            }
+        } finally {
+            if (cursor != null)
+                cursor.close();
+        }
+        return null;
+    }
+
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is ExternalStorageProvider.
+     */
+    public boolean isExternalStorageDocument(Uri uri) {
+        return "com.android.externalstorage.documents".equals(uri.getAuthority());
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is DownloadsProvider.
+     */
+    public boolean isDownloadsDocument(Uri uri) {
+        return "com.android.providers.downloads.documents".equals(uri.getAuthority());
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is MediaProvider.
+     */
+    public boolean isMediaDocument(Uri uri) {
+        return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
 }
