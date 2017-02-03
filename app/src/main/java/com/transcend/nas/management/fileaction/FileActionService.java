@@ -4,7 +4,8 @@ import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.content.Loader;
 import android.os.Bundle;
-import android.util.Log;
+
+import com.transcend.nas.management.externalstorage.ExternalStorageController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,10 @@ import java.util.List;
  */
 abstract class FileActionService {
     public String TAG = FileActionService.class.getSimpleName();
+    protected String mMode;
+    protected String mRoot;
+    protected String mPath;
+    protected ExternalStorageController mExternalStorageController;
     protected int OPEN;
     protected int LIST;
     protected int DOWNLOAD;
@@ -29,8 +34,54 @@ abstract class FileActionService {
         OPEN, LIST, DOWNLOAD, UPLOAD, RENAME, COPY, MOVE, DELETE, CreateFOLDER, SHARE
     }
 
+    public String getMode(Context context){
+        return mMode;
+    }
+
+    public String getRootPath(Context context){
+        return mRoot;
+    }
+
+    public void setCurrentPath(String path){
+        mPath = path;
+    }
+
+    public void setExternalStorageController(ExternalStorageController controller){
+        mExternalStorageController = controller;
+    }
+
+    protected boolean isWritePermissionRequired(Context context, String path) {
+        if(mExternalStorageController != null)
+            return mExternalStorageController.isWritePermissionRequired(path);
+        return false;
+    }
+
+    public FileAction getFileAction(int action){
+        FileAction fileAction = null;
+        if(action == OPEN)
+            fileAction = FileAction.OPEN;
+        else if(action == LIST)
+            fileAction = FileAction.LIST;
+        else if(action == DOWNLOAD)
+            fileAction = FileAction.DOWNLOAD;
+        else if(action == UPLOAD)
+            fileAction = FileAction.UPLOAD;
+        else if(action == RENAME)
+            fileAction = FileAction.RENAME;
+        else if(action == COPY)
+            fileAction = FileAction.COPY;
+        else if(action == MOVE)
+            fileAction = FileAction.MOVE;
+        else if(action == DELETE)
+            fileAction = FileAction.DELETE;
+        else if(action == CreateFOLDER)
+            fileAction = FileAction.CreateFOLDER;
+        else if(action == SHARE)
+            fileAction = FileAction.SHARE;
+        return fileAction;
+    }
+
     public int getLoaderID(FileAction action){
-        Log.d(TAG, action.toString());
         int id = -1;
         switch (action) {
             case OPEN:

@@ -197,7 +197,7 @@ public class FileSharedActivity extends AppCompatActivity implements
     }
 
     private void initDropdown() {
-        mDropdownAdapter = new FileManageDropdownAdapter(this, false);
+        mDropdownAdapter = new FileManageDropdownAdapter(this);
         mDropdownAdapter.setOnDropdownItemSelectedListener(this);
         mDropdown = (AppCompatSpinner) findViewById(R.id.main_dropdown);
         mDropdown.setAdapter(mDropdownAdapter);

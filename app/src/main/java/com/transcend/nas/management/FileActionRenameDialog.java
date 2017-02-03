@@ -104,7 +104,8 @@ public abstract class FileActionRenameDialog implements TextWatcher, View.OnClic
             if (!new FileNameChecker(name).isValid()) {
                 Toast.makeText(mContext, R.string.toast_invalid_name, Toast.LENGTH_SHORT).show();
             } else {
-                onConfirm(name);
+                if(!mName.equals(name))
+                    onConfirm(name);
                 mDialog.dismiss();
             }
         }

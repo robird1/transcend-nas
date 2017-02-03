@@ -110,7 +110,7 @@ public class FileActionPickerActivity extends AppCompatActivity implements
     }
 
     private void initDropdown() {
-        mDropdownAdapter = new FileManageDropdownAdapter(this, true);
+        mDropdownAdapter = new FileManageDropdownAdapter(this);
         mDropdownAdapter.setOnDropdownItemSelectedListener(this);
         mDropdownAdapter.updateList(mPath, mMode);
         mDropdown = (AppCompatSpinner)findViewById(R.id.locate_dropdown);

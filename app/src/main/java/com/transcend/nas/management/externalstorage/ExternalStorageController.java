@@ -6,8 +6,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 
+import com.transcend.nas.DrawerMenuActivity;
 import com.transcend.nas.management.FileManageActivity;
-import com.transcend.nas.settings.BaseDrawerActivity;
 
 /**
  * Created by steve_su on 2016/12/26.
@@ -23,7 +23,7 @@ public class ExternalStorageController {
         mInstance = getInstance();
     }
 
-    public void onDrawerItemSelected(BaseDrawerActivity activity, int itemId) {
+    public void onDrawerItemSelected(DrawerMenuActivity activity, int itemId) {
         mInstance.onNavigationItemSelected(activity, itemId);
     }
 

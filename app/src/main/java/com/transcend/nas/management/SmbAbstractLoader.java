@@ -16,7 +16,6 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.R;
 import com.transcend.nas.common.CustomNotificationManager;
-import com.transcend.nas.management.firmware.FileFactory;
 import com.transcend.nas.utils.MathUtil;
 import com.tutk.IOTC.P2PService;
 

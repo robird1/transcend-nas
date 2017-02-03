@@ -1,4 +1,4 @@
-package com.transcend.nas.settings;
+package com.transcend.nas;
 
 import android.app.LoaderManager;
 import android.content.Intent;
@@ -12,11 +12,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import com.transcend.nas.LoaderID;
-import com.transcend.nas.NASApp;
-import com.transcend.nas.NASPref;
-import com.transcend.nas.NASUtils;
-import com.transcend.nas.R;
 import com.transcend.nas.common.ManageFactory;
 import com.transcend.nas.connection.LoginActivity;
 import com.transcend.nas.connection.old.StartActivity;
@@ -27,6 +22,10 @@ import com.transcend.nas.management.firmware.ShareFolderManager;
 import com.transcend.nas.management.firmware.TwonkyManager;
 import com.transcend.nas.service.AutoBackupService;
 import com.transcend.nas.service.LanCheckManager;
+import com.transcend.nas.settings.DiskFactory;
+import com.transcend.nas.settings.FeedbackActivity;
+import com.transcend.nas.settings.HelpActivity;
+import com.transcend.nas.settings.SettingsActivity;
 import com.transcend.nas.tutk.TutkLogoutLoader;
 import com.transcend.nas.view.NotificationDialog;
 import com.transcend.nas.viewer.music.MusicService;
@@ -35,12 +34,14 @@ import com.transcend.nas.viewer.music.MusicService;
  * Created by steve_su on 2016/12/12.
  */
 
-public abstract class BaseDrawerActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
-        LoaderManager.LoaderCallbacks<Boolean>, SDCardReceiver.SDCardObserver {
+public abstract class DrawerMenuActivity extends AppCompatActivity implements
+        NavigationView.OnNavigationItemSelectedListener,
+        LoaderManager.LoaderCallbacks<Boolean>,
+        SDCardReceiver.SDCardObserver {
 
+    private static final String TAG = DrawerMenuActivity.class.getSimpleName();
 
-    private static final String TAG = BaseDrawerActivity.class.getSimpleName();
-    private DrawerMenuController mDrawerController;
+    public DrawerMenuController mDrawerController;
 
     public abstract int onLayoutID();
 
@@ -55,6 +56,19 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
         initToolbar();
         initDrawer();
         SDCardReceiver.registerObserver(this);
+    }
+
+    protected void initToolbar() {
+        Toolbar toolbar = (Toolbar) findViewById(onToolbarID());
+        toolbar.setTitle("");
+        //toolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_white_24dp);
+        setSupportActionBar(toolbar);
+    }
+
+    protected void initDrawer() {
+        Toolbar toolbar = (Toolbar) findViewById(onToolbarID());
+        mDrawerController = new DrawerMenuController(this, toolbar, this);
+        mDrawerController.initView(onActivityDrawer());
     }
 
     @Override
@@ -77,6 +91,14 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
         } else {
             mDrawerController.openDrawer();
         }
+    }
+
+    public void toggleDrawerCheckedItem() {
+        toggleDrawerCheckedItem(getIntent());
+    }
+
+    private void toggleDrawerCheckedItem(@NonNull Intent intent) {
+        mDrawerController.setCheckedItem(intent.getIntExtra("lastSelectedItem", R.id.nav_storage));
     }
 
     @Override
@@ -140,44 +162,19 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
 
     @Override
     public void notifyMounted() {
-        mDrawerController.setSDItem(true);
+        mDrawerController.setSdCardItem(true);
     }
 
     @Override
     public void notifyUnmounted() {
-        mDrawerController.setSDItem(false);
-    }
-
-    protected void initToolbar() {
-        Toolbar toolbar = (Toolbar) findViewById(onToolbarID());
-        toolbar.setTitle("");
-        //toolbar.setNavigationIcon(R.drawable.ic_navigation_arrow_white_24dp);
-        setSupportActionBar(toolbar);
-    }
-
-    protected void initDrawer() {
-        Toolbar toolbar = (Toolbar) findViewById(onToolbarID());
-        mDrawerController = new DrawerMenuController(this, toolbar, this);
-        mDrawerController.initView(onActivityDrawer());
-    }
-
-    protected DrawerMenuController getDrawerController() {
-        return mDrawerController;
-    }
-
-    public void toggleDrawerCheckedItem() {
-        toggleDrawerCheckedItem(getIntent());
-    }
-
-    protected void toggleDrawerCheckedItem(@NonNull Intent intent) {
-        mDrawerController.setCheckdItem(intent.getIntExtra("lastSelectedItem", R.id.nav_storage));
+        mDrawerController.setSdCardItem(false);
     }
 
     private void startActivity(final Class invokedClass, final int itemId) {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                Intent i = new Intent(BaseDrawerActivity.this, invokedClass);
+                Intent i = new Intent(DrawerMenuActivity.this, invokedClass);
                 i.putExtra("lastSelectedItem", itemId);
                 startActivity(i);
                 overridePendingTransition(0, 0);
@@ -189,7 +186,7 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                Intent intent = new Intent(BaseDrawerActivity.this, FileManageActivity.class);
+                Intent intent = new Intent(DrawerMenuActivity.this, FileManageActivity.class);
                 intent.putExtra("selectedItemId", itemId);
                 intent.putExtra("path", getFileManagePath(itemId));
                 startActivity(intent);
@@ -221,7 +218,7 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
             public void onConfirm() {
                 Bundle args = new Bundle();
                 args.putBoolean("clean", true);
-                getLoaderManager().restartLoader(LoaderID.TUTK_LOGOUT, args, BaseDrawerActivity.this).forceLoad();
+                getLoaderManager().restartLoader(LoaderID.TUTK_LOGOUT, args, DrawerMenuActivity.this).forceLoad();
             }
 
             @Override
@@ -234,18 +231,14 @@ public abstract class BaseDrawerActivity extends AppCompatActivity implements Na
     protected void clearDataAfterSwitch() {
         NASPref.clearDataAfterSwitch(this);
 
-        boolean isRunning = false;
-
         //stop auto backup service
-        isRunning = ManageFactory.isServiceRunning(this, AutoBackupService.class);
-        if (isRunning) {
+        if (ManageFactory.isServiceRunning(this, AutoBackupService.class)) {
             Intent intent = new Intent(this, AutoBackupService.class);
             stopService(intent);
         }
 
         //stop music service
-        isRunning = ManageFactory.isServiceRunning(this, MusicService.class);
-        if (isRunning) {
+        if (ManageFactory.isServiceRunning(this, MusicService.class)) {
             Intent intent = new Intent(this, MusicService.class);
             stopService(intent);
         }

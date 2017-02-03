@@ -10,7 +10,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.RelativeLayout;
 
-import com.transcend.nas.NASUtils;
+import com.transcend.nas.DrawerMenuActivity;
+import com.transcend.nas.DrawerMenuController;
 import com.transcend.nas.R;
 
 import java.util.Locale;
@@ -19,7 +20,7 @@ import java.util.Locale;
  * Created by steve_su on 2016/11/28.
  */
 
-public class HelpActivity extends BaseDrawerActivity {
+public class HelpActivity extends DrawerMenuActivity {
     private static final String TAG = HelpActivity.class.getSimpleName();
     private WebView mWebView;
     private RelativeLayout mProgress;

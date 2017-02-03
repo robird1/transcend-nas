@@ -3,6 +3,7 @@ package com.transcend.nas.management;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Environment;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -37,13 +38,10 @@ public class FileManageDropdownAdapter extends BaseAdapter {
 
     private static final String PREFIX_REMOTE = NASApp.getContext().getResources().
             getString(R.string.app_name);
-    private static final String PREFIX_LOCAL = NASApp.getContext().getResources().
-            getString(R.string.storage_name);
 
     private Spinner mDropdown;
     private List<String> mList;
     private List<String> mDisplayList;
-    private boolean isActionLocate = false;
 
     private OnDropdownItemSelectedListener mCallback;
     private Context mContext;
@@ -52,9 +50,8 @@ public class FileManageDropdownAdapter extends BaseAdapter {
         void onDropdownItemSelected(int position);
     }
 
-    public FileManageDropdownAdapter(Context context, boolean actionLocate) {
+    public FileManageDropdownAdapter(Context context) {
         mContext = context;
-        isActionLocate = actionLocate;
         mList = new ArrayList<String>();
     }
 
@@ -65,8 +62,7 @@ public class FileManageDropdownAdapter extends BaseAdapter {
     public void updateList(String path, String mode) {
         if (NASApp.MODE_SMB.equals(mode)) {
             path = PREFIX_REMOTE + path;
-        }
-        else {
+        } else {
             if (!NASUtils.isSDCardPath(mContext, path)) {
                 File storage = Environment.getExternalStorageDirectory();
                 String root = storage.getAbsolutePath();

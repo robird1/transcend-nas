@@ -4,9 +4,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 
+import com.transcend.nas.DrawerMenuActivity;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.R;
-import com.transcend.nas.settings.BaseDrawerActivity;
 
 import static com.transcend.nas.NASUtils.getSDLocation;
 
@@ -20,7 +20,7 @@ public class ExternalStorageKitKat extends AbstractExternalStorage {
     }
 
     @Override
-    protected void onNavigationItemSelected(BaseDrawerActivity activity, int itemId) {
+    protected void onNavigationItemSelected(DrawerMenuActivity activity, int itemId) {
         NASApp.ROOT_SD = getSDLocation(getContext());
         activity.startFileManageActivity(itemId);
     }

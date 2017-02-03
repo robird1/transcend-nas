@@ -5,14 +5,19 @@ import android.content.Context;
 import android.content.Loader;
 
 import com.transcend.nas.LoaderID;
+import com.transcend.nas.NASApp;
+import com.transcend.nas.management.FileDownloadLoader;
+import com.transcend.nas.management.LocalFileUploadLoader;
 import com.transcend.nas.management.SmbFileCopyLoader;
 import com.transcend.nas.management.SmbFileDeleteLoader;
-import com.transcend.nas.management.FileDownloadLoader;
+import com.transcend.nas.management.SmbFileDownloadLoader;
 import com.transcend.nas.management.SmbFileListLoader;
 import com.transcend.nas.management.SmbFileMoveLoader;
 import com.transcend.nas.management.SmbFileRenameLoader;
 import com.transcend.nas.management.SmbFileShareLoader;
 import com.transcend.nas.management.SmbFolderCreateLoader;
+import com.transcend.nas.management.externalstorage.ExternalStorageLollipop;
+import com.transcend.nas.management.externalstorage.OTGFileDownloadLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +35,10 @@ class SmbFileActionService extends FileActionService {
         COPY = LoaderID.SMB_FILE_COPY;
         MOVE = LoaderID.SMB_FILE_MOVE;
         DELETE = LoaderID.SMB_FILE_DELETE;
+        SHARE = LoaderID.SMB_FILE_SHARE;
+        mMode = NASApp.MODE_SMB;
+        mRoot = NASApp.ROOT_SMB;
+        mPath = NASApp.ROOT_SMB;
     }
 
     @Override
@@ -49,12 +58,14 @@ class SmbFileActionService extends FileActionService {
 
     @Override
     protected AsyncTaskLoader download(Context context, List<String> list, String dest) {
+        if(isWritePermissionRequired(context, dest))
+            return new OTGFileDownloadLoader(context, list, dest, new ExternalStorageLollipop(context).getSDFileLocation(dest));
         return new FileDownloadLoader(context, list, dest);
     }
 
     @Override
     protected AsyncTaskLoader upload(Context context, List<String> list, String dest) {
-        return null;
+        return new LocalFileUploadLoader(context, list, dest);
     }
 
     @Override

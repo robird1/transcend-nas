@@ -3,16 +3,11 @@ package com.transcend.nas.management.externalstorage;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v4.provider.DocumentFile;
-import android.util.Log;
 
-import com.transcend.nas.NASApp;
-import com.transcend.nas.NASUtils;
+import com.transcend.nas.DrawerMenuActivity;
 import com.transcend.nas.management.FileManageActivity;
-import com.transcend.nas.settings.BaseDrawerActivity;
 
 import java.io.File;
-import java.util.List;
 
 /**
  * Created by steve_su on 2016/12/26.
@@ -45,7 +40,7 @@ public abstract class AbstractExternalStorage {
         return mContext;
     }
 
-    protected void onNavigationItemSelected(BaseDrawerActivity activity, int itemId) {
+    protected void onNavigationItemSelected(DrawerMenuActivity activity, int itemId) {
 
     }
 

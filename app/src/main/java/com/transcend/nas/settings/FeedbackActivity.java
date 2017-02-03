@@ -16,6 +16,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.transcend.nas.BuildConfig;
+import com.transcend.nas.DrawerMenuActivity;
+import com.transcend.nas.DrawerMenuController;
 import com.transcend.nas.R;
 
 import java.io.BufferedReader;
@@ -35,7 +37,7 @@ import static com.transcend.nas.NASUtils.getDeviceName;
  * Created by steve_su on 2016/11/22.
  */
 
-public class FeedbackActivity extends BaseDrawerActivity {
+public class FeedbackActivity extends DrawerMenuActivity {
 
     private static final String TAG = FeedbackActivity.class.getSimpleName();
     private static final String CATEGORY_LIST_URL = "http://www.transcend-info.com/Service/SMSService.svc/web/GetSrvCategoryList";

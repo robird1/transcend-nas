@@ -38,6 +38,7 @@ public class NASApp extends MultiDexApplication {
 
     public static final String MODE_SMB = "SMB";
     public static final String MODE_STG = "STG";
+    public static final String MODE_SDCARD = "SDCARD";
 
     public static final String ACT_COPY     = "COPY";
     public static final String ACT_MOVE     = "MOVE";

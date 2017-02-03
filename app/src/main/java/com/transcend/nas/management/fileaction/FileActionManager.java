@@ -3,91 +3,163 @@ package com.transcend.nas.management.fileaction;
 import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.Loader;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
 
+import com.transcend.nas.LoaderID;
+import com.transcend.nas.NASApp;
+import com.transcend.nas.NASPref;
+import com.transcend.nas.NASUtils;
+import com.transcend.nas.R;
+import com.transcend.nas.management.FileInfo;
+import com.transcend.nas.management.externalstorage.ExternalStorageController;
+
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by ike_lee on 2016/12/21.
  */
-public class FileActionManager implements LoaderManager.LoaderCallbacks<Boolean> {
+public class FileActionManager {
+    private static final String TAG = FileActionManager.class.getSimpleName();
+
     private Context mContext;
     private RelativeLayout mProgressLayout;
     private FileActionService mFileActionService;
+    private Map<FileActionServiceType, FileActionService> mFileActionServicePool;
     private FileActionServiceType mFileActionServiceType;
-    private FileActionService.FileAction mFileActionType;
-    private FileActionListener mFileActionListener;
+    private LoaderManager.LoaderCallbacks<Boolean> mCallbacks;
+    private int mPreviousLoaderID = -1;
+    private Bundle mPreviousLoaderArgs = null;
+
+    private int[] RETRY_CMD = new int[]{LoaderID.SMB_FILE_LIST, LoaderID.SMB_FILE_RENAME, LoaderID.SMB_FILE_DELETE,
+            LoaderID.SMB_NEW_FOLDER, LoaderID.EVENT_NOTIFY};
 
     public enum FileActionServiceType {
-        ANDROID, SMB
+        PHONE, SD, SMB
     }
 
-    public interface FileActionListener {
-        public void onFileActionCreate(Loader<Boolean> loader, int id, Bundle args);
-        public void onFileActionFinished(Loader<Boolean> loader, Boolean success);
+    public FileActionManager(Context context, FileActionServiceType service, LoaderManager.LoaderCallbacks<Boolean> callbacks) {
+        this(context, service, callbacks, null);
     }
 
-    public FileActionManager(Context context, FileActionServiceType service, FileActionListener listener) {
-        this(context, service, listener, null);
-    }
-
-    public FileActionManager(Context context, FileActionServiceType service, FileActionListener listener, RelativeLayout progressLayout) {
+    public FileActionManager(Context context, FileActionServiceType service, LoaderManager.LoaderCallbacks<Boolean> callbacks, RelativeLayout progressLayout) {
         mContext = context;
         mFileActionServiceType = service;
-        mFileActionListener = listener;
+        mCallbacks = callbacks;
         mProgressLayout = progressLayout;
         setServiceType(service);
     }
-
 
     public void setServiceType(FileActionServiceType type) {
         if (mFileActionService != null && mFileActionServiceType == type)
             return;
 
-        mFileActionServiceType = type;
-        switch (type) {
-            case ANDROID:
-                mFileActionService = new LocalFileActionService();
-                break;
-            case SMB:
-                mFileActionService = new SmbFileActionService();
-                break;
+        if (null == mFileActionServicePool)
+            mFileActionServicePool = new HashMap<>();
+
+        FileActionService service = mFileActionServicePool.get(type);
+        if (null == service) {
+            switch (type) {
+                case SD:
+                    service = new SdcardActionService();
+                    break;
+                case PHONE:
+                    service = new PhoneActionService();
+                    break;
+                case SMB:
+                    service = new SmbFileActionService();
+                    break;
+            }
+            mFileActionServicePool.put(type, service);
         }
+
+        mFileActionServiceType = type;
+        mFileActionService = service;
+    }
+
+    public void checkServiceType(String path) {
+        if (path.startsWith("/storage")) {
+            if (NASUtils.isSDCardPath(mContext, path))
+                setServiceType(FileActionManager.FileActionServiceType.SD);
+            else
+                setServiceType(FileActionManager.FileActionServiceType.PHONE);
+        } else {
+            setServiceType(FileActionManager.FileActionServiceType.SMB);
+        }
+    }
+
+    public String getServiceRootPath() {
+        String root = NASApp.ROOT_SMB;
+        if (mFileActionService != null)
+            root = mFileActionService.getRootPath(mContext);
+        return root;
+    }
+
+    public String getServiceMode() {
+        String mode = NASApp.MODE_SMB;
+        if (mFileActionService != null)
+            mode = mFileActionService.getMode(mContext);
+        return mode;
+    }
+
+    public void setCurrentPath(String path) {
+        if (mFileActionService != null)
+            mFileActionService.setCurrentPath(path);
+    }
+
+    public void setExternalStorageController(ExternalStorageController controller){
+        if (mFileActionService != null)
+            mFileActionService.setExternalStorageController(controller);
+    }
+
+    public void setProgressLayout(RelativeLayout progressLayout) {
+        mProgressLayout = progressLayout;
     }
 
     public void list(String path) {
         createLoader(FileActionService.FileAction.LIST, null, path, null);
+        Log.w(TAG, "doLoad: " + path);
     }
 
     public void download(String dest, ArrayList<String> paths) {
         createLoader(FileActionService.FileAction.DOWNLOAD, null, dest, paths);
+        Log.w(TAG, "doDownload: " + paths.size() + " item(s) to " + dest);
     }
 
     public void upload(String dest, ArrayList<String> paths) {
         createLoader(FileActionService.FileAction.UPLOAD, null, dest, paths);
+        Log.w(TAG, "doUpload: " + paths.size() + " item(s) to " + dest);
     }
 
     public void rename(String path, String name) {
         createLoader(FileActionService.FileAction.RENAME, name, path, null);
+        Log.w(TAG, "doRename: " + path + ", " + name);
     }
 
     public void copy(String dest, ArrayList<String> paths) {
         createLoader(FileActionService.FileAction.COPY, null, dest, paths);
+        Log.w(TAG, "doCopy: " + paths.size() + " item(s) to " + dest);
     }
 
     public void move(String dest, ArrayList<String> paths) {
         createLoader(FileActionService.FileAction.MOVE, null, dest, paths);
+        Log.w(TAG, "doMove: " + paths.size() + " item(s) to " + dest);
     }
 
     public void delete(ArrayList<String> paths) {
         createLoader(FileActionService.FileAction.DELETE, null, null, paths);
+        Log.w(TAG, "doDelete: " + paths.size() + " items");
     }
 
     public void createFolder(String dest, String newName) {
-        mFileActionType = FileActionService.FileAction.CreateFOLDER;
         StringBuilder builder = new StringBuilder(dest);
         if (!dest.endsWith("/"))
             builder.append("/");
@@ -97,69 +169,183 @@ public class FileActionManager implements LoaderManager.LoaderCallbacks<Boolean>
         createLoader(FileActionService.FileAction.CreateFOLDER, null, path, null);
     }
 
-
     public void share(String dest, ArrayList<String> paths) {
         createLoader(FileActionService.FileAction.SHARE, null, dest, paths);
     }
 
-    private void createLoader(FileActionService.FileAction type, String name, String dest, ArrayList<String> paths) {
-        mFileActionType = type;
+    public void shareLocalFile(ArrayList<FileInfo> files) {
+        boolean onlyImage = true;
+        ArrayList<Uri> imageUris = new ArrayList<Uri>();
+        for (FileInfo file : files) {
+            Uri uri = Uri.fromFile(new File(file.path));
+            imageUris.add(uri);
+            if (!file.type.equals(FileInfo.TYPE.PHOTO))
+                onlyImage = false;
+        }
 
+        Intent shareIntent = new Intent();
+        shareIntent.setType(onlyImage ? "image/*" : "*/*");
+
+        if (imageUris.size() == 1) {
+            shareIntent.setAction(Intent.ACTION_SEND);
+            shareIntent.putExtra(Intent.EXTRA_STREAM, imageUris.get(0));
+        } else {
+            shareIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
+            shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris);
+        }
+
+        mContext.startActivity(Intent.createChooser(shareIntent, mContext.getResources().getText(R.string.share)));
+        Log.w(TAG, "doShare: " + files.size() + " item(s)");
+    }
+
+    private void createLoader(FileActionService.FileAction type, String name, String dest, ArrayList<String> paths) {
         int id = mFileActionService.getLoaderID(type);
         Bundle args = new Bundle();
-        if(name != null)
+        if (name != null)
             args.putString("name", name);
-        if(dest != null)
+        if (dest != null)
             args.putString("path", dest);
-        if(paths != null)
+        if (paths != null)
             args.putStringArrayList("paths", paths);
+        if (type != null)
+            args.putInt("actionType", id);
 
-        ((Activity) mContext).getLoaderManager().restartLoader(id, args, this).forceLoad();
+        ((Activity) mContext).getLoaderManager().restartLoader(id, args, mCallbacks).forceLoad();
     }
 
-    @Override
     public Loader<Boolean> onCreateLoader(int id, Bundle args) {
+        setRecordCommand(id, args);
+        Loader<Boolean> loader = null;
         if (mFileActionService != null) {
-            if (mProgressLayout != null && mFileActionType != null) {
-                switch (mFileActionType) {
-                    case LIST:
-                    case RENAME:
-                    case DELETE:
-                    case CreateFOLDER:
-                        mProgressLayout.setVisibility(View.VISIBLE);
-                        break;
-                    default:
-                        mProgressLayout.setVisibility(View.INVISIBLE);
-                        break;
+            int type = args.getInt("actionType");
+            FileActionService.FileAction action = mFileActionService.getFileAction(type);
+            if (action != null) {
+                Log.d(TAG, "action : " + action);
+                loader = mFileActionService.onCreateLoader(mContext, action, args);
+                if (loader != null && mProgressLayout != null) {
+                    switch (action) {
+                        case LIST:
+                        case RENAME:
+                        case DELETE:
+                        case CreateFOLDER:
+                            mProgressLayout.setVisibility(View.VISIBLE);
+                            break;
+                        default:
+                            mProgressLayout.setVisibility(View.INVISIBLE);
+                            break;
+                    }
                 }
             }
-
-            Loader<Boolean> loader = mFileActionService.onCreateLoader(mContext, mFileActionType, args);
-            if (mFileActionListener != null)
-                mFileActionListener.onFileActionCreate(loader, id, args);
-            return loader;
         }
 
-        return null;
+        return loader;
     }
 
-    @Override
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
+        Log.w(TAG, "onLoaderFinished: " + loader.getClass().getSimpleName() + " " + success);
         if (mFileActionService != null) {
             mFileActionService.onLoadFinished(mContext, loader, success);
-
-            if (mFileActionListener != null)
-                mFileActionListener.onFileActionFinished(loader, success);
-
-            if (mProgressLayout != null)
-                mProgressLayout.setVisibility(View.INVISIBLE);
         }
     }
 
-    @Override
     public void onLoaderReset(Loader<Boolean> loader) {
-
+        Log.w(TAG, "onLoaderReset: " + loader.getClass().getSimpleName());
     }
 
+    public int getRecordCommandID() {
+        return mPreviousLoaderID;
+    }
+
+    public Bundle getRecordCommandArg() {
+        return mPreviousLoaderArgs;
+    }
+
+    public boolean setRecordCommand(int id, Bundle args) {
+        if (id == LoaderID.TUTK_NAS_LINK) {
+            return false;
+        }
+
+        boolean record = false;
+        for (int cmd : RETRY_CMD) {
+            if (id == cmd) {
+                boolean retry = args.getBoolean("retry");
+                Log.d(TAG, "setRecordCommand : " + id + ", retry : " + retry);
+                if (args != null && !retry) {
+                    mPreviousLoaderID = id;
+                    mPreviousLoaderArgs = args;
+                    record = true;
+                }
+                break;
+            }
+        }
+
+        if (!record) {
+            cleanRecordCommand();
+        }
+
+        return record;
+    }
+
+    public boolean doRecordCommand() {
+        int id = getRecordCommandID();
+        Bundle previous = getRecordCommandArg();
+        if (id > 0 && previous != null) {
+            Log.d(TAG, "doRecordCommand : " + id);
+            previous.putBoolean("retry", true);
+            ((Activity) mContext).getLoaderManager().restartLoader(id, previous, mCallbacks).forceLoad();
+            return true;
+        }
+        return false;
+    }
+
+    public void cleanRecordCommand() {
+        mPreviousLoaderID = -1;
+        mPreviousLoaderArgs = null;
+    }
+
+    public boolean isTopDirectory(Context context, String path) {
+        String root = getServiceRootPath();
+        switch (mFileActionServiceType) {
+            case SD:
+            case PHONE:
+                File base = new File(root);
+                File file = new File(path);
+                return file.equals(base);
+            case SMB:
+                return path.equals(root);
+            default:
+                return path.equals(root);
+        }
+    }
+
+    public boolean isDownloadDirectory(Context context, String path) {
+        String download = NASPref.getDownloadLocation(context);
+        File base = new File(download);
+        File file = new File(path);
+        return file.equals(base);
+    }
+
+    public boolean isSubDirectory(String dest, ArrayList<String> paths) {
+        for (String path : paths) {
+            if (dest.startsWith(path)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isDirectorySupportUpload(String path) {
+        String mode = getServiceMode();
+        String root = getServiceRootPath();
+        if (NASApp.MODE_SMB.equals(mode) && !root.equals(path))
+            return true;
+        else
+            return false;
+    }
+
+    public boolean isRemoteAction() {
+        String mode = getServiceMode();
+        return NASApp.MODE_SMB.equals(mode);
+    }
 
 }

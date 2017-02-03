@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v4.provider.DocumentFile;
 import android.support.v7.app.AlertDialog;
@@ -14,11 +13,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.transcend.nas.DrawerMenuActivity;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.management.FileManageActivity;
-import com.transcend.nas.settings.BaseDrawerActivity;
 import com.transcend.nas.viewer.photo.ViewerPager;
 
 import java.io.File;
@@ -44,7 +43,7 @@ public class ExternalStorageLollipop extends AbstractExternalStorage {
     }
 
     @Override
-    protected void onNavigationItemSelected(BaseDrawerActivity activity, int itemId) {
+    protected void onNavigationItemSelected(DrawerMenuActivity activity, int itemId) {
         if (isWritePermissionNotGranted() == true) {
             Toast.makeText(mContext, R.string.dialog_request_write_permission, Toast.LENGTH_LONG).show();
             requestPermissionDialog(activity);
@@ -70,8 +69,6 @@ public class ExternalStorageLollipop extends AbstractExternalStorage {
             Toast.makeText(mContext, R.string.dialog_grant_permission_failed, Toast.LENGTH_LONG).show();
             requestPermissionDialog(activity);
         }
-
-        activity.toggleDrawerCheckedItem();
     }
 
     @Override
@@ -244,7 +241,7 @@ public class ExternalStorageLollipop extends AbstractExternalStorage {
         return PreferenceManager.getDefaultSharedPreferences(mContext).edit().putString(PREF_DEFAULT_URISD, uriTree.toString()).commit();
     }
 
-    private void requestPermissionDialog(final BaseDrawerActivity activity) {
+    private void requestPermissionDialog(final DrawerMenuActivity activity) {
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         builder.setTitle(mContext.getResources().getString(R.string.sdcard));
         builder.setIcon(R.drawable.ic_drawer_sdcard);

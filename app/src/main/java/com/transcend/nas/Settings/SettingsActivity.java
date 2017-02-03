@@ -22,6 +22,8 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.utils.StorageUtils;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.DrawerMenuActivity;
+import com.transcend.nas.DrawerMenuController;
 import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
@@ -35,7 +37,7 @@ import java.io.File;
 /**
  * Created by silverhsu on 16/3/2.
  */
-public class SettingsActivity extends BaseDrawerActivity {
+public class SettingsActivity extends DrawerMenuActivity {
     public static final int REQUEST_CODE = SettingsActivity.class.hashCode() & 0xFFFF;
     public static final String TAG = SettingsActivity.class.getSimpleName();
 

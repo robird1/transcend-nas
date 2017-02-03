@@ -1,4 +1,4 @@
-package com.transcend.nas.settings;
+package com.transcend.nas;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,9 +15,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.realtek.nasfun.api.ServerManager;
-import com.transcend.nas.NASPref;
-import com.transcend.nas.NASUtils;
-import com.transcend.nas.R;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,29 +28,19 @@ import javax.net.ssl.HttpsURLConnection;
  */
 
 public class DrawerMenuController {
-    //    private static final String TAG = DrawerMenuController.class.getSimpleName();
+    //private static final String TAG = DrawerMenuController.class.getSimpleName();
+
     private static final int MESSAGE_FB_PROFILE_PHOTO = 999;
     private AppCompatActivity mActivity;
     private Toolbar mToolbar;
-    private NavigationView.OnNavigationItemSelectedListener mItemClickListener;
-    private DrawerLayout mDrawer;
     private ActionBarDrawerToggle mToggle;
+    private DrawerLayout mDrawer;
     private NavigationView mNavView;
     private ImageView mNavHeaderIcon;
     private Bitmap mPhotoBitmap;
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MESSAGE_FB_PROFILE_PHOTO:
-                    mNavHeaderIcon.setImageBitmap(mPhotoBitmap);
-                    break;
-            }
-        }
-    };
+    private NavigationView.OnNavigationItemSelectedListener mItemClickListener;
 
     public enum DrawerMenu {
-        DRAWER_FILE_MANAGE(R.id.drawer_layout, R.id.activity_file_manage_drawer),
         DRAWER_DEFAULT(R.id.drawer_layout, R.id.navigation_view);
 
         private int mDrawerLayoutId, mNavigationViewId;
@@ -84,7 +71,8 @@ public class DrawerMenuController {
                 mActivity, mDrawer, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawer.setDrawerListener(mToggle);
         mToggle.syncState();
-//        mToggle.setToolbarNavigationClickListener(mToolbarNavigationListener);
+        //mToggle.setToolbarNavigationClickListener(mToolbarNavigationListener);
+
         mNavView = (NavigationView) mActivity.findViewById(enumInstance.getNavigationViewId());
         mNavView.setNavigationItemSelectedListener(mItemClickListener);
         View navHeader = mNavView.inflateHeaderView(R.layout.activity_file_manage_drawer_header);
@@ -94,44 +82,8 @@ public class DrawerMenuController {
         setDrawerHeaderIcon();
         setRemoteDeviceName();
         setLocalDeviceName();
-        mNavView.getMenu().findItem(R.id.nav_switch).setVisible(NASPref.useSwitchNas);
-        checkSDCardItem();
-    }
-
-    public void setDrawerLockMode(int lockMode) {
-        mDrawer.setDrawerLockMode(lockMode);
-    }
-
-    public void openDrawer() {
-        mDrawer.openDrawer(GravityCompat.START);
-    }
-
-    public void closeDrawer() {
-        mDrawer.closeDrawer(GravityCompat.START);
-    }
-
-    public boolean isDrawerOpen() {
-        return mDrawer.isDrawerOpen(GravityCompat.START);
-    }
-
-    public void setDrawerIndicatorEnabled(boolean isEnabled) {
-        mToggle.setDrawerIndicatorEnabled(isEnabled);
-    }
-
-    public void setCheckdItem(int id) {
-        mNavView.setCheckedItem(id);
-    }
-
-    public void setToolbarNavigationClickListener(View.OnClickListener l) {
-        mToggle.setToolbarNavigationClickListener(l);
-    }
-
-    public NavigationView getNavigationView() {
-        return mNavView;
-    }
-
-    public void setSDItem(boolean isVisible) {
-        getNavigationView().getMenu().findItem(R.id.nav_sdcard).setVisible(isVisible);
+        setSdCardItem();
+        setSwitchNASItem();
     }
 
     private void setNavigationViewTitle(View navHeader) {
@@ -147,16 +99,6 @@ public class DrawerMenuController {
         else
             navHeaderSubtitle.setText(String.format("%s@%s", ServerManager.INSTANCE.getCurrentServer().getUsername(),
                     ServerManager.INSTANCE.getCurrentServer().getHostname()));
-    }
-
-    private void setRemoteDeviceName() {
-        String device = NASPref.getDeviceName(mActivity);
-        if (device != null && !"".equals(device))
-            mNavView.getMenu().findItem(R.id.nav_storage).setTitle(device);
-    }
-
-    private void setLocalDeviceName() {
-        mNavView.getMenu().findItem(R.id.nav_device).setTitle(NASUtils.getDeviceName());
     }
 
     private void setDrawerHeaderIcon() {
@@ -188,12 +130,65 @@ public class DrawerMenuController {
         }
     }
 
-    private void checkSDCardItem() {
-        List<File> stgList = NASUtils.getStoragePath(mActivity);
-        if (stgList.size() > 1) {
-            setSDItem(true);
-        } else {
-            setSDItem(false);
-        }
+    private void setRemoteDeviceName() {
+        String device = NASPref.getDeviceName(mActivity);
+        if (device != null && !"".equals(device))
+            mNavView.getMenu().findItem(R.id.nav_storage).setTitle(device);
     }
+
+    private void setLocalDeviceName() {
+        mNavView.getMenu().findItem(R.id.nav_device).setTitle(NASUtils.getDeviceName());
+    }
+
+    private void setSdCardItem() {
+        List<File> stgList = NASUtils.getStoragePath(mActivity);
+        setSdCardItem(stgList.size() > 1);
+    }
+
+    private void setSwitchNASItem(){
+        mNavView.getMenu().findItem(R.id.nav_switch).setVisible(NASPref.useSwitchNas);
+    }
+
+    public void setDrawerLockMode(int lockMode) {
+        mDrawer.setDrawerLockMode(lockMode);
+    }
+
+    public void openDrawer() {
+        mDrawer.openDrawer(GravityCompat.START);
+    }
+
+    public void closeDrawer() {
+        mDrawer.closeDrawer(GravityCompat.START);
+    }
+
+    public boolean isDrawerOpen() {
+        return mDrawer.isDrawerOpen(GravityCompat.START);
+    }
+
+    public void setDrawerIndicatorEnabled(boolean isEnabled) {
+        mToggle.setDrawerIndicatorEnabled(isEnabled);
+    }
+
+    public void setToolbarNavigationClickListener(View.OnClickListener l) {
+        mToggle.setToolbarNavigationClickListener(l);
+    }
+
+    public void setCheckedItem(int id) {
+        mNavView.setCheckedItem(id);
+    }
+
+    public void setSdCardItem(boolean isVisible) {
+        mNavView.getMenu().findItem(R.id.nav_sdcard).setVisible(isVisible);
+    }
+
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MESSAGE_FB_PROFILE_PHOTO:
+                    mNavHeaderIcon.setImageBitmap(mPhotoBitmap);
+                    break;
+            }
+        }
+    };
 }
