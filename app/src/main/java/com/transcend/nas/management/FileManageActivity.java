@@ -58,6 +58,9 @@ import com.transcend.nas.R;
 import com.transcend.nas.common.GoogleAnalysisFactory;
 import com.transcend.nas.common.ManageFactory;
 import com.transcend.nas.connection.LoginListActivity;
+import com.transcend.nas.management.download.AbstractDownloadManager;
+import com.transcend.nas.management.download.DownloadFactory;
+import com.transcend.nas.management.download.TempFileDownloadManager;
 import com.transcend.nas.management.externalstorage.ExternalStorageController;
 import com.transcend.nas.management.externalstorage.ExternalStorageLollipop;
 import com.transcend.nas.management.externalstorage.OTGFileCopyLoader;
@@ -77,10 +80,7 @@ import com.transcend.nas.settings.DrawerMenuController;
 import com.transcend.nas.tutk.TutkLinkNasLoader;
 import com.transcend.nas.tutk.TutkLogoutLoader;
 import com.transcend.nas.view.ProgressDialog;
-import com.transcend.nas.viewer.document.AbstractDownloadManager;
-import com.transcend.nas.viewer.document.DownloadFactory;
 import com.transcend.nas.viewer.document.OpenWithUploadHandler;
-import com.transcend.nas.viewer.document.TempFileDownloadManager;
 import com.transcend.nas.viewer.music.MusicActivity;
 import com.transcend.nas.viewer.music.MusicManager;
 import com.transcend.nas.viewer.photo.ViewerActivity;
@@ -95,7 +95,6 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static com.transcend.nas.NASUtils.isSDCardPath;
 
@@ -153,8 +152,6 @@ public class FileManageActivity extends BaseDrawerActivity implements
 
     private DrawerMenuController mDrawerController;
     private ExternalStorageController mStorageController;
-
-    private long mTime;
 
     @Override
     public int onLayoutID() {
@@ -858,9 +855,6 @@ public class FileManageActivity extends BaseDrawerActivity implements
             case LoaderID.LOCAL_FILE_MOVE:
                 return new LocalFileMoveLoader(this, paths, path);
             case LoaderID.FILE_DOWNLOAD:
-                Log.d(TAG, "[Enter] onCreateLoader() LoaderID.FILE_DOWNLOAD");
-                mTime = System.currentTimeMillis();
-                Log.d(TAG, "download start time: "+ FileInfo.getTime(mTime));
                 return new FileDownloadLoader(this, paths, path);
             case LoaderID.LOCAL_FILE_UPLOAD:
                 return new LocalFileUploadLoader(this, paths, path);
@@ -900,12 +894,6 @@ public class FileManageActivity extends BaseDrawerActivity implements
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
         Log.w(TAG, "onLoaderFinished: " + loader.getClass().getSimpleName() + " " + success);
         if (success) {
-            if (loader instanceof FileDownloadLoader) {
-                Log.d(TAG, "[Enter] onLoadFinished() FileDownloadLoader");
-                Log.d(TAG, "download end time: "+ FileInfo.getTime(System.currentTimeMillis()));
-                long diff = System.currentTimeMillis() - mTime;
-                Log.d(TAG, "spend time: "+ TimeUnit.MILLISECONDS.toMinutes(diff));
-            }
             if (loader instanceof SmbFileListLoader) {
                 //file list change, stop previous image loader
                 ImageLoader.getInstance().stop();

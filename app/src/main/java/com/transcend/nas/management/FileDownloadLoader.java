@@ -8,8 +8,8 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.R;
 import com.transcend.nas.common.CustomNotificationManager;
-import com.transcend.nas.viewer.document.AbstractDownloadManager;
-import com.transcend.nas.viewer.document.DownloadFactory;
+import com.transcend.nas.management.download.AbstractDownloadManager;
+import com.transcend.nas.management.download.DownloadFactory;
 import com.tutk.IOTC.P2PService;
 
 import java.io.File;

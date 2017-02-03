@@ -17,8 +17,8 @@ import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.common.CustomNotificationManager;
 import com.transcend.nas.management.SmbAbstractLoader;
-import com.transcend.nas.viewer.document.AbstractDownloadManager;
-import com.transcend.nas.viewer.document.DownloadFactory;
+import com.transcend.nas.management.download.AbstractDownloadManager;
+import com.transcend.nas.management.download.DownloadFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
