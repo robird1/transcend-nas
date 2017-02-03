@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
  Loco xml export: Android string resources
- Project: 201608 SJC App
+ Project: 2016Q4 SJC App
  Release: Working copy
  Locale: zh_TW, Chinese (Taiwan)
  Tagged: Android_SJC
  Exported by: Translator TS
- Exported at: Thu, 15 Dec 2016 07:01:33 +0000
+ Exported at: Fri, 03 Feb 2017 08:02:10 +0000
 -->
 <resources>
     <string name="about">關於</string>
@@ -65,7 +65,10 @@
     <string name="dialog_button_save">儲存</string>
     <string name="dialog_button_yes">是</string>
     <string name="dialog_clean_cache">是否清除快取?</string>
+    <string name="dialog_grant_permission_failed">選擇的目錄非SD卡之根目錄</string>
     <string name="dialog_remote_file_changed">此檔案已被他人修改並上傳。是否上傳取代或另存本地裝置?</string>
+    <string name="dialog_request_write_permission">請選擇根目錄以授與寫入權限</string>
+    <string name="dialog_write_operation_not_allowed">因Android 4.4的寫入限制以致操作失敗</string>
     <string name="disk">磁碟</string>
     <string name="disk_info">磁碟資訊</string>
     <!-- No need to translate -->
@@ -74,6 +77,7 @@
     <string name="dlg_msg_delete">確定刪除已選檔案？</string>
     <string name="done">完成</string>
     <string name="download">下載</string>
+    <string name="download_location_error">請檢查下載位置，所設定的位置不存在</string>
     <string name="downloading">下載中</string>
     <string name="duplicate_name">名稱重複</string>
     <string name="edit_mode">編輯模式</string>
@@ -89,7 +93,6 @@
     <string name="error_format">格式錯誤</string>
     <string name="exit">結束</string>
     <string name="fb_request_email_permission">請同意提供電子信箱資訊以供登入使用</string>
-    <string name="feedback">意見回饋</string>
     <string name="feedback_message">意見</string>
     <string name="file_format_audio">音訊格式</string>
     <string name="file_format_document">文件格式</string>
@@ -109,7 +112,7 @@
     <string name="ip_address">IP位址</string>
     <string name="last_modified">最後修改</string>
     <string name="legal">隱私</string>
-    <string name="license_agreement_description">您必需同意授權合約才能繼續。</string>
+    <string name="license_agreement_description">您必須同意授權合約才能繼續。</string>
     <string name="licenses">許可權利</string>
     <string name="loading">載入中</string>
     <string name="location">位置</string>
@@ -186,6 +189,7 @@
     <string name="resend">重送</string>
     <string name="reverse_date">日期 (反序)</string>
     <string name="reverse_name">名稱 (反序)</string>
+    <string name="sdcard">SD卡</string>
     <string name="search">搜尋</string>
     <string name="search_result_empty">沒有符合檔案</string>
     <string name="select_folder_error">目的地不能在被選取的項目中</string>
@@ -217,6 +221,7 @@
     <string name="temperature">溫度</string>
     <string name="termsofuse">使用條款</string>
     <string name="thank_you">感謝您</string>
+    <string name="toast_invalid_name">輸入的名稱包含不合法字元</string>
     <string name="total">全部</string>
     <string name="try_auto_connect">自動連線中</string>
     <string name="try_remote_access">遠端存取</string>
@@ -233,6 +238,7 @@
     <string name="uploading">上傳中</string>
     <string name="use_cellular_network">使用行動網路</string>
     <string name="used">已使用</string>
+    <string name="user_feedback">意見回饋</string>
     <string name="video">影片</string>
     <string name="view">顯示</string>
     <string name="warning">警告</string>
@@ -253,12 +259,4 @@
     <string name="wizard_success">StoreJet Cloud 已準備完成</string>
     <string name="wizard_try">重試</string>
     <string name="wizard_wifi_info">將手機Wi-Fi連線到路由器網路</string>
-
-    <string name="sdcard">SD卡</string>
-    <string name="dialog_request_write_permission">請選擇根目錄以授與寫入權限</string>
-    <string name="dialog_grant_permission_failed">選擇的目錄非SD卡之根目錄</string>
-    <string name="dialog_write_operation_not_allowed">因Android 4.4的寫入限制以致操作失敗</string>
-    <string name="download_location_error">請檢查下載位置，所設定的位置不存在</string>
-    <string name="toast_invalid_name">輸入的名稱包含不合法字元</string>
-
 </resources>

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
  Loco xml export: Android string resources
- Project: 201608 SJC App
+ Project: 2016Q4 SJC App
  Release: Working copy
  Locale: en_US, English (USA)
  Tagged: Android_SJC
  Exported by: Translator TS
- Exported at: Thu, 15 Dec 2016 07:01:33 +0000
+ Exported at: Fri, 03 Feb 2017 08:02:10 +0000
 -->
 <resources>
     <string name="about">About</string>
@@ -65,15 +65,19 @@
     <string name="dialog_button_save">Save</string>
     <string name="dialog_button_yes">YES</string>
     <string name="dialog_clean_cache">Do you want to clean cache?</string>
+    <string name="dialog_grant_permission_failed">Selected folder is not the root folder of SD card</string>
     <string name="dialog_remote_file_changed">This file has been remotely modified. Do you want to replace it or save to local device?</string>
+    <string name="dialog_request_write_permission">Please select root folder to grant write permission</string>
+    <string name="dialog_write_operation_not_allowed">Operation failed due to the writing limitation of Android 4.4</string>
     <string name="disk">Disk</string>
-    <string name="disk_info">Disk Information</string>
+    <string name="disk_info">Disk info</string>
     <!-- No need to translate -->
     <string name="disk_smart">S.M.A.R.T</string>
     <string name="disk_smart_info">Help to check disk status</string>
     <string name="dlg_msg_delete">Are you sure to delete files?</string>
     <string name="done">Done</string>
     <string name="download">Download</string>
+    <string name="download_location_error">Please check your download location, the target destination does not exist</string>
     <string name="downloading">Downloading</string>
     <string name="duplicate_name">Duplicate name</string>
     <string name="edit_mode">Edit mode</string>
@@ -89,7 +93,6 @@
     <string name="error_format">Error format</string>
     <string name="exit">Exit</string>
     <string name="fb_request_email_permission">Please grant the email address permission for Facebook login</string>
-    <string name="feedback">Feedback</string>
     <string name="feedback_message">Message</string>
     <string name="file_format_audio">Audio format</string>
     <string name="file_format_document">Document format</string>
@@ -151,10 +154,10 @@
     <string name="not_have_account">Not have an account?</string>
     <string name="not_receive_active">Not receive a certification mail?</string>
     <string name="off">OFF</string>
-    <string name="offline">offline</string>
+    <string name="offline">Offline</string>
     <string name="ok">OK</string>
     <string name="on">ON</string>
-    <string name="online">online</string>
+    <string name="online">Online</string>
     <string name="open_source_statement">Open Source Statement</string>
     <string name="open_with">Open with</string>
     <string name="operation_error">Invalid operation</string>
@@ -186,6 +189,7 @@
     <string name="resend">Resend</string>
     <string name="reverse_date">Date (Reverse)</string>
     <string name="reverse_name">Name (Reverse)</string>
+    <string name="sdcard">SD Card</string>
     <string name="search">Search</string>
     <string name="search_result_empty">No match file</string>
     <string name="select_folder_error">Destination can\'t be the selected list</string>
@@ -217,6 +221,7 @@
     <string name="temperature">Temperature</string>
     <string name="termsofuse">Terms of Use</string>
     <string name="thank_you">Thank you</string>
+    <string name="toast_invalid_name">The input name contains invalid character</string>
     <string name="total">Total</string>
     <string name="try_auto_connect">Auto connecting</string>
     <string name="try_remote_access">Remote access</string>
@@ -233,6 +238,7 @@
     <string name="uploading">Uploading</string>
     <string name="use_cellular_network">Use Cellular Network</string>
     <string name="used">Used</string>
+    <string name="user_feedback">User Feedback</string>
     <string name="video">video</string>
     <string name="view">View</string>
     <string name="warning">Warning</string>
@@ -253,12 +259,4 @@
     <string name="wizard_success">StoreJet Cloud is Ready</string>
     <string name="wizard_try">Try Again</string>
     <string name="wizard_wifi_info">Connect device Wi-Fi to router network</string>
-
-    <string name="sdcard">SD Card</string>
-    <string name="dialog_request_write_permission">Please select root folder to grant write permission</string>
-    <string name="dialog_grant_permission_failed">Selected folder is not the root folder of SD card</string>
-    <string name="dialog_write_operation_not_allowed">Operation failed due to the writing limitation of Android 4.4</string>
-    <string name="download_location_error">Please check your download location, the target destination does not exist</string>
-    <string name="toast_invalid_name">The input name contains invalid character</string>
-
 </resources>

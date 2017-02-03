@@ -276,7 +276,7 @@ public abstract class DrawerMenuActivity extends AppCompatActivity implements
         else
             intent.setClass(this, StartActivity.class);
         startActivity(intent);
-        finish();
+        finishAffinity();
     }
 
 }
