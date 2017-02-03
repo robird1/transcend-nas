@@ -7,7 +7,7 @@ import android.content.Loader;
 import com.transcend.nas.LoaderID;
 import com.transcend.nas.management.SmbFileCopyLoader;
 import com.transcend.nas.management.SmbFileDeleteLoader;
-import com.transcend.nas.management.SmbFileDownloadLoader;
+import com.transcend.nas.management.FileDownloadLoader;
 import com.transcend.nas.management.SmbFileListLoader;
 import com.transcend.nas.management.SmbFileMoveLoader;
 import com.transcend.nas.management.SmbFileRenameLoader;
@@ -24,7 +24,7 @@ class SmbFileActionService extends FileActionService {
     public SmbFileActionService(){
         TAG = SmbFileActionService.class.getSimpleName();
         LIST = LoaderID.SMB_FILE_LIST;
-        DOWNLOAD = LoaderID.SMB_FILE_DOWNLOAD;
+        DOWNLOAD = LoaderID.FILE_DOWNLOAD;
         CreateFOLDER = LoaderID.SMB_NEW_FOLDER;
         RENAME = LoaderID.SMB_FILE_RENAME;
         COPY = LoaderID.SMB_FILE_COPY;
@@ -49,7 +49,7 @@ class SmbFileActionService extends FileActionService {
 
     @Override
     protected AsyncTaskLoader download(Context context, List<String> list, String dest) {
-        return new SmbFileDownloadLoader(context, list, dest);
+        return new FileDownloadLoader(context, list, dest);
     }
 
     @Override

@@ -41,7 +41,7 @@ import com.transcend.nas.management.LocalFileDeleteLoader;
 import com.transcend.nas.management.LocalFileUploadLoader;
 import com.transcend.nas.management.SmbAbstractLoader;
 import com.transcend.nas.management.SmbFileDeleteLoader;
-import com.transcend.nas.management.SmbFileDownloadLoader;
+import com.transcend.nas.management.FileDownloadLoader;
 import com.transcend.nas.management.externalstorage.ExternalStorageController;
 import com.transcend.nas.management.externalstorage.ExternalStorageLollipop;
 import com.transcend.nas.management.externalstorage.OTGFileDeleteLoader;
@@ -390,7 +390,7 @@ public class ViewerActivity extends AppCompatActivity implements
         int position = mPager.getCurrentItem();
         FileInfo info = mList.get(position);
         paths.add(info.path);
-        int id = LoaderID.SMB_FILE_DOWNLOAD;
+        int id = LoaderID.FILE_DOWNLOAD;
         Bundle args = new Bundle();
         args.putStringArrayList("paths", paths);
         args.putString("path", dest);
@@ -427,8 +427,8 @@ public class ViewerActivity extends AppCompatActivity implements
         String path = args.getString("path");
         String name = args.getString("name");
         switch (mLoaderID = id) {
-            case LoaderID.SMB_FILE_DOWNLOAD:
-                return new SmbFileDownloadLoader(this, paths, path);
+            case LoaderID.FILE_DOWNLOAD:
+                return new FileDownloadLoader(this, paths, path);
             case LoaderID.LOCAL_FILE_UPLOAD:
                 return new LocalFileUploadLoader(this, paths, path);
             case LoaderID.SMB_FILE_DELETE:
@@ -484,7 +484,7 @@ public class ViewerActivity extends AppCompatActivity implements
                     }
                     doPhotoCast(position);
                 }
-            } else if (loader instanceof SmbFileDownloadLoader || loader instanceof LocalFileUploadLoader) {
+            } else if (loader instanceof FileDownloadLoader || loader instanceof LocalFileUploadLoader) {
                 //do nothing
             }
         }
