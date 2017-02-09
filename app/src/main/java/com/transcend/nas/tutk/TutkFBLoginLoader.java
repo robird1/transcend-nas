@@ -1,7 +1,10 @@
 package com.transcend.nas.tutk;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
+
+import com.transcend.nas.NASPref;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,6 +33,11 @@ public class TutkFBLoginLoader extends TutkBasicLoader {
         mUserName = userName;
         mUID = uid;
         mToken = token;
+
+        if (TextUtils.isEmpty(mEmail)) {
+            mEmail = mUID;
+        }
+        NASPref.setFBUserName(context, mUserName);
     }
 
     @Override

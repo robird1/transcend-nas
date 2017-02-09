@@ -239,6 +239,18 @@ public class NASPref {
         PrefUtil.write(context, name, key, enable);
     }
 
+    public static String getFBUserName(Context context) {
+        String name = context.getString(R.string.pref_name);
+        String key = context.getString(R.string.pref_fb_user_name);
+        String def = "";
+        return PrefUtil.read(context, name, key, def);
+    }
+
+    public static void setFBUserName(Context context, String userName) {
+        String name = context.getString(R.string.pref_name);
+        String key = context.getString(R.string.pref_fb_user_name);
+        PrefUtil.write(context, name, key, userName);
+    }
 
     public static int getCloudAccountStatus(Context context) {
         String name = context.getString(R.string.pref_name);

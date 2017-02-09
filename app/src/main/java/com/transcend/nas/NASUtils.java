@@ -52,6 +52,7 @@ public final class NASUtils {
         if (NASPref.getFBAccountStatus(context)) {
             NASPref.setCloudUsername(context, "");
             NASPref.setFBAccountStatus(context, false);
+            NASPref.setFBUserName(context, "");
         }
 
         NASPref.setHostname(context, "");

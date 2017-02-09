@@ -94,11 +94,15 @@ public class DrawerMenuController {
     private void setNavigationViewSubtitle(View navHeader) {
         TextView navHeaderSubtitle = (TextView) navHeader.findViewById(R.id.drawer_header_subtitle);
         String email = NASPref.getCloudUsername(mActivity);
-        if (!email.equals(""))
-            navHeaderSubtitle.setText(String.format("%s", email));
-        else
+        if (!email.equals("")) {
+            if (email.contains("@"))
+                navHeaderSubtitle.setText(String.format("%s", email));
+            else
+                navHeaderSubtitle.setText(NASPref.getFBUserName(mActivity));
+        } else {
             navHeaderSubtitle.setText(String.format("%s@%s", ServerManager.INSTANCE.getCurrentServer().getUsername(),
                     ServerManager.INSTANCE.getCurrentServer().getHostname()));
+        }
     }
 
     private void setDrawerHeaderIcon() {
