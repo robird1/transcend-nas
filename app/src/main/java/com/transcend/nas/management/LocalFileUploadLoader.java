@@ -177,12 +177,12 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
         }, 1000);
     }
 
-    String getUniqueFileName()
+    public String getUniqueFileName()
     {
         return mUniqueName;
     }
 
-    boolean isOpenWithUpload()
+    public boolean isOpenWithUpload()
     {
         return mIsOpenWithUpload;
     }

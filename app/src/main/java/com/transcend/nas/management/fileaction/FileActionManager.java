@@ -3,19 +3,15 @@ package com.transcend.nas.management.fileaction;
 import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.Loader;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
 
-import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.NASUtils;
-import com.transcend.nas.R;
 import com.transcend.nas.management.FileInfo;
 import com.transcend.nas.management.externalstorage.ExternalStorageController;
 
@@ -27,20 +23,14 @@ import java.util.Map;
 /**
  * Created by ike_lee on 2016/12/21.
  */
-public class FileActionManager {
+public class FileActionManager extends AbstractActionManager {
     private static final String TAG = FileActionManager.class.getSimpleName();
 
     private Context mContext;
-    private RelativeLayout mProgressLayout;
     private FileActionService mFileActionService;
     private Map<FileActionServiceType, FileActionService> mFileActionServicePool;
     private FileActionServiceType mFileActionServiceType;
     private LoaderManager.LoaderCallbacks<Boolean> mCallbacks;
-    private int mPreviousLoaderID = -1;
-    private Bundle mPreviousLoaderArgs = null;
-
-    private int[] RETRY_CMD = new int[]{LoaderID.SMB_FILE_LIST, LoaderID.SMB_FILE_RENAME, LoaderID.SMB_FILE_DELETE,
-            LoaderID.SMB_NEW_FOLDER, LoaderID.EVENT_NOTIFY};
 
     public enum FileActionServiceType {
         PHONE, SD, SMB
@@ -110,12 +100,16 @@ public class FileActionManager {
         return mode;
     }
 
+    public FileActionService getFileActionService() {
+        return mFileActionService;
+    }
+
     public void setCurrentPath(String path) {
         if (mFileActionService != null)
             mFileActionService.setCurrentPath(path);
     }
 
-    public void setExternalStorageController(ExternalStorageController controller){
+    public void setExternalStorageController(ExternalStorageController controller) {
         if (mFileActionService != null)
             mFileActionService.setExternalStorageController(controller);
     }
@@ -169,33 +163,16 @@ public class FileActionManager {
         createLoader(FileActionService.FileAction.CreateFOLDER, null, path, null);
     }
 
-    public void share(String dest, ArrayList<String> paths) {
-        createLoader(FileActionService.FileAction.SHARE, null, dest, paths);
-    }
-
-    public void shareLocalFile(ArrayList<FileInfo> files) {
-        boolean onlyImage = true;
-        ArrayList<Uri> imageUris = new ArrayList<Uri>();
-        for (FileInfo file : files) {
-            Uri uri = Uri.fromFile(new File(file.path));
-            imageUris.add(uri);
-            if (!file.type.equals(FileInfo.TYPE.PHOTO))
-                onlyImage = false;
-        }
-
-        Intent shareIntent = new Intent();
-        shareIntent.setType(onlyImage ? "image/*" : "*/*");
-
-        if (imageUris.size() == 1) {
-            shareIntent.setAction(Intent.ACTION_SEND);
-            shareIntent.putExtra(Intent.EXTRA_STREAM, imageUris.get(0));
+    public void share(final String dest, final ArrayList<FileInfo> files) {
+        if (isRemoteAction()) {
+            ArrayList<String> paths = new ArrayList<String>();
+            for (FileInfo file : files) {
+                paths.add(file.path);
+            }
+            createLoader(FileActionService.FileAction.SHARE, null, dest, paths);
         } else {
-            shareIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
-            shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris);
+            NASUtils.shareLocalFile(mContext, files);
         }
-
-        mContext.startActivity(Intent.createChooser(shareIntent, mContext.getResources().getText(R.string.share)));
-        Log.w(TAG, "doShare: " + files.size() + " item(s)");
     }
 
     private void createLoader(FileActionService.FileAction type, String name, String dest, ArrayList<String> paths) {
@@ -214,25 +191,26 @@ public class FileActionManager {
     }
 
     public Loader<Boolean> onCreateLoader(int id, Bundle args) {
-        setRecordCommand(id, args);
         Loader<Boolean> loader = null;
         if (mFileActionService != null) {
-            int type = args.getInt("actionType");
-            FileActionService.FileAction action = mFileActionService.getFileAction(type);
-            if (action != null) {
-                Log.d(TAG, "action : " + action);
-                loader = mFileActionService.onCreateLoader(mContext, action, args);
-                if (loader != null && mProgressLayout != null) {
-                    switch (action) {
-                        case LIST:
-                        case RENAME:
-                        case DELETE:
-                        case CreateFOLDER:
-                            mProgressLayout.setVisibility(View.VISIBLE);
-                            break;
-                        default:
-                            mProgressLayout.setVisibility(View.INVISIBLE);
-                            break;
+            int type = args.getInt("actionType", -1);
+            if (type > 0) {
+                FileActionService.FileAction action = mFileActionService.getFileAction(type);
+                if (action != null) {
+                    loader = mFileActionService.onCreateLoader(mContext, action, args);
+                    if (loader != null && mProgressLayout != null) {
+                        switch (action) {
+                            case LIST:
+                            case RENAME:
+                            case DELETE:
+                            case CreateFOLDER:
+                            case SHARE:
+                                mProgressLayout.setVisibility(View.VISIBLE);
+                                break;
+                            default:
+                                mProgressLayout.setVisibility(View.INVISIBLE);
+                                break;
+                        }
                     }
                 }
             }
@@ -241,66 +219,15 @@ public class FileActionManager {
         return loader;
     }
 
-    public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
-        Log.w(TAG, "onLoaderFinished: " + loader.getClass().getSimpleName() + " " + success);
+    public boolean onLoadFinished(Loader<Boolean> loader, Boolean success) {
         if (mFileActionService != null) {
-            mFileActionService.onLoadFinished(mContext, loader, success);
-        }
-    }
-
-    public void onLoaderReset(Loader<Boolean> loader) {
-        Log.w(TAG, "onLoaderReset: " + loader.getClass().getSimpleName());
-    }
-
-    public int getRecordCommandID() {
-        return mPreviousLoaderID;
-    }
-
-    public Bundle getRecordCommandArg() {
-        return mPreviousLoaderArgs;
-    }
-
-    public boolean setRecordCommand(int id, Bundle args) {
-        if (id == LoaderID.TUTK_NAS_LINK) {
-            return false;
+            return mFileActionService.onLoadFinished(mContext, mProgressLayout, loader, success);
         }
 
-        boolean record = false;
-        for (int cmd : RETRY_CMD) {
-            if (id == cmd) {
-                boolean retry = args.getBoolean("retry");
-                Log.d(TAG, "setRecordCommand : " + id + ", retry : " + retry);
-                if (args != null && !retry) {
-                    mPreviousLoaderID = id;
-                    mPreviousLoaderArgs = args;
-                    record = true;
-                }
-                break;
-            }
-        }
-
-        if (!record) {
-            cleanRecordCommand();
-        }
-
-        return record;
-    }
-
-    public boolean doRecordCommand() {
-        int id = getRecordCommandID();
-        Bundle previous = getRecordCommandArg();
-        if (id > 0 && previous != null) {
-            Log.d(TAG, "doRecordCommand : " + id);
-            previous.putBoolean("retry", true);
-            ((Activity) mContext).getLoaderManager().restartLoader(id, previous, mCallbacks).forceLoad();
-            return true;
-        }
         return false;
     }
 
-    public void cleanRecordCommand() {
-        mPreviousLoaderID = -1;
-        mPreviousLoaderArgs = null;
+    public void onLoaderReset(Loader<Boolean> loader) {
     }
 
     public boolean isTopDirectory(Context context, String path) {
@@ -337,10 +264,10 @@ public class FileActionManager {
     public boolean isDirectorySupportUpload(String path) {
         String mode = getServiceMode();
         String root = getServiceRootPath();
-        if (NASApp.MODE_SMB.equals(mode) && !root.equals(path))
-            return true;
-        else
+        if (NASApp.MODE_SMB.equals(mode) && root.equals(path))
             return false;
+        else
+            return true;
     }
 
     public boolean isRemoteAction() {

@@ -43,6 +43,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
     protected String mPassword;
     protected String mHostname;
     protected Exception mException;
+    protected String mExceptionMessage;
     protected int mNotificationID = 0;
     protected String mType = "";
     protected int mTotal = 0;
@@ -68,7 +69,6 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
 
     @Override
     public Boolean loadInBackground() {
-        Log.w(TAG, "loadInBackground");
         // Restructure Remote Access
         //String p2pIP = P2PService.getInstance().getP2PIP();
         //if (mHostname.contains(p2pIP))
@@ -111,35 +111,44 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         return builder.toString();
     }
 
-    protected void setException(Exception e){
+    protected void setExceptionWithMessage(Exception e, String message) {
         mException = e;
+        mExceptionMessage = message;
     }
 
-    public String getExceptionMessage(){
+    protected void setException(Exception e) {
+        setExceptionWithMessage(e, null);
+    }
+
+    public String getExceptionMessage() {
         String message = getContext().getString(R.string.network_error);
-        if(mException != null) {
+        if (mException != null) {
             if (mException instanceof jcifs.smb.SmbAuthException) {
                 message = getContext().getString(R.string.access_error);
             } else if (mException instanceof SmbException) {
                 SmbException e = (SmbException) mException;
                 String msg = e.getMessage();
-                if(msg != null && msg.contains("Invalid operation")){
+                if (msg != null && msg.contains("Invalid operation")) {
                     message = getContext().getString(R.string.operation_error);
-                }
-                else {
-                    message = getContext().getString(R.string.network_error);
+                } else {
+                    if (mExceptionMessage != null && "".equals(mExceptionMessage)) {
+                        message = mExceptionMessage;
+                        mExceptionMessage = null;
+                    } else {
+                        message = getContext().getString(R.string.network_error);
+                    }
                 }
             }
         }
         return message;
     }
 
-    public String getType(){
+    public String getType() {
         return mType;
     }
 
     protected String createRemoteUniqueName(SmbFile source, String destination) throws MalformedURLException, SmbException {
-        final boolean isDirectory= source.isDirectory();
+        final boolean isDirectory = source.isDirectory();
         SmbFile dir = new SmbFile(destination);
         SmbFile[] files = dir.listFiles(new SmbFileFilter() {
             @Override
@@ -224,7 +233,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         Log.w(TAG, mNotificationID + " progress: " + count + "/" + total + ", " + name);
         int icon = R.mipmap.ic_launcher;
 
-        if(mBuilder == null) {
+        if (mBuilder == null) {
             //add content intent
             Intent intent = mActivity.getIntent();
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -271,7 +280,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         intent.setClass(getContext(), FileManageActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        if(destination != null && !destination.equals(""))
+        if (destination != null && !destination.equals(""))
             intent.putExtra("path", destination);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);

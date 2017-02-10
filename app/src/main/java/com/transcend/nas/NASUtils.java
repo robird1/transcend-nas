@@ -19,6 +19,7 @@ import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
 import com.transcend.nas.connection.LoginHelper;
+import com.transcend.nas.management.FileInfo;
 import com.transcend.nas.utils.MimeUtil;
 
 import java.io.BufferedReader;
@@ -262,6 +263,33 @@ public final class NASUtils {
 
             }
         };
+    }
+
+    public static void shareLocalFile(Context context, ArrayList<FileInfo> files) {
+        if (files != null && files.size() > 0) {
+            boolean onlyImage = true;
+            ArrayList<Uri> imageUris = new ArrayList<Uri>();
+            for (FileInfo file : files) {
+                Uri uri = Uri.fromFile(new File(file.path));
+                imageUris.add(uri);
+                if (!file.type.equals(FileInfo.TYPE.PHOTO))
+                    onlyImage = false;
+            }
+
+            Intent shareIntent = new Intent();
+            shareIntent.setType(onlyImage ? "image/*" : "*/*");
+
+            if (imageUris.size() == 1) {
+                shareIntent.setAction(Intent.ACTION_SEND);
+                shareIntent.putExtra(Intent.EXTRA_STREAM, imageUris.get(0));
+            } else {
+                shareIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
+                shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris);
+            }
+
+            context.startActivity(Intent.createChooser(shareIntent, context.getResources().getText(R.string.share)));
+            Log.w(TAG, "doShare: " + files.size() + " item(s)");
+        }
     }
 
 }

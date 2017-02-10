@@ -53,84 +53,88 @@ public class EventNotifyLoader extends AsyncTaskLoader<Boolean> {
         Server server = ServerManager.INSTANCE.getCurrentServer();
         String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
         String hash = server.getHash();
-        DefaultHttpClient httpClient = HttpClientManager.getClient();
-        String commandURL = "http://" + hostname + "/nas/query/event_notify";
-        HttpResponse response = null;
-        InputStream inputStream = null;
-        try {
-            do {
-                HttpPost httpPost = new HttpPost(commandURL);
-                List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-                nameValuePairs.add(new BasicNameValuePair("hash", hash));
-                httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-                response = httpClient.execute(httpPost);
-                if (response == null) {
-                    Log.e(TAG, "response is null");
-                    break;
-                }
-                HttpEntity entity = response.getEntity();
-                if (entity == null) {
-                    Log.e(TAG, "response entity is null");
-                    break;
-                }
-                inputStream = entity.getContent();
-                String inputEncoding = EntityUtils.getContentCharSet(entity);
-                if (inputEncoding == null) {
-                    inputEncoding = HTTP.DEFAULT_CONTENT_CHARSET;
-                }
-
-                XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-                factory.setNamespaceAware(true);
-                XmlPullParser xpp = factory.newPullParser();
-                xpp.setInput(inputStream, inputEncoding);
-                int eventType = xpp.getEventType();
-                String curTagName = null;
-                String text = null;
-
-                do {
-                    String tagName = xpp.getName();
-                    if (eventType == XmlPullParser.START_TAG) {
-                        curTagName = tagName;
-                        if (curTagName != null)
-                            isSuccess = true;
-                    } else if (eventType == XmlPullParser.TEXT) {
-                        if (curTagName != null) {
-                            text = xpp.getText();
-                            if (curTagName.equals("reason")) {
-                                String reason = text;
-                                if (reason != null && reason.equals("Not Login")) {
-                                    isValid = false;
-                                }
-                            }
-
-                        }
-                    } else if (eventType == XmlPullParser.END_TAG) {
-                        curTagName = null;
-                    }
-                    eventType = xpp.next();
-                } while (eventType != XmlPullParser.END_DOCUMENT);
-            } while (false);
-
-        } catch (XmlPullParserException e) {
-            Log.d(TAG, "XML Parser error");
-            e.printStackTrace();
-        } catch (IOException e) {
-            Log.d(TAG, "Fail to connect to server");
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            Log.d(TAG, "catch IllegalArgumentException");
-            e.printStackTrace();
-        } finally {
+        if(hash != null && !"".equals(hash)) {
+            DefaultHttpClient httpClient = HttpClientManager.getClient();
+            String commandURL = "http://" + hostname + "/nas/query/event_notify";
+            HttpResponse response = null;
+            InputStream inputStream = null;
             try {
-                if (inputStream != null)
-                    inputStream.close();
-            } catch (IOException e) {
+                do {
+                    HttpPost httpPost = new HttpPost(commandURL);
+                    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+                    nameValuePairs.add(new BasicNameValuePair("hash", hash));
+                    httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+                    response = httpClient.execute(httpPost);
+                    if (response == null) {
+                        Log.e(TAG, "response is null");
+                        break;
+                    }
+                    HttpEntity entity = response.getEntity();
+                    if (entity == null) {
+                        Log.e(TAG, "response entity is null");
+                        break;
+                    }
+                    inputStream = entity.getContent();
+                    String inputEncoding = EntityUtils.getContentCharSet(entity);
+                    if (inputEncoding == null) {
+                        inputEncoding = HTTP.DEFAULT_CONTENT_CHARSET;
+                    }
+
+                    XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+                    factory.setNamespaceAware(true);
+                    XmlPullParser xpp = factory.newPullParser();
+                    xpp.setInput(inputStream, inputEncoding);
+                    int eventType = xpp.getEventType();
+                    String curTagName = null;
+                    String text = null;
+
+                    do {
+                        String tagName = xpp.getName();
+                        if (eventType == XmlPullParser.START_TAG) {
+                            curTagName = tagName;
+                            if (curTagName != null)
+                                isSuccess = true;
+                        } else if (eventType == XmlPullParser.TEXT) {
+                            if (curTagName != null) {
+                                text = xpp.getText();
+                                if (curTagName.equals("reason")) {
+                                    String reason = text;
+                                    if (reason != null && reason.equals("Not Login")) {
+                                        isValid = false;
+                                    }
+                                }
+
+                            }
+                        } else if (eventType == XmlPullParser.END_TAG) {
+                            curTagName = null;
+                        }
+                        eventType = xpp.next();
+                    } while (eventType != XmlPullParser.END_DOCUMENT);
+                } while (false);
+
+            } catch (XmlPullParserException e) {
+                Log.d(TAG, "XML Parser error");
                 e.printStackTrace();
+            } catch (IOException e) {
+                Log.d(TAG, "Fail to connect to server");
+                e.printStackTrace();
+            } catch (IllegalArgumentException e) {
+                Log.d(TAG, "catch IllegalArgumentException");
+                e.printStackTrace();
+            } finally {
+                try {
+                    if (inputStream != null)
+                        inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+        } else {
+            isValid = false;
         }
 
         if(isSuccess) {
-            Log.w(TAG, "hash key valid : " + isValid);
+            Log.w(TAG, "hash key valid : " + isValid + ", hash : " + hash );
             if (!isValid) {
                 Log.w(TAG, "hash key not valid, start login again");
                 Server mServer = ServerManager.INSTANCE.getCurrentServer();

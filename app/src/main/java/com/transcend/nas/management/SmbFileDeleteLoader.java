@@ -50,7 +50,7 @@ public class SmbFileDeleteLoader extends SmbAbstractLoader {
         return true;
     }
 
-    boolean isDeleteAfterUpload()
+    public boolean isDeleteAfterUpload()
     {
         return mIsDeleteAfterUpload;
     }

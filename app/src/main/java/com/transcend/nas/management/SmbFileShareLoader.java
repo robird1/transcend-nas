@@ -111,6 +111,7 @@ public class SmbFileShareLoader extends SmbAbstractLoader {
             count += length;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 if(isLoadInBackgroundCanceled()) {
+                    Log.d(TAG, "Share cancel");
                     add = false;
                     break;
                 }

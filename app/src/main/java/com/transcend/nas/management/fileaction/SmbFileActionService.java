@@ -2,11 +2,19 @@ package com.transcend.nas.management.fileaction;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.content.Intent;
 import android.content.Loader;
+import android.net.Uri;
+import android.util.Log;
+import android.view.View;
+import android.widget.RelativeLayout;
 
 import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASApp;
+import com.transcend.nas.NASUtils;
+import com.transcend.nas.R;
 import com.transcend.nas.management.FileDownloadLoader;
+import com.transcend.nas.management.FileInfo;
 import com.transcend.nas.management.LocalFileUploadLoader;
 import com.transcend.nas.management.SmbFileCopyLoader;
 import com.transcend.nas.management.SmbFileDeleteLoader;
@@ -19,6 +27,7 @@ import com.transcend.nas.management.SmbFolderCreateLoader;
 import com.transcend.nas.management.externalstorage.ExternalStorageLollipop;
 import com.transcend.nas.management.externalstorage.OTGFileDownloadLoader;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,8 +51,15 @@ class SmbFileActionService extends FileActionService {
     }
 
     @Override
-    public void onLoadFinished(Context context, Loader<Boolean> loader, Boolean success) {
-
+    public boolean onLoadFinished(Context context, RelativeLayout progress, Loader<Boolean> loader, Boolean success) {
+        if(loader instanceof SmbFileShareLoader) {
+            ArrayList<FileInfo> shareList = ((SmbFileShareLoader) loader).getShareList();
+            NASUtils.shareLocalFile(context, shareList);
+            if(progress != null)
+                progress.setVisibility(View.INVISIBLE);
+            return true;
+        }
+        return false;
     }
 
     @Override

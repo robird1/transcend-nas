@@ -1,0 +1,223 @@
+package com.transcend.nas.management.fileaction;
+
+import android.app.Activity;
+import android.app.LoaderManager;
+import android.content.Context;
+import android.content.Loader;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.RelativeLayout;
+
+import com.transcend.nas.LoaderID;
+import com.transcend.nas.NASPref;
+import com.transcend.nas.management.FileInfo;
+import com.transcend.nas.management.FileManageActivity;
+import com.transcend.nas.management.LocalFileUploadLoader;
+import com.transcend.nas.management.SmbFileDeleteLoader;
+import com.transcend.nas.management.SmbFileListLoader;
+import com.transcend.nas.management.SmbFileRenameLoader;
+import com.transcend.nas.management.firmware.EventNotifyLoader;
+import com.transcend.nas.management.firmware.TwonkyManager;
+import com.transcend.nas.tutk.TutkLinkNasLoader;
+import com.transcend.nas.tutk.TutkLogoutLoader;
+import com.transcend.nas.viewer.document.OpenWithUploadHandler;
+
+import java.util.ArrayList;
+
+/**
+ * Created by ike_lee on 2016/12/21.
+ */
+public class CustomActionManager extends AbstractActionManager {
+    private static final String TAG = CustomActionManager.class.getSimpleName();
+
+    private Context mContext;
+    private LoaderManager.LoaderCallbacks mCallbacks;
+    private RelativeLayout mProgressLayout;
+
+    private int mPreviousLoaderID = -1;
+    private Bundle mPreviousLoaderArgs = null;
+    private int[] RETRY_CMD = new int[]{LoaderID.SMB_FILE_LIST, LoaderID.SMB_FILE_RENAME, LoaderID.SMB_FILE_DELETE,
+            LoaderID.SMB_NEW_FOLDER, LoaderID.EVENT_NOTIFY};
+
+    private OpenWithUploadHandler mOpenWithUploadHandler;
+
+    public CustomActionManager(Context context, LoaderManager.LoaderCallbacks callbacks) {
+        this(context, callbacks, null);
+    }
+
+    public CustomActionManager(Context context, LoaderManager.LoaderCallbacks callbacks, RelativeLayout progressLayout) {
+        mContext = context;
+        mCallbacks = callbacks;
+        mProgressLayout = progressLayout;
+    }
+
+    public Loader<Boolean> onCreateLoader(int id, Bundle args) {
+        setRecordCommand(id, args);
+        ArrayList<String> paths;
+        String path, name;
+        switch (id) {
+            case LoaderID.LOCAL_FILE_UPLOAD_OPEN_WITH:
+                mProgressLayout.setVisibility(View.VISIBLE);
+                paths = args.getStringArrayList("paths");
+                path = args.getString("path");
+                return new LocalFileUploadLoader(mContext, paths, path, true);
+            case LoaderID.SMB_FILE_DELETE_AFTER_UPLOAD:
+                mProgressLayout.setVisibility(View.VISIBLE);
+                paths = args.getStringArrayList("paths");
+                return new SmbFileDeleteLoader(mContext, paths, true);
+            case LoaderID.SMB_FILE_RENAME:
+                mProgressLayout.setVisibility(View.VISIBLE);
+                path = args.getString("path");
+                name = args.getString("name");
+                return new SmbFileRenameLoader(mContext, path, name);
+            case LoaderID.EVENT_NOTIFY:
+                mProgressLayout.setVisibility(View.VISIBLE);
+                return new EventNotifyLoader(mContext, args);
+            case LoaderID.TUTK_NAS_LINK:
+                mProgressLayout.setVisibility(View.VISIBLE);
+                return new TutkLinkNasLoader(mContext, args);
+            case LoaderID.TUTK_LOGOUT:
+                mProgressLayout.setVisibility(View.VISIBLE);
+                return new TutkLogoutLoader(mContext);
+            default:
+                return null;
+        }
+    }
+
+    public boolean onLoadFinished(Loader<Boolean> loader, Boolean success) {
+        if(success) {
+            if (loader instanceof TutkLinkNasLoader) {
+                return doRecordCommand();
+            } else if ((loader instanceof LocalFileUploadLoader)) {
+                LocalFileUploadLoader uploadLoader = ((LocalFileUploadLoader) loader);
+                if (uploadLoader.isOpenWithUpload()) {
+                    String fileName = uploadLoader.getUniqueFileName();
+                    mOpenWithUploadHandler.setTempFilePath(mOpenWithUploadHandler.getRemoteFileDirPath().concat(fileName));
+                    ArrayList pathList = new ArrayList();
+                    pathList.add(mOpenWithUploadHandler.getSelectedFile().path);
+                    Bundle args = new Bundle();
+                    args.putStringArrayList("paths", pathList);
+                    ((Activity) mContext).getLoaderManager().restartLoader(LoaderID.SMB_FILE_DELETE_AFTER_UPLOAD, args, mCallbacks).forceLoad();
+                    return true;
+                }
+            } else if ((loader instanceof SmbFileDeleteLoader)) {
+                SmbFileDeleteLoader deleteLoader = ((SmbFileDeleteLoader) loader);
+                if (deleteLoader.isDeleteAfterUpload()) {
+                    Bundle args = new Bundle();
+                    args.putString("path", mOpenWithUploadHandler.getTempFilePath());
+                    args.putString("name", mOpenWithUploadHandler.getSelectedFile().name);
+                    ((Activity) mContext).getLoaderManager().restartLoader(LoaderID.SMB_FILE_RENAME, args, mCallbacks).forceLoad();
+                    return true;
+                }
+            } else if (loader instanceof EventNotifyLoader) {
+                TwonkyManager.getInstance().initTwonky();
+                Bundle args = ((EventNotifyLoader) loader).getBundleArgs();
+                int id = args.getInt("actionType", -1);
+                if(id > 0) {
+                    ((Activity) mContext).getLoaderManager().restartLoader(id, args, mCallbacks).forceLoad();
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public void onLoaderReset(Loader<Boolean> loader) {
+    }
+
+    public void setProgressLayout(RelativeLayout progressLayout) {
+        mProgressLayout = progressLayout;
+    }
+
+    public boolean doNasHashKeyTimeOutCheck(FileActionManager fileActionManager, String path) {
+        Long lastTime = Long.parseLong(NASPref.getSessionVerifiedTime(mContext));
+        Long currTime = System.currentTimeMillis();
+        if (currTime - lastTime >= 180000) {
+            Log.d(TAG, "doEventNotify");
+            Bundle args = new Bundle();
+            if(fileActionManager != null)
+                args.putInt("actionType", fileActionManager.getFileActionService().getLoaderID(FileActionService.FileAction.LIST));
+            args.putString("path", path);
+            ((Activity) mContext).getLoaderManager().restartLoader(LoaderID.EVENT_NOTIFY, args, mCallbacks).forceLoad();
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean doNasTUTKLink(Loader<Boolean> loader) {
+        if(loader instanceof TutkLinkNasLoader)
+            return false;
+
+        Bundle args = new Bundle();
+        String uuid = NASPref.getUUID(mContext);
+        if (uuid == null || "".equals(uuid)) {
+            uuid = NASPref.getCloudUUID(mContext);
+            if (uuid == null || "".equals(uuid)) {
+                return false;
+            }
+        }
+
+        args.putString("hostname", uuid);
+        ((Activity) mContext).getLoaderManager().restartLoader(LoaderID.TUTK_NAS_LINK, args, mCallbacks).forceLoad();
+        return true;
+    }
+
+    public void doOpenWithUpload(FileManageActivity activity, FileInfo fileInfo, String downloadFilePath, SmbFileListLoader loader){
+        mOpenWithUploadHandler = new OpenWithUploadHandler(activity, fileInfo, downloadFilePath, loader);
+        mOpenWithUploadHandler.showDialog();
+    }
+
+
+    public int getRecordCommandID() {
+        return mPreviousLoaderID;
+    }
+
+    public Bundle getRecordCommandArg() {
+        return mPreviousLoaderArgs;
+    }
+
+    public boolean setRecordCommand(int id, Bundle args) {
+        if (id == LoaderID.TUTK_NAS_LINK) {
+            return false;
+        }
+
+        boolean record = false;
+        for (int cmd : RETRY_CMD) {
+            if (id == cmd) {
+                boolean retry = args.getBoolean("retry");
+                if (args != null && !retry) {
+                    mPreviousLoaderID = id;
+                    mPreviousLoaderArgs = args;
+                    record = true;
+                }
+                break;
+            }
+        }
+
+        if (!record) {
+            cleanRecordCommand();
+        }
+
+        return record;
+    }
+
+    public boolean doRecordCommand() {
+        int id = getRecordCommandID();
+        Bundle previous = getRecordCommandArg();
+        Log.d(TAG, "doRecordCommand : " + id);
+        if (id > 0 && previous != null) {
+            previous.putBoolean("retry", true);
+            ((Activity) mContext).getLoaderManager().restartLoader(id, previous, mCallbacks).forceLoad();
+            return true;
+        }
+        return false;
+    }
+
+    public void cleanRecordCommand() {
+        mPreviousLoaderID = -1;
+        mPreviousLoaderArgs = null;
+    }
+}

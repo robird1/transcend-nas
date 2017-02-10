@@ -4,6 +4,7 @@ import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.content.Loader;
 import android.support.v4.provider.DocumentFile;
+import android.widget.RelativeLayout;
 
 import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASApp;
@@ -15,11 +16,9 @@ import com.transcend.nas.management.LocalFileMoveLoader;
 import com.transcend.nas.management.LocalFileRenameLoader;
 import com.transcend.nas.management.LocalFileUploadLoader;
 import com.transcend.nas.management.LocalFolderCreateLoader;
-import com.transcend.nas.management.externalstorage.ExternalStorageController;
 import com.transcend.nas.management.externalstorage.ExternalStorageLollipop;
 import com.transcend.nas.management.externalstorage.OTGFileCopyLoader;
 import com.transcend.nas.management.externalstorage.OTGFileDeleteLoader;
-import com.transcend.nas.management.externalstorage.OTGFileDownloadLoader;
 import com.transcend.nas.management.externalstorage.OTGFileMoveLoader;
 import com.transcend.nas.management.externalstorage.OTGFileRenameLoader;
 import com.transcend.nas.management.externalstorage.OTGLocalFolderCreateLoader;
@@ -50,8 +49,8 @@ class PhoneActionService extends FileActionService {
     }
 
     @Override
-    public void onLoadFinished(Context context, Loader<Boolean> loader, Boolean success) {
-
+    public boolean onLoadFinished(Context context, RelativeLayout progress, Loader<Boolean> loader, Boolean success) {
+        return false;
     }
 
     @Override

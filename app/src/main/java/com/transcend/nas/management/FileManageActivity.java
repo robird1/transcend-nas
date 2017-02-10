@@ -48,7 +48,6 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
-import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.NASUtils;
@@ -61,8 +60,10 @@ import com.transcend.nas.management.download.DownloadFactory;
 import com.transcend.nas.management.download.TempFileDownloadManager;
 import com.transcend.nas.management.externalstorage.ExternalStorageController;
 import com.transcend.nas.management.externalstorage.ExternalStorageLollipop;
+import com.transcend.nas.management.fileaction.AbstractActionManager;
+import com.transcend.nas.management.fileaction.ActionHelper;
+import com.transcend.nas.management.fileaction.CustomActionManager;
 import com.transcend.nas.management.fileaction.FileActionManager;
-import com.transcend.nas.management.firmware.EventNotifyLoader;
 import com.transcend.nas.management.firmware.FileFactory;
 import com.transcend.nas.management.firmware.MediaFactory;
 import com.transcend.nas.management.firmware.TwonkyManager;
@@ -70,10 +71,8 @@ import com.transcend.nas.service.AutoBackupService;
 import com.transcend.nas.service.LanCheckManager;
 import com.transcend.nas.DrawerMenuActivity;
 import com.transcend.nas.DrawerMenuController;
-import com.transcend.nas.tutk.TutkLinkNasLoader;
 import com.transcend.nas.tutk.TutkLogoutLoader;
 import com.transcend.nas.view.ProgressDialog;
-import com.transcend.nas.viewer.document.OpenWithUploadHandler;
 import com.transcend.nas.viewer.music.MusicActivity;
 import com.transcend.nas.viewer.music.MusicManager;
 import com.transcend.nas.viewer.photo.ViewerActivity;
@@ -114,23 +113,21 @@ public class FileManageActivity extends DrawerMenuActivity implements
 
     private String mPath;
     private ArrayList<FileInfo> mFileList;
-    private int mLoaderID;
     private boolean isDownloadFolder = false;
 
     private VideoCastManager mCastManager;
     private VideoCastConsumer mCastConsumer;
 
-    private ProgressDialog mShareDialog;
-    private SmbFileShareLoader mSmbFileShareLoader;
-
     private SmbFileListLoader mSmbFileListLoader;
     private FileInfo mFileInfo;
     private String mDownloadFilePath;
-    private OpenWithUploadHandler mOpenWithUploadHandler;
     private String mOriginMD5Checksum;
 
     private ExternalStorageController mStorageController;
+
+    private ActionHelper mActionHelper;
     private FileActionManager mFileActionManager;
+    private CustomActionManager mCustomActionManager;
 
     @Override
     public int onLayoutID() {
@@ -332,6 +329,13 @@ public class FileManageActivity extends DrawerMenuActivity implements
         mFileActionManager = new FileActionManager(this, FileActionManager.FileActionServiceType.SMB, this);
         mPath = mFileActionManager.getServiceRootPath();
 
+        mCustomActionManager = new CustomActionManager(this, this);
+
+        List<AbstractActionManager> actionManagerList = new ArrayList<>();
+        actionManagerList.add(mFileActionManager);
+        actionManagerList.add(mCustomActionManager);
+        mActionHelper = new ActionHelper(actionManagerList);
+
         mCastManager = VideoCastManager.getInstance();
         mCastConsumer = new VideoCastConsumerImpl() {
             @Override
@@ -444,7 +448,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
 
     private void initProgressView() {
         mProgressView = (RelativeLayout) findViewById(R.id.main_progress_view);
-        mFileActionManager.setProgressLayout(mProgressView);
+        mActionHelper.setProgressLayout(mProgressView);
     }
 
     @Override
@@ -600,7 +604,6 @@ public class FileManageActivity extends DrawerMenuActivity implements
         selectAtPosition(position);
     }
 
-
     /**
      * ACTION MODE CONTROL
      */
@@ -654,7 +657,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
                     doRename();
                     break;
                 case R.id.file_manage_editor_action_share:
-                    doShare();
+                    doShare(getSelectedFiles());
                     break;
                 case R.id.file_manage_editor_action_copy:
                     startFileActionLocateActivity(NASApp.ACT_COPY);
@@ -691,7 +694,8 @@ public class FileManageActivity extends DrawerMenuActivity implements
         toggleDrawerCheckedItem();
 
         if (mProgressView.isShown()) {
-            getLoaderManager().destroyLoader(mLoaderID);
+            getLoaderManager().destroyLoader(mActionHelper.getCurrentLoaderID());
+            mActionHelper.destroyLoader();
             mProgressView.setVisibility(View.INVISIBLE);
             return;
         }
@@ -734,94 +738,41 @@ public class FileManageActivity extends DrawerMenuActivity implements
      */
     @Override
     public Loader<Boolean> onCreateLoader(int id, Bundle args) {
-        mLoaderID = id;
-        Loader<Boolean> loader = mFileActionManager.onCreateLoader(id, args);
-        if (loader == null) {
-            switch (id) {
-                case LoaderID.LOCAL_FILE_UPLOAD_OPEN_WITH:
-                    mProgressView.setVisibility(View.VISIBLE);
-                    ArrayList<String> paths = args.getStringArrayList("paths");
-                    String path = args.getString("path");
-                    return new LocalFileUploadLoader(this, paths, path, true);
-                case LoaderID.EVENT_NOTIFY:
-                    mProgressView.setVisibility(View.VISIBLE);
-                    return new EventNotifyLoader(this, args);
-                case LoaderID.TUTK_NAS_LINK:
-                    mProgressView.setVisibility(View.VISIBLE);
-                    return new TutkLinkNasLoader(this, args);
-                case LoaderID.TUTK_LOGOUT:
-                    mProgressView.setVisibility(View.VISIBLE);
-                    return new TutkLogoutLoader(this);
-            }
-        }
-
+        Loader<Boolean> loader = mActionHelper.onCreateLoader(id, args);
         if (loader instanceof SmbFileListLoader)
             mSmbFileListLoader = (SmbFileListLoader) loader;
-        if (loader instanceof SmbFileShareLoader)
-            mSmbFileShareLoader = (SmbFileShareLoader) loader;
         return loader;
     }
 
     @Override
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
-        mFileActionManager.onLoadFinished(loader, success);
+        if (mActionHelper.onLoadFinished(loader, success))
+            return;
+
+        if (loader instanceof TutkLogoutLoader) {
+            super.onLoadFinished(loader, success);
+            return;
+        }
+
         if (success) {
-            if (loader instanceof SmbFileListLoader) {
+            if (loader instanceof SmbFileListLoader || loader instanceof LocalFileListLoader) {
                 //file list change, stop previous image loader
                 ImageLoader.getInstance().stop();
-                mPath = ((SmbFileListLoader) loader).getPath();
-                mFileList = ((SmbFileListLoader) loader).getFileList();
+                if (loader instanceof SmbFileListLoader) {
+                    mPath = ((SmbFileListLoader) loader).getPath();
+                    mFileList = ((SmbFileListLoader) loader).getFileList();
+                } else {
+                    mPath = ((LocalFileListLoader) loader).getPath();
+                    mFileList = ((LocalFileListLoader) loader).getFileList();
+                }
                 mFileActionManager.setCurrentPath(mPath);
                 Collections.sort(mFileList, FileInfoSort.comparator(this));
                 FileFactory.getInstance().addFolderFilterRule(mPath, mFileList);
                 FileFactory.getInstance().addFileTypeSortRule(mFileList);
                 closeEditorMode();
-                enableFabEdit(!mFileActionManager.isTopDirectory(this, mPath));
+                enableFabEdit(mFileActionManager.isDirectorySupportUpload(mPath));
                 updateScreen();
                 toggleDrawerCheckedItem();
-            } else if (loader instanceof LocalFileListLoader) {
-                //file list change, stop previous image loader
-                ImageLoader.getInstance().stop();
-                mPath = ((LocalFileListLoader) loader).getPath();
-                mFileList = ((LocalFileListLoader) loader).getFileList();
-                mFileActionManager.setCurrentPath(mPath);
-                Collections.sort(mFileList, FileInfoSort.comparator(this));
-                FileFactory.getInstance().addFileTypeSortRule(mFileList);
-                closeEditorMode();
-                enableFabEdit(true);
-                updateScreen();
-                toggleDrawerCheckedItem();
-            } else if (loader instanceof TutkLinkNasLoader) {
-                if (mFileActionManager.doRecordCommand())
-                    return;
-            } else if (loader instanceof TutkLogoutLoader) {
-                startSignInActivity();
-                return;
-            } else if (loader instanceof EventNotifyLoader) {
-                TwonkyManager.getInstance().initTwonky();
-                Bundle args = ((EventNotifyLoader) loader).getBundleArgs();
-                String path = args.getString("path");
-                if (path != null && !path.equals("")) {
-                    doLoad(path);
-                    return;
-                }
-            } else if (loader instanceof SmbFileShareLoader) {
-                ArrayList<FileInfo> files = ((SmbFileShareLoader) loader).getShareList();
-                if (files != null && files.size() > 0)
-                    doLocalShare(files);
-            } else if ((loader instanceof LocalFileUploadLoader) && ((LocalFileUploadLoader) loader).isOpenWithUpload()) {
-                Bundle args = new Bundle();
-                ArrayList pathList = new ArrayList();
-                pathList.add(mFileInfo.path);
-                args.putStringArrayList("paths", pathList);
-                String fileName = ((LocalFileUploadLoader) loader).getUniqueFileName();
-                mOpenWithUploadHandler.setTempFilePath(mOpenWithUploadHandler.getRemoteFileDirPath().concat(fileName));
-                getLoaderManager().restartLoader(LoaderID.SMB_FILE_DELETE_AFTER_UPLOAD, args, this).forceLoad();
-            } else if ((loader instanceof SmbFileDeleteLoader) && ((SmbFileDeleteLoader) loader).isDeleteAfterUpload()) {
-                Bundle args = new Bundle();
-                args.putString("path", mOpenWithUploadHandler.getTempFilePath());
-                args.putString("name", mFileInfo.name);
-                getLoaderManager().restartLoader(LoaderID.SMB_FILE_RENAME, args, this).forceLoad();
             } else {
                 doRefresh();
                 if (loader instanceof SmbAbstractLoader) {
@@ -832,37 +783,19 @@ public class FileManageActivity extends DrawerMenuActivity implements
                 }
             }
         } else {
-            if (!LanCheckManager.getInstance().getLanConnect() && mFileActionManager.getRecordCommandArg() != null) {
-                if (mLoaderID == LoaderID.TUTK_NAS_LINK) {
-                    mFileActionManager.cleanRecordCommand();
-                    LanCheckManager.getInstance().startLanCheck();
-                    Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+            if (LanCheckManager.getInstance().getLanConnect()) {
+                LanCheckManager.getInstance().startLanCheck();
+                if (loader instanceof SmbAbstractLoader) {
+                    Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
                 } else {
-                    Bundle args = new Bundle();
-                    String uuid = NASPref.getUUID(this);
-                    if (uuid == null || "".equals(uuid)) {
-                        uuid = NASPref.getCloudUUID(this);
-                        if (uuid == null || "".equals(uuid)) {
-                            startSignInActivity();
-                            return;
-                        }
-                    }
-                    args.putString("hostname", uuid);
-                    getLoaderManager().restartLoader(LoaderID.TUTK_NAS_LINK, args, this).forceLoad();
-                    return;
+                    Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
                 }
             } else {
-                checkEmptyView();
-                if (loader instanceof SmbAbstractLoader) {
-                    if ((loader instanceof FileDownloadLoader) && isDownloadLocationNotExist()) {
-                        Toast.makeText(this, R.string.download_location_error, Toast.LENGTH_LONG).show();
-                    } else {
-                        LanCheckManager.getInstance().startLanCheck();
-                        Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
-                    }
+                if (mCustomActionManager.doNasTUTKLink(loader)) {
+                    //Toast.makeText(this, getString(R.string.try_remote_access), Toast.LENGTH_SHORT).show();
+                    return;
                 } else {
-                    if (loader instanceof EventNotifyLoader)
-                        LanCheckManager.getInstance().startLanCheck();
+                    LanCheckManager.getInstance().startLanCheck();
                     Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
                 }
             }
@@ -873,26 +806,13 @@ public class FileManageActivity extends DrawerMenuActivity implements
             }
         }
 
+        checkEmptyView();
         mProgressView.setVisibility(View.INVISIBLE);
     }
 
     @Override
     public void onLoaderReset(Loader<Boolean> loader) {
-        mFileActionManager.onLoaderReset(loader);
-    }
-
-    private boolean doEventNotify(boolean update, String path) {
-        Long lastTime = Long.parseLong(NASPref.getSessionVerifiedTime(this));
-        Long currTime = System.currentTimeMillis();
-        if (mFileActionManager.isRemoteAction() && currTime - lastTime >= 180000) {
-            Bundle args = new Bundle();
-            args.putString("path", update ? path : "");
-            getLoaderManager().restartLoader(LoaderID.EVENT_NOTIFY, args, this).forceLoad();
-            Log.d(TAG, "doEventNotify");
-            return true;
-        }
-
-        return false;
+        mActionHelper.onLoaderReset(loader);
     }
 
     /**
@@ -997,7 +917,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
 
     public void doLoad(String path) {
         mFileActionManager.checkServiceType(path);
-        if (doEventNotify(true, path)) {
+        if (mFileActionManager.isRemoteAction() && mCustomActionManager.doNasHashKeyTimeOutCheck(mFileActionManager, path)) {
             return;
         }
         mFileActionManager.list(path);
@@ -1031,43 +951,24 @@ public class FileManageActivity extends DrawerMenuActivity implements
         };
     }
 
-    private void doShare() {
-        ArrayList<FileInfo> files = getSelectedFiles();
-        if (mFileActionManager.isRemoteAction()) {
-            Bundle value = new Bundle();
-            value.putString(ProgressDialog.DIALOG_TITLE, getString(R.string.share));
-            value.putInt(ProgressDialog.DIALOG_ICON, R.drawable.ic_toolbar_share_gray);
-            String format = getResources().getString(files.size() <= 1 ? R.string.msg_file_selected : R.string.msg_files_selected);
-            value.putString(ProgressDialog.DIALOG_MESSAGE, String.format(format, files.size()));
-            mShareDialog = new ProgressDialog(this, value) {
-                @Override
-                public void onConfirm() {
-                    mFileActionManager.share(NASPref.getShareLocation(FileManageActivity.this), getSelectedPaths());
-                }
+    private void doShare(final ArrayList<FileInfo> files) {
+        Bundle value = new Bundle();
+        value.putString(ProgressDialog.DIALOG_TITLE, mContext.getString(R.string.share));
+        value.putInt(ProgressDialog.DIALOG_ICON, R.drawable.ic_toolbar_share_gray);
+        String format = mContext.getResources().getString(files.size() <= 1 ? R.string.msg_file_selected : R.string.msg_files_selected);
+        value.putString(ProgressDialog.DIALOG_MESSAGE, String.format(format, files.size()));
+        new ProgressDialog(mContext, value) {
+            @Override
+            public void onConfirm() {
+                mFileActionManager.share(NASPref.getShareLocation(FileManageActivity.this), files);
+                dismiss();
+            }
 
-                @Override
-                public void onCancel() {
-                    getLoaderManager().destroyLoader(mLoaderID);
-                    if (mSmbFileShareLoader != null) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                            mSmbFileShareLoader.cancelLoad();
-                        }
-                        mSmbFileShareLoader = null;
-                    }
-                    mShareDialog = null;
-                }
-            };
-        } else {
-            doLocalShare(files);
-        }
-    }
+            @Override
+            public void onCancel() {
 
-    private void doLocalShare(ArrayList<FileInfo> files) {
-        mFileActionManager.shareLocalFile(files);
-        if (mShareDialog != null) {
-            mShareDialog.dismiss();
-            mShareDialog = null;
-        }
+            }
+        };
         closeEditorMode();
     }
 
@@ -1494,8 +1395,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         if (mOriginMD5Checksum != null) {
             String checksum = getMD5Checksum();
             if (checksum != null && !mOriginMD5Checksum.equals(checksum)) {
-                mOpenWithUploadHandler = new OpenWithUploadHandler(this, mFileInfo, mDownloadFilePath, mSmbFileListLoader);
-                mOpenWithUploadHandler.showDialog();
+                mCustomActionManager.doOpenWithUpload(this, mFileInfo, mDownloadFilePath, mSmbFileListLoader);
             }
         }
 
@@ -1543,21 +1443,6 @@ public class FileManageActivity extends DrawerMenuActivity implements
 
         //return complete hash
         return sb.toString();
-    }
-
-    private boolean isDownloadLocationNotExist() {
-        boolean isNotExist = false;
-        String location = NASPref.getDownloadLocation(this);
-        File file = new File(location);
-        if (!file.exists()) {
-            isNotExist = true;
-        } else {                                 // Enter this block if SD card has been removed
-            File[] files = file.listFiles();
-            if (files == null) {
-                isNotExist = true;
-            }
-        }
-        return isNotExist;
     }
 
     /**

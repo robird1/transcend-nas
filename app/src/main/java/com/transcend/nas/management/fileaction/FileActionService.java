@@ -4,6 +4,7 @@ import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.content.Loader;
 import android.os.Bundle;
+import android.widget.RelativeLayout;
 
 import com.transcend.nas.management.externalstorage.ExternalStorageController;
 
@@ -147,7 +148,11 @@ abstract class FileActionService {
         return null;
     }
 
-    public abstract void onLoadFinished(Context context, Loader<Boolean> loader, Boolean success);
+    public boolean onLoadFinished(Context context, Loader<Boolean> loader, Boolean success) {
+        return onLoadFinished(context, null, loader, success);
+    }
+
+    public abstract boolean onLoadFinished(Context context, RelativeLayout progress, Loader<Boolean> loader, Boolean success);
 
     protected abstract AsyncTaskLoader open(Context context, String path);
 

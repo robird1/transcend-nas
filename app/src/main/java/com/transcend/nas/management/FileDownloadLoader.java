@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.common.CustomNotificationManager;
 import com.transcend.nas.management.download.AbstractDownloadManager;
@@ -50,7 +51,7 @@ public class FileDownloadLoader extends SmbAbstractLoader {
             return download();
         } catch (Exception e) {
             e.printStackTrace();
-            setException(e);
+            setExceptionWithMessage(e, isDownloadDirectoryExist(getContext()) ? null : getContext().getString(R.string.download_location_error));
             updateResult(mType, getContext().getString(R.string.error), mDest);
         }
         return false;
@@ -126,4 +127,20 @@ public class FileDownloadLoader extends SmbAbstractLoader {
 //            }
 //        }, 1000);
 //    }
+
+
+    public boolean isDownloadDirectoryExist(Context context) {
+        boolean isExist = true;
+        String location = NASPref.getDownloadLocation(context);
+        File file = new File(location);
+        if (!file.exists()) {
+            isExist = false;
+        } else {                                 // Enter this block if SD card has been removed
+            File[] files = file.listFiles();
+            if (files == null) {
+                isExist = false;
+            }
+        }
+        return isExist;
+    }
 }

@@ -256,4 +256,8 @@ public class OpenWithUploadHandler {
         return mTempFilePath;
     }
 
+    public FileInfo getSelectedFile (){
+        return mSelectedFile;
+    }
+
 }

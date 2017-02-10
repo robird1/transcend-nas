@@ -148,10 +148,8 @@ public abstract class DrawerMenuActivity extends AppCompatActivity implements
 
     @Override
     public void onLoadFinished(Loader<Boolean> loader, Boolean isSuccess) {
-        if (isSuccess) {
-            if (loader instanceof TutkLogoutLoader) {
-                startSignInActivity();
-            }
+        if (loader instanceof TutkLogoutLoader) {
+            startSignInActivity();
         }
     }
 
