@@ -215,7 +215,6 @@ public class LoginActivity extends AppCompatActivity implements
         StyleFactory.set_blue_text_touch_effect(this, signInOther);
         signInOther.setOnClickListener(this);
         TextView accountTitle = (TextView) findViewById(R.id.start_account_title);
-        TextView accountContent = (TextView) findViewById(R.id.start_account_content);
         mAccountImage = (ImageView) findViewById(R.id.start_account_image);
         if (NASPref.getFBAccountStatus(mContext))
             mAccountImage.setImageResource(R.drawable.icon_facebook_24dp);
@@ -223,9 +222,11 @@ public class LoginActivity extends AppCompatActivity implements
         String email = NASPref.getCloudUsername(mContext);
         String pwd = NASPref.getCloudPassword(mContext);
         if (!email.equals("") && !pwd.equals("")) {
-            accountContent.setText(email);
-            String title = email.split("@")[0];
-            accountTitle.setText(title);
+            if (email.contains("@")) {
+                accountTitle.setText(String.format("%s\n%s", email.split("@")[0], email));
+            } else {   // if user login by FB with no email information
+                accountTitle.setText(String.format("%s", NASPref.getFBUserName(this)));
+            }
             showStartView();
         } else {
             showLoginView();
