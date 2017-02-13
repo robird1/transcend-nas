@@ -73,10 +73,10 @@
 
     <string-array name="sort_items">
         <item>@string/type</item>
-        <item>@string/date</item>
-        <item>@string/reverse_date</item>
-        <item>@string/name</item>
-        <item>@string/reverse_name</item>
+        <item>@string/sort_date_newest_first</item>
+        <item>@string/sort_date_oldest_first</item>
+        <item>@string/sort_name_a_to_z</item>
+        <item>@string/sort_name_z_to_a</item>
     </string-array>
 
     <string-array name="cache_size_entries">

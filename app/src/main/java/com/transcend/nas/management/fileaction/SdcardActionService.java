@@ -9,6 +9,7 @@ import com.transcend.nas.NASUtils;
  */
 class SdcardActionService extends PhoneActionService {
     public SdcardActionService() {
+        super();
         TAG = SdcardActionService.class.getSimpleName();
         mMode = NASApp.MODE_SDCARD;
         mRoot = NASApp.ROOT_SD;

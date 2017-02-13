@@ -42,7 +42,6 @@ class PhoneActionService extends FileActionService {
         COPY = LoaderID.LOCAL_FILE_COPY;
         MOVE = LoaderID.LOCAL_FILE_MOVE;
         DELETE = LoaderID.LOCAL_FILE_DELETE;
-        SHARE = LoaderID.LOCAL_FILE_SHARE;
         mMode = NASApp.MODE_STG;
         mRoot = NASApp.ROOT_STG;
         mPath = NASApp.ROOT_STG;

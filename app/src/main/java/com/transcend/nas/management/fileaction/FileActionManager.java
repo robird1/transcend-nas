@@ -264,10 +264,10 @@ public class FileActionManager extends AbstractActionManager {
     public boolean isDirectorySupportUpload(String path) {
         String mode = getServiceMode();
         String root = getServiceRootPath();
-        if (NASApp.MODE_SMB.equals(mode) && root.equals(path))
-            return false;
-        else
+        if (NASApp.MODE_SMB.equals(mode) && !root.equals(path))
             return true;
+        else
+            return false;
     }
 
     public boolean isRemoteAction() {

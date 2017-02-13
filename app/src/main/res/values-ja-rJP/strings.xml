@@ -6,7 +6,7 @@
  Locale: ja_JP, Japanese
  Tagged: Android_SJC
  Exported by: Translator TS
- Exported at: Fri, 03 Feb 2017 08:02:10 +0000
+ Exported at: Mon, 13 Feb 2017 03:21:02 +0000
 -->
 <resources>
     <string name="about">情報</string>
@@ -215,6 +215,10 @@
     <string name="smart_passed">正常</string>
     <string name="smart_unknown">不明</string>
     <string name="sort">ソート</string>
+    <string name="sort_date_newest_first">Date (Newest First)</string>
+    <string name="sort_date_oldest_first">Date (Oldest First)</string>
+    <string name="sort_name_a_to_z">Name (A -&gt; Z)</string>
+    <string name="sort_name_z_to_a">Name (Z -&gt; A)</string>
     <string name="status">ステータス</string>
     <string name="submit">送信</string>
     <string name="system_info">システム情報</string>

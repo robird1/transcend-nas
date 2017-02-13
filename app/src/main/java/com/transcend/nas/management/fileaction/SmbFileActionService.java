@@ -39,6 +39,7 @@ class SmbFileActionService extends FileActionService {
         TAG = SmbFileActionService.class.getSimpleName();
         LIST = LoaderID.SMB_FILE_LIST;
         DOWNLOAD = LoaderID.FILE_DOWNLOAD;
+        UPLOAD = LoaderID.LOCAL_FILE_UPLOAD;
         CreateFOLDER = LoaderID.SMB_NEW_FOLDER;
         RENAME = LoaderID.SMB_FILE_RENAME;
         COPY = LoaderID.SMB_FILE_COPY;
