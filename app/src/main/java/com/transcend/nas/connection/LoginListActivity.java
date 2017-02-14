@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -45,6 +46,7 @@ import com.transcend.nas.tutk.TutkGetNasLoader;
 import com.transcend.nas.tutk.TutkLinkNasLoader;
 import com.transcend.nas.service.LanCheckManager;
 import com.transcend.nas.view.NotificationDialog;
+import com.tutk.IOTC.IOTCAPIs;
 import com.tutk.IOTC.P2PService;
 
 import java.util.ArrayList;
@@ -69,7 +71,11 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
     private WizardDialog mWizardDialog;
     private LoginDialog mLoginDialog;
 
-    private boolean enableDeviceCheck = false;
+    private boolean enableDeviceCheck = true;
+    private int DeviceCheckTimeMax = 5000;
+    private int DeviceCheckTimePeriod = 1000;
+    private int mDeviceCheckTime = 0;
+    private Handler mHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +90,13 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
     }
 
     @Override
+    protected void onDestroy() {
+        IOTCAPIs.IOTC_DeInitialize();
+        super.onDestroy();
+    }
+
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.nas_finder, menu);
         return true;
@@ -93,11 +106,8 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                if (mProgressView.isShown()) {
-                    mProgressView.setVisibility(View.INVISIBLE);
-                    getLoaderManager().destroyLoader(mLoaderID);
-                }
-                startLoginActivity();
+                if (!mProgressView.isShown())
+                    startLoginActivity();
                 break;
             case R.id.action_refresh_nas_finder:
                 if (!mProgressView.isShown())
@@ -109,11 +119,14 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
 
     @Override
     public void onBackPressed() {
-        if (mProgressView.isShown()) {
+        if (!mProgressView.isShown()) {
+            startLoginActivity();
+        } else {
+            if (LoaderID.TUTK_NAS_ONLINE_CHECK == mLoaderID)
+                return;
+
             mProgressView.setVisibility(View.INVISIBLE);
             getLoaderManager().destroyLoader(mLoaderID);
-        } else {
-            startLoginActivity();
         }
     }
 
@@ -126,6 +139,9 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
         mNASList = (ArrayList<HashMap<String, String>>) intent.getSerializableExtra("NASList");
         if (mNASList == null)
             mNASList = new ArrayList<HashMap<String, String>>();
+
+        int init = IOTCAPIs.IOTC_Initialize2(0);
+        Log.d(TAG, "IOTCAgent_Connect(.) IOTC_Initialize2=" + init);
     }
 
     private void initToolbar() {
@@ -261,7 +277,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                 return new TutkGetNasLoader(this, server, token);
             case LoaderID.TUTK_NAS_ONLINE_CHECK:
                 mProgressView.setVisibility(View.VISIBLE);
-                return new P2PStautsLoader(LoginListActivity.this, mNASList);
+                return new P2PStautsLoader(LoginListActivity.this, mNASList, 3000);
             case LoaderID.TUTK_NAS_DELETE:
                 mProgressView.setVisibility(View.VISIBLE);
                 server = args.getString("server");
@@ -320,25 +336,24 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
 
         //merge the list from android NsdManager
         LanCheckManager.getInstance().stopAndroidDiscovery();
-        ArrayList<HashMap<String,String>> nasList = LanCheckManager.getInstance().getAndroidDiscoveryList();
-        for(HashMap<String,String> nas : nasList) {
+        ArrayList<HashMap<String, String>> nasList = LanCheckManager.getInstance().getAndroidDiscoveryList();
+        for (HashMap<String, String> nas : nasList) {
             boolean add = true;
             String nickname = nas.get("nickname");
             String hostname = nas.get("hostname");
-            for(HashMap<String,String> tmp : mLANList) {
+            for (HashMap<String, String> tmp : mLANList) {
                 String tmpHostname = tmp.get("hostname");
-                if(hostname != null && hostname.equals(tmpHostname)) {
+                if (hostname != null && hostname.equals(tmpHostname)) {
                     add = false;
                     break;
                 }
             }
 
-            if(add) {
+            if (add) {
                 mLANList.add(nas);
                 Log.d(TAG, "Add service " + nickname + ", " + hostname + " from NsdManager");
-            }
-            else
-                Log.d(TAG, "Ignore service " + nickname + ", "  + hostname + " from NsdManager");
+            } else
+                Log.d(TAG, "Ignore service " + nickname + ", " + hostname + " from NsdManager");
         }
 
         showListDialog(mLANList);
@@ -458,7 +473,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
             if (info != null)
                 isWiFi = (info.getType() == ConnectivityManager.TYPE_WIFI);
 
-            if(exist && isWiFi) {
+            if (exist && isWiFi) {
                 //Link nas's tutk server fail, try lan connect
                 Bundle args = loader.getBundleArgs();
                 args.putString("hostname", account.ip);
@@ -466,10 +481,22 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                 getLoaderManager().restartLoader(LoaderID.WIZARD, args, LoginListActivity.this).forceLoad();
             } else {
                 mProgressView.setVisibility(View.INVISIBLE);
-                if(isWiFi)
+                if (isWiFi)
                     startNASListLoader(false);
-                else
-                    Toast.makeText(this, loader.getError(), Toast.LENGTH_SHORT).show();
+                else {
+                    String error = loader.getError();
+                    if (enableDeviceCheck) {
+                        for (HashMap<String, String> nas : mNASList) {
+                            String UID = nas.get("hostname");
+                            if (UID != null && UID.equals(account.uuid)) {
+                                error = "no".equals(nas.get("online")) ? getString(R.string.offline) : error;
+                                break;
+                            }
+                        }
+                    }
+
+                    Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+                }
             }
             return;
         }
@@ -479,9 +506,35 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
         getLoaderManager().restartLoader(LoaderID.WIZARD, args, this).forceLoad();
     }
 
-    private void checkP2PStatusLoader(boolean success, P2PStautsLoader loader) {
-        mProgressView.setVisibility(View.INVISIBLE);
-        mAdapter.notifyDataSetChanged();
+    private void checkP2PStatusLoader(boolean success, final P2PStautsLoader loader) {
+        if (success) {
+            mDeviceCheckTime = DeviceCheckTimeMax;
+            if (mHandler == null)
+                mHandler = new Handler();
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (loader.isIOTCReady()) {
+                        mNASList = loader.getNasList();
+                        mAdapter.notifyDataSetChanged();
+                        mProgressView.setVisibility(View.INVISIBLE);
+                    } else {
+                        mDeviceCheckTime -= DeviceCheckTimePeriod;
+                        if (mDeviceCheckTime > 0) {
+                            mHandler.postDelayed(this, DeviceCheckTimePeriod);
+                            Log.d(TAG, "P2PStatusLoader remain time : " + mDeviceCheckTime);
+                        } else {
+                            mProgressView.setVisibility(View.INVISIBLE);
+                            Toast.makeText(LoginListActivity.this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "P2PStatusLoader timeout");
+                        }
+                    }
+                }
+            }, DeviceCheckTimePeriod);
+        } else {
+            mProgressView.setVisibility(View.INVISIBLE);
+            Toast.makeText(LoginListActivity.this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void checkWizardLoader(boolean success, WizardCheckLoader loader) {
@@ -611,11 +664,11 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
         mLoginDialog = new LoginDialog(LoginListActivity.this, args, remoteAccess, false) {
             @Override
             public void onConfirm(Bundle args) {
-                if(args != null) {
+                if (args != null) {
                     String username = args.getString("username");
                     GoogleAnalysisFactory.getInstance(LoginListActivity.this).
                             sendEvent(GoogleAnalysisFactory.VIEW.START_NAS_LIST, GoogleAnalysisFactory.ACTION.LoginNas,
-                            NASPref.defaultUserName.equals(username) ? GoogleAnalysisFactory.LABEL.LoginByAdmin : GoogleAnalysisFactory.LABEL.LoginByNonAdmin);
+                                    NASPref.defaultUserName.equals(username) ? GoogleAnalysisFactory.LABEL.LoginByAdmin : GoogleAnalysisFactory.LABEL.LoginByNonAdmin);
                 }
                 startLoginLoader(args);
             }
@@ -693,29 +746,34 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                     holder.subtitle.setText(hostname);
                 }
 
-                if(mTutkUUID != null && !mTutkUUID.equals(""))
+                if (mTutkUUID != null && !mTutkUUID.equals(""))
                     holder.delete.setVisibility(mTutkUUID.equals(hostname) ? View.INVISIBLE : View.VISIBLE);
 
                 if (enableDeviceCheck) {
+                    int colorPrimary = ContextCompat.getColor(LoginListActivity.this, R.color.textColorPrimary);
+                    int colorSecondary = ContextCompat.getColor(LoginListActivity.this, R.color.textColorSecondary);
                     String isOnLine = mNASList.get(position).get("online");
                     if (isOnLine != null && !isOnLine.equals("")) {
                         if (isOnLine.equals("yes")) {
                             holder.subtitle.setText(getString(R.string.online));
-                            holder.subtitle.setTextColor(Color.GREEN);
+                            holder.subtitle.setTextColor(colorPrimary);
+                            holder.title.setTextColor(colorPrimary);
                         } else {
                             holder.subtitle.setText(getString(R.string.offline));
-                            holder.subtitle.setTextColor(ContextCompat.getColor(LoginListActivity.this, R.color.textColorSecondary));
+                            holder.subtitle.setTextColor(colorSecondary);
+                            holder.title.setTextColor(colorSecondary);
                         }
                     } else {
-                        holder.subtitle.setTextColor(ContextCompat.getColor(LoginListActivity.this, R.color.textColorSecondary));
                         holder.subtitle.setText(getString(R.string.loading));
+                        holder.subtitle.setTextColor(colorPrimary);
+                        holder.title.setTextColor(colorPrimary);
                     }
                 }
             } else {
                 //this is the 'Add' item
                 holder.listItem.setVisibility(View.GONE);
                 holder.addItem.setVisibility(View.VISIBLE);
-                if(mNASList == null || mNASList.size() == 0){
+                if (mNASList == null || mNASList.size() == 0) {
                     holder.split.setVisibility(View.GONE);
                 } else {
                     holder.split.setVisibility(View.VISIBLE);
@@ -790,16 +848,9 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                         String nickname = nas.get("nickname");
                         String hostname = nas.get("hostname");
 
-                        if(mTutkUUID != null && mTutkUUID.equals(hostname)) {
+                        if (mTutkUUID != null && mTutkUUID.equals(hostname)) {
                             startFileManageActivity();
                             return;
-                        }
-
-                        if (enableDeviceCheck) {
-                            String isOnLine = nas.get("online");
-                            if ("no".equals(isOnLine)) {
-                                return;
-                            }
                         }
 
                         if (nickname != null && nickname.contains(NASApp.TUTK_NAME_TAG)) {
