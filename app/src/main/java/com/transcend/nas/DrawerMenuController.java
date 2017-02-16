@@ -15,10 +15,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.management.externalstorage.SDCardReceiver;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -39,6 +41,7 @@ public class DrawerMenuController {
     private ImageView mNavHeaderIcon;
     private Bitmap mPhotoBitmap;
     private NavigationView.OnNavigationItemSelectedListener mItemClickListener;
+    private static List<DeviceNameObserver> mObserver = new ArrayList<>();
 
     public enum DrawerMenu {
         DRAWER_DEFAULT(R.id.drawer_layout, R.id.navigation_view);
@@ -57,6 +60,22 @@ public class DrawerMenuController {
         public int getNavigationViewId() {
             return mNavigationViewId;
         }
+    }
+
+    public interface DeviceNameObserver {
+        void onChangeDeviceName();
+    }
+
+    public static void registerObserver(DeviceNameObserver observer) {
+        mObserver.add(observer);
+    }
+
+    public static void unregisterObserver(DeviceNameObserver observer) {
+        mObserver.remove(observer);
+    }
+
+    public static List<DeviceNameObserver> getObserver() {
+        return mObserver;
     }
 
     DrawerMenuController(AppCompatActivity activity, Toolbar toolbar, NavigationView.OnNavigationItemSelectedListener listener) {
@@ -132,6 +151,10 @@ public class DrawerMenuController {
                 }
             }).start();
         }
+    }
+
+    public void updateRemoteDeviceName() {
+        setRemoteDeviceName();
     }
 
     private void setRemoteDeviceName() {

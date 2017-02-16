@@ -2,6 +2,8 @@ package com.transcend.nas.settings;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.util.Log;
+
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
@@ -22,13 +24,14 @@ public class FirmwareInfoLoader extends AsyncTaskLoader<Boolean> {
     @Override
     public Boolean loadInBackground() {
         Server server = ServerManager.INSTANCE.getCurrentServer();
-        mInfo = server.getServerInfo();
-        if(null == mInfo) {
-            String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
-            boolean success = server.doGetServerInfo(hostname);
-            if(success)
-                mInfo = server.getServerInfo();
+        String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
+        boolean success = server.doGetServerInfo(hostname);
+        if(success) {
+            Log.d(TAG, "[Enter] success");
+            mInfo = server.getServerInfo();
+            Log.d(TAG, "mInfo.hostName: "+ mInfo.hostName);
         }
+
         return true;
     }
 

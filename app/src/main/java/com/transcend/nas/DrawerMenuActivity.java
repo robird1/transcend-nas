@@ -22,8 +22,10 @@ import com.transcend.nas.management.firmware.ShareFolderManager;
 import com.transcend.nas.management.firmware.TwonkyManager;
 import com.transcend.nas.service.AutoBackupService;
 import com.transcend.nas.service.LanCheckManager;
+import com.transcend.nas.settings.DeviceInfoActivity;
 import com.transcend.nas.settings.DiskFactory;
 import com.transcend.nas.settings.FeedbackActivity;
+import com.transcend.nas.settings.FirmwareHostNameLoader;
 import com.transcend.nas.settings.HelpActivity;
 import com.transcend.nas.settings.SettingsActivity;
 import com.transcend.nas.tutk.TutkLogoutLoader;
@@ -37,7 +39,7 @@ import com.transcend.nas.viewer.music.MusicService;
 public abstract class DrawerMenuActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener,
         LoaderManager.LoaderCallbacks<Boolean>,
-        SDCardReceiver.SDCardObserver {
+        SDCardReceiver.SDCardObserver, DrawerMenuController.DeviceNameObserver {
 
     private static final String TAG = DrawerMenuActivity.class.getSimpleName();
 
@@ -56,6 +58,7 @@ public abstract class DrawerMenuActivity extends AppCompatActivity implements
         initToolbar();
         initDrawer();
         SDCardReceiver.registerObserver(this);
+        DrawerMenuController.registerObserver(this);
     }
 
     protected void initToolbar() {
@@ -74,6 +77,7 @@ public abstract class DrawerMenuActivity extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
         SDCardReceiver.unregisterObserver(this);
+        DrawerMenuController.unregisterObserver(this);
         super.onDestroy();
     }
 
@@ -166,6 +170,11 @@ public abstract class DrawerMenuActivity extends AppCompatActivity implements
     @Override
     public void notifyUnmounted() {
         mDrawerController.setSdCardItem(false);
+    }
+
+    @Override
+    public void onChangeDeviceName() {
+        mDrawerController.updateRemoteDeviceName();
     }
 
     private void startActivity(final Class invokedClass, final int itemId) {
