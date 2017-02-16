@@ -115,8 +115,11 @@ public class CustomActionManager extends AbstractActionManager {
                 Bundle args = ((EventNotifyLoader) loader).getBundleArgs();
                 int id = args.getInt("actionType", -1);
                 if(id > 0) {
-                    ((Activity) mContext).getLoaderManager().restartLoader(id, args, mCallbacks).forceLoad();
-                    return true;
+                    Loader tmp = ((Activity) mContext).getLoaderManager().restartLoader(id, args, mCallbacks);
+                    if(tmp != null) {
+                        tmp.forceLoad();
+                        return true;
+                    }
                 }
             }
         }

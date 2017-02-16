@@ -65,7 +65,9 @@ public abstract class AbstractDownloadManager {
 
     private String setRequestDestinationUri(DownloadManager.Request request, Bundle data) {
         File dir = new File(onDownloadDestination(data));
-        String filePath = dir.toString().concat("/").concat(onFileName(data));
+        String filename = onFileName(data);
+        String filePath = dir.toString().concat("/").concat(filename);
+        request.setTitle(filename);
         request.setDestinationUri(Uri.fromFile(new File(filePath)));
         return filePath;
     }
