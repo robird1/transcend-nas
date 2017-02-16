@@ -141,10 +141,12 @@ public class FileFactory {
         if (path.startsWith(NASApp.ROOT_STG)) {
             url = "file://" + path;
         } else if (NASUtils.isSDCardPath(context, path)) {
-            Uri uri = new ExternalStorageController(context).getSDFileUri(path);
-            if (uri != null) {
-                url = uri.toString();
-            }
+//            Uri uri = new ExternalStorageController(context).getSDFileUri(path);
+//            if (uri != null) {
+//                url = uri.toString();
+//            }
+            url = "file://" + path;
+
         } else {
             //First, try twonky image, and try webdav image when twonky image empty
             url = TwonkyManager.getInstance().getUrlFromPath(thumbnail, path);
