@@ -570,7 +570,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
 
     @Override
     public void onRecyclerItemLongClick(int position) {
-        if (mFileActionManager.isRemoteAction() && mFileActionManager.isTopDirectory(this, mPath))
+        if (!mFileActionManager.isDirectorySupportFileAction(mPath))
             return;
 
         if (mEditorMode == null) {
@@ -595,7 +595,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
 
     @Override
     public void onRecyclerItemIconClick(int position) {
-        if (mFileActionManager.isRemoteAction() && mFileActionManager.isTopDirectory(this, mPath))
+        if (!mFileActionManager.isDirectorySupportFileAction(mPath))
             return;
 
         if (mEditorMode == null) {
@@ -703,7 +703,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         if (mDrawerController.isDrawerOpen()) {
             mDrawerController.closeDrawer();
         } else {
-            if (mFileActionManager.isTopDirectory(this, mPath) || (isDownloadFolder && mFileActionManager.isDownloadDirectory(this, mPath))) {
+            if (mFileActionManager.isTopDirectory(mPath) || (isDownloadFolder && mFileActionManager.isDownloadDirectory(this, mPath))) {
                 mDrawerController.openDrawer();
             } else {
                 String parent = new File(mPath).getParent();
@@ -770,7 +770,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
                 FileFactory.getInstance().addFolderFilterRule(mPath, mFileList);
                 FileFactory.getInstance().addFileTypeSortRule(mFileList);
                 closeEditorMode();
-                enableFabEdit(mFileActionManager.isDirectorySupportUpload(mPath));
+                enableFabEdit(mFileActionManager.isDirectorySupportFileAction(mPath));
                 updateScreen();
                 toggleDrawerCheckedItem();
             } else {
@@ -1013,7 +1013,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     }
 
     private void checkTopView() {
-        mDrawerController.setDrawerIndicatorEnabled(mFileActionManager.isTopDirectory(this, mPath) || (isDownloadFolder && mFileActionManager.isDownloadDirectory(this, mPath)));
+        mDrawerController.setDrawerIndicatorEnabled(mFileActionManager.isTopDirectory(mPath) || (isDownloadFolder && mFileActionManager.isDownloadDirectory(this, mPath)));
     }
 
     private void checkEmptyView() {

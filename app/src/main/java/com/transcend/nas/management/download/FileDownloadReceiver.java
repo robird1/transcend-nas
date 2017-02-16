@@ -10,7 +10,9 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.transcend.nas.NASPref;
 import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.common.CustomNotificationManager;
@@ -119,6 +121,8 @@ public class FileDownloadReceiver extends BroadcastReceiver {
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         if(destination != null && !destination.equals(""))
             intent.putExtra("path", destination);
+        else
+            intent.putExtra("path", NASPref.getDownloadLocation(mContext));
 
         PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext());
@@ -129,6 +133,7 @@ public class FileDownloadReceiver extends BroadcastReceiver {
         builder.setAutoCancel(true);
         ntfMgr.notify(taskId, builder.build());
         CustomNotificationManager.getInstance().releaseNotificationID(taskId);
+        Toast.makeText(mContext, type + " - " + mContext.getString(R.string.done), Toast.LENGTH_SHORT).show();
     }
 
     private void showMap() {

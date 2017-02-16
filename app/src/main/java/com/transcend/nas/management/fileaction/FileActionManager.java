@@ -27,6 +27,7 @@ public class FileActionManager extends AbstractActionManager {
     private static final String TAG = FileActionManager.class.getSimpleName();
 
     private Context mContext;
+    protected ExternalStorageController mExternalStorageController;
     private FileActionService mFileActionService;
     private Map<FileActionServiceType, FileActionService> mFileActionServicePool;
     private FileActionServiceType mFileActionServiceType;
@@ -73,6 +74,8 @@ public class FileActionManager extends AbstractActionManager {
 
         mFileActionServiceType = type;
         mFileActionService = service;
+        if(mFileActionService.getExternalStorageController() == null && mExternalStorageController != null)
+            mFileActionService.setExternalStorageController(mExternalStorageController);
     }
 
     public void checkServiceType(String path) {
@@ -110,8 +113,7 @@ public class FileActionManager extends AbstractActionManager {
     }
 
     public void setExternalStorageController(ExternalStorageController controller) {
-        if (mFileActionService != null)
-            mFileActionService.setExternalStorageController(controller);
+        mExternalStorageController = controller;
     }
 
     public void setProgressLayout(RelativeLayout progressLayout) {
@@ -228,9 +230,10 @@ public class FileActionManager extends AbstractActionManager {
     }
 
     public void onLoaderReset(Loader<Boolean> loader) {
+
     }
 
-    public boolean isTopDirectory(Context context, String path) {
+    public boolean isTopDirectory(String path) {
         String root = getServiceRootPath();
         switch (mFileActionServiceType) {
             case SD:
@@ -261,10 +264,15 @@ public class FileActionManager extends AbstractActionManager {
         return false;
     }
 
+    public boolean isDirectorySupportFileAction(String path){
+        if(isRemoteAction() && isTopDirectory(path))
+            return false;
+        else
+            return true;
+    }
+
     public boolean isDirectorySupportUpload(String path) {
-        String mode = getServiceMode();
-        String root = getServiceRootPath();
-        if (NASApp.MODE_SMB.equals(mode) && !root.equals(path))
+        if (isRemoteAction() && !isTopDirectory(path))
             return true;
         else
             return false;
