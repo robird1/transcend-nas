@@ -10,8 +10,11 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerInfo;
@@ -28,6 +31,7 @@ import com.transcend.nas.R;
 public class DeviceInfoActivity extends AppCompatActivity{
     public static final int REQUEST_CODE = DeviceInfoActivity.class.hashCode() & 0xFFFF;
     public static final String TAG = DeviceInfoActivity.class.getSimpleName();
+    private static final String REGULAR_EXPRESSION = "^[a-zA-Z0-9_]{1,32}$";
 
     public static int mLoaderID = -1;
     public DeviceInfoFragment mFragment;
@@ -73,12 +77,14 @@ public class DeviceInfoActivity extends AppCompatActivity{
 
     public static class DeviceInfoFragment extends PreferenceFragment implements LoaderManager.LoaderCallbacks {
         private Preference mPrefDeviceName;
+//        private RelativeLayout mProgressView;
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.preference_device_info);
             mPrefDeviceName = findPreference(getString(R.string.pref_device_name));
+//            initProgressView();
             getLoaderManager().restartLoader(LoaderID.FIRMWARE_INFORMATION, null, this).forceLoad();
         }
 
@@ -100,6 +106,13 @@ public class DeviceInfoActivity extends AppCompatActivity{
                 if (info != null)
                     refreshDeviceInfo(info);
             }
+//            else if (loader instanceof FirmwareHostNameLoader) {
+//                mProgressView.setVisibility(View.INVISIBLE);
+//
+//                String newName = ((FirmwareHostNameLoader) loader).getHostName();
+//                NASPref.setDeviceName(DeviceInfoFragment.this.getActivity(), newName);
+//                notifyUI(newName);
+//            }
 
             mLoaderID = -1;
         }
@@ -134,9 +147,14 @@ public class DeviceInfoActivity extends AppCompatActivity{
                 public void onClick(DialogInterface dialog, int which) {
                     EditText userInput = (EditText) ((AlertDialog) dialog).findViewById(R.id.device_name);
                     String name = userInput.getText().toString();
-                    NASPref.setDeviceName(DeviceInfoFragment.this.getActivity(), name);
-                    notifyUI(name);
-                    updateRemoteSever(name);
+                    boolean isValid = name.matches(REGULAR_EXPRESSION);
+                    if (isValid) {
+                        updateRemoteSever(name);
+                        NASPref.setDeviceName(DeviceInfoFragment.this.getActivity(), name);
+                        notifyUI(name);
+                    } else {
+                        Toast.makeText(DeviceInfoFragment.this.getActivity(), DeviceInfoFragment.this.getString(R.string.invalid_name), Toast.LENGTH_LONG).show();
+                    }
                 }
             });
             AlertDialog dialog = builder.show();
@@ -155,6 +173,7 @@ public class DeviceInfoActivity extends AppCompatActivity{
             if (isAdmin()) {
                 Bundle args = new Bundle();
                 args.putString("hostname", hostName);
+//                mProgressView.setVisibility(View.VISIBLE);
                 getLoaderManager().restartLoader(LoaderID.DEVICE_NAME, args, this).forceLoad();
             }
         }
@@ -163,6 +182,10 @@ public class DeviceInfoActivity extends AppCompatActivity{
             Server server = ServerManager.INSTANCE.getCurrentServer();
             return NASPref.defaultUserName.equals(server.getUsername());
         }
+
+//        private void initProgressView() {
+//            mProgressView = (RelativeLayout) this.getActivity().findViewById(R.id.settings_progress_view);
+//        }
 
     }
 
