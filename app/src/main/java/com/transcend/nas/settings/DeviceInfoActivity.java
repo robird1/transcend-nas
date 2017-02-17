@@ -32,6 +32,7 @@ public class DeviceInfoActivity extends AppCompatActivity{
     public static final int REQUEST_CODE = DeviceInfoActivity.class.hashCode() & 0xFFFF;
     public static final String TAG = DeviceInfoActivity.class.getSimpleName();
     private static final String REGULAR_EXPRESSION = "^[a-zA-Z0-9_]{1,32}$";
+    private static final boolean enableReviseDeviceName = false;
 
     public static int mLoaderID = -1;
     public DeviceInfoFragment mFragment;
@@ -124,13 +125,15 @@ public class DeviceInfoActivity extends AppCompatActivity{
 
         private void refreshDeviceInfo(final ServerInfo info) {
             mPrefDeviceName.setSummary(info.hostName);
-            mPrefDeviceName.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    initDialog(info.hostName);
-                    return false;
-                }
-            });
+            if(enableReviseDeviceName) {
+                mPrefDeviceName.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                    @Override
+                    public boolean onPreferenceClick(Preference preference) {
+                        initDialog(info.hostName);
+                        return false;
+                    }
+                });
+            }
             Preference prefIPAddress = findPreference(getString(R.string.pref_device_ip));
             prefIPAddress.setSummary(info.ipAddress);
             Preference prefMACAddress = findPreference(getString(R.string.pref_device_mac));

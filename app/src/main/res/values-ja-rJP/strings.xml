@@ -6,7 +6,7 @@
  Locale: ja_JP, Japanese
  Tagged: Android_SJC
  Exported by: Translator TS
- Exported at: Mon, 13 Feb 2017 03:21:02 +0000
+ Exported at: Fri, 17 Feb 2017 06:56:18 +0000
 -->
 <resources>
     <string name="about">情報</string>
@@ -65,10 +65,10 @@
     <string name="dialog_button_save">保存</string>
     <string name="dialog_button_yes">はい</string>
     <string name="dialog_clean_cache">キャッシュをクリアしますか?</string>
-    <string name="dialog_grant_permission_failed"></string>
+    <string name="dialog_grant_permission_failed">選択したフォルダはSDカードのルートフォルダではありません。</string>
     <string name="dialog_remote_file_changed">このファイルはリモートで変更されました。ローカル機器に置き換えるか保存しますか?</string>
-    <string name="dialog_request_write_permission"></string>
-    <string name="dialog_write_operation_not_allowed"></string>
+    <string name="dialog_request_write_permission">書込み許可を与えるルートフォルダを選択してください。</string>
+    <string name="dialog_write_operation_not_allowed">Android 4.4の書込み制限による動作エラー</string>
     <string name="disk">ディスク</string>
     <string name="disk_info">ディスク情報</string>
     <!-- No need to translate -->
@@ -77,7 +77,7 @@
     <string name="dlg_msg_delete">選択したファイルを削除しますか？</string>
     <string name="done">完了</string>
     <string name="download">ダウンロード</string>
-    <string name="download_location_error"></string>
+    <string name="download_location_error">指定したダウンロード先は存在しません。確認してください。</string>
     <string name="downloading">ダウンロード中…</string>
     <string name="duplicate_name">名前の複製</string>
     <string name="edit_mode">モードの編集</string>
@@ -188,7 +188,7 @@
     <string name="rename">名前の変更</string>
     <string name="resend">再送信</string>
     <string name="reverse_date">日時(順序入替)</string>
-    <string name="reverse_name">名（逆）</string>
+    <string name="reverse_name">名前（逆）</string>
     <string name="sdcard">SDカード</string>
     <string name="search">検索</string>
     <string name="search_result_empty">一致するファイルがありません。</string>
@@ -215,17 +215,17 @@
     <string name="smart_passed">正常</string>
     <string name="smart_unknown">不明</string>
     <string name="sort">ソート</string>
-    <string name="sort_date_newest_first">Date (Newest First)</string>
-    <string name="sort_date_oldest_first">Date (Oldest First)</string>
-    <string name="sort_name_a_to_z">Name (A -&gt; Z)</string>
-    <string name="sort_name_z_to_a">Name (Z -&gt; A)</string>
+    <string name="sort_date_newest_first">日時(新しい順)</string>
+    <string name="sort_date_oldest_first">日時(古い順)</string>
+    <string name="sort_name_a_to_z">名前(A -&gt; Z)</string>
+    <string name="sort_name_z_to_a">名前(Z -&gt; A)</string>
     <string name="status">ステータス</string>
     <string name="submit">送信</string>
     <string name="system_info">システム情報</string>
     <string name="temperature">温度</string>
     <string name="termsofuse">利用規約</string>
     <string name="thank_you">ありがとうございます。</string>
-    <string name="toast_invalid_name"></string>
+    <string name="toast_invalid_name">入力情報に使用できない文字が含まれています。</string>
     <string name="total">トータル</string>
     <string name="try_auto_connect">自動接続</string>
     <string name="try_remote_access">リモートアクセス</string>

@@ -18,8 +18,8 @@ public abstract class AbstractDownloadManager {
     public static final String KEY_TARGET_PATH = "target_path";
     public static final String KEY_FILE_NAME = "file_name";
     public static final String KEY_TASK_ID = "task_id";
-    private Context mContext;
-    private DownloadManager mDownloadManager;
+    protected Context mContext;
+    protected DownloadManager mDownloadManager;
     private long mDownloadId;
     private Bundle mData;
     private String mFileTargetPath;

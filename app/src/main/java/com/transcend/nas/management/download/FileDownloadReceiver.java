@@ -45,8 +45,15 @@ public class FileDownloadReceiver extends BroadcastReceiver {
             query.setFilterById(mDownloadId);
             DownloadManager manager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
             Cursor c = manager.query(query);
-            if (c.moveToFirst()) {
-                doAction(c);
+            try {
+                if (c.moveToFirst()) {
+                    doAction(c);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if(c != null)
+                    c.close();
             }
         }
     }
@@ -94,7 +101,7 @@ public class FileDownloadReceiver extends BroadcastReceiver {
         mTaskIdMap.put(taskId, remainTaskFiles);
 
         if (remainTaskFiles == 0) {
-            invokeNotifyService(mContext.getString(R.string.download), mContext.getString(R.string.done), null, taskId);
+            invokeNotifyService(mContext.getString(R.string.download), mContext.getString(R.string.done), NASPref.getDownloadLocation(mContext), taskId);
             mTaskIdMap.remove(taskId);
             showMap();
         }
@@ -121,8 +128,6 @@ public class FileDownloadReceiver extends BroadcastReceiver {
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         if(destination != null && !destination.equals(""))
             intent.putExtra("path", destination);
-        else
-            intent.putExtra("path", NASPref.getDownloadLocation(mContext));
 
         PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext());
@@ -152,5 +157,4 @@ public class FileDownloadReceiver extends BroadcastReceiver {
             Log.d(TAG, "download id: "+ entry.getKey() + " task id: "+ entry.getValue());
         }
     }
-
 }
