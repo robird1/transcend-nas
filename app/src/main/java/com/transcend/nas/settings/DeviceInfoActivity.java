@@ -1,5 +1,6 @@
 package com.transcend.nas.settings;
 
+import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.DialogInterface;
 import android.content.Loader;
@@ -9,6 +10,7 @@ import android.preference.PreferenceFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -24,6 +26,8 @@ import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 
+import static com.transcend.nas.LoaderID.FIRMWARE_DEVICE_NAME;
+
 /**
  * Created by steve_su on 2016/11/25.
  */
@@ -32,8 +36,8 @@ public class DeviceInfoActivity extends AppCompatActivity{
     public static final int REQUEST_CODE = DeviceInfoActivity.class.hashCode() & 0xFFFF;
     public static final String TAG = DeviceInfoActivity.class.getSimpleName();
     private static final String REGULAR_EXPRESSION = "^[a-zA-Z0-9_]{1,32}$";
-    private static final boolean enableReviseDeviceName = false;
 
+    private static boolean mIsBackButtonEnable = true;
     public static int mLoaderID = -1;
     public DeviceInfoFragment mFragment;
 
@@ -70,22 +74,28 @@ public class DeviceInfoActivity extends AppCompatActivity{
 
     @Override
     public void onBackPressed() {
-        if (mLoaderID >= 0) {
-            mFragment.getLoaderManager().destroyLoader(mLoaderID);
+        if (mIsBackButtonEnable) {
+            if (mLoaderID >= 0) {
+                mFragment.getLoaderManager().destroyLoader(mLoaderID);
+            }
+            super.onBackPressed();
         }
-        super.onBackPressed();
     }
 
     public static class DeviceInfoFragment extends PreferenceFragment implements LoaderManager.LoaderCallbacks {
+        private Activity mContext;
         private Preference mPrefDeviceName;
-//        private RelativeLayout mProgressView;
+        private RelativeLayout mProgressView;
+        private String mUserInputName;
+        private boolean mIsUpdateHostName = false;
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+            mContext = DeviceInfoFragment.this.getActivity();
             addPreferencesFromResource(R.xml.preference_device_info);
             mPrefDeviceName = findPreference(getString(R.string.pref_device_name));
-//            initProgressView();
+            initProgressView();
             getLoaderManager().restartLoader(LoaderID.FIRMWARE_INFORMATION, null, this).forceLoad();
         }
 
@@ -93,9 +103,9 @@ public class DeviceInfoActivity extends AppCompatActivity{
         public Loader onCreateLoader(int id, Bundle args) {
             switch (mLoaderID = id) {
                 case LoaderID.FIRMWARE_INFORMATION:
-                    return new FirmwareInfoLoader(this.getActivity());
-                case LoaderID.DEVICE_NAME:
-                    return new FirmwareHostNameLoader(this.getActivity(), args.getString("hostname"));
+                    return new FirmwareInfoLoader(mContext);
+                case FIRMWARE_DEVICE_NAME:
+                    return new FirmwareHostNameLoader(mContext, args.getString("hostname"));
             }
             return null;
         }
@@ -104,18 +114,21 @@ public class DeviceInfoActivity extends AppCompatActivity{
         public void onLoadFinished(Loader loader, Object data) {
             if (loader instanceof FirmwareInfoLoader) {
                 ServerInfo info = ((FirmwareInfoLoader) loader).getServerInfo();
-                if (info != null)
-                    refreshDeviceInfo(info);
+                if (info != null) {
+                    if (!mIsUpdateHostName) {
+                        refreshDeviceInfo(info);
+                    } else {
+                        updateDeviceName(info);
+                        mIsUpdateHostName = false;
+                        mIsBackButtonEnable = true;
+                    }
+                }
+                mLoaderID = -1;
             }
-//            else if (loader instanceof FirmwareHostNameLoader) {
-//                mProgressView.setVisibility(View.INVISIBLE);
-//
-//                String newName = ((FirmwareHostNameLoader) loader).getHostName();
-//                NASPref.setDeviceName(DeviceInfoFragment.this.getActivity(), newName);
-//                notifyUI(newName);
-//            }
-
-            mLoaderID = -1;
+            else if (loader instanceof FirmwareHostNameLoader) {
+                mIsUpdateHostName = true;
+                getLoaderManager().restartLoader(LoaderID.FIRMWARE_INFORMATION, null, this).forceLoad();
+            }
         }
 
         @Override
@@ -125,7 +138,7 @@ public class DeviceInfoActivity extends AppCompatActivity{
 
         private void refreshDeviceInfo(final ServerInfo info) {
             mPrefDeviceName.setSummary(info.hostName);
-            if(enableReviseDeviceName) {
+            if (isAdmin()) {
                 mPrefDeviceName.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                     @Override
                     public boolean onPreferenceClick(Preference preference) {
@@ -140,8 +153,19 @@ public class DeviceInfoActivity extends AppCompatActivity{
             prefMACAddress.setSummary(info.mac);
         }
 
+        private void updateDeviceName(ServerInfo info) {
+            mProgressView.setVisibility(View.INVISIBLE);
+            Log.d(TAG, "info.hostName: "+ info.hostName);
+            if (info != null && mUserInputName.equals(info.hostName)) {
+                NASPref.setDeviceName(mContext, info.hostName);
+                notifyUI(info.hostName);
+            } else {
+                Toast.makeText(mContext, mContext.getString(R.string.error), Toast.LENGTH_LONG).show();
+            }
+        }
+
         private void initDialog(String hostName) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity());
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
             builder.setTitle(R.string.settings_device_name_title);
             builder.setView(R.layout.dialog_device_name);
             builder.setNegativeButton(R.string.cancel, null);
@@ -149,14 +173,12 @@ public class DeviceInfoActivity extends AppCompatActivity{
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     EditText userInput = (EditText) ((AlertDialog) dialog).findViewById(R.id.device_name);
-                    String name = userInput.getText().toString();
-                    boolean isValid = name.matches(REGULAR_EXPRESSION);
+                    mUserInputName = userInput.getText().toString();
+                    boolean isValid = mUserInputName.matches(REGULAR_EXPRESSION);
                     if (isValid) {
-                        updateRemoteSever(name);
-                        NASPref.setDeviceName(DeviceInfoFragment.this.getActivity(), name);
-                        notifyUI(name);
+                        updateRemoteSever(mUserInputName);
                     } else {
-                        Toast.makeText(DeviceInfoFragment.this.getActivity(), DeviceInfoFragment.this.getString(R.string.invalid_name), Toast.LENGTH_LONG).show();
+                        Toast.makeText(mContext, mContext.getString(R.string.invalid_name), Toast.LENGTH_LONG).show();
                     }
                 }
             });
@@ -176,8 +198,9 @@ public class DeviceInfoActivity extends AppCompatActivity{
             if (isAdmin()) {
                 Bundle args = new Bundle();
                 args.putString("hostname", hostName);
-//                mProgressView.setVisibility(View.VISIBLE);
-                getLoaderManager().restartLoader(LoaderID.DEVICE_NAME, args, this).forceLoad();
+                mProgressView.setVisibility(View.VISIBLE);
+                mIsBackButtonEnable = false;
+                getLoaderManager().restartLoader(FIRMWARE_DEVICE_NAME, args, this).forceLoad();
             }
         }
 
@@ -186,9 +209,9 @@ public class DeviceInfoActivity extends AppCompatActivity{
             return NASPref.defaultUserName.equals(server.getUsername());
         }
 
-//        private void initProgressView() {
-//            mProgressView = (RelativeLayout) this.getActivity().findViewById(R.id.settings_progress_view);
-//        }
+        private void initProgressView() {
+            mProgressView = (RelativeLayout) mContext.findViewById(R.id.settings_progress_view);
+        }
 
     }
 

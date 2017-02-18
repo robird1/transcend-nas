@@ -27,46 +27,40 @@ import java.util.List;
 
 public class FirmwareHostNameLoader extends AsyncTaskLoader<Boolean> {
     private static String TAG = FirmwareHostNameLoader.class.getSimpleName();
-    private String mHostName;
+    private String mUserInput;
 
-    public FirmwareHostNameLoader(Context context, String hostName) {
+    public FirmwareHostNameLoader(Context context, String userInput) {
         super(context);
-        mHostName = hostName;
+        mUserInput = userInput;
     }
 
     @Override
     public Boolean loadInBackground() {
-        int responseCode = setHostName();
+        setHostName();
         return true;
     }
 
-    public String getHostName() {
-        return mHostName;
+    private void setHostName() {
+        sendPostRequest();
     }
 
-    private int setHostName() {
-        return sendPostRequest();
-    }
-
-    private int sendPostRequest() {
+    private void sendPostRequest() {
         Log.d(TAG, "[Enter] sendPostRequest");
         Server server = ServerManager.INSTANCE.getCurrentServer();
-        String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
+        String ip = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
         String hash = server.getHash();
-        String commandURL = "http://" + hostname + "/nas/set/hostname";
+        String commandURL = "http://" + ip + "/nas/set/hostname";
         Log.d(TAG, "commandURL: "+ commandURL);
-        Log.d(TAG, "mHostName: "+ mHostName);
+        Log.d(TAG, "mUserInput: "+ mUserInput);
 
-        int responseCode = -1;
         try {
             HttpPost httpPost = new HttpPost(commandURL);
             List<NameValuePair> nameValuePairs = new ArrayList<>();
-            nameValuePairs.add(new BasicNameValuePair("hostname", mHostName));
+            nameValuePairs.add(new BasicNameValuePair("hostname", mUserInput));
             nameValuePairs.add(new BasicNameValuePair("hash", hash));
             httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
             HttpResponse response = HttpClientManager.getClient().execute(httpPost);
-            responseCode = response.getStatusLine().getStatusCode();
-            Log.d(TAG, "responseCode: "+ responseCode);
+            Log.d(TAG, "responseCode: "+ response.getStatusLine().getStatusCode());
 
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -75,8 +69,6 @@ public class FirmwareHostNameLoader extends AsyncTaskLoader<Boolean> {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        return responseCode;
     }
 
 }
