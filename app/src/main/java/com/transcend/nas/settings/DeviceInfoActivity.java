@@ -26,7 +26,6 @@ import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 
-import static com.transcend.nas.LoaderID.FIRMWARE_DEVICE_NAME;
 
 /**
  * Created by steve_su on 2016/11/25.
@@ -35,7 +34,7 @@ import static com.transcend.nas.LoaderID.FIRMWARE_DEVICE_NAME;
 public class DeviceInfoActivity extends AppCompatActivity{
     public static final int REQUEST_CODE = DeviceInfoActivity.class.hashCode() & 0xFFFF;
     public static final String TAG = DeviceInfoActivity.class.getSimpleName();
-    private static final String REGULAR_EXPRESSION = "^[a-zA-Z0-9_]{1,32}$";
+    private static final String REGULAR_EXPRESSION = "^[a-zA-Z0-9-]{1,32}$";
 
     private static boolean mIsBackButtonEnable = true;
     public static int mLoaderID = -1;
@@ -55,7 +54,8 @@ public class DeviceInfoActivity extends AppCompatActivity{
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                finish();
+                if (mIsBackButtonEnable)
+                    finish();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -104,7 +104,7 @@ public class DeviceInfoActivity extends AppCompatActivity{
             switch (mLoaderID = id) {
                 case LoaderID.FIRMWARE_INFORMATION:
                     return new FirmwareInfoLoader(mContext);
-                case FIRMWARE_DEVICE_NAME:
+                case LoaderID.FIRMWARE_DEVICE_NAME:
                     return new FirmwareHostNameLoader(mContext, args.getString("hostname"));
             }
             return null;
@@ -200,7 +200,7 @@ public class DeviceInfoActivity extends AppCompatActivity{
                 args.putString("hostname", hostName);
                 mProgressView.setVisibility(View.VISIBLE);
                 mIsBackButtonEnable = false;
-                getLoaderManager().restartLoader(FIRMWARE_DEVICE_NAME, args, this).forceLoad();
+                getLoaderManager().restartLoader(LoaderID.FIRMWARE_DEVICE_NAME, args, this).forceLoad();
             }
         }
 

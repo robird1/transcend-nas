@@ -14,8 +14,9 @@
             android:id="@+id/device_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:inputType="text"
             android:maxLines="1"
-            android:maxLength="30"/>
+            android:maxLength="32"/>
     </android.support.design.widget.TextInputLayout>
 
 </RelativeLayout>
