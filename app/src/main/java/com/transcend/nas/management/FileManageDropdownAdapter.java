@@ -3,6 +3,7 @@ package com.transcend.nas.management;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Environment;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -151,7 +152,7 @@ public class FileManageDropdownAdapter extends BaseAdapter {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
             convertView = inflater.inflate(R.layout.dropdown, parent, false);
         }
-        convertView.setOnTouchListener(new OnDropdownItemTouchListener(position));
+        convertView.setOnClickListener(new OnDropdownItemClickListener(position));
         TextView tv = ViewHolder.get(convertView, R.id.dropdown_text);
         tv.setText(mDisplayList.get(position));
         tv.setTextColor(Color.WHITE);
@@ -182,23 +183,20 @@ public class FileManageDropdownAdapter extends BaseAdapter {
         }
     }
 
-    public class OnDropdownItemTouchListener implements View.OnTouchListener {
+    public class OnDropdownItemClickListener implements View.OnClickListener {
 
         private int mPosition;
 
-        public OnDropdownItemTouchListener(int position) {
+        public OnDropdownItemClickListener(int position) {
             mPosition = position;
         }
 
         @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            if (event.getAction() == MotionEvent.ACTION_UP) {
-                if (mCallback != null) {
-                    mCallback.onDropdownItemSelected(mPosition);
-                }
-                dismissDropdownList();
+        public void onClick(View v) {
+            if (mCallback != null) {
+                mCallback.onDropdownItemSelected(mPosition);
             }
-            return true;
+            dismissDropdownList();
         }
 
         /**

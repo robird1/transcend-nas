@@ -1,27 +1,36 @@
 package com.transcend.nas.management;
 
-import android.app.Fragment;
+import android.app.LoaderManager;
+import android.content.Loader;
 import android.os.Bundle;
 import android.preference.Preference;
+import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
+import android.preference.PreferenceScreen;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 
-import com.nostra13.universalimageloader.core.ImageLoader;
+import com.transcend.nas.LoaderID;
 import com.transcend.nas.R;
 import com.transcend.nas.management.firmware.FileFactory;
+
+import java.util.Map;
 
 /**
  * Created by silverhsu on 16/3/9.
  */
-public class FileInfoActivity extends AppCompatActivity {
+public class FileInfoActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Boolean> {
 
     public static final int REQUEST_CODE = FileInfoActivity.class.hashCode() & 0xFFFF;
     public static final String TAG = FileInfoActivity.class.getSimpleName();
+    private static final boolean enableMoreInfo = true;
+
     private ImageView ivImage;
+    private InformationFragment mFragment;
+    private int mLoaderID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,9 +38,15 @@ public class FileInfoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_file_info);
         Bundle args = getIntent().getExtras();
         FileInfo fileInfo = (FileInfo) args.getSerializable("info");
+
         initToolbar();
         initImagePreview(fileInfo);
         initFragment();
+
+        if(enableMoreInfo)
+            checkFileInfo(fileInfo);
+        else
+            mFragment.addMoreInfo(null);
     }
 
     @Override
@@ -43,6 +58,7 @@ public class FileInfoActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
+                getLoaderManager().destroyLoader(mLoaderID);
                 finish();
                 break;
         }
@@ -51,6 +67,7 @@ public class FileInfoActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        getLoaderManager().destroyLoader(mLoaderID);
         finish();
     }
 
@@ -85,8 +102,41 @@ public class FileInfoActivity extends AppCompatActivity {
 
     private void initFragment() {
         int id = R.id.info_frame;
-        Fragment f = new InformationFragment();
-        getFragmentManager().beginTransaction().replace(id, f).commit();
+        mFragment = new InformationFragment();
+        getFragmentManager().beginTransaction().replace(id, mFragment).commit();
+    }
+
+    private void checkFileInfo(FileInfo fileInfo){
+        Bundle args = new Bundle();
+        args.putString("path", fileInfo.path);
+        getLoaderManager().restartLoader(LoaderID.SMB_FILE_INFO, args, this).forceLoad();
+    }
+
+    @Override
+    public Loader<Boolean> onCreateLoader(int id, Bundle args) {
+        switch (mLoaderID = id) {
+            case LoaderID.SMB_FILE_INFO:
+                String path = args.getString("path");
+                return new FileInfoLoader(this, path);
+        }
+
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
+        if(loader instanceof FileInfoLoader) {
+            if(success) {
+                Map<String, String> result = ((FileInfoLoader) loader).getFileInfo();
+                if(mFragment != null)
+                    mFragment.addMoreInfo(result);
+            }
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Boolean> loader) {
+
     }
 
     /**
@@ -151,6 +201,29 @@ public class FileInfoActivity extends AppCompatActivity {
             String formatSize = FileFactory.getInstance().getFileSize(mFileInfo.size);
             if(!FileInfo.TYPE.DIR.equals(mFileInfo.type))
                 pref.setSummary(formatSize);
+        }
+
+        public void addMoreInfo(Map<String, String> info) {
+            PreferenceScreen screen = getPreferenceScreen();
+            if(info != null) {
+                for (String key : info.keySet()) {
+                    // Create the Preferences Manually - so that the key can be set programatically.
+                    PreferenceCategory category = new PreferenceCategory(screen.getContext());
+                    category.setLayoutResource(R.layout.preference_category_widget);
+                    category.setTitle(key);
+                    screen.addPreference(category);
+
+                    Preference preference = new Preference(screen.getContext());
+                    preference.setSummary(info.get(key));
+                    preference.setSelectable(false);
+
+                    category.addPreference(preference);
+                }
+            }
+
+            //add footer
+            PreferenceCategory category = new PreferenceCategory(screen.getContext());
+            screen.addPreference(category);
         }
 
     }

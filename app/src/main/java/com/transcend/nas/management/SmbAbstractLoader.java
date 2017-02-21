@@ -53,6 +53,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
     protected Runnable mWatcher;
     protected boolean success = true;
     protected int mCount = 0;
+    private String[] mLoadingString = {".","..","...","...."};
     private NotificationCompat.Builder mBuilder;
 
     public SmbAbstractLoader(Context context) {
@@ -195,27 +196,33 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         return unique;
     }
 
-    protected void startProgressWatcher(final String title, final SmbFile target, final int total) {
+    protected void startProgressWatcher(final String title, final String destination, final int total) {
         mCount = 0;
         mThread = new HandlerThread(TAG);
         mThread.start();
         mHandler = new Handler(mThread.getLooper());
-        mHandler.post(mWatcher = new Runnable() {
+        mHandler.postDelayed(mWatcher = new Runnable() {
             @Override
             public void run() {
-                int count = target.getContentLength();
-                if (mHandler != null) {
-                    mHandler.postDelayed(mWatcher, 1000);
+                try {
+                    SmbFile target = new SmbFile(destination, title);
+                    int count = target.getContentLength();
                     updateProgress(mType, title, count, total);
+
+                    if (count >= mCount)
+                        mCount = count;
+                    else
+                        success = false;
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
                 }
 
-                if (count >= mCount)
-                    mCount = count;
-                else
-                    success = false;
+                if (mHandler != null) {
+                    mHandler.postDelayed(mWatcher, 1000);
+                }
 
             }
-        });
+        }, 1000);
     }
 
     protected void closeProgressWatcher() {
@@ -229,7 +236,11 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         }
     }
 
-    protected void updateProgress(String type, String name, int count, int total) {
+    protected void updateProgress(String type, String name, int count, int total){
+        updateProgress(type, name, count, total, true);
+    }
+
+    protected void updateProgress(String type, String name, int count, int total, boolean showProgress) {
         Log.w(TAG, mNotificationID + " progress: " + count + "/" + total + ", " + name);
         int icon = R.mipmap.ic_launcher;
 
@@ -250,20 +261,26 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
             mBuilder.setAutoCancel(true);
         }
 
+        if(showProgress) {
+            int max = 100;
+            int progress = (total > 100) ? count / (total / 100) : 0;
+            boolean indeterminate = (total == 0);
 
-        int max = (count == total) ? 0 : 100;
-        int progress = (total > 100) ? count / (total / 100) : 0;
-        boolean indeterminate = (total == 0);
+            String stat = String.format("%s / %s", MathUtil.getBytes(count), MathUtil.getBytes(total));
+            String text = String.format("%s - %s", type, stat);
+            String info = String.format("%d%%", progress);
+
+            mBuilder.setContentText(text);
+            mBuilder.setContentInfo(info);
+            mBuilder.setProgress(max, progress, indeterminate);
+        } else {
+            String loading = mLoadingString[mCurrent%mLoadingString.length];
+            mBuilder.setContentText(String.format("%s%s", type, loading));
+        }
 
         String title = mTotal > 1 ? String.format("(%s/%s) " + name, mCurrent, mTotal) : name;
-        String stat = String.format("%s / %s", MathUtil.getBytes(count), MathUtil.getBytes(total));
-        String text = String.format("%s - %s", type, stat);
-        String info = String.format("%d%%", progress);
-
         mBuilder.setContentTitle(title);
-        mBuilder.setContentText(text);
-        mBuilder.setContentInfo(info);
-        mBuilder.setProgress(max, progress, indeterminate);
+
         NotificationManager ntfMgr = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
         ntfMgr.notify(mNotificationID, mBuilder.build());
     }

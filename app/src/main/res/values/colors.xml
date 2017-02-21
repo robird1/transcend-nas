@@ -16,4 +16,5 @@
     <color name="colorRadioButtonCheck">#00BDFF</color>
     <color name="colorRadioButtonUnCheck">#BCBEBF</color>
     <color name="colorNavigationPrimaryBackground">#DFDFDF</color>
+    <color name="colorAccentConvert">#A60014</color>
 </resources>

@@ -54,4 +54,6 @@ public class LoaderID {
     public static final int OTG_FILE_DOWNLOAD = 46;
     public static final int OTG_LOCAL_NEW_FOLDER = 47;
     public static final int FIRMWARE_DEVICE_NAME = 48;
+    public static final int SMB_FILE_INFO = 49;
+
 }

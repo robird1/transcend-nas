@@ -68,9 +68,29 @@ public abstract class TutkBasicLoader extends AsyncTaskLoader<Boolean> {
     public String getSystemLanguage() {
         String language = "en";
         Locale locale = Resources.getSystem().getConfiguration().locale;
-        Log.d(TAG,"TEST " + locale);
-        if("zh_TW".equals(locale.toString())) {
-            language = "zh-tw";
+        String result = locale.toString();
+        Log.d(TAG, "TEST " + result);
+        if (result != null && !"".equals(result)) {
+            if (result.startsWith("zh")) {
+                if(result.startsWith("zh_CN"))
+                    language = "zh-cn";
+                else
+                    language = "zh-tw";
+            } else if (result.startsWith("de")) {
+                language = "de";
+            } else if (result.startsWith("es")) {
+                language = "en-es";
+            } else if (result.startsWith("fr")) {
+                language = "fr";
+            } else if (result.startsWith("it")) {
+                language = "it";
+            } else if (result.startsWith("ja")) {
+                language = "jp";
+            } else if (result.startsWith("ko")) {
+                language = "kr";
+            } else if (result.startsWith("pt")) {
+                language = "pt";
+            }
         }
         return language;
     }
@@ -183,7 +203,7 @@ public abstract class TutkBasicLoader extends AsyncTaskLoader<Boolean> {
             conn.setHostnameVerifier(DO_NOT_VERIFY);
             conn.setRequestMethod("POST");
             conn.setRequestProperty("x-transcend-header", "application/transcend.v1");
-            if(isJson)
+            if (isJson)
                 conn.setRequestProperty("content-type", "application/json");
             else
                 conn.setRequestProperty("content-type", "application/x-www-form-urlencoded");

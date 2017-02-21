@@ -44,7 +44,6 @@ public class SmbFileCopyLoader extends SmbAbstractLoader {
     }
 
     private boolean copy() throws MalformedURLException, SmbException {
-        updateProgress(mType, getContext().getResources().getString(R.string.loading), 0, 0);
         for (String path : mSrcs) {
             if(!success)
                 break;
@@ -91,11 +90,14 @@ public class SmbFileCopyLoader extends SmbAbstractLoader {
 
     private void copyFile(SmbFile source, String destination) throws MalformedURLException, SmbException {
         String name = createRemoteUniqueName(source, destination);
-        SmbFile target = new SmbFile(destination, name);
         int total = source.getContentLength();
-        startProgressWatcher(name, target, total);
+        updateProgress(mType, name, 0, total);
+
+        SmbFile target = new SmbFile(destination, name);
+        startProgressWatcher(name, destination, total);
         source.copyTo(target);
         closeProgressWatcher();
+
         updateProgress(mType, name, total, total);
     }
 }

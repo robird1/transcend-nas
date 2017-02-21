@@ -60,8 +60,4 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory>
-        <!-- footer -->
-    </PreferenceCategory>
-
 </PreferenceScreen>

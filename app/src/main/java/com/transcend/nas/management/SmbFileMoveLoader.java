@@ -38,7 +38,6 @@ public class SmbFileMoveLoader extends SmbAbstractLoader {
             return move();
         } catch (Exception e) {
             e.printStackTrace();
-            closeProgressWatcher();
             setException(e);
             updateResult(mType, getContext().getString(R.string.error), mDest);
         }
@@ -46,7 +45,6 @@ public class SmbFileMoveLoader extends SmbAbstractLoader {
     }
 
     private boolean move() throws MalformedURLException, SmbException {
-        updateProgress(mType, getContext().getResources().getString(R.string.loading), 0, 0);
         for (String path : mSrcs) {
             SmbFile source = new SmbFile(getSmbUrl(path));
             if (source.getParent().endsWith(mDest))
@@ -87,10 +85,7 @@ public class SmbFileMoveLoader extends SmbAbstractLoader {
     private void moveFile(SmbFile source, String destination) throws MalformedURLException, SmbException {
         String name = createRemoteUniqueName(source, destination);
         SmbFile target = new SmbFile(destination, name);
-        int total = source.getContentLength();
-        startProgressWatcher(name, target, total);
         source.renameTo(target);
-        closeProgressWatcher();
-        updateProgress(mType, name, total, total);
+        updateProgress(mType, name, 0, 0, false);
     }
 }

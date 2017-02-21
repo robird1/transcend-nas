@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.Loader;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -520,19 +521,19 @@ public class FileManageActivity extends DrawerMenuActivity implements
         switch (id) {
             case R.id.file_manage_viewer_action_refresh:
                 doRefresh();
-                break;
+                return true;
             case R.id.file_manage_viewer_action_view:
                 doChangeView();
-                break;
+                return true;
             case R.id.file_manage_viewer_action_sort:
                 doSort();
-                break;
+                return true;
             case R.id.file_manage_viewer_action_search:
                 doSearch();
-                break;
+                return true;
             case R.id.file_manage_viewer_action_upload:
                 startFileActionPickerActivity(NASApp.ACT_PICK_UPLOAD);
-                break;
+                return true;
             //case R.id.file_manage_viewer_action_download:
             //    startFileActionPickerActivity(NASApp.ACT_PICK_DOWNLOAD);
             //    break;
