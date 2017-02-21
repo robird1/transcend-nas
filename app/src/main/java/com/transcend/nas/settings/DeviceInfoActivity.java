@@ -10,7 +10,6 @@ import android.preference.PreferenceFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -25,6 +24,7 @@ import com.transcend.nas.DrawerMenuController;
 import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
+import com.transcend.nas.tutk.TutkCreateNasLoader;
 
 
 /**
@@ -82,7 +82,7 @@ public class DeviceInfoActivity extends AppCompatActivity{
         }
     }
 
-    public static class DeviceInfoFragment extends PreferenceFragment implements LoaderManager.LoaderCallbacks {
+    public static class DeviceInfoFragment extends PreferenceFragment implements LoaderManager.LoaderCallbacks<Boolean> {
         private Activity mContext;
         private Preference mPrefDeviceName;
         private RelativeLayout mProgressView;
@@ -100,34 +100,41 @@ public class DeviceInfoActivity extends AppCompatActivity{
         }
 
         @Override
-        public Loader onCreateLoader(int id, Bundle args) {
+        public Loader<Boolean> onCreateLoader(int id, Bundle args) {
             switch (mLoaderID = id) {
                 case LoaderID.FIRMWARE_INFORMATION:
                     return new FirmwareInfoLoader(mContext);
                 case LoaderID.FIRMWARE_DEVICE_NAME:
                     return new FirmwareHostNameLoader(mContext, args.getString("hostname"));
+                case LoaderID.TUTK_NAS_CREATE:
+                    return new TutkCreateNasLoader(mContext, args);
             }
             return null;
         }
 
         @Override
-        public void onLoadFinished(Loader loader, Object data) {
-            if (loader instanceof FirmwareInfoLoader) {
-                ServerInfo info = ((FirmwareInfoLoader) loader).getServerInfo();
-                if (info != null) {
-                    if (!mIsUpdateHostName) {
-                        refreshDeviceInfo(info);
-                    } else {
-                        updateDeviceName(info);
-                        mIsUpdateHostName = false;
-                        mIsBackButtonEnable = true;
+        public void onLoadFinished(Loader loader, Boolean success) {
+            if (success) {
+                if (loader instanceof FirmwareInfoLoader) {
+                    ServerInfo info = ((FirmwareInfoLoader) loader).getServerInfo();
+                    if (info != null) {
+                        if (!mIsUpdateHostName) {
+                            refreshDeviceInfo(info);
+                        } else {
+                            updateDeviceName(info);
+                            mIsUpdateHostName = false;
+                            mIsBackButtonEnable = true;
+                        }
                     }
+                    mLoaderID = -1;
+                } else if (loader instanceof FirmwareHostNameLoader) {
+                    mIsUpdateHostName = true;
+                    getLoaderManager().restartLoader(LoaderID.FIRMWARE_INFORMATION, null, this).forceLoad();
+                } else if (loader instanceof TutkCreateNasLoader) {
+                    updateRemoteSever();
                 }
-                mLoaderID = -1;
-            }
-            else if (loader instanceof FirmwareHostNameLoader) {
-                mIsUpdateHostName = true;
-                getLoaderManager().restartLoader(LoaderID.FIRMWARE_INFORMATION, null, this).forceLoad();
+            } else {
+                Toast.makeText(mContext, getString(R.string.error), Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -155,12 +162,18 @@ public class DeviceInfoActivity extends AppCompatActivity{
 
         private void updateDeviceName(ServerInfo info) {
             mProgressView.setVisibility(View.INVISIBLE);
-            Log.d(TAG, "info.hostName: "+ info.hostName);
             if (info != null && mUserInputName.equals(info.hostName)) {
                 NASPref.setDeviceName(mContext, info.hostName);
                 notifyUI(info.hostName);
             } else {
                 Toast.makeText(mContext, mContext.getString(R.string.error), Toast.LENGTH_LONG).show();
+            }
+        }
+
+        private void notifyUI(String name) {
+            mPrefDeviceName.setSummary(name);
+            for (DrawerMenuController.DeviceNameObserver o : DrawerMenuController.getObserver()) {
+                o.onChangeDeviceName();
             }
         }
 
@@ -176,7 +189,7 @@ public class DeviceInfoActivity extends AppCompatActivity{
                     mUserInputName = userInput.getText().toString();
                     boolean isValid = mUserInputName.matches(REGULAR_EXPRESSION);
                     if (isValid) {
-                        updateRemoteSever(mUserInputName);
+                        updateTutkInfo();
                     } else {
                         Toast.makeText(mContext, mContext.getString(R.string.invalid_name), Toast.LENGTH_LONG).show();
                     }
@@ -187,20 +200,29 @@ public class DeviceInfoActivity extends AppCompatActivity{
             hostNameField.setText(hostName);
         }
 
-        private void notifyUI(String name) {
-            mPrefDeviceName.setSummary(name);
-            for (DrawerMenuController.DeviceNameObserver o : DrawerMenuController.getObserver()) {
-                o.onChangeDeviceName();
-            }
-        }
-
-        private void updateRemoteSever(String hostName) {
+        private void updateRemoteSever() {
             if (isAdmin()) {
                 Bundle args = new Bundle();
-                args.putString("hostname", hostName);
+                args.putString("hostname", mUserInputName);
                 mProgressView.setVisibility(View.VISIBLE);
                 mIsBackButtonEnable = false;
                 getLoaderManager().restartLoader(LoaderID.FIRMWARE_DEVICE_NAME, args, this).forceLoad();
+            }
+        }
+
+        private void updateTutkInfo() {
+            String uuid = ServerManager.INSTANCE.getCurrentServer().getTutkUUID();
+            if (uuid != null && !uuid.equals("")) {
+                Bundle args = new Bundle();
+                args.putString("server", NASPref.getCloudServer(mContext));
+                args.putString("token", NASPref.getCloudAuthToken(mContext));
+                args.putString("nasName", mUserInputName);
+                args.putString("nasUUID", uuid);
+
+                // use the create API for updating nas name
+                getLoaderManager().restartLoader(LoaderID.TUTK_NAS_CREATE, args, this).forceLoad();
+            } else {
+                Toast.makeText(mContext, getString(R.string.error), Toast.LENGTH_SHORT).show();
             }
         }
 
