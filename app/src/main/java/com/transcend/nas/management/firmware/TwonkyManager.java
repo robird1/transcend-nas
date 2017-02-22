@@ -33,6 +33,9 @@ public class TwonkyManager {
     private Set<String> mCacheMap;
     private boolean useTwonkyServer = false;
 
+    private static final int defaultLifeCycle = 10;
+    private int mLifeCycle = 0;
+
     public TwonkyManager() {
         mImageMap = new HashMap<>();
         mFolderMap = new HashMap<>();
@@ -79,11 +82,21 @@ public class TwonkyManager {
         return useTwonkyServer;
     }
 
+    public boolean checkLifeCycle() {
+        mLifeCycle--;
+        if (mLifeCycle > 0)
+            return true;
+        else {
+            mLifeCycle = defaultLifeCycle;
+            return false;
+        }
+    }
+
     public void updateTwonky(String path) {
         if (!useTwonkyServer)
             return;
 
-        if (path.equals(NASApp.ROOT_SMB)) {
+        if (path.equals(NASApp.ROOT_SMB) && !checkLifeCycle()) {
             Server server = ServerManager.INSTANCE.getCurrentServer();
             String username = server.getUsername();
             List<String> smbSharedList = new ArrayList<>();

@@ -103,8 +103,8 @@ public class SmbFileListLoader extends SmbAbstractLoader {
                     fileInfo.type = FileInfo.TYPE.DIR;
                     fileInfo.size = Long.valueOf(0);
                     mFileList.add(fileInfo);
+                    Log.d(TAG, "add shared folder : " + name + ", because lost folder");
                 }
-                Log.d(TAG, "check shared folder : " + name + ", lost folder : " + addToSmbList);
             }
         }
     }

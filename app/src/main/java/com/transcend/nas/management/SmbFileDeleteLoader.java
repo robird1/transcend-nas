@@ -44,6 +44,11 @@ public class SmbFileDeleteLoader extends SmbAbstractLoader {
 
     private boolean delete() throws MalformedURLException, SmbException {
         for (String path : mPaths) {
+            if(isLoadInBackgroundCanceled()) {
+                Log.d(TAG, "Delete cancel");
+                break;
+            }
+
             SmbFile target = new SmbFile(getSmbUrl(path));
             target.delete();
         }

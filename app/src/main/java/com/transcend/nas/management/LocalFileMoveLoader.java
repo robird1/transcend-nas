@@ -44,7 +44,6 @@ public class LocalFileMoveLoader extends LocalAbstractLoader {
     }
 
     private boolean move() throws IOException {
-        updateProgress(getContext().getResources().getString(R.string.loading), 0, 0);
         for (String path : mSrcs) {
             File source = new File(path);
             if (source.getParent().equals(mDest))
@@ -91,16 +90,18 @@ public class LocalFileMoveLoader extends LocalAbstractLoader {
 
     private void moveFile(File source, String destination) throws IOException {
         String name = createUniqueName(source, destination);
-        File target = new File(destination, name);
         int total = (int) source.length();
+        updateProgress(name, 0, total);
+
+        File target = new File(destination, name);
         startProgressWatcher(name, target, total);
-//        source.renameTo(target);
         FileUtils.copyFile(source, target);
         boolean isSuccess = source.delete();
         if (!isSuccess) {
             throw new IOException();
         }
         closeProgressWatcher();
+
         updateProgress(name, total, total);
     }
 

@@ -776,8 +776,12 @@ public class FileManageActivity extends DrawerMenuActivity implements
                 toggleDrawerCheckedItem();
             } else {
                 doRefresh();
-                if (loader instanceof SmbAbstractLoader) {
-                    String type = ((SmbAbstractLoader) loader).getType();
+                if (loader instanceof SmbAbstractLoader || loader instanceof LocalAbstractLoader ) {
+                    String type = null;
+                    if(loader instanceof SmbAbstractLoader)
+                        type = ((SmbAbstractLoader) loader).getType();
+                    else
+                        type = ((LocalAbstractLoader) loader).getType();
                     if (type != null && !type.equals("") && !type.equals(getString(R.string.download))) {
                         Toast.makeText(FileManageActivity.this, type + " - " + getString(R.string.done), Toast.LENGTH_SHORT).show();
                     }
@@ -918,7 +922,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
 
     public void doLoad(String path) {
         mFileActionManager.checkServiceType(path);
-        if (mFileActionManager.isRemoteAction() && mCustomActionManager.doNasHashKeyTimeOutCheck(mFileActionManager, path)) {
+        if (mFileActionManager.isRemoteAction() && mCustomActionManager.doNasHashKeyTimeOutCheck(path)) {
             return;
         }
         mFileActionManager.list(path);
@@ -948,6 +952,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
             @Override
             public void onConfirm(String newName) {
                 mFileActionManager.rename(path, newName);
+                closeEditorMode();
             }
         };
     }
@@ -996,6 +1001,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
             @Override
             public void onConfirm(ArrayList<String> paths) {
                 mFileActionManager.delete(paths);
+                closeEditorMode();
             }
         };
     }

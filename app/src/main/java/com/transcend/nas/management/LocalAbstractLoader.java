@@ -36,11 +36,13 @@ public class LocalAbstractLoader extends AsyncTaskLoader<Boolean> {
     protected HandlerThread mThread;
     protected Handler mHandler;
     protected Runnable mWatcher;
-    private String mType = "";
+    protected String mType = "";
 
     protected int mNotificationID = 0;
     protected int mTotal = 0;
     protected int mCurrent = 0;
+    private String[] mLoadingString = {".","..","...","...."};
+    private NotificationCompat.Builder mBuilder;
 
     public LocalAbstractLoader(Context context) {
         super(context);
@@ -88,16 +90,17 @@ public class LocalAbstractLoader extends AsyncTaskLoader<Boolean> {
         mThread = new HandlerThread(TAG);
         mThread.start();
         mHandler = new Handler(mThread.getLooper());
-        mHandler.post(mWatcher = new Runnable() {
+        mHandler.postDelayed(mWatcher = new Runnable() {
             @Override
             public void run() {
                 int count = (int) target.length();
+                updateProgress(title, count, total);
+
                 if (mHandler != null) {
                     mHandler.postDelayed(mWatcher, 1000);
-                    updateProgress(title, count, total);
                 }
             }
-        });
+        }, 1000);
     }
 
     protected void closeProgressWatcher() {
@@ -111,37 +114,53 @@ public class LocalAbstractLoader extends AsyncTaskLoader<Boolean> {
         }
     }
 
-    protected void updateProgress(String name, int count, int total) {
-        Log.w(TAG, "progress: " + count + "/" + total + ", " + name);
+    protected void updateProgress(String name, int count, int total){
+        updateProgress(name, count, total, true);
+    }
 
-        int max = (count == total) ? 0 : 100;
-//        int progress = (total > 0) ? count / (total / 100) : 0;
-        int progress = 0;
-        if (total > 100 && count > 0)
-            progress = (total > 0) ? count / (total / 100) : 0;
-
-        boolean indeterminate = (total == 0);
+    protected void updateProgress(String name, int count, int total, boolean showProgress) {
+        Log.w(TAG, mNotificationID + " progress: " + count + "/" + total + ", " + name);
         int icon = R.mipmap.ic_launcher;
 
+        if (mBuilder == null) {
+            //add content intent
+            Intent intent = mActivity.getIntent();
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            //add delete intent
+            //Intent delete = mActivity.getIntent();
+            //delete.putExtra("id", mNotificationID);
+            //PendingIntent deleteIntent = PendingIntent.getActivity(getContext(), 0, delete, PendingIntent.FLAG_CANCEL_CURRENT);
+            mBuilder = new NotificationCompat.Builder(getContext());
+            mBuilder.setSmallIcon(icon);
+            mBuilder.setContentIntent(pendingIntent);
+            //mBuilder.setDeleteIntent(deleteIntent);
+            mBuilder.setAutoCancel(true);
+        }
+
+        if(showProgress) {
+            int max = 100;
+            int progress = (total > 100) ? count / (total / 100) : 0;
+            boolean indeterminate = (total == 0);
+
+            String stat = String.format("%s / %s", MathUtil.getBytes(count), MathUtil.getBytes(total));
+            String text = String.format("%s - %s", mType, stat);
+            String info = String.format("%d%%", progress);
+
+            mBuilder.setContentText(text);
+            mBuilder.setContentInfo(info);
+            mBuilder.setProgress(max, progress, indeterminate);
+        } else {
+            String loading = mLoadingString[mCurrent%mLoadingString.length];
+            mBuilder.setContentText(String.format("%s%s", mType, loading));
+        }
+
         String title = mTotal > 1 ? String.format("(%s/%s) " + name, mCurrent, mTotal) : name;
-        String stat = String.format("%s / %s", MathUtil.getBytes(count), MathUtil.getBytes(total));
-        String text = String.format("%s - %s", mType, stat);
-        String info = String.format("%d%%", progress);
+        mBuilder.setContentTitle(title);
 
         NotificationManager ntfMgr = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        Intent intent = mActivity.getIntent();
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext());
-        builder.setSmallIcon(icon);
-        builder.setContentTitle(title);
-        builder.setContentText(text);
-        builder.setContentInfo(info);
-        builder.setProgress(max, progress, indeterminate);
-        builder.setContentIntent(pendingIntent);
-        builder.setAutoCancel(true);
-        ntfMgr.notify(mNotificationID, builder.build());
+        ntfMgr.notify(mNotificationID, mBuilder.build());
     }
 
     protected void updateResult(String result, String destination) {
@@ -152,10 +171,11 @@ public class LocalAbstractLoader extends AsyncTaskLoader<Boolean> {
         String text = String.format("%s - %s", mType, result);
 
         NotificationManager ntfMgr = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        Intent intent = mActivity.getIntent();
+        Intent intent = new Intent();
+        intent.setClass(getContext(), FileManageActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        if(destination != null && !destination.equals(""))
+        if (destination != null && !destination.equals(""))
             intent.putExtra("path", destination);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);

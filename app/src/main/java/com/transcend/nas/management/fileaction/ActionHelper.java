@@ -37,7 +37,7 @@ public class ActionHelper extends AbstractActionManager {
             for(AbstractActionManager manager : mActionManagerList) {
                 Loader<Boolean> tmp = manager.onCreateLoader(id, args);
                 if(tmp != null && loader != null)
-                    Log.d(TAG, "some loader is duplicate");
+                    Log.d(TAG, "some loader is duplicate : " + id);
 
                 if(tmp != null)
                     loader = tmp;

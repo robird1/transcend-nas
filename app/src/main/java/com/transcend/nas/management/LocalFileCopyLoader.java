@@ -60,7 +60,6 @@ public class LocalFileCopyLoader extends LocalAbstractLoader {
     }
 
     private boolean copy() throws IOException {
-        updateProgress(getContext().getResources().getString(R.string.loading), 0, 0);
         for (String path : mSrcs) {
             File source = new File(path);
             if (source.isDirectory())
@@ -101,11 +100,14 @@ public class LocalFileCopyLoader extends LocalAbstractLoader {
 
     private void copyFile(File source, String destination) throws IOException {
         String name = createUniqueName(source, destination);
-        File target = new File(destination, name);
         int total = (int) source.length();
+        updateProgress(name, 0, total);
+
+        File target = new File(destination, name);
         startProgressWatcher(name, target, total);
         FileUtils.copyFile(source, target);
         closeProgressWatcher();
+
         updateProgress(name, total, total);
     }
 }

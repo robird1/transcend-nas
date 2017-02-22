@@ -109,18 +109,16 @@ public class SmbFileShareLoader extends SmbAbstractLoader {
         while ((length = mIS.read(buffer)) != -1) {
             mOS.write(buffer, 0, length);
             count += length;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                if(isLoadInBackgroundCanceled()) {
-                    Log.d(TAG, "Share cancel");
-                    add = false;
-                    break;
-                }
+            if (isLoadInBackgroundCanceled()) {
+                Log.d(TAG, "Share cancel");
+                add = false;
+                break;
             }
         }
         mOS.close();
         mIS.close();
 
-        if(add) {
+        if (add) {
             FileInfo fileInfo = new FileInfo();
             fileInfo.path = target.getPath();
             fileInfo.name = target.getName();
@@ -134,8 +132,7 @@ public class SmbFileShareLoader extends SmbAbstractLoader {
     }
 
 
-
-    public ArrayList<FileInfo> getShareList(){
+    public ArrayList<FileInfo> getShareList() {
         return mShareList;
     }
 }

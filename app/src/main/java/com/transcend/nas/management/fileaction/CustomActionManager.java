@@ -112,9 +112,11 @@ public class CustomActionManager extends AbstractActionManager {
                 }
             } else if (loader instanceof EventNotifyLoader) {
                 TwonkyManager.getInstance().initTwonky();
-                Bundle args = ((EventNotifyLoader) loader).getBundleArgs();
-                int id = args.getInt("actionType", -1);
+                SmbFileActionService service = new SmbFileActionService();
+                int id = service.getLoaderID(FileActionService.FileAction.LIST);
                 if(id > 0) {
+                    Bundle args = ((EventNotifyLoader) loader).getBundleArgs();
+                    args.putInt("actionType", id);
                     Loader tmp = ((Activity) mContext).getLoaderManager().restartLoader(id, args, mCallbacks);
                     if(tmp != null) {
                         tmp.forceLoad();
@@ -134,14 +136,12 @@ public class CustomActionManager extends AbstractActionManager {
         mProgressLayout = progressLayout;
     }
 
-    public boolean doNasHashKeyTimeOutCheck(FileActionManager fileActionManager, String path) {
+    public boolean doNasHashKeyTimeOutCheck(String path) {
         Long lastTime = Long.parseLong(NASPref.getSessionVerifiedTime(mContext));
         Long currTime = System.currentTimeMillis();
         if (currTime - lastTime >= 180000) {
             Log.d(TAG, "doEventNotify");
             Bundle args = new Bundle();
-            if(fileActionManager != null)
-                args.putInt("actionType", fileActionManager.getFileActionService().getLoaderID(FileActionService.FileAction.LIST));
             args.putString("path", path);
             ((Activity) mContext).getLoaderManager().restartLoader(LoaderID.EVENT_NOTIFY, args, mCallbacks).forceLoad();
             return true;

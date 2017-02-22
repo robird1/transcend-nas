@@ -16,6 +16,7 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.R;
 import com.transcend.nas.common.CustomNotificationManager;
+import com.transcend.nas.common.ManageFactory;
 import com.transcend.nas.utils.MathUtil;
 import com.tutk.IOTC.P2PService;
 
@@ -53,7 +54,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
     protected Runnable mWatcher;
     protected boolean success = true;
     protected int mCount = 0;
-    private String[] mLoadingString = {".","..","...","...."};
+    private String[] mLoadingString = {".","..","..."};
     private NotificationCompat.Builder mBuilder;
 
     public SmbAbstractLoader(Context context) {
