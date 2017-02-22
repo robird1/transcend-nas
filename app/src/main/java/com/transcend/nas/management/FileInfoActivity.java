@@ -26,7 +26,7 @@ public class FileInfoActivity extends AppCompatActivity implements LoaderManager
 
     public static final int REQUEST_CODE = FileInfoActivity.class.hashCode() & 0xFFFF;
     public static final String TAG = FileInfoActivity.class.getSimpleName();
-    private static final boolean enableMoreInfo = true;
+    private static final boolean enableMoreInfo = false;
 
     private ImageView ivImage;
     private InformationFragment mFragment;
@@ -45,8 +45,6 @@ public class FileInfoActivity extends AppCompatActivity implements LoaderManager
 
         if(enableMoreInfo)
             checkFileInfo(fileInfo);
-        else
-            mFragment.addMoreInfo(null);
     }
 
     @Override

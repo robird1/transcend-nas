@@ -471,7 +471,6 @@ public class FileManageActivity extends DrawerMenuActivity implements
 
     private void initExternalStorageController() {
         mStorageController = new ExternalStorageController(mContext);
-        mFileActionManager.setExternalStorageController(mStorageController);
     }
 
     /**

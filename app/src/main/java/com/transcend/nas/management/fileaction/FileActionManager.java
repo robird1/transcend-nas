@@ -27,7 +27,6 @@ public class FileActionManager extends AbstractActionManager {
     private static final String TAG = FileActionManager.class.getSimpleName();
 
     private Context mContext;
-    protected ExternalStorageController mExternalStorageController;
     private FileActionService mFileActionService;
     private Map<FileActionServiceType, FileActionService> mFileActionServicePool;
     private FileActionServiceType mFileActionServiceType;
@@ -74,8 +73,6 @@ public class FileActionManager extends AbstractActionManager {
 
         mFileActionServiceType = type;
         mFileActionService = service;
-        if(mFileActionService.getExternalStorageController() == null && mExternalStorageController != null)
-            mFileActionService.setExternalStorageController(mExternalStorageController);
     }
 
     public void checkServiceType(String path) {
@@ -110,10 +107,6 @@ public class FileActionManager extends AbstractActionManager {
     public void setCurrentPath(String path) {
         if (mFileActionService != null)
             mFileActionService.setCurrentPath(path);
-    }
-
-    public void setExternalStorageController(ExternalStorageController controller) {
-        mExternalStorageController = controller;
     }
 
     public void setProgressLayout(RelativeLayout progressLayout) {

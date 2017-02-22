@@ -19,6 +19,7 @@ import com.transcend.nas.common.CustomNotificationManager;
 import com.transcend.nas.management.SmbAbstractLoader;
 import com.transcend.nas.management.download.AbstractDownloadManager;
 import com.transcend.nas.management.download.DownloadFactory;
+import com.tutk.IOTC.P2PService;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -98,7 +99,8 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
     public boolean downloadFile(Context context, SmbFile srcFileItem, String destPath, String uniqueName) throws IOException {
         Log.d(TAG, "[Enter] downloadFile");
         if (srcFileItem.isFile()) {
-            String srcPath = srcFileItem.getPath().split(mServer.getHostname())[1];
+            String hostname = P2PService.getInstance().getIP(mServer.getHostname(), P2PService.P2PProtocalType.SMB);
+            String srcPath = srcFileItem.getPath().split(hostname)[1];
             Bundle data = new Bundle();
             data.putString(AbstractDownloadManager.KEY_SOURCE_PATH, srcPath);
             data.putString(AbstractDownloadManager.KEY_TARGET_PATH, destPath);

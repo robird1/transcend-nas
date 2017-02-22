@@ -35,6 +35,7 @@ public class DeviceInfoActivity extends AppCompatActivity{
     public static final int REQUEST_CODE = DeviceInfoActivity.class.hashCode() & 0xFFFF;
     public static final String TAG = DeviceInfoActivity.class.getSimpleName();
     private static final String REGULAR_EXPRESSION = "^[a-zA-Z0-9-]{1,32}$";
+    private static final boolean enableReviseDeviceName = false;
 
     private static boolean mIsBackButtonEnable = true;
     public static int mLoaderID = -1;
@@ -145,7 +146,7 @@ public class DeviceInfoActivity extends AppCompatActivity{
 
         private void refreshDeviceInfo(final ServerInfo info) {
             mPrefDeviceName.setSummary(info.hostName);
-            if (isAdmin()) {
+            if (enableReviseDeviceName && isAdmin()) {
                 mPrefDeviceName.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                     @Override
                     public boolean onPreferenceClick(Preference preference) {

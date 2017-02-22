@@ -47,18 +47,10 @@ abstract class FileActionService {
         mPath = path;
     }
 
-    public void setExternalStorageController(ExternalStorageController controller){
-        mExternalStorageController = controller;
-    }
-
-    public ExternalStorageController getExternalStorageController(){
-        return mExternalStorageController;
-    }
-
     protected boolean isWritePermissionRequired(Context context, String path) {
-        if(mExternalStorageController != null)
-            return mExternalStorageController.isWritePermissionRequired(path);
-        return false;
+        if(mExternalStorageController == null)
+            mExternalStorageController = new ExternalStorageController(context);
+        return mExternalStorageController.isWritePermissionRequired(path);
     }
 
     public FileAction getFileAction(int action){
