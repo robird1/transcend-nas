@@ -1373,6 +1373,14 @@ public class FileManageActivity extends DrawerMenuActivity implements
 
                 NASUtils.showAppChooser(FileManageActivity.this, destUri);
             }
+
+            @Override
+            public void onFail() {
+                if (mProgressView != null) {
+                    mProgressView.setVisibility(View.INVISIBLE);
+                }
+                Toast.makeText(mContext, getString(R.string.error), Toast.LENGTH_SHORT).show();
+            }
         });
     }
 

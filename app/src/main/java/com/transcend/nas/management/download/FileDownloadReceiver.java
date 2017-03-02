@@ -73,6 +73,11 @@ public class FileDownloadReceiver extends BroadcastReceiver {
             case DownloadManager.STATUS_FAILED:
                 Log.d(TAG, "[Enter] DownloadManager.STATUS_FAILED");
                 Log.d(TAG, "reason: "+ c.getString(c.getColumnIndex(DownloadManager.COLUMN_REASON)));
+
+                long id = DownloadFactory.getManager(mContext, DownloadFactory.Type.TEMPORARY).getDownloadId();
+                if (mDownloadId == id) {
+                    notifyOpenFileListener(null);
+                }
                 break;
             default:
                 Log.d(TAG, "[Enter] default block. error code: "+ c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS)));
@@ -109,8 +114,13 @@ public class FileDownloadReceiver extends BroadcastReceiver {
 
     private void notifyOpenFileListener(String localUri) {
         TempFileDownloadManager manager = (TempFileDownloadManager) DownloadFactory.getManager(mContext, DownloadFactory.Type.TEMPORARY);
-        if (manager.getOpenFileListener() != null) {
-            manager.getOpenFileListener().onComplete(Uri.parse(localUri));
+        TempFileDownloadManager.OpenFileListener listener = manager.getOpenFileListener();
+        if (listener != null) {
+            if (localUri != null) {
+                listener.onComplete(Uri.parse(localUri));
+            } else {
+                listener.onFail();
+            }
         }
     }
 

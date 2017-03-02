@@ -17,6 +17,7 @@ public class TempFileDownloadManager extends AbstractDownloadManager {
 
     public interface OpenFileListener {
         void onComplete(Uri destUri);
+        void onFail();
     }
 
     TempFileDownloadManager(Context context) {
