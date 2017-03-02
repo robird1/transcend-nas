@@ -6,7 +6,7 @@
  Locale: ko_KR, Korean
  Tagged: Android_SJC
  Exported by: Translator TS
- Exported at: Fri, 17 Feb 2017 06:56:18 +0000
+ Exported at: Wed, 01 Mar 2017 05:27:15 +0000
 -->
 <resources>
     <string name="about">약</string>
@@ -93,6 +93,7 @@
     <string name="error_format">오류 포맷</string>
     <string name="exit">끝내기</string>
     <string name="fb_request_email_permission">페이스북 계정으로 로그인하기 위해서 이메일 승인이 필요합니다.</string>
+    <string name="feedback">피드백</string>
     <string name="feedback_message">메세지</string>
     <string name="file_format_audio">음원</string>
     <string name="file_format_document">문서</string>

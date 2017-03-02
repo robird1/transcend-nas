@@ -16,6 +16,7 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.R;
 import com.transcend.nas.common.CustomNotificationManager;
+import com.transcend.nas.common.CustomNotificationReceiver;
 import com.transcend.nas.common.ManageFactory;
 import com.transcend.nas.utils.MathUtil;
 import com.tutk.IOTC.P2PService;
@@ -24,6 +25,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,10 +73,6 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
 
     @Override
     public Boolean loadInBackground() {
-        // Restructure Remote Access
-        //String p2pIP = P2PService.getInstance().getP2PIP();
-        //if (mHostname.contains(p2pIP))
-        //    P2PService.getInstance().reStartP2PConnect();
         return true;
     }
 
@@ -127,6 +125,8 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         if (mException != null) {
             if (mException instanceof jcifs.smb.SmbAuthException) {
                 message = getContext().getString(R.string.access_error);
+            } else if (mException instanceof FileNotFoundException) {
+                message = getContext().getString(R.string.operation_error);
             } else if (mException instanceof SmbException) {
                 SmbException e = (SmbException) mException;
                 String msg = e.getMessage();
@@ -205,6 +205,9 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         mHandler.postDelayed(mWatcher = new Runnable() {
             @Override
             public void run() {
+                if(isLoadInBackgroundCanceled())
+                    return;
+
                 try {
                     SmbFile target = new SmbFile(destination, title);
                     int count = target.getContentLength();
@@ -242,24 +245,13 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
     }
 
     protected void updateProgress(String type, String name, int count, int total, boolean showProgress) {
-        Log.w(TAG, mNotificationID + " progress: " + count + "/" + total + ", " + name);
-        int icon = R.mipmap.ic_launcher;
+        if(isLoadInBackgroundCanceled()) {
+            return;
+        }
 
+        Log.w(TAG, mNotificationID + " progress: " + count + "/" + total + ", " + name);
         if (mBuilder == null) {
-            //add content intent
-            Intent intent = mActivity.getIntent();
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            //add delete intent
-            //Intent delete = mActivity.getIntent();
-            //delete.putExtra("id", mNotificationID);
-            //PendingIntent deleteIntent = PendingIntent.getActivity(getContext(), 0, delete, PendingIntent.FLAG_CANCEL_CURRENT);
-            mBuilder = new NotificationCompat.Builder(getContext());
-            mBuilder.setSmallIcon(icon);
-            mBuilder.setContentIntent(pendingIntent);
-            //mBuilder.setDeleteIntent(deleteIntent);
-            mBuilder.setAutoCancel(true);
+            mBuilder = CustomNotificationManager.createProgressBuilder(getContext(), mActivity, mNotificationID);
         }
 
         if(showProgress) {
@@ -287,29 +279,11 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
     }
 
     protected void updateResult(String type, String result, String destination) {
-        Log.w(TAG, "result: " + result);
+        if(isLoadInBackgroundCanceled()) {
+            return;
+        }
 
-        int icon = R.mipmap.ic_launcher;
-        String name = getContext().getResources().getString(R.string.app_name);
-        String text = String.format("%s - %s", type, result);
-
-        NotificationManager ntfMgr = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        Intent intent = new Intent();
-        intent.setClass(getContext(), FileManageActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        if (destination != null && !destination.equals(""))
-            intent.putExtra("path", destination);
-
-        PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext());
-        builder.setSmallIcon(icon);
-        builder.setContentTitle(name);
-        builder.setContentText(text);
-        builder.setContentIntent(pendingIntent);
-        builder.setAutoCancel(true);
-        ntfMgr.notify(mNotificationID, builder.build());
-        CustomNotificationManager.getInstance().releaseNotificationID(mNotificationID);
+        CustomNotificationManager.updateResult(getContext(), mNotificationID, type, result, destination);
     }
 
 }

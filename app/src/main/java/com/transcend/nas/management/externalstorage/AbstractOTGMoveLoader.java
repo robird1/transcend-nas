@@ -51,12 +51,16 @@ public class AbstractOTGMoveLoader extends LocalAbstractLoader {
             mHandler.post(mWatcher = new Runnable() {
                 @Override
                 public void run() {
-                    int count = 0;
-                    if (target != null)
-                        count = (int) target.length();
+                    if(isLoadInBackgroundCanceled())
+                        return;
+
+                    if (target != null) {
+                        int count = (int) target.length();
+                        updateProgress(target.getName(), count, total);
+                    }
+
                     if (mHandler != null) {
                         mHandler.postDelayed(mWatcher, 1000);
-                        updateProgress(target.getName(), count, total);
                     }
                 }
             });

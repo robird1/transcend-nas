@@ -1,12 +1,7 @@
 package com.transcend.nas.management;
 
 import android.content.Context;
-import android.util.Log;
-
 import com.transcend.nas.R;
-import com.transcend.nas.common.CustomNotificationManager;
-
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,20 +10,13 @@ import java.util.List;
 /**
  * Created by silverhsu on 16/2/18.
  */
-public class LocalFileMoveLoader extends LocalAbstractLoader {
+public class LocalFileMoveLoader extends LocalFileCopyLoader {
 
     private static final String TAG = LocalFileMoveLoader.class.getSimpleName();
-    private List<String> mSrcs;
-    private String mDest;
 
     public LocalFileMoveLoader(Context context, List<String> srcs, String dest) {
-        super(context);
+        super(context, srcs, dest);
         setType(getContext().getString(R.string.move));
-        mSrcs = srcs;
-        mDest = dest;
-        mTotal = mSrcs.size();
-        mCurrent = 0;
-        mNotificationID = CustomNotificationManager.getInstance().queryNotificationID();
     }
 
     @Override
@@ -45,20 +33,25 @@ public class LocalFileMoveLoader extends LocalAbstractLoader {
 
     private boolean move() throws IOException {
         for (String path : mSrcs) {
+            if (isLoadInBackgroundCanceled())
+                return true;
+
             File source = new File(path);
             if (source.getParent().equals(mDest))
                 continue;
-            if (source.isDirectory())
+            if (source.isDirectory()) {
                 moveDirectory(source, mDest);
-            else
-                moveFile(source, mDest);
+            } else {
+                copyFile(source, mDest);
+                deleteFile(source);
+            }
             mCurrent++;
         }
         updateResult(getContext().getString(R.string.done), mDest);
         return true;
     }
 
-    private void moveDirectory(File source, String destination) throws IOException  {
+    private void moveDirectory(File source, String destination) throws IOException {
         String name = createUniqueName(source, destination);
         File target = new File(destination, name);
         boolean isSuccess = target.mkdirs();
@@ -73,36 +66,27 @@ public class LocalFileMoveLoader extends LocalAbstractLoader {
 
         String path = target.getPath();
         for (File file : files) {
-            if(file.isHidden())
+            if (isLoadInBackgroundCanceled())
+                return;
+
+            if (file.isHidden())
                 continue;
 
-            if (file.isDirectory())
+            if (file.isDirectory()) {
                 moveDirectory(file, path);
-            else
-                moveFile(file, path);
+            } else {
+                copyFile(file, path);
+                deleteFile(file);
+            }
             mCurrent++;
         }
-        isSuccess = source.delete();
+        deleteFile(source);
+    }
+
+    private void deleteFile(File file) throws IOException{
+        boolean isSuccess = file.delete();
         if (!isSuccess) {
             throw new IOException();
         }
     }
-
-    private void moveFile(File source, String destination) throws IOException {
-        String name = createUniqueName(source, destination);
-        int total = (int) source.length();
-        updateProgress(name, 0, total);
-
-        File target = new File(destination, name);
-        startProgressWatcher(name, target, total);
-        FileUtils.copyFile(source, target);
-        boolean isSuccess = source.delete();
-        if (!isSuccess) {
-            throw new IOException();
-        }
-        closeProgressWatcher();
-
-        updateProgress(name, total, total);
-    }
-
 }

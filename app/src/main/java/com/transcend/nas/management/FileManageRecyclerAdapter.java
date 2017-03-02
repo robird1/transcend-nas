@@ -117,7 +117,8 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
                 ImageLoader.getInstance().cancelDisplayTask(holder.icon);
 
 
-            holder.itemView.setSelected(fileInfo.checked);
+            //holder.itemView.setSelected(fileInfo.checked);
+            holder.background.setVisibility(fileInfo.checked ? View.VISIBLE : View.INVISIBLE);
             holder.mark.setVisibility(fileInfo.checked ? View.VISIBLE : View.INVISIBLE);
 
         }
@@ -179,6 +180,7 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
         int viewType;
 
         View itemView;
+        View background;
         ImageView mark;
         ImageView icon;
         ImageView info;
@@ -192,6 +194,7 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
             this.itemView = itemView;
             if (viewType == ITEM_VIEW_TYPE_CONTENT) {
                 if (itemView.getId() == R.id.listitem_file_manage) {
+                    background = (View) itemView.findViewById(R.id.listitem_file_manage_background);
                     mark = (ImageView)itemView.findViewById(R.id.listitem_file_manage_mark);
                     icon = (ImageView)itemView.findViewById(R.id.listitem_file_manage_icon);
                     info = (ImageView)itemView.findViewById(R.id.listitem_file_manage_info);
@@ -200,6 +203,7 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
                     setOnItemInfoClickListener();
                 }
                 if (itemView.getId() == R.id.griditem_file_manage) {
+                    background = (View) itemView.findViewById(R.id.griditem_file_manage_background);
                     mark = (ImageView)itemView.findViewById(R.id.griditem_file_manage_mark);
                     icon = (ImageView)itemView.findViewById(R.id.griditem_file_manage_icon);
                     title = (TextView)itemView.findViewById(R.id.griditem_file_manage_title);

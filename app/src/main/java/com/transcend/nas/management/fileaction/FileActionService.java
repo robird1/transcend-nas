@@ -47,7 +47,7 @@ abstract class FileActionService {
         mPath = path;
     }
 
-    protected boolean isWritePermissionRequired(Context context, String path) {
+    protected boolean isWritePermissionRequired(Context context, String... path) {
         if(mExternalStorageController == null)
             mExternalStorageController = new ExternalStorageController(context);
         return mExternalStorageController.isWritePermissionRequired(path);

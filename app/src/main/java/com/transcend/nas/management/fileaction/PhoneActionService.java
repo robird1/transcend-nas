@@ -88,7 +88,7 @@ class PhoneActionService extends FileActionService {
 
     @Override
     protected AsyncTaskLoader move(Context context, List<String> list, String dest) {
-        if (isWritePermissionRequired(context, dest))
+        if (list != null && list.size() > 0 && isWritePermissionRequired(context, list.get(0), dest))
             return new OTGFileMoveLoader(context, getSelectedDocumentFiles(context, mPath, list), new ExternalStorageLollipop(context).getDestination(dest));
         return new LocalFileMoveLoader(context, list, dest);
     }

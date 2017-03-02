@@ -32,6 +32,7 @@ public class TwonkyManager {
     private HashMap<String, String> mFolderMap;
     private Set<String> mCacheMap;
     private boolean useTwonkyServer = false;
+    private boolean useTwonkyRescanFile = true;
 
     private static final int defaultLifeCycle = 10;
     private int mLifeCycle = 0;
@@ -242,6 +243,27 @@ public class TwonkyManager {
             return null;
 
         String value = "http://" + getTwonkyIP() + "/rpc/rescan";
+        String result = HttpRequestFactory.doGetRequest(value, false);
+        return result;
+    }
+
+    public String doTwonkyRescanFile(String path){
+        Log.d(TAG, "twonky rescan file : " + path);
+        if (!useTwonkyServer || !useTwonkyRescanFile)
+            return null;
+
+        //we only support rescan photo file
+        FileInfo.TYPE type = FileInfo.getType(path);
+        if (!FileInfo.TYPE.PHOTO.equals(type))
+            return null;
+
+        String value = "http://" + getTwonkyIP() + "/rpc/share_local_file?";
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        String username = server.getUsername();
+        String realPath = ShareFolderManager.getInstance().getRealPath(path);
+        if(path.equals(realPath) && path.startsWith("/" + username + "/"))
+            realPath = "/home" + path;
+        value += realPath;
         String result = HttpRequestFactory.doGetRequest(value, false);
         return result;
     }

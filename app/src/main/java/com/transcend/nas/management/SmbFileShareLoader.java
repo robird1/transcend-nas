@@ -44,7 +44,6 @@ public class SmbFileShareLoader extends SmbAbstractLoader {
         super(context);
         mSrcs = srcs;
         mDest = dest;
-        mNotificationID = CustomNotificationManager.getInstance().queryNotificationID();
         mType = getContext().getString(R.string.share);
         mShareList = new ArrayList<>();
     }

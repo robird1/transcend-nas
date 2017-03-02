@@ -6,7 +6,7 @@
  Locale: en_US, English (USA)
  Tagged: Android_SJC
  Exported by: Translator TS
- Exported at: Fri, 17 Feb 2017 06:56:18 +0000
+ Exported at: Wed, 01 Mar 2017 05:27:15 +0000
 -->
 <resources>
     <string name="about">About</string>
@@ -93,6 +93,7 @@
     <string name="error_format">Error format</string>
     <string name="exit">Exit</string>
     <string name="fb_request_email_permission">Please grant the email address permission for Facebook login</string>
+    <string name="feedback">Feedback</string>
     <string name="feedback_message">Message</string>
     <string name="file_format_audio">Audio format</string>
     <string name="file_format_document">Document format</string>
@@ -242,7 +243,7 @@
     <string name="uploading">Uploading</string>
     <string name="use_cellular_network">Use Cellular Network</string>
     <string name="used">Used</string>
-    <string name="user_feedback">User Feedback</string>
+    <string name="user_feedback">Feedback</string>
     <string name="video">video</string>
     <string name="view">View</string>
     <string name="warning">Warning</string>

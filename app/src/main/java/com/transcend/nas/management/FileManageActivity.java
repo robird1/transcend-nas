@@ -627,6 +627,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     private void initMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.file_manage_editor, menu);
         MenuItem item = menu.findItem(R.id.file_manage_editor_action_transmission);
+        mFileActionManager.checkServiceType(mPath);
         if (mFileActionManager.isRemoteAction()) {
             item.setTitle(R.string.download);
             item.setIcon(R.drawable.ic_toolbar_download_white);
@@ -775,9 +776,9 @@ public class FileManageActivity extends DrawerMenuActivity implements
                 toggleDrawerCheckedItem();
             } else {
                 doRefresh();
-                if (loader instanceof SmbAbstractLoader || loader instanceof LocalAbstractLoader ) {
+                if (loader instanceof SmbAbstractLoader || loader instanceof LocalAbstractLoader) {
                     String type = null;
-                    if(loader instanceof SmbAbstractLoader)
+                    if (loader instanceof SmbAbstractLoader)
                         type = ((SmbAbstractLoader) loader).getType();
                     else
                         type = ((LocalAbstractLoader) loader).getType();
@@ -1300,6 +1301,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     }
 
     private void startVideoActivity(FileInfo fileInfo) {
+        mFileActionManager.checkServiceType(mPath);
         if (mFileActionManager.isRemoteAction() && mCastManager != null && mCastManager.isConnected()) {
             try {
                 //clean image

@@ -513,11 +513,12 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         builder.setNegativeButton(R.string.cancel, null);
         builder.setPositiveButton(R.string.confirm, null);
         builder.setCancelable(true);
-        AlertDialog dialog = builder.show();
+        final AlertDialog dialog = builder.show();
         Button bnPos = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
         bnPos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                dialog.dismiss();
                 backToMainActivity();
             }
         });

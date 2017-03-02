@@ -3,13 +3,20 @@
     android:id="@+id/griditem_file_manage"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/selector">
+    android:background="?android:attr/selectableItemBackground">
+
+    <View
+        android:id="@+id/griditem_file_manage_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorSelected"
+        android:visibility="invisible" />
 
     <TextView
         android:id="@+id/center"
         android:layout_width="1dp"
         android:layout_height="1dp"
-        android:layout_centerInParent="true"/>
+        android:layout_centerInParent="true" />
 
     <TextView
         android:id="@+id/griditem_file_manage_title"
@@ -17,7 +24,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="4dp"
-        android:background="#80FFFFFF"
         android:ellipsize="marquee"
         android:gravity="center"
         android:marqueeRepeatLimit="marquee_forever"
@@ -39,21 +45,19 @@
         android:id="@+id/griditem_file_indicate_icon"
         android:layout_width="36dp"
         android:layout_height="36dp"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
         android:src="@drawable/ic_movies_gray_24dp"
         android:visibility="gone" />
 
     <ImageView
         android:id="@+id/griditem_file_manage_mark"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/griditem_file_manage_title"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="8dp"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
         android:src="@drawable/ic_check_circle_gray_24dp"
+        android:tint="@color/colorCheckBox"
         android:visibility="invisible" />
 
 </com.transcend.nas.view.SquareRelativeLayout>

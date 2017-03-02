@@ -51,7 +51,7 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
         super(context);
         mSrcs = srcs;
         mDest = dest;
-        mNotificationID = CustomNotificationManager.getInstance().queryNotificationID();
+        mNotificationID = CustomNotificationManager.getInstance().queryNotificationID(this);
         mType = getContext().getString(R.string.upload);
         mTotal = mSrcs.size();
         mCurrent = 0;
@@ -84,6 +84,9 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
 
     private boolean upload() throws IOException {
         for (String path : mSrcs) {
+            if(isLoadInBackgroundCanceled())
+                return true;
+
             File source = new File(path);
             if (source.isDirectory())
                 uploadDirectory(source, getSmbUrl(mDest));
@@ -106,6 +109,9 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
         }
         String path = target.getPath();
         for (File file : files) {
+            if(isLoadInBackgroundCanceled())
+                return;
+
             if(file.isHidden())
                 continue;
 
@@ -124,17 +130,20 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
         SmbFile target = new SmbFile(destination, mUniqueName);
         mOS = new BufferedOutputStream(target.getOutputStream());
         mIS = new BufferedInputStream(new FileInputStream(source));
-        updateProgress(mType, mUniqueName, count, total);
+        updateProgress(mType, mUniqueName, 0, total);
         byte[] buffer = new byte[BUFFER_SIZE];
         int length = 0;
         while ((length = mIS.read(buffer)) != -1) {
+            if(isLoadInBackgroundCanceled())
+                break;
+
             mOS.write(buffer, 0, length);
             count += length;
             updateProgressPerSecond(mUniqueName, count, total);
         }
         mOS.close();
         mIS.close();
-        updateProgressPerSecond(mUniqueName, count, total);
+        updateProgress(mType, mUniqueName, count, total);
     }
 
     private String createUniqueName(File source, String destination) throws MalformedURLException, SmbException {

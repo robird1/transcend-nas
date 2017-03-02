@@ -34,8 +34,8 @@ import jcifs.smb.SmbException;
 public class LocalFileCopyLoader extends LocalAbstractLoader {
 
     private static final String TAG = LocalFileCopyLoader.class.getSimpleName();
-    private List<String> mSrcs;
-    private String mDest;
+    protected List<String> mSrcs;
+    protected String mDest;
 
     public LocalFileCopyLoader(Context context, List<String> srcs, String dest) {
         super(context);
@@ -44,7 +44,7 @@ public class LocalFileCopyLoader extends LocalAbstractLoader {
         mDest = dest;
         mTotal = mSrcs.size();
         mCurrent = 0;
-        mNotificationID = CustomNotificationManager.getInstance().queryNotificationID();
+        mNotificationID = CustomNotificationManager.getInstance().queryNotificationID(this);
     }
 
     @Override
@@ -61,6 +61,9 @@ public class LocalFileCopyLoader extends LocalAbstractLoader {
 
     private boolean copy() throws IOException {
         for (String path : mSrcs) {
+            if(isLoadInBackgroundCanceled())
+                return true;
+
             File source = new File(path);
             if (source.isDirectory())
                 copyDirectory(source, mDest);
@@ -87,6 +90,9 @@ public class LocalFileCopyLoader extends LocalAbstractLoader {
 
         String path = target.getPath();
         for (File file : files) {
+            if(isLoadInBackgroundCanceled())
+                return;
+
             if(file.isHidden())
                 continue;
 
@@ -98,7 +104,7 @@ public class LocalFileCopyLoader extends LocalAbstractLoader {
         }
     }
 
-    private void copyFile(File source, String destination) throws IOException {
+    public void copyFile(File source, String destination) throws IOException {
         String name = createUniqueName(source, destination);
         int total = (int) source.length();
         updateProgress(name, 0, total);

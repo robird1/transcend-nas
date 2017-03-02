@@ -25,7 +25,7 @@ public class SmbFileMoveLoader extends SmbAbstractLoader {
         mActivity = (Activity) context;
         mSrcs = srcs;
         mDest = dest;
-        mNotificationID = CustomNotificationManager.getInstance().queryNotificationID();
+        mNotificationID = CustomNotificationManager.getInstance().queryNotificationID(this);
         mType = getContext().getString(R.string.move);
         mTotal = mSrcs.size();
         mCurrent = 0;
@@ -46,6 +46,9 @@ public class SmbFileMoveLoader extends SmbAbstractLoader {
 
     private boolean move() throws MalformedURLException, SmbException {
         for (String path : mSrcs) {
+            if(isLoadInBackgroundCanceled())
+                return true;
+
             SmbFile source = new SmbFile(getSmbUrl(path));
             if (source.getParent().endsWith(mDest))
                 continue;
@@ -70,6 +73,9 @@ public class SmbFileMoveLoader extends SmbAbstractLoader {
         }
         String path = target.getPath();
         for (SmbFile file : files) {
+            if(isLoadInBackgroundCanceled())
+                return;
+
             if(file.isHidden())
                 continue;
 

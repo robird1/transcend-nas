@@ -39,7 +39,8 @@ public class FileDownloadReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "[Enter] onReceive");
         mContext = context;
-        if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(intent.getAction())) {
+        String action = intent.getAction();
+        if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
             mDownloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L);
             DownloadManager.Query query = new DownloadManager.Query();
             query.setFilterById(mDownloadId);
@@ -52,7 +53,7 @@ public class FileDownloadReceiver extends BroadcastReceiver {
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                if(c != null)
+                if (c != null)
                     c.close();
             }
         }
@@ -63,7 +64,7 @@ public class FileDownloadReceiver extends BroadcastReceiver {
             case DownloadManager.STATUS_SUCCESSFUL:
                 Log.d(TAG, "[Enter] DownloadManager.STATUS_SUCCESSFUL");
                 String uri = c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
-                Log.d(TAG, "uri: "+ uri);
+                Log.d(TAG, "uri: " + uri);
                 if (uri.contains(NASUtils.getCacheFilesLocation(mContext))) {
                     notifyOpenFileListener(uri);
                 } else {
@@ -72,7 +73,7 @@ public class FileDownloadReceiver extends BroadcastReceiver {
                 break;
             case DownloadManager.STATUS_FAILED:
                 Log.d(TAG, "[Enter] DownloadManager.STATUS_FAILED");
-                Log.d(TAG, "reason: "+ c.getString(c.getColumnIndex(DownloadManager.COLUMN_REASON)));
+                Log.d(TAG, "reason: " + c.getString(c.getColumnIndex(DownloadManager.COLUMN_REASON)));
 
                 long id = DownloadFactory.getManager(mContext, DownloadFactory.Type.TEMPORARY).getDownloadId();
                 if (mDownloadId == id) {
@@ -80,8 +81,8 @@ public class FileDownloadReceiver extends BroadcastReceiver {
                 }
                 break;
             default:
-                Log.d(TAG, "[Enter] default block. error code: "+ c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS)));
-                Log.d(TAG, "reason: "+ c.getString(c.getColumnIndex(DownloadManager.COLUMN_REASON)));
+                Log.d(TAG, "[Enter] default block. error code: " + c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS)));
+                Log.d(TAG, "reason: " + c.getString(c.getColumnIndex(DownloadManager.COLUMN_REASON)));
                 break;
         }
     }
@@ -102,7 +103,7 @@ public class FileDownloadReceiver extends BroadcastReceiver {
             return;
         }
 
-        Log.d(TAG, "taskId: "+ taskId + " remainTaskFiles: "+ remainTaskFiles);
+        Log.d(TAG, "taskId: " + taskId + " remainTaskFiles: " + remainTaskFiles);
         mTaskIdMap.put(taskId, remainTaskFiles);
 
         if (remainTaskFiles == 0) {
@@ -122,33 +123,11 @@ public class FileDownloadReceiver extends BroadcastReceiver {
                 listener.onFail();
             }
         }
+
     }
 
     private void invokeNotifyService(String type, String result, String destination, int taskId) {
-        Log.w(TAG, "result: " + result);
-
-        int icon = R.mipmap.ic_launcher;
-        String name = getContext().getResources().getString(R.string.app_name);
-        String text = String.format("%s - %s", type, result);
-
-        NotificationManager ntfMgr = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        Intent intent = new Intent();
-        intent.setClass(getContext(), FileManageActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        if(destination != null && !destination.equals(""))
-            intent.putExtra("path", destination);
-
-        PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext());
-        builder.setSmallIcon(icon);
-        builder.setContentTitle(name);
-        builder.setContentText(text);
-        builder.setContentIntent(pendingIntent);
-        builder.setAutoCancel(true);
-        ntfMgr.notify(taskId, builder.build());
-        CustomNotificationManager.getInstance().releaseNotificationID(taskId);
-        Toast.makeText(mContext, type + " - " + mContext.getString(R.string.done), Toast.LENGTH_SHORT).show();
+        CustomNotificationManager.updateResult(getContext(), taskId, type, result, destination);
     }
 
     private void showMap() {
@@ -157,14 +136,14 @@ public class FileDownloadReceiver extends BroadcastReceiver {
         Iterator iterator = taskIdSet.iterator();
         while (iterator.hasNext()) {
             Map.Entry entry = (Map.Entry) iterator.next();
-            Log.d(TAG, "task id: "+ entry.getKey() + " remain files: "+ entry.getValue());
+            Log.d(TAG, "task id: " + entry.getKey() + " remain files: " + entry.getValue());
         }
 
         Set downloadIdSet = mDownloadIdMap.entrySet();
         Iterator iterator2 = downloadIdSet.iterator();
         while (iterator2.hasNext()) {
             Map.Entry entry = (Map.Entry) iterator2.next();
-            Log.d(TAG, "download id: "+ entry.getKey() + " task id: "+ entry.getValue());
+            Log.d(TAG, "download id: " + entry.getKey() + " task id: " + entry.getValue());
         }
     }
 }

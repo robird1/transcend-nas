@@ -37,7 +37,7 @@ public class FileDownloadLoader extends SmbAbstractLoader {
         mContext = context;
         mSrcs = srcs;
         mDest = dest;
-        mNotificationID = CustomNotificationManager.getInstance().queryNotificationID();
+        mNotificationID = CustomNotificationManager.getInstance().queryNotificationID(this);
         Log.d(TAG, "mNotificationID: "+ mNotificationID);
         mType = getContext().getString(R.string.download);
         mTotal = mSrcs.size();

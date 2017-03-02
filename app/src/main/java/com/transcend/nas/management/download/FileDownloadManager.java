@@ -1,18 +1,11 @@
 package com.transcend.nas.management.download;
 
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.NotificationCompat;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.common.CustomNotificationManager;
-import com.transcend.nas.management.FileManageActivity;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -83,27 +76,7 @@ class FileDownloadManager extends AbstractDownloadManager {
     }
 
     private void invokeNotifyService(String type, String result, String destination, int taskId) {
-        int icon = R.mipmap.ic_launcher;
-        String name = getContext().getResources().getString(R.string.app_name);
-        String text = String.format("%s - %s", type, result);
-
-        NotificationManager ntfMgr = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        Intent intent = new Intent();
-        intent.setClass(getContext(), FileManageActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        if(destination != null && !destination.equals(""))
-            intent.putExtra("path", destination);
-
-        PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext());
-        builder.setSmallIcon(icon);
-        builder.setContentTitle(name);
-        builder.setContentText(text);
-        builder.setContentIntent(pendingIntent);
-        builder.setAutoCancel(true);
-        ntfMgr.notify(taskId, builder.build());
-        CustomNotificationManager.getInstance().releaseNotificationID(taskId);
+        CustomNotificationManager.updateResult(getContext(), taskId, type, result, destination);
     }
 
 }

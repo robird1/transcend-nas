@@ -13,6 +13,7 @@ import android.util.Log;
 
 import com.transcend.nas.R;
 import com.transcend.nas.common.CustomNotificationManager;
+import com.transcend.nas.common.CustomNotificationReceiver;
 import com.transcend.nas.utils.MathUtil;
 
 import org.apache.commons.io.FilenameUtils;
@@ -47,7 +48,6 @@ public class LocalAbstractLoader extends AsyncTaskLoader<Boolean> {
     public LocalAbstractLoader(Context context) {
         super(context);
         mActivity = (Activity) context;
-        mType = "";
     }
 
     @Override
@@ -93,8 +93,13 @@ public class LocalAbstractLoader extends AsyncTaskLoader<Boolean> {
         mHandler.postDelayed(mWatcher = new Runnable() {
             @Override
             public void run() {
-                int count = (int) target.length();
-                updateProgress(title, count, total);
+                if(isLoadInBackgroundCanceled())
+                    return;
+
+                if(target != null) {
+                    int count = (int) target.length();
+                    updateProgress(title, count, total);
+                }
 
                 if (mHandler != null) {
                     mHandler.postDelayed(mWatcher, 1000);
@@ -119,24 +124,13 @@ public class LocalAbstractLoader extends AsyncTaskLoader<Boolean> {
     }
 
     protected void updateProgress(String name, int count, int total, boolean showProgress) {
-        Log.w(TAG, mNotificationID + " progress: " + count + "/" + total + ", " + name);
-        int icon = R.mipmap.ic_launcher;
+        if(isLoadInBackgroundCanceled()) {
+            return;
+        }
 
+        Log.w(TAG, mNotificationID + " progress: " + count + "/" + total + ", " + name);
         if (mBuilder == null) {
-            //add content intent
-            Intent intent = mActivity.getIntent();
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            //add delete intent
-            //Intent delete = mActivity.getIntent();
-            //delete.putExtra("id", mNotificationID);
-            //PendingIntent deleteIntent = PendingIntent.getActivity(getContext(), 0, delete, PendingIntent.FLAG_CANCEL_CURRENT);
-            mBuilder = new NotificationCompat.Builder(getContext());
-            mBuilder.setSmallIcon(icon);
-            mBuilder.setContentIntent(pendingIntent);
-            //mBuilder.setDeleteIntent(deleteIntent);
-            mBuilder.setAutoCancel(true);
+            mBuilder = CustomNotificationManager.createProgressBuilder(getContext(), mActivity, mNotificationID);
         }
 
         if(showProgress) {
@@ -164,29 +158,11 @@ public class LocalAbstractLoader extends AsyncTaskLoader<Boolean> {
     }
 
     protected void updateResult(String result, String destination) {
-        Log.w(TAG, "result: " + result);
+        if(isLoadInBackgroundCanceled()) {
+            return;
+        }
 
-        int icon = R.mipmap.ic_launcher;
-        String name = getContext().getResources().getString(R.string.app_name);
-        String text = String.format("%s - %s", mType, result);
-
-        NotificationManager ntfMgr = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        Intent intent = new Intent();
-        intent.setClass(getContext(), FileManageActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        if (destination != null && !destination.equals(""))
-            intent.putExtra("path", destination);
-
-        PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext());
-        builder.setSmallIcon(icon);
-        builder.setContentTitle(name);
-        builder.setContentText(text);
-        builder.setContentIntent(pendingIntent);
-        builder.setAutoCancel(true);
-        ntfMgr.notify(mNotificationID, builder.build());
-        CustomNotificationManager.getInstance().releaseNotificationID(mNotificationID);
+        CustomNotificationManager.updateResult(getContext(), mNotificationID, mType, result, destination);
     }
 
 }

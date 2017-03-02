@@ -23,7 +23,7 @@ public class SmbFileCopyLoader extends SmbAbstractLoader {
         super(context);
         mSrcs = srcs;
         mDest = dest;
-        mNotificationID = CustomNotificationManager.getInstance().queryNotificationID();
+        mNotificationID = CustomNotificationManager.getInstance().queryNotificationID(this);
         mType = getContext().getString(R.string.copy);
         mTotal = mSrcs.size();
         mCurrent = 0;
@@ -45,6 +45,9 @@ public class SmbFileCopyLoader extends SmbAbstractLoader {
 
     private boolean copy() throws MalformedURLException, SmbException {
         for (String path : mSrcs) {
+            if(isLoadInBackgroundCanceled())
+                return true;
+
             if(!success)
                 break;
 
@@ -74,6 +77,9 @@ public class SmbFileCopyLoader extends SmbAbstractLoader {
         }
         String path = target.getPath();
         for (SmbFile file : files) {
+            if(isLoadInBackgroundCanceled())
+                return;
+            
             if(!success)
                 break;
 

@@ -6,7 +6,7 @@
  Locale: zh_TW, Chinese (Taiwan)
  Tagged: Android_SJC
  Exported by: Translator TS
- Exported at: Fri, 17 Feb 2017 06:56:18 +0000
+ Exported at: Wed, 01 Mar 2017 05:27:15 +0000
 -->
 <resources>
     <string name="about">關於</string>
@@ -93,6 +93,7 @@
     <string name="error_format">格式錯誤</string>
     <string name="exit">結束</string>
     <string name="fb_request_email_permission">請同意提供電子信箱資訊以供登入使用</string>
+    <string name="feedback">意見回饋</string>
     <string name="feedback_message">意見</string>
     <string name="file_format_audio">音訊格式</string>
     <string name="file_format_document">文件格式</string>

@@ -6,7 +6,7 @@
  Locale: ja_JP, Japanese
  Tagged: Android_SJC
  Exported by: Translator TS
- Exported at: Fri, 17 Feb 2017 06:56:18 +0000
+ Exported at: Wed, 01 Mar 2017 05:27:15 +0000
 -->
 <resources>
     <string name="about">情報</string>
@@ -93,6 +93,7 @@
     <string name="error_format">エラーフォーマット</string>
     <string name="exit">終了</string>
     <string name="fb_request_email_permission">このメールアドレスにFacebookにログインするための権限を設定してください。</string>
+    <string name="feedback">フィードバック</string>
     <string name="feedback_message">メッセージ</string>
     <string name="file_format_audio">音楽フォーマット</string>
     <string name="file_format_document">ドキュメントフォーマット</string>
