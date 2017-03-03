@@ -26,9 +26,9 @@ public class SmbFileMoveLoader extends SmbAbstractLoader {
         mSrcs = srcs;
         mDest = dest;
         mNotificationID = CustomNotificationManager.getInstance().queryNotificationID(this);
-        mType = getContext().getString(R.string.move);
         mTotal = mSrcs.size();
         mCurrent = 0;
+        setType(getContext().getString(R.string.move));
     }
 
     @Override

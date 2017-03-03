@@ -158,8 +158,8 @@ public class FileActionManager extends AbstractActionManager {
         createLoader(FileActionService.FileAction.CreateFOLDER, null, path, null);
     }
 
-    public void share(final String dest, final ArrayList<FileInfo> files) {
-        if (isRemoteAction()) {
+    public void share(String dest, ArrayList<FileInfo> files) {
+        if (isRemoteAction(files.get(0).path)) {
             ArrayList<String> paths = new ArrayList<String>();
             for (FileInfo file : files) {
                 paths.add(file.path);
@@ -258,20 +258,21 @@ public class FileActionManager extends AbstractActionManager {
     }
 
     public boolean isDirectorySupportFileAction(String path){
-        if(isRemoteAction() && isTopDirectory(path))
+        if(isRemoteAction(path) && isTopDirectory(path))
             return false;
         else
             return true;
     }
 
     public boolean isDirectorySupportUpload(String path) {
-        if (isRemoteAction() && !isTopDirectory(path))
+        if (isRemoteAction(path) && !isTopDirectory(path))
             return true;
         else
             return false;
     }
 
-    public boolean isRemoteAction() {
+    public boolean isRemoteAction(String path) {
+        checkServiceType(path);
         String mode = getServiceMode();
         return NASApp.MODE_SMB.equals(mode);
     }

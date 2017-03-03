@@ -1,11 +1,6 @@
 package com.transcend.nas.management;
 
-import android.content.AsyncTaskLoader;
 import android.content.Context;
-import android.util.Log;
-
-import com.realtek.nasfun.api.Server;
-import com.realtek.nasfun.api.ServerManager;
 
 import java.net.MalformedURLException;
 

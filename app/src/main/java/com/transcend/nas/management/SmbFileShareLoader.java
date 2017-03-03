@@ -44,7 +44,6 @@ public class SmbFileShareLoader extends SmbAbstractLoader {
         super(context);
         mSrcs = srcs;
         mDest = dest;
-        mType = getContext().getString(R.string.share);
         mShareList = new ArrayList<>();
     }
 

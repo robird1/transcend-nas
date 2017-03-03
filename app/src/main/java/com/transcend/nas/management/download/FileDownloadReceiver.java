@@ -56,6 +56,10 @@ public class FileDownloadReceiver extends BroadcastReceiver {
                 if (c != null)
                     c.close();
             }
+        } else if (DownloadManager.ACTION_NOTIFICATION_CLICKED.equals(action)) {
+            Intent dm = new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS);
+            dm.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(dm);
         }
     }
 

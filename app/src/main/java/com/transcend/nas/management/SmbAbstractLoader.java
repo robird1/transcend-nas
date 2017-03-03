@@ -145,6 +145,10 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         return message;
     }
 
+    public void setType(String type) {
+        mType = type;
+    }
+
     public String getType() {
         return mType;
     }

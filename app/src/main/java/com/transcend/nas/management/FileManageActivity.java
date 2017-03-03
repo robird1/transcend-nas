@@ -627,8 +627,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     private void initMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.file_manage_editor, menu);
         MenuItem item = menu.findItem(R.id.file_manage_editor_action_transmission);
-        mFileActionManager.checkServiceType(mPath);
-        if (mFileActionManager.isRemoteAction()) {
+        if (mFileActionManager.isRemoteAction(mPath)) {
             item.setTitle(R.string.download);
             item.setIcon(R.drawable.ic_toolbar_download_white);
         } else {
@@ -651,7 +650,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         } else {
             switch (id) {
                 case R.id.file_manage_editor_action_transmission:
-                    String type = mFileActionManager.isRemoteAction() ? NASApp.ACT_DOWNLOAD : NASApp.ACT_UPLOAD;
+                    String type = mFileActionManager.isRemoteAction(mPath) ? NASApp.ACT_DOWNLOAD : NASApp.ACT_UPLOAD;
                     startFileActionLocateActivity(type);
                     break;
                 case R.id.file_manage_editor_action_rename:
@@ -921,8 +920,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     }
 
     public void doLoad(String path) {
-        mFileActionManager.checkServiceType(path);
-        if (mFileActionManager.isRemoteAction() && mCustomActionManager.doNasHashKeyTimeOutCheck(path)) {
+        if (mFileActionManager.isRemoteAction(path) && mCustomActionManager.doNasHashKeyTimeOutCheck(path)) {
             return;
         }
         mFileActionManager.list(path);
@@ -1157,8 +1155,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     @Override
     public void toggleDrawerCheckedItem() {
         int id;
-        mFileActionManager.checkServiceType(mPath);
-        if (mFileActionManager.isRemoteAction()) {
+        if (mFileActionManager.isRemoteAction(mPath)) {
             id = R.id.nav_storage;
         } else {
             if (isDownloadFolder) {
@@ -1301,8 +1298,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     }
 
     private void startVideoActivity(FileInfo fileInfo) {
-        mFileActionManager.checkServiceType(mPath);
-        if (mFileActionManager.isRemoteAction() && mCastManager != null && mCastManager.isConnected()) {
+        if (mFileActionManager.isRemoteAction(mPath) && mCastManager != null && mCastManager.isConnected()) {
             try {
                 //clean image
                 mCastManager.sendDataMessage("close");
