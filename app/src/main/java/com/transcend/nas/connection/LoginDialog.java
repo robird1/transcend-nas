@@ -10,6 +10,8 @@ import android.support.v7.widget.AppCompatEditText;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -130,6 +132,10 @@ public abstract class LoginDialog implements View.OnClickListener {
                     Toast.makeText(mActivity, mActivity.getString(R.string.empty_password), Toast.LENGTH_SHORT).show();
                     return;
                 }
+
+                //hide keyboard
+                InputMethodManager imm = (InputMethodManager) mActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(mDialog.getCurrentFocus().getWindowToken(), 0);
 
                 showProgress();
                 Bundle args = new Bundle();

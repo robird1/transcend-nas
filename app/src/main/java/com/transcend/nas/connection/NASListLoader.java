@@ -51,7 +51,7 @@ public class NASListLoader extends AsyncTaskLoader<Boolean> {
 
     public NASListLoader(Context context) {
         super(context);
-        mWifiMgr = (WifiManager)getContext().getSystemService(Context.WIFI_SERVICE);
+        mWifiMgr = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         mLock = mWifiMgr.createMulticastLock(TAG);
         mNASList = new ArrayList<HashMap<String, String>>();
     }
