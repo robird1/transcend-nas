@@ -4,13 +4,12 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.realtek.nasfun.api.Server;
-import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.common.CustomNotificationManager;
 import com.transcend.nas.management.download.AbstractDownloadManager;
 import com.transcend.nas.management.download.DownloadFactory;
+import com.transcend.nas.management.download.FileDownloadManager;
 import com.tutk.IOTC.P2PService;
 
 import java.io.File;
@@ -29,19 +28,14 @@ public class FileDownloadLoader extends SmbAbstractLoader {
     private List<String> mSrcs;
     private String mDest;
 
-//    private boolean mForbidden;
-//    private Timer mTimer;
-
     public FileDownloadLoader(Context context, List<String> srcs, String dest) {
         super(context);
         mContext = context;
         mSrcs = srcs;
         mDest = dest;
         mNotificationID = CustomNotificationManager.getInstance().queryNotificationID(this);
-        Log.d(TAG, "mNotificationID: "+ mNotificationID);
-        mType = getContext().getString(R.string.download);
-        mTotal = mSrcs.size();
         mCurrent = 0;
+        setType(getContext().getString(R.string.download));
     }
 
     @Override
@@ -51,6 +45,9 @@ public class FileDownloadLoader extends SmbAbstractLoader {
             return download();
         } catch (Exception e) {
             e.printStackTrace();
+            FileDownloadManager manager = (FileDownloadManager) DownloadFactory.getManager(mActivity, DownloadFactory.Type.PERSIST);
+            if (manager != null)
+                manager.cancelByNotificationId(mNotificationID);
             setExceptionWithMessage(e, isDownloadDirectoryExist(getContext()) ? null : getContext().getString(R.string.download_location_error));
             updateResult(mType, getContext().getString(R.string.error), mDest);
         }
@@ -58,15 +55,26 @@ public class FileDownloadLoader extends SmbAbstractLoader {
     }
 
     private boolean download() throws IOException {
+        FileDownloadManager manager = (FileDownloadManager) DownloadFactory.getManager(mActivity, DownloadFactory.Type.PERSIST);
+        if (manager != null)
+            manager.setTotalTaskByNotificationId(mNotificationID, -1);
+
         for (String path : mSrcs) {
             SmbFile source = new SmbFile(getSmbUrl(path));
             if (source.isDirectory())
                 downloadDirectory(source, mDest);
             else
                 downloadFile(source, mDest);
-            mCurrent++;
         }
-//        updateResult(mType, getContext().getString(R.string.done), mDest);
+
+        if (mCurrent == 0) {
+            if (manager != null)
+                manager.cancelByNotificationId(mNotificationID);
+            updateResult(mType, getContext().getString(R.string.done), mDest);
+        } else {
+            if (manager != null)
+                manager.setTotalTaskByNotificationId(mNotificationID, mCurrent);
+        }
         return true;
     }
 
@@ -75,59 +83,33 @@ public class FileDownloadLoader extends SmbAbstractLoader {
         File target = new File(destination, name);
         target.mkdirs();
         SmbFile[] files = source.listFiles();
-        for (SmbFile file : files) {
-            if (!file.isHidden())
-                mTotal++;
-        }
 
         String path = target.getPath();
         for (SmbFile file : files) {
-            if(file.isHidden())
+            if (file.isHidden())
                 continue;
 
             if (file.isDirectory())
                 downloadDirectory(file, path);
             else
                 downloadFile(file, path);
-            mCurrent++;
         }
     }
 
     private void downloadFile(SmbFile source, String destination) throws IOException {
-        Log.d(TAG, "[Enter] downloadFile");
-//        int total = source.getContentLength();
-//        int count = 0;
-
         String name = createLocalUniqueName(source, destination);
-        Server server = ServerManager.INSTANCE.getCurrentServer();
-        String hostName = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.SMB);
-        Log.d(TAG, "hostName: "+ hostName);
+        String hostName = P2PService.getInstance().getIP(mHostname, P2PService.P2PProtocalType.SMB);
         String srcPath = source.getPath().split(hostName)[1];
-        Log.d(TAG, "srcPath: "+ srcPath);
+        Log.d(TAG, "[Enter] downloadFile, srcPath: " + srcPath);
 
-//        updateProgressPerSecond(name, count, total);
         Bundle data = new Bundle();
         data.putString(AbstractDownloadManager.KEY_SOURCE_PATH, srcPath);
         data.putString(AbstractDownloadManager.KEY_TARGET_PATH, destination);
         data.putString(AbstractDownloadManager.KEY_FILE_NAME, name);
         data.putInt(AbstractDownloadManager.KEY_TASK_ID, mNotificationID);
         DownloadFactory.getManager(mContext, DownloadFactory.Type.PERSIST).start(data);
+        mCurrent++;
     }
-
-//    private void updateProgressPerSecond(String name, int count, int total) {
-//        if (mForbidden)
-//            return;
-//        mForbidden = true;
-//        updateProgress(mType, name, count, total);
-//        mTimer = new Timer();
-//        mTimer.schedule(new TimerTask() {
-//            @Override
-//            public void run() {
-//                mForbidden = false;
-//            }
-//        }, 1000);
-//    }
-
 
     public boolean isDownloadDirectoryExist(Context context) {
         boolean isExist = true;

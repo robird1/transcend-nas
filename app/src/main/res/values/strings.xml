@@ -6,7 +6,7 @@
  Locale: en_US, English (USA)
  Tagged: Android_SJC
  Exported by: Translator TS
- Exported at: Wed, 01 Mar 2017 05:27:15 +0000
+ Exported at: Wed, 08 Mar 2017 02:35:07 +0000
 -->
 <resources>
     <string name="about">About</string>
@@ -110,7 +110,6 @@
     <string name="invalid_email">Invalid email address</string>
     <string name="invalid_message">Empty message</string>
     <string name="invalid_name">Invalid name</string>
-    <string name="ip_address">IP address</string>
     <string name="last_modified">Last modified</string>
     <string name="legal">Privacy</string>
     <string name="license_agreement_description">You must agree to the Transcend license agreement and privacy policy to continue.</string>

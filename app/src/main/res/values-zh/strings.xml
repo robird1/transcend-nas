@@ -6,7 +6,7 @@
  Locale: zh_TW, Chinese (Taiwan)
  Tagged: Android_SJC
  Exported by: Translator TS
- Exported at: Wed, 01 Mar 2017 05:27:15 +0000
+ Exported at: Wed, 08 Mar 2017 02:35:07 +0000
 -->
 <resources>
     <string name="about">關於</string>
@@ -110,7 +110,6 @@
     <string name="invalid_email">無效的電子信箱</string>
     <string name="invalid_message">意見欄位不能為空</string>
     <string name="invalid_name">無效的名稱</string>
-    <string name="ip_address">IP位址</string>
     <string name="last_modified">最後修改</string>
     <string name="legal">隱私</string>
     <string name="license_agreement_description">您必須同意授權合約才能繼續。</string>

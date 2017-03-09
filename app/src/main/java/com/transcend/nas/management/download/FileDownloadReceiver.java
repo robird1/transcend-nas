@@ -1,14 +1,11 @@
 package com.transcend.nas.management.download;
 
 import android.app.DownloadManager;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -16,15 +13,14 @@ import com.transcend.nas.NASPref;
 import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.common.CustomNotificationManager;
-import com.transcend.nas.management.FileManageActivity;
 
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import static com.transcend.nas.NASApp.getContext;
 import static com.transcend.nas.management.download.FileDownloadManager.mDownloadIdMap;
 import static com.transcend.nas.management.download.FileDownloadManager.mTaskIdMap;
+import static com.transcend.nas.management.download.FileDownloadManager.mTaskIdTotalMap;
 
 /**
  * Created by steve_su on 2017/1/17.
@@ -32,23 +28,19 @@ import static com.transcend.nas.management.download.FileDownloadManager.mTaskIdM
 
 public class FileDownloadReceiver extends BroadcastReceiver {
     private static final String TAG = FileDownloadReceiver.class.getSimpleName();
-    private Context mContext;
-    private long mDownloadId;
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d(TAG, "[Enter] onReceive");
-        mContext = context;
         String action = intent.getAction();
         if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
-            mDownloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L);
+            long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L);
             DownloadManager.Query query = new DownloadManager.Query();
-            query.setFilterById(mDownloadId);
+            query.setFilterById(downloadId);
             DownloadManager manager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
             Cursor c = manager.query(query);
             try {
                 if (c.moveToFirst()) {
-                    doAction(c);
+                    doAction(context, c, downloadId);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -63,25 +55,24 @@ public class FileDownloadReceiver extends BroadcastReceiver {
         }
     }
 
-    private void doAction(Cursor c) {
+    private void doAction(Context context, Cursor c, long downloadId) {
         switch (c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))) {
             case DownloadManager.STATUS_SUCCESSFUL:
-                Log.d(TAG, "[Enter] DownloadManager.STATUS_SUCCESSFUL");
                 String uri = c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
-                Log.d(TAG, "uri: " + uri);
-                if (uri.contains(NASUtils.getCacheFilesLocation(mContext))) {
-                    notifyOpenFileListener(uri);
+                Log.d(TAG, "[Enter] DownloadManager.STATUS_SUCCESSFUL : " + uri);
+                if (uri.contains(NASUtils.getCacheFilesLocation(context))) {
+                    notifyOpenFileListener(context, uri);
                 } else {
-                    checkNotifyService();
+                    checkNotifyService(context, downloadId);
                 }
                 break;
             case DownloadManager.STATUS_FAILED:
-                Log.d(TAG, "[Enter] DownloadManager.STATUS_FAILED");
-                Log.d(TAG, "reason: " + c.getString(c.getColumnIndex(DownloadManager.COLUMN_REASON)));
-
-                long id = DownloadFactory.getManager(mContext, DownloadFactory.Type.TEMPORARY).getDownloadId();
-                if (mDownloadId == id) {
-                    notifyOpenFileListener(null);
+                Log.d(TAG, "[Enter] DownloadManager.STATUS_FAILED : " + c.getInt(c.getColumnIndex(DownloadManager.COLUMN_REASON)));
+                long id = DownloadFactory.getManager(context, DownloadFactory.Type.TEMPORARY).getDownloadId();
+                if (id == downloadId) {
+                    notifyOpenFileListener(context, null);
+                } else {
+                    checkNotifyService(context, downloadId);
                 }
                 break;
             default:
@@ -91,34 +82,35 @@ public class FileDownloadReceiver extends BroadcastReceiver {
         }
     }
 
-    private void checkNotifyService() {
-        int taskId;
-        if (mDownloadIdMap.containsKey(mDownloadId)) {
-            taskId = mDownloadIdMap.get(mDownloadId);
-            mDownloadIdMap.remove(mDownloadId);
-        } else {
+    private void checkNotifyService(Context context, long downloadId) {
+        if (!mDownloadIdMap.containsKey(downloadId))
             return;
-        }
 
-        int remainTaskFiles;
-        if (mTaskIdMap.containsKey(taskId)) {
-            remainTaskFiles = mTaskIdMap.get(taskId) - 1;
-        } else {
+        int taskId = mDownloadIdMap.get(downloadId);
+        mDownloadIdMap.remove(downloadId);
+
+        int currentTaskCount = 1;
+        if (mTaskIdMap.containsKey(taskId))
+            currentTaskCount = mTaskIdMap.get(taskId) + 1;
+        mTaskIdMap.put(taskId, currentTaskCount);
+
+        if (!mTaskIdTotalMap.containsKey(taskId))
             return;
-        }
 
-        Log.d(TAG, "taskId: " + taskId + " remainTaskFiles: " + remainTaskFiles);
-        mTaskIdMap.put(taskId, remainTaskFiles);
+        int totalTaskCount = mTaskIdTotalMap.get(taskId);
+        Log.d(TAG, "taskId: " + taskId + ", progress : " + currentTaskCount + "/" + totalTaskCount);
 
-        if (remainTaskFiles == 0) {
-            invokeNotifyService(mContext.getString(R.string.download), mContext.getString(R.string.done), NASPref.getDownloadLocation(mContext), taskId);
+        if (currentTaskCount == totalTaskCount) {
+            invokeNotifyService(context, context.getString(R.string.download), context.getString(R.string.done), NASPref.getDownloadLocation(context), taskId);
+            Toast.makeText(context, context.getString(R.string.download) + " - " + context.getString(R.string.done), Toast.LENGTH_SHORT).show();
             mTaskIdMap.remove(taskId);
+            mTaskIdTotalMap.remove(taskId);
             showMap();
         }
     }
 
-    private void notifyOpenFileListener(String localUri) {
-        TempFileDownloadManager manager = (TempFileDownloadManager) DownloadFactory.getManager(mContext, DownloadFactory.Type.TEMPORARY);
+    private void notifyOpenFileListener(Context context, String localUri) {
+        TempFileDownloadManager manager = (TempFileDownloadManager) DownloadFactory.getManager(context, DownloadFactory.Type.TEMPORARY);
         TempFileDownloadManager.OpenFileListener listener = manager.getOpenFileListener();
         if (listener != null) {
             if (localUri != null) {
@@ -130,8 +122,8 @@ public class FileDownloadReceiver extends BroadcastReceiver {
 
     }
 
-    private void invokeNotifyService(String type, String result, String destination, int taskId) {
-        CustomNotificationManager.updateResult(getContext(), taskId, type, result, destination);
+    private void invokeNotifyService(Context context, String type, String result, String destination, int taskId) {
+        CustomNotificationManager.updateResult(context, taskId, type, result, destination);
     }
 
     private void showMap() {

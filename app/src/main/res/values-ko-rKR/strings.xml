@@ -6,7 +6,7 @@
  Locale: ko_KR, Korean
  Tagged: Android_SJC
  Exported by: Translator TS
- Exported at: Wed, 01 Mar 2017 05:27:15 +0000
+ Exported at: Wed, 08 Mar 2017 02:35:07 +0000
 -->
 <resources>
     <string name="about">약</string>
@@ -110,7 +110,6 @@
     <string name="invalid_email">유효하지 않은 메일 주소</string>
     <string name="invalid_message">비어있습니다.</string>
     <string name="invalid_name">유효하지 않은 이름</string>
-    <string name="ip_address">ip 주소</string>
     <string name="last_modified">최근 수정됨</string>
     <string name="legal">개인 정보</string>
     <string name="license_agreement_description">라인센스 계약서</string>

@@ -10,6 +10,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -211,8 +212,20 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
             getLoaderManager().restartLoader(LoaderID.TUTK_NAS_GET, args, this).forceLoad();
         } else {
             //local list
-            showListDialog(null);
-            getLoaderManager().restartLoader(LoaderID.NAS_LIST, null, this).forceLoad();
+
+            //get network status
+            boolean isWiFi = false;
+            ConnectivityManager mConnMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo info = mConnMgr.getActiveNetworkInfo();
+            if (info != null)
+                isWiFi = (info.getType() == ConnectivityManager.TYPE_WIFI);
+
+            if(isWiFi) {
+                showListDialog(null);
+                getLoaderManager().restartLoader(LoaderID.NAS_LIST, null, this).forceLoad();
+            } else {
+                showWifiNotificationDialog();
+            }
         }
     }
 
@@ -689,6 +702,23 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
             mLoginDialog.showProgress();
             startLoginLoader(args);
         }
+    }
+
+    private void showWifiNotificationDialog(){
+        Bundle value = new Bundle();
+        value.putString(NotificationDialog.DIALOG_MESSAGE, getString(R.string.wizard_wifi_info));
+        new NotificationDialog(this, value) {
+            @Override
+            public void onConfirm() {
+                Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
+                startActivity(intent);
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+        };
     }
 
     private void showNotificationDialog(final Bundle args) {

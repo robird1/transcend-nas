@@ -52,9 +52,9 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
         mSrcs = srcs;
         mDest = dest;
         mNotificationID = CustomNotificationManager.getInstance().queryNotificationID(this);
-        mType = getContext().getString(R.string.upload);
         mTotal = mSrcs.size();
         mCurrent = 0;
+        setType(getContext().getString(R.string.upload));
     }
 
     public LocalFileUploadLoader(Context context, List<String> srcs, String dest, boolean isOpenWithUpload) {

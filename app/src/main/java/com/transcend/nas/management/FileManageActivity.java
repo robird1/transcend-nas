@@ -774,7 +774,9 @@ public class FileManageActivity extends DrawerMenuActivity implements
                 updateScreen();
                 toggleDrawerCheckedItem();
             } else {
-                doRefresh();
+                if(mProgressView.isShown())
+                    doRefresh();
+
                 if (loader instanceof SmbAbstractLoader || loader instanceof LocalAbstractLoader) {
                     String type = null;
                     if (loader instanceof SmbAbstractLoader)
@@ -785,6 +787,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
                         Toast.makeText(FileManageActivity.this, type + " - " + getString(R.string.done), Toast.LENGTH_SHORT).show();
                     }
                 }
+
             }
         } else {
             if (LanCheckManager.getInstance().getLanConnect()) {
@@ -923,6 +926,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         if (mFileActionManager.isRemoteAction(path) && mCustomActionManager.doNasHashKeyTimeOutCheck(path)) {
             return;
         }
+        mProgressView.setVisibility(View.VISIBLE);
         mFileActionManager.list(path);
     }
 

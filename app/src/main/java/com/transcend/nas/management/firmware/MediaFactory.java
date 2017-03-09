@@ -23,6 +23,8 @@ import com.tutk.IOTC.P2PService;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
 
@@ -79,9 +81,33 @@ public class MediaFactory {
                 }
             }
 
-            if(forceLocal) {
+            String[] paths = filepath.replaceFirst("/", "").split("/");
+            int length = paths.length;
+            try {
+                String newPath = "";
+                for (int i = 0; i < length; i++) {
+                    if(paths[i].contains(" ")) {
+                        String[] tmp = paths[i].split(" ");
+                        String result = "";
+                        for(int j = 0 ; j < tmp.length ; j++) {
+                            if(j == 0)
+                                result = URLEncoder.encode(tmp[j], "UTF-8");
+                            else
+                                result += " " + URLEncoder.encode(tmp[j], "UTF-8");
+                        }
+                        newPath = newPath + "/" + result;
+                    } else {
+                        newPath = newPath + "/" + URLEncoder.encode(paths[i], "UTF-8");
+                    }
+                }
+                filepath = newPath;
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+
+            if (forceLocal) {
                 ServerInfo info = server.getServerInfo();
-                if(info != null)
+                if (info != null)
                     hostname = info.ipAddress;
             }
 

@@ -22,6 +22,8 @@ public abstract class NotificationDialog implements View.OnClickListener {
     public static String DIALOG_TITLE = "title";
     public static String DIALOG_MESSAGE = "message";
     public static String DIALOG_LAYOUT = "layout";
+    public static String DIALOG_NEGATIVE_TEXT = "negative";
+    public static String DIALOG_POSITIVE_TEXT = "positive";
 
     private AppCompatActivity mActivity;
     private AlertDialog mDialog;
@@ -29,6 +31,8 @@ public abstract class NotificationDialog implements View.OnClickListener {
     private Button mDlgBtnNeg;
     private String mTitle;
     private String mMessage;
+    private String mNegativeText;
+    private String mPositiveText;
     private int mLayoutID = 0;
 
     public NotificationDialog(Context context, Bundle args) {
@@ -40,6 +44,8 @@ public abstract class NotificationDialog implements View.OnClickListener {
         mTitle = args.getString(DIALOG_TITLE);
         mMessage = args.getString(DIALOG_MESSAGE);
         mLayoutID = args.getInt(DIALOG_LAYOUT);
+        mNegativeText = args.getString(DIALOG_NEGATIVE_TEXT);
+        mPositiveText = args.getString(DIALOG_POSITIVE_TEXT);
         initDialog(showPositiveButton, showNegativeButton);
     }
 
@@ -57,11 +63,17 @@ public abstract class NotificationDialog implements View.OnClickListener {
             builder.setMessage(mMessage);
 
         if(showNegativeButton) {
-            builder.setNegativeButton(R.string.cancel, null);
+            if(mNegativeText != null && !mNegativeText.equals(""))
+                builder.setNegativeButton(mNegativeText, null);
+            else
+                builder.setNegativeButton(R.string.cancel, null);
         }
 
         if(showPositiveButton) {
-            builder.setPositiveButton(R.string.ok, null);
+            if(mPositiveText != null && !mPositiveText.equals(""))
+                builder.setPositiveButton(mPositiveText, null);
+            else
+                builder.setPositiveButton(R.string.ok, null);
         }
 
         mDialog = builder.show();

@@ -6,7 +6,7 @@
  Locale: ja_JP, Japanese
  Tagged: Android_SJC
  Exported by: Translator TS
- Exported at: Wed, 01 Mar 2017 05:27:15 +0000
+ Exported at: Wed, 08 Mar 2017 02:35:07 +0000
 -->
 <resources>
     <string name="about">情報</string>
@@ -110,7 +110,6 @@
     <string name="invalid_email">無効なメールアドレスです。</string>
     <string name="invalid_message">メッセージなし</string>
     <string name="invalid_name">無効な名前</string>
-    <string name="ip_address">IPアドレス</string>
     <string name="last_modified">最終編集日</string>
     <string name="legal">プライバシー</string>
     <string name="license_agreement_description">続けるにはトランセンドのライセンス契約および個人情報保護に関する方針に同意いただく必要があります。</string>

@@ -19,6 +19,7 @@ import com.transcend.nas.common.CustomNotificationManager;
 import com.transcend.nas.management.SmbAbstractLoader;
 import com.transcend.nas.management.download.AbstractDownloadManager;
 import com.transcend.nas.management.download.DownloadFactory;
+import com.transcend.nas.management.download.FileDownloadManager;
 import com.tutk.IOTC.P2PService;
 
 import java.io.FileNotFoundException;
@@ -43,10 +44,9 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
         mSrcs = srcs;
         mDest = dest;
         mNotificationID = CustomNotificationManager.getInstance().queryNotificationID(this);
-        mType = getContext().getString(R.string.download);
-        mTotal = mSrcs.size();
         mCurrent = 0;
         mDestFileItem = destFileItem;
+        setType(getContext().getString(R.string.download));
     }
 
     @Override
@@ -56,6 +56,9 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
             return download();
         } catch (Exception e) {
             e.printStackTrace();
+            FileDownloadManager manager = (FileDownloadManager) DownloadFactory.getManager(mActivity, DownloadFactory.Type.PERSIST);
+            if (manager != null)
+                manager.cancelByNotificationId(mNotificationID);
             setException(e);
             updateResult(mType, getContext().getString(R.string.error), mDest);
         }
@@ -63,24 +66,39 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
     }
 
     private boolean download() throws IOException {
+        FileDownloadManager manager = (FileDownloadManager) DownloadFactory.getManager(mActivity, DownloadFactory.Type.PERSIST);
+        if (manager != null)
+            manager.setTotalTaskByNotificationId(mNotificationID, -1);
+
         for (String path : mSrcs) {
             SmbFile source = new SmbFile(getSmbUrl(path));
             if (source.isDirectory())
                 downloadDirectoryTask(mActivity, source, mDestFileItem);
             else
                 downloadFileTask(mActivity, source, mDestFileItem);
-            mCurrent++;
         }
-        updateResult(mType, getContext().getString(R.string.done), mDest);
+
+        if (mCurrent == 0) {
+            if (manager != null)
+                manager.cancelByNotificationId(mNotificationID);
+            updateResult(mType, getContext().getString(R.string.done), mDest);
+        } else {
+            if (manager != null)
+                manager.setTotalTaskByNotificationId(mNotificationID, mCurrent);
+        }
         return true;
     }
 
-    private void downloadDirectoryTask(Context context, SmbFile srcFileItem, DocumentFile destFileItem) throws IOException {
+    private void downloadDirectoryTask(Context context, SmbFile srcFileItem, DocumentFile
+            destFileItem) throws IOException {
         String dirName = createLocalUniqueName(srcFileItem, getPath(context, destFileItem.getUri()));
         DocumentFile destDirectory = destFileItem.createDirectory(dirName);
         SmbFile[] files = srcFileItem.listFiles();
         for (SmbFile file : files) {
-            Log.d(TAG, "file.getPath(): "+ file.getPath());
+            if (file.isHidden())
+                continue;
+
+            Log.d(TAG, "file.getPath(): " + file.getPath());
             if (file.isDirectory()) {
                 downloadDirectoryTask(mActivity, file, destDirectory);
             } else {
@@ -90,14 +108,12 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
     }
 
     private void downloadFileTask(Context context, SmbFile srcFileItem, DocumentFile destFileItem) throws IOException {
-        Log.d(TAG, "[Enter] downloadFileTask()");
         String destPath = getPath(context, destFileItem.getUri());
         String fileName = createLocalUniqueName(srcFileItem, destPath);
         downloadFile(context, srcFileItem, destPath, fileName);
     }
 
     public boolean downloadFile(Context context, SmbFile srcFileItem, String destPath, String uniqueName) throws IOException {
-        Log.d(TAG, "[Enter] downloadFile");
         if (srcFileItem.isFile()) {
             String hostname = P2PService.getInstance().getIP(mServer.getHostname(), P2PService.P2PProtocalType.SMB);
             String srcPath = srcFileItem.getPath().split(hostname)[1];
@@ -107,6 +123,7 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
             data.putString(AbstractDownloadManager.KEY_FILE_NAME, uniqueName);
             data.putInt(AbstractDownloadManager.KEY_TASK_ID, mNotificationID);
             DownloadFactory.getManager(context, DownloadFactory.Type.PERSIST).start(data);
+            mCurrent++;
             return true;
         } else if (srcFileItem.isDirectory()) {
             return true;
@@ -121,7 +138,7 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
      * other file-based ContentProviders.
      *
      * @param context The context.
-     * @param uri The Uri to query.
+     * @param uri     The Uri to query.
      * @author paulburke
      */
     @TargetApi(19)
@@ -141,12 +158,12 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
                 if ("primary".equalsIgnoreCase(type)) {
                     return Environment.getExternalStorageDirectory() + "/" + split[1];
                 } else {
-                    Log.d(TAG, "split.length: "+ split.length);
+                    //Log.d(TAG, "split.length: " + split.length);
                     String path = NASUtils.getSDLocation(context).concat("/");
                     if (split.length != 1) {
                         path = path.concat(split[1]);
                     }
-                    Log.d(TAG, "destination path: "+ path);
+                    Log.d(TAG, "destination path: " + path);
                     return path;
                 }
             }
@@ -175,7 +192,7 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
                 }
 
                 final String selection = "_id=?";
-                final String[] selectionArgs = new String[] {
+                final String[] selectionArgs = new String[]{
                         split[1]
                 };
 
@@ -198,14 +215,14 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
      * Get the value of the data column for this Uri. This is useful for
      * MediaStore Uris, and other file-based ContentProviders.
      *
-     * @param context The context.
-     * @param uri The Uri to query.
-     * @param selection (Optional) Filter used in the query.
+     * @param context       The context.
+     * @param uri           The Uri to query.
+     * @param selection     (Optional) Filter used in the query.
      * @param selectionArgs (Optional) Selection arguments used in the query.
      * @return The value of the _data column, which is typically a file path.
      */
     public String getDataColumn(Context context, Uri uri, String selection,
-                                       String[] selectionArgs) {
+                                String[] selectionArgs) {
 
         Cursor cursor = null;
         final String column = "_data";
