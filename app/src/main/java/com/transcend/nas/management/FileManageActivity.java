@@ -449,6 +449,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
 
     private void initProgressView() {
         mProgressView = (RelativeLayout) findViewById(R.id.main_progress_view);
+        mProgressView.setVisibility(View.VISIBLE);
         mActionHelper.setProgressLayout(mProgressView);
     }
 
@@ -774,11 +775,11 @@ public class FileManageActivity extends DrawerMenuActivity implements
                 updateScreen();
                 toggleDrawerCheckedItem();
             } else {
-                if(mProgressView.isShown())
+                if (mProgressView.isShown())
                     doRefresh();
 
                 if (loader instanceof SmbAbstractLoader || loader instanceof LocalAbstractLoader) {
-                    String type = null;
+                    String type;
                     if (loader instanceof SmbAbstractLoader)
                         type = ((SmbAbstractLoader) loader).getType();
                     else
@@ -787,7 +788,6 @@ public class FileManageActivity extends DrawerMenuActivity implements
                         Toast.makeText(FileManageActivity.this, type + " - " + getString(R.string.done), Toast.LENGTH_SHORT).show();
                     }
                 }
-
             }
         } else {
             if (LanCheckManager.getInstance().getLanConnect()) {
@@ -798,7 +798,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
                     Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
                 }
             } else {
-                if (mCustomActionManager.doNasTUTKLink(loader)) {
+                if (mCustomActionManager.getRecordCommandID() > 0 && mCustomActionManager.doNasTUTKLink(loader)) {
                     //Toast.makeText(this, getString(R.string.try_remote_access), Toast.LENGTH_SHORT).show();
                     return;
                 } else {
@@ -926,7 +926,6 @@ public class FileManageActivity extends DrawerMenuActivity implements
         if (mFileActionManager.isRemoteAction(path) && mCustomActionManager.doNasHashKeyTimeOutCheck(path)) {
             return;
         }
-        mProgressView.setVisibility(View.VISIBLE);
         mFileActionManager.list(path);
     }
 

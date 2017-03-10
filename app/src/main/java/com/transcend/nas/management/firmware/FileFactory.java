@@ -13,9 +13,7 @@ import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASUtils;
-import com.transcend.nas.R;
 import com.transcend.nas.management.FileInfo;
-import com.transcend.nas.management.externalstorage.ExternalStorageController;
 import com.tutk.IOTC.P2PService;
 
 import java.io.File;
@@ -177,6 +175,10 @@ public class FileFactory {
                         filepath = "/dav" + newPath;
                     }
                 }
+
+                String convert = NASUtils.encodeString(filepath);
+                if(convert != null && !"".equals(convert))
+                    filepath = convert;
 
                 if(forceLocal) {
                     ServerInfo info = server.getServerInfo();

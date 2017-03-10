@@ -190,11 +190,13 @@ public class CustomActionManager extends AbstractActionManager {
         boolean record = false;
         for (int cmd : RETRY_CMD) {
             if (id == cmd) {
-                boolean retry = args.getBoolean("retry");
-                if (args != null && !retry) {
-                    mPreviousLoaderID = id;
-                    mPreviousLoaderArgs = args;
-                    record = true;
+                if (args != null) {
+                    boolean retry = args.getBoolean("retry" , false);
+                    if(!retry) {
+                        mPreviousLoaderID = id;
+                        mPreviousLoaderArgs = args;
+                        record = true;
+                    }
                 }
                 break;
             }

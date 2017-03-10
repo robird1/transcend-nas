@@ -7,6 +7,8 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
+import com.transcend.nas.service.LanCheckManager;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -47,6 +49,7 @@ public class NASListLoader extends AsyncTaskLoader<Boolean> {
     private JmDNS mJmDNS;
     private ArrayList<HashMap<String, String>> mNASList;
     private int mRetry = 1;
+    private boolean mEnableAndroidDiscovery = false;
     private Context mContext;
 
     public NASListLoader(Context context) {
@@ -54,6 +57,11 @@ public class NASListLoader extends AsyncTaskLoader<Boolean> {
         mWifiMgr = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         mLock = mWifiMgr.createMulticastLock(TAG);
         mNASList = new ArrayList<HashMap<String, String>>();
+    }
+
+    public NASListLoader(Context context, boolean enableAndroidDiscovery) {
+        this(context);
+        mEnableAndroidDiscovery = enableAndroidDiscovery;
     }
 
     public NASListLoader(Context context, int retry) {
@@ -65,6 +73,9 @@ public class NASListLoader extends AsyncTaskLoader<Boolean> {
     @Override
     public Boolean loadInBackground() {
         Log.w(TAG, "loadInBackground");
+        if(mEnableAndroidDiscovery)
+            LanCheckManager.getInstance().startAndroidDiscovery();
+
         ConnectivityManager connectivityManager = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = connectivityManager.getActiveNetworkInfo();
         if (info != null && info.isAvailable()) {

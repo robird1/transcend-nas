@@ -301,8 +301,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                 mProgressView.setVisibility(View.VISIBLE);
                 return new TutkLinkNasLoader(this, args);
             case LoaderID.NAS_LIST:
-                LanCheckManager.getInstance().startAndroidDiscovery();
-                return new NASListLoader(this);
+                return new NASListLoader(this, true);
             case LoaderID.WIZARD:
                 mProgressView.setVisibility(View.VISIBLE);
                 return new WizardCheckLoader(this, args);

@@ -7,6 +7,7 @@ import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.common.HttpRequestFactory;
 import com.transcend.nas.management.FileInfo;
 import com.tutk.IOTC.P2PService;
@@ -136,6 +137,10 @@ public class TwonkyManager {
         String realPath = ShareFolderManager.getInstance().getRealPath(path);
         if(path.equals(realPath) && path.startsWith("/" + username + "/"))
             realPath = "/home" + path;
+
+        String convert = NASUtils.encodeString(realPath);
+        if(convert != null && !"".equals(convert))
+            realPath = convert;
 
         if (thumbnail)
             value += realPath;

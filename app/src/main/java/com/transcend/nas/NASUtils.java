@@ -26,7 +26,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -290,6 +292,35 @@ public final class NASUtils {
             context.startActivity(Intent.createChooser(shareIntent, context.getResources().getText(R.string.share)));
             Log.w(TAG, "doShare: " + files.size() + " item(s)");
         }
+    }
+
+    public static String encodeString(String origPath){
+        String encodePath = "";
+        String[] paths = origPath.replaceFirst("/", "").split("/");
+        int length = paths.length;
+        try {
+            String newPath = "";
+            for (int i = 0; i < length; i++) {
+                if(paths[i].contains(" ")) {
+                    String[] tmp = paths[i].split(" ");
+                    String result = "";
+                    for(int j = 0 ; j < tmp.length ; j++) {
+                        if(j == 0)
+                            result = URLEncoder.encode(tmp[j], "UTF-8");
+                        else
+                            result += " " + URLEncoder.encode(tmp[j], "UTF-8");
+                    }
+                    newPath = newPath + "/" + result;
+                } else {
+                    newPath = newPath + "/" + URLEncoder.encode(paths[i], "UTF-8");
+                }
+            }
+            encodePath = newPath;
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        return encodePath;
     }
 
 }

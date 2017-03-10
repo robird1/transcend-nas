@@ -41,7 +41,6 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
     private boolean isInit = false;
 
     public LanCheckManager() {
-        mNsdManager = (NsdManager) NASApp.getContext().getSystemService(Context.NSD_SERVICE);
         mServiceList = new HashMap<>();
         mServiceInfoList = new ArrayList<>();
     }
@@ -135,6 +134,9 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
     public void startAndroidDiscovery() {
         mServiceList.clear();
         mServiceInfoList.clear();
+        if(mNsdManager == null)
+            mNsdManager = (NsdManager) NASApp.getContext().getSystemService(Context.NSD_SERVICE);
+
         ConnectivityManager connectivityManager = (ConnectivityManager) NASApp.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = connectivityManager.getActiveNetworkInfo();
         if (info != null && info.isAvailable()) {
@@ -144,7 +146,8 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
                     stopAndroidDiscovery();  // Cancel any existing discovery request
                     initializeResolveListener();
                     initializeDiscoveryListener();
-                    mNsdManager.discoverServices(TYPE, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
+                    if(mNsdManager != null)
+                        mNsdManager.discoverServices(TYPE, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
                     break;
             }
         }
@@ -153,7 +156,8 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
     public void stopAndroidDiscovery() {
         if (mDiscoveryListener != null) {
             try {
-                mNsdManager.stopServiceDiscovery(mDiscoveryListener);
+                if(mNsdManager != null)
+                    mNsdManager.stopServiceDiscovery(mDiscoveryListener);
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -183,7 +187,8 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
                     mServiceInfoList.add(service);
                     if (!isStartResolve) {
                         isStartResolve = true;
-                        mNsdManager.resolveService(service, mResolveListener);
+                        if(mNsdManager != null)
+                            mNsdManager.resolveService(service, mResolveListener);
                     }
                 }
             }
@@ -233,7 +238,8 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
                 if (size > 0) {
                     mServiceInfoList.remove(0);
                     if (size - 1 > 0) {
-                        mNsdManager.resolveService(mServiceInfoList.get(0), mResolveListener);
+                        if(mNsdManager != null)
+                            mNsdManager.resolveService(mServiceInfoList.get(0), mResolveListener);
                         return;
                     }
                 }

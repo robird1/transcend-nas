@@ -81,29 +81,9 @@ public class MediaFactory {
                 }
             }
 
-            String[] paths = filepath.replaceFirst("/", "").split("/");
-            int length = paths.length;
-            try {
-                String newPath = "";
-                for (int i = 0; i < length; i++) {
-                    if(paths[i].contains(" ")) {
-                        String[] tmp = paths[i].split(" ");
-                        String result = "";
-                        for(int j = 0 ; j < tmp.length ; j++) {
-                            if(j == 0)
-                                result = URLEncoder.encode(tmp[j], "UTF-8");
-                            else
-                                result += " " + URLEncoder.encode(tmp[j], "UTF-8");
-                        }
-                        newPath = newPath + "/" + result;
-                    } else {
-                        newPath = newPath + "/" + URLEncoder.encode(paths[i], "UTF-8");
-                    }
-                }
-                filepath = newPath;
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+            String convert = NASUtils.encodeString(filepath);
+            if(convert != null && !"".equals(convert))
+                filepath = convert;
 
             if (forceLocal) {
                 ServerInfo info = server.getServerInfo();
