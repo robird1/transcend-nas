@@ -61,13 +61,13 @@
                 android:layout_height="300dp"
                 android:scaleType="fitCenter"
                 android:layout_gravity="center_horizontal"
-                android:src="@drawable/image_folder_empty" />
+                android:src="@drawable/image_nas_empty" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:text="@string/empty_folder" />
+                android:text="@string/search_result_empty" />
 
         </LinearLayout>
 

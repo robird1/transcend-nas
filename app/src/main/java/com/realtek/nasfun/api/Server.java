@@ -241,10 +241,13 @@ public class Server {
     public boolean connect(boolean checkTutk) {
         Log.d(TAG, "Connecting to server:" + hostname);
         if(NASPref.useConcurrentLogin) {
-            isConnected = connect2(checkTutk);
+            isConnected = connect2();
         } else {
             isConnected = (doGenHash() && doLogin() && doGetServerInfo(hostname));
         }
+
+        if(isConnected && checkTutk)
+            isConnected = checkTutkuid();
 
         if (isConnected) {
             Log.i(TAG, "Login to " + hostname + " success");
@@ -255,7 +258,7 @@ public class Server {
         return isConnected;
     }
 
-    public boolean connect2(boolean checkTutk) {
+    public boolean connect2() {
         mGetTmpInfoSuccess = false;
         Thread getInfo = new Thread(new Runnable() {
             @Override

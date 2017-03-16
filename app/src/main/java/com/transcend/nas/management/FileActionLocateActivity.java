@@ -24,6 +24,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -65,6 +66,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
     private AppCompatSpinner mDropdown;
     private FileManageDropdownAdapter mDropdownAdapter;
     private RecyclerView mRecyclerView;
+    private LinearLayout mRecyclerEmptyView;
     private FileManageRecyclerAdapter mRecyclerAdapter;
     private FloatingActionButton mFabControl;
     private RelativeLayout mProgressView;
@@ -157,6 +159,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setAdapter(mRecyclerAdapter);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        mRecyclerEmptyView = (LinearLayout) findViewById(R.id.locate_recycler_empty_view);
     }
 
     private void initFabs() {
@@ -411,6 +414,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
                 Toast.makeText(this, getString(R.string.error), Toast.LENGTH_SHORT).show();
         }
 
+        checkEmptyView();
         mProgressView.setVisibility(View.INVISIBLE);
     }
 
@@ -480,6 +484,10 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         mDropdownAdapter.notifyDataSetChanged();
         mRecyclerAdapter.updateList(mFileList);
         mRecyclerAdapter.notifyDataSetChanged();
+    }
+
+    private void checkEmptyView() {
+        mRecyclerEmptyView.setVisibility((mFileList != null && mFileList.size() > 0) ? View.GONE : View.VISIBLE);
     }
 
     private void resizeToolbar() {

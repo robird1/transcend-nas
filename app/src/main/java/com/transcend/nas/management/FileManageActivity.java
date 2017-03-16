@@ -410,9 +410,11 @@ public class FileManageActivity extends DrawerMenuActivity implements
     private void initDropdown() {
         mDropdownAdapter = new FileManageDropdownAdapter(this);
         mDropdownAdapter.setOnDropdownItemSelectedListener(this);
+        mDropdownAdapter.updateList(mPath, mFileActionManager.getServiceMode());
         mDropdown = (AppCompatSpinner) findViewById(R.id.main_dropdown);
         mDropdown.setAdapter(mDropdownAdapter);
         mDropdown.setDropDownVerticalOffset(10);
+        mDropdownAdapter.notifyDataSetChanged();
     }
 
     private void initRecyclerView() {
@@ -1016,7 +1018,6 @@ public class FileManageActivity extends DrawerMenuActivity implements
         mRecyclerAdapter.updateList(mFileList);
         mRecyclerAdapter.notifyDataSetChanged();
         checkTopView();
-        checkEmptyView();
         invalidateOptionsMenu();
     }
 
