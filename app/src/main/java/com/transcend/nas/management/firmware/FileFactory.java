@@ -2,6 +2,7 @@ package com.transcend.nas.management.firmware;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.media.Image;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.ImageView;
@@ -122,8 +123,10 @@ public class FileFactory {
                 //MICRO_KIND, size: 96 x 96 thumbnail
                 //Bitmap bmThumbnail = ThumbnailUtils.createVideoThumbnail(path, MediaStore.Video.Thumbnails.MICRO_KIND);
                 //view.setImageBitmap(bmThumbnail);
+                ImageLoader.getInstance().cancelDisplayTask(view);
             } else if(type.equals(FileInfo.TYPE.MUSIC)){
                 //TODO : load music thumbnail
+                ImageLoader.getInstance().cancelDisplayTask(view);
             }
         } else {
             ImageLoader.getInstance().displayImage(url, view);

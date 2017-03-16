@@ -1,6 +1,7 @@
 package com.transcend.nas.management;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -24,6 +25,7 @@ public class SmbFileListLoader extends SmbAbstractLoader {
 
     private ArrayList<FileInfo> mFileList;
     private String mPath;
+    private boolean mFinish = true;
 
     public SmbFileListLoader(Context context, String path) {
         super(context);
@@ -33,9 +35,42 @@ public class SmbFileListLoader extends SmbAbstractLoader {
 
     @Override
     public Boolean loadInBackground() {
+        if (mPath.equals(NASApp.ROOT_SMB)) {
+            final boolean inShareFolderLifeCycle = ShareFolderManager.getInstance().checkMapLifeCycle();
+            final boolean inTwonkyLifeCycle = TwonkyManager.getInstance().checkLifeCycle();
+            if(!inShareFolderLifeCycle || !inTwonkyLifeCycle) {
+                mFinish = false;
+                Thread mThread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //shared folder is relative path, we need to get the real path.
+                        if (!inShareFolderLifeCycle)
+                            ShareFolderManager.getInstance().updateSharedFolder();
+
+                        //update twonky image
+                        if (!inTwonkyLifeCycle)
+                            TwonkyManager.getInstance().updateTwonky();
+
+                        mFinish = true;
+                    }
+                });
+                mThread.start();
+            }
+        }
+
         try {
             super.loadInBackground();
-            return updateFileList();
+            boolean result = updateFileList();
+            while (!mFinish) {
+                Thread.sleep(200);
+            }
+
+            if (mPath.equals(NASApp.ROOT_SMB)) {
+                //fix bug, lost shared folder problem
+                checkSharedFolderList();
+            }
+
+            return result;
         } catch (Exception e) {
             e.printStackTrace();
             setException(e);
@@ -63,19 +98,6 @@ public class SmbFileListLoader extends SmbAbstractLoader {
             mFileList.add(fileInfo);
         }
         Log.w(TAG, "mFileList size: " + mFileList.size());
-
-        if (mPath.equals(NASApp.ROOT_SMB)) {
-            //shared folder is relative path, we need to get the real path.
-            ShareFolderManager.getInstance().updateSharedFolder();
-
-            //fix bug, lost shared folder problem
-            checkSharedFolderList();
-
-            //update twonky image
-            TwonkyManager.getInstance().updateTwonky(mPath);
-        }
-
-
         return true;
     }
 

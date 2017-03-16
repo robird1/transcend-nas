@@ -53,12 +53,10 @@ public class ShareFolderManager {
     }
 
     public void updateSharedFolder() {
-        if (!checkMapLifeCycle()) {
-            cleanRealPathMap();
-            if(getSharedList()) {
-                Log.d(TAG, "shared folder map update success");
-                mMapLifeCycle = defaultLifeCycle;
-            }
+        cleanRealPathMap();
+        if (getSharedList()) {
+            Log.d(TAG, "shared folder map update success");
+            mMapLifeCycle = defaultLifeCycle;
         }
         Log.d(TAG, "shared folder map size : " + getMapSize());
     }

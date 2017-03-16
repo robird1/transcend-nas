@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.realtek.nasfun.HttpHelper;
 
 import com.realtek.nasfun.api.CGIResponse.Item;
+import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.tutk.IOTC.P2PService;
 
@@ -176,6 +177,8 @@ public class Server {
     //int displayName = ServerType.UNDEFINITION.getDisplayNameRes();
     int firmwareType = -1;
     ServerInfo info = null;
+    ServerInfo tmpInfo = null;
+    private boolean mGetTmpInfoSuccess = false;
     private boolean isConnected = false;
 
     //Nas Server support functionalities
@@ -237,15 +240,38 @@ public class Server {
      */
     public boolean connect(boolean checkTutk) {
         Log.d(TAG, "Connecting to server:" + hostname);
-
-        isConnected = (doGenHash() && doLogin() && doGetServerInfo(hostname));
-        if (isConnected && checkTutk)
-            isConnected = isConnected && checkTutkuid();
+        if(NASPref.useConcurrentLogin) {
+            isConnected = connect2(checkTutk);
+        } else {
+            isConnected = (doGenHash() && doLogin() && doGetServerInfo(hostname));
+        }
 
         if (isConnected) {
             Log.i(TAG, "Login to " + hostname + " success");
         } else {
             Log.i(TAG, "Login to " + this + " fail");
+        }
+
+        return isConnected;
+    }
+
+    public boolean connect2(boolean checkTutk) {
+        mGetTmpInfoSuccess = false;
+        Thread getInfo = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mGetTmpInfoSuccess = doGetTmpServerInfo(hostname);
+            }
+        });
+        getInfo.start();
+
+        isConnected = (doGenHash() && doLogin());
+        if(isConnected) {
+            if (mGetTmpInfoSuccess) {
+                info = tmpInfo;
+            } else {
+                isConnected = doGetServerInfo(hostname);
+            }
         }
 
         return isConnected;
@@ -1511,6 +1537,65 @@ public class Server {
                 Log.d(TAG, info.toString());
                 // check info
                 if (info.hardware != null) {
+                    isSuccess = true;
+                } else {
+                    break;
+                }
+                // use ServerInfo to set firmware
+                // but for StoreJet Cloud, we don't need to check firmwareType
+                // isSuccess = setFirmwareType();
+                // for StoreJet Cloud, we don't need get server profile
+                //getServerProfile();
+            } catch (ClientProtocolException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            } finally {
+                if (inputStream != null) {
+                    try {
+                        inputStream.close();
+                    } catch (IOException e) {
+                        isSuccess = false;
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } while (false);
+        return isSuccess;
+    }
+
+    public boolean doGetTmpServerInfo(String hostname) {
+        boolean isSuccess = false;
+        tmpInfo = null;
+        InputStream inputStream = null;
+        String commandURL = "http://" + hostname + NAS_GET_INFO;
+        DefaultHttpClient httpClient = HttpClientManager.getClient();
+
+        do {
+            try {
+                Log.d(TAG, "Get " + commandURL);
+                HttpGet httpGet = new HttpGet(commandURL);
+                HttpResponse httpResponse;
+                httpResponse = httpClient.execute(httpGet);
+                if (httpResponse == null) {
+                    Log.e(TAG, "httpResponse is null");
+                    break;
+                }
+                HttpEntity httpEntity = httpResponse.getEntity();
+                inputStream = httpEntity.getContent();
+                String inputEncoding = EntityUtils.getContentCharSet(httpEntity);
+                if (inputEncoding == null) {
+                    inputEncoding = HTTP.DEFAULT_CONTENT_CHARSET;
+                }
+
+                // Get server information from response
+                tmpInfo = new ServerInfo();
+                tmpInfo.parse(inputStream, inputEncoding);
+                Log.d(TAG, tmpInfo.toString());
+                // check info
+                if (tmpInfo.hardware != null) {
                     isSuccess = true;
                 } else {
                     break;

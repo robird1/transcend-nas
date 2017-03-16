@@ -63,7 +63,7 @@ public class TwonkyManager {
     }
 
     public boolean initTwonky() {
-        if(NASPref.useTwonkyServer) {
+        if (NASPref.useTwonkyServer) {
             String firmware = NASPref.defaultFirmwareVersion;
             Server server = ServerManager.INSTANCE.getCurrentServer();
             ServerInfo info = server.getServerInfo();
@@ -94,24 +94,22 @@ public class TwonkyManager {
         }
     }
 
-    public void updateTwonky(String path) {
+    public void updateTwonky() {
         if (!useTwonkyServer)
             return;
 
-        if (path.equals(NASApp.ROOT_SMB) && !checkLifeCycle()) {
-            Server server = ServerManager.INSTANCE.getCurrentServer();
-            String username = server.getUsername();
-            List<String> smbSharedList = new ArrayList<>();
-            //add current user's home folder
-            smbSharedList.add("/home/" + username + "/");
-            //add other smb shared folder
-            List<String> realPathList = ShareFolderManager.getInstance().getAllValue();
-            for (String realPath : realPathList)
-                smbSharedList.add(realPath);
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        String username = server.getUsername();
+        List<String> smbSharedList = new ArrayList<>();
+        //add current user's home folder
+        smbSharedList.add("/home/" + username + "/");
+        //add other smb shared folder
+        List<String> realPathList = ShareFolderManager.getInstance().getAllValue();
+        for (String realPath : realPathList)
+            smbSharedList.add(realPath);
 
-            addTwonkySharedFolder(smbSharedList);
-            //doTwonkyRescan(false);
-        }
+        addTwonkySharedFolder(smbSharedList);
+        //doTwonkyRescan(false);
 
         //old version
         //startTwonkyParser(mPath, 0, 100);
@@ -135,20 +133,19 @@ public class TwonkyManager {
         Server server = ServerManager.INSTANCE.getCurrentServer();
         String username = server.getUsername();
         String realPath = ShareFolderManager.getInstance().getRealPath(path);
-        if(path.equals(realPath) && path.startsWith("/" + username + "/"))
+        if (path.equals(realPath) && path.startsWith("/" + username + "/"))
             realPath = "/home" + path;
 
         String convert = NASUtils.encodeString(realPath);
-        if(convert != null && !"".equals(convert))
+        if (convert != null && !"".equals(convert))
             realPath = convert;
 
         if (thumbnail)
-            value += realPath;
+            value += realPath + "&scale=256x256";
         else
             value += realPath + "&scale=orig";
         return value;
     }
-
 
 
     private boolean addTwonkySharedFolder(List<String> lists) {
@@ -252,7 +249,7 @@ public class TwonkyManager {
         return result;
     }
 
-    public String doTwonkyRescanFile(String path){
+    public String doTwonkyRescanFile(String path) {
         Log.d(TAG, "twonky rescan file : " + path);
         if (!useTwonkyServer || !useTwonkyRescanFile)
             return null;
@@ -266,7 +263,7 @@ public class TwonkyManager {
         Server server = ServerManager.INSTANCE.getCurrentServer();
         String username = server.getUsername();
         String realPath = ShareFolderManager.getInstance().getRealPath(path);
-        if(path.equals(realPath) && path.startsWith("/" + username + "/"))
+        if (path.equals(realPath) && path.startsWith("/" + username + "/"))
             realPath = "/home" + path;
         value += realPath;
         String result = HttpRequestFactory.doGetRequest(value, false);

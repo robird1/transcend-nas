@@ -21,9 +21,11 @@ public class NASPref {
     public static final boolean useDefaultDownloadFolder = true;
     public static final boolean useNewLoginFlow = true;
     public static final boolean useFacebookLogin = true;
+    public static final boolean useConcurrentLogin = true;
     public static final int useTwonkyMinFirmwareVersion = 20161122;
     public static boolean useTwonkyServer = true;
     public static boolean useSwitchNas = false;
+
 
     public enum Sort {
         TYPE,
