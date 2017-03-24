@@ -64,7 +64,7 @@ public class LoginActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Boolean>,
         View.OnClickListener {
 
-    private static final int FB_PROFILE_PHOTO = 999;
+    static final int FB_PROFILE_PHOTO = 999;
 
     public static final int REQUEST_CODE = LoginActivity.class.hashCode() & 0xFFFF;
     public static final String TAG = LoginActivity.class.getSimpleName();

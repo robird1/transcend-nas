@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary">
+
+    <com.transcend.nas.view.AspectRatioImageView
+        android:id="@+id/background_image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:adjustViewBounds="true" />
+
+    <!--<RelativeLayout-->
+        <!--android:id="@+id/login_layout"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:visibility="visible">-->
+
+        <!--<LinearLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_centerInParent="true"-->
+            <!--android:orientation="vertical"-->
+            <!--android:paddingBottom="60dp"-->
+            <!--android:paddingLeft="30dp"-->
+            <!--android:paddingRight="30dp">-->
+
+            <!--<RelativeLayout-->
+                <!--android:id="@+id/login_fb_layout"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginLeft="24dp"-->
+                <!--android:layout_marginRight="24dp"-->
+                <!--android:layout_marginTop="200dp">-->
+
+                <!--<Button-->
+                    <!--android:id="@+id/login_by_facebook"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_gravity="center_horizontal"-->
+                    <!--android:background="@drawable/button_normal_blue"-->
+                    <!--android:text="@string/sign_up_by_invite"-->
+                    <!--android:textAllCaps="false"-->
+                    <!--android:textSize="18sp" />-->
+            <!--</RelativeLayout>-->
+
+            <!--&lt;!&ndash;<RelativeLayout&ndash;&gt;-->
+                <!--&lt;!&ndash;android:layout_width="wrap_content"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:layout_marginLeft="24dp"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:layout_marginRight="24dp"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:layout_marginTop="30dp">&ndash;&gt;-->
+
+                <!--&lt;!&ndash;<Button&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:id="@+id/login_by_email"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_width="match_parent"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_gravity="center_horizontal"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:background="@drawable/button_normal"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:text="@string/sign_in_by_email"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:textAllCaps="false"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:textSize="18sp" />&ndash;&gt;-->
+            <!--&lt;!&ndash;</RelativeLayout>&ndash;&gt;-->
+            <!--<RelativeLayout-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:paddingRight="20dp"-->
+                <!--android:paddingLeft="20dp"-->
+                <!--android:layout_marginTop="30dp"-->
+                <!--android:paddingBottom="@dimen/activity_vertical_margin"-->
+                <!--android:layout_alignParentLeft="true">-->
+
+                <!--<TextView-->
+                    <!--android:text="@string/license_agreement_description"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:id="@+id/license_agreement_text1"-->
+                    <!--android:gravity="center" />-->
+
+            <!--</RelativeLayout>-->
+        <!--</LinearLayout>-->
+    <!--</RelativeLayout>-->
+
+    <RelativeLayout
+        android:id="@+id/start_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:orientation="vertical"
+            android:paddingBottom="60dp"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="160dp"
+                android:layout_gravity="center_horizontal"
+                android:visibility="invisible"
+                android:src="@drawable/ic_logo_storejetcloud_big" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="60dp"
+                android:gravity="center_horizontal">
+
+                <ImageView
+                    android:id="@+id/start_account_image"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/icon_account_24dp" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="12dp"
+                    android:layout_toRightOf="@id/start_account_image"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/start_account_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="storejetcloud"
+                        android:textColor="@android:color/black"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </RelativeLayout>
+
+            <Button
+                android:id="@+id/start_login_invite_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginLeft="24dp"
+                android:layout_marginRight="24dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/button_normal"
+                android:text="@string/sign_up_by_invite"
+                android:textAllCaps="false"
+                android:textSize="18sp" />
+
+        </LinearLayout>
+
+        <TextView
+            android:text="@string/license_agreement_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/view_license"
+            android:layout_marginBottom="20dp"
+            android:id="@+id/license_agreement_text1"
+            android:gravity="center" />
+
+        <Button
+            android:id="@+id/view_license"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/bottom_layout"
+            android:gravity="center"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:text="@string/btn_view_license_agreement"
+            android:textColor="@color/colorAccentDialog"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/login_progress_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:visibility="invisible"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true" />
+
+    </RelativeLayout>
+
+</RelativeLayout>

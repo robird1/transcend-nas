@@ -264,4 +264,8 @@
     <string name="wizard_success">StoreJet Cloud is Ready</string>
     <string name="wizard_try">Try Again</string>
     <string name="wizard_wifi_info">Connect device Wi-Fi to router network</string>
+
+    <string name="invite_fb_friends">Invite Facebook Friends</string>
+    <string name="sign_up_by_invite">Sign in with facebook invitation</string>
+    <string name="invite_friends">Invite Friends</string>
 </resources>

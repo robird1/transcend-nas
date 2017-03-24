@@ -18,7 +18,7 @@ public class TutkGetNasLoader extends TutkBasicLoader {
     private List<TutkNasNode> nasList;
     private Context mContext;
 
-    public class TutkNasNode {
+    public static class TutkNasNode {
         public String nasID;
         public String nasUUID;
         public String nasName;

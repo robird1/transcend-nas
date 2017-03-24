@@ -9,7 +9,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.transcend.nas.AutoLinkActivity;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
@@ -33,20 +32,16 @@ public class LicenseAgreementActivity extends Activity {
         agreeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(LicenseAgreementActivity.this, AutoLinkActivity.class));
-
-                NASPref.setIsFirstUse(LicenseAgreementActivity.this, false);
-
-                LicenseAgreementActivity.this.finish();
+                onClickAgreeButton();
             }
         });
     }
 
-    @Override
-    public void onBackPressed()
-    {
-        startActivity(new Intent(this, FirstUseActivity.class));
-        super.onBackPressed();
+    public void onClickAgreeButton() {
+        Intent i = new Intent(this, IntroduceActivity.class);
+        startActivity(i);
+        NASPref.setIsLicenseAgreed(this, true);
+        finish();
     }
 
 }

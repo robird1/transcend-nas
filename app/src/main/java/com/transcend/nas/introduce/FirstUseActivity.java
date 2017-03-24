@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 
 import com.transcend.nas.R;
 
@@ -20,14 +19,6 @@ public class FirstUseActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_first_use);
-//        TextView privacyBtn = (TextView) findViewById(R.id.btn_privacy_policy);
-//
-//        privacyBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                startActivity(new Intent(FirstUseActivity.this, PrivacyPolicyActivity.class));
-//            }
-//        });
 
         Button licenseBtn = (Button) findViewById(R.id.btn_view_license_agreement);
         licenseBtn.setOnClickListener(new View.OnClickListener() {

@@ -70,6 +70,10 @@ public final class NASUtils {
         NASPref.setBackupSetting(context, false);
         NASPref.setBackupLocation(context, "/homes/" + Build.MODEL + "/");
         NASPref.setBackupSource(context, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
+
+        NASPref.setCloudNasID(context, "");
+        NASPref.setCloudNickName(context, "");
+
     }
 
     private static void clearDatabaseData(Context context) {
