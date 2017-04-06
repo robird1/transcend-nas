@@ -1,11 +1,16 @@
 package com.transcend.nas.management;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.transcend.nas.R;
 import com.transcend.nas.common.CustomNotificationManager;
 import com.transcend.nas.management.firmware.FileFactory;
+import com.transcend.nas.management.firmware.ShareFolderManager;
+import com.transcend.nas.service.FileRecentFactory;
+import com.transcend.nas.service.FileRecentInfo;
+import com.transcend.nas.service.FileRecentManager;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -88,17 +93,28 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
                 return true;
 
             File source = new File(path);
+            SmbFile target;
             if (source.isDirectory())
-                uploadDirectory(source, getSmbUrl(mDest));
+                target = uploadDirectory(source, getSmbUrl(mDest));
             else
-                uploadFile(source, getSmbUrl(mDest));
+                target = uploadFile(source, getSmbUrl(mDest));
+
+            if(target != null) {
+                FileRecentInfo info = FileRecentFactory.create(getContext(), target, FileRecentInfo.ActionType.UPLOAD);
+                if(info != null && info.info != null) {
+                    String filePath = TextUtils.concat(mDest, target.getName().replace("/", "")).toString();
+                    info.info.path = filePath;
+                    info.realPath = ShareFolderManager.getInstance().getRealPath(filePath);
+                    FileRecentManager.getInstance().setAction(info);
+                }
+            }
             mCurrent++;
         }
         updateResult(mType, getContext().getString(R.string.done), mDest);
         return true;
     }
 
-    private void uploadDirectory(File source, String destination) throws IOException {
+    private SmbFile uploadDirectory(File source, String destination) throws IOException {
         String name = createUniqueName(source, destination);
         SmbFile target = new SmbFile(destination, name);
         target.mkdirs();
@@ -110,7 +126,7 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
         String path = target.getPath();
         for (File file : files) {
             if(isLoadInBackgroundCanceled())
-                return;
+                return null;
 
             if(file.isHidden())
                 continue;
@@ -121,9 +137,10 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
                 uploadFile(file, path);
             mCurrent++;
         }
+        return target;
     }
 
-    private void uploadFile(File source, String destination) throws IOException {
+    private SmbFile uploadFile(File source, String destination) throws IOException {
         int total = (int)source.length();
         int count = 0;
         mUniqueName = createUniqueName(source, destination);
@@ -144,6 +161,7 @@ public class LocalFileUploadLoader extends SmbAbstractLoader {
         mOS.close();
         mIS.close();
         updateProgress(mType, mUniqueName, count, total);
+        return target;
     }
 
     private String createUniqueName(File source, String destination) throws MalformedURLException, SmbException {

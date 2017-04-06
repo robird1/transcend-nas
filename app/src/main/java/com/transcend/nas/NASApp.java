@@ -33,12 +33,14 @@ public class NASApp extends MultiDexApplication {
 
     public static final String ROOT_SMB = "/";
     public static final String ROOT_STG = Environment.getExternalStorageDirectory().getAbsolutePath();
+    public static final String ROOT_RECENT = "Recent/";
     public static String ROOT_SD;
     public static DocumentFile sdDir;
 
     public static final String MODE_SMB = "SMB";
     public static final String MODE_STG = "STG";
     public static final String MODE_SDCARD = "SDCARD";
+    public static final String MODE_RECENT = "RECENT";
 
     public static final String ACT_COPY     = "COPY";
     public static final String ACT_MOVE     = "MOVE";

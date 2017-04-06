@@ -3,26 +3,10 @@ package com.transcend.nas.connection;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.provider.BaseColumns;
 import android.util.Log;
 
-import com.realtek.nasfun.api.SambaStatus;
-import com.realtek.nasfun.api.Server;
-import com.realtek.nasfun.api.ServerInfo;
-import com.realtek.nasfun.api.ServerManager;
-import com.transcend.nas.NASPref;
-import com.transcend.nas.management.FileInfo;
 import com.transcend.nas.service.MyDBHelper;
-import com.tutk.IOTC.P2PService;
-
-import java.io.File;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.List;
-
-import jcifs.smb.SmbException;
-import jcifs.smb.SmbFile;
+import com.transcend.nas.service.MyDBManager;
 
 /**
  * Created by ike_lee on 2016/9/5.
@@ -30,9 +14,6 @@ import jcifs.smb.SmbFile;
 public class LoginHelper {
     private static final String TAG = "LoginHelper";
     private Context mContext;
-
-    private MyDBHelper dbHelper;
-    private SQLiteDatabase db;
 
     public static class LoginInfo{
         public String email;
@@ -50,12 +31,6 @@ public class LoginHelper {
 
     public LoginHelper(Context context) {
         mContext = context;
-        dbHelper = new MyDBHelper(context);
-        db = dbHelper.getWritableDatabase();
-    }
-
-    public void onDestroy(){
-        db.close();
     }
 
     public void setAccount(LoginInfo item){
@@ -69,7 +44,7 @@ public class LoginHelper {
             cv.put(MyDBHelper.TUTK_IP, item.ip);
             cv.put(MyDBHelper.TUTK_UUID, item.uuid);
             cv.put(MyDBHelper.TUTK_MACADDRESS, item.macAddress);
-            long id = db.insert(MyDBHelper.TABLE_TUTK, null, cv);
+            long id = MyDBManager.getInstance(mContext).insert(MyDBHelper.TABLE_TUTK, null, cv);
         } else {
             updateAccount(item);
         }
@@ -87,7 +62,7 @@ public class LoginHelper {
             return false;
 
         try {
-            c = db.rawQuery(url, null);
+            c = MyDBManager.getInstance(mContext).rawQuery(url, null);
             if (c.moveToFirst()) {
                 exist = true;
                 item.ip = c.getString(c.getColumnIndex(MyDBHelper.TUTK_IP));
@@ -97,8 +72,7 @@ public class LoginHelper {
             c.close();
             c = null;
         } catch (IllegalStateException e){
-            dbHelper = new MyDBHelper(mContext);
-            db = dbHelper.getWritableDatabase();
+            MyDBManager.getInstance(mContext).init(mContext);
         } finally {
             if(c != null)
                 c.close();
@@ -110,13 +84,13 @@ public class LoginHelper {
         ContentValues cv = new ContentValues();
         cv.put(MyDBHelper.TUTK_USERNAME, item.username);
         cv.put(MyDBHelper.TUTK_PASSWORD, item.password);
-        int count = db.update(MyDBHelper.TABLE_TUTK, cv, MyDBHelper.TUTK_EMAIL + "='" + item.email
+        int count = MyDBManager.getInstance(mContext).update(MyDBHelper.TABLE_TUTK, cv, MyDBHelper.TUTK_EMAIL + "='" + item.email
                 + "' AND " + MyDBHelper.TUTK_MACADDRESS + "='" + item.macAddress + "'", null);
     }
 
     public void deleteAccount(LoginInfo item){
         Log.d(TAG, item.email +"," + item.uuid);
-        int count = db.delete(MyDBHelper.TABLE_TUTK, MyDBHelper.TUTK_EMAIL + "='" + item.email
+        int count = MyDBManager.getInstance(mContext).delete(MyDBHelper.TABLE_TUTK, MyDBHelper.TUTK_EMAIL + "='" + item.email
                 + "' AND " + MyDBHelper.TUTK_UUID + "='" + item.uuid + "'", null);
     }
 
@@ -127,17 +101,43 @@ public class LoginHelper {
         url = "select * from " + MyDBHelper.TABLE_TUTK + " WHERE " + MyDBHelper.TUTK_EMAIL + "='" + item.email
                 + "' AND " + MyDBHelper.TUTK_MACADDRESS + "='" + item.macAddress + "'";
         try {
-            c = db.rawQuery(url, null);
+            c = MyDBManager.getInstance(mContext).rawQuery(url, null);
             exist = c.getCount() > 0;
             c.close();
             c = null;
         } catch (IllegalStateException e){
-            dbHelper = new MyDBHelper(mContext);
-            db = dbHelper.getWritableDatabase();
+            MyDBManager.getInstance(mContext).init(mContext);
         } finally {
             if(c != null)
                 c.close();
         }
         return exist;
+    }
+
+    public int getAccountID(LoginHelper.LoginInfo item) {
+        int userID = -1;
+        String url;
+        Cursor c = null;
+        url = "select * from " + MyDBHelper.TABLE_TUTK + " WHERE " + MyDBHelper.TUTK_EMAIL + "='" + item.email
+                + "' AND " + MyDBHelper.TUTK_USERNAME + "='" + item.username + "'";
+        if(item.macAddress != null && !item.macAddress.equals(""))
+            url +=  " AND " + MyDBHelper.TUTK_MACADDRESS + "='" + item.macAddress + "'";
+        if(item.uuid != null && !item.uuid.equals(""))
+            url +=  " AND " + MyDBHelper.TUTK_UUID + "='" + item.uuid + "'";
+
+        try {
+            c = MyDBManager.getInstance(mContext).rawQuery(url, null);
+            if (c.moveToFirst()) {
+                userID = c.getInt(c.getColumnIndex(MyDBHelper.ID));
+            }
+            c.close();
+            c = null;
+        } catch (IllegalStateException e) {
+            MyDBManager.getInstance(mContext).init(mContext);
+        } finally {
+            if (c != null)
+                c.close();
+        }
+        return userID;
     }
 }

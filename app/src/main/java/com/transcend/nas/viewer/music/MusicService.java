@@ -21,6 +21,9 @@ import android.widget.RemoteViews;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.management.FileInfo;
+import com.transcend.nas.service.FileRecentFactory;
+import com.transcend.nas.service.FileRecentInfo;
+import com.transcend.nas.service.FileRecentManager;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -378,6 +381,10 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
         if (mMediaPlayer != null) {
             MusicManager.getInstance().setMusicIndex(mFileIndex);
             MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.NEW);
+            if(mFileList != null && mFileIndex < mFileList.size()) {
+                FileRecentInfo action = FileRecentFactory.create(getApplicationContext(), mFileList.get(mFileIndex), FileRecentInfo.ActionType.OPEN);
+                FileRecentManager.getInstance().setAction(action);
+            }
         } else {
             MusicManager.getInstance().setMusicIndex(-1);
             MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.ERROR);

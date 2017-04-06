@@ -121,6 +121,8 @@ abstract class FileActionService {
         String path = args.getString("path");
         String name = args.getString("name");
         switch (id) {
+            case OPEN:
+                return open(context, path);
             case LIST:
                 return list(context, path);
             case UPLOAD:

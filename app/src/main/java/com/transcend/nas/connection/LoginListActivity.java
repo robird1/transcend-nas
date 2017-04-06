@@ -454,7 +454,6 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                     account.email = NASPref.getCloudUsername(LoginListActivity.this);
                     account.uuid = nas.get("hostname");
                     loginHelper.deleteAccount(account);
-                    loginHelper.onDestroy();
                     break;
                 }
             }
@@ -476,7 +475,6 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
             account.email = NASPref.getCloudUsername(this);
             account.uuid = loader.getNasUUID();
             boolean exist = loginHelper.getAccount(account);
-            loginHelper.onDestroy();
 
             //get network status
             boolean isWiFi = false;
@@ -564,7 +562,6 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
             account.email = NASPref.getCloudUsername(LoginListActivity.this);
             account.macAddress = loader.getMacAddress();
             boolean exist = loginHelper.getAccount(account);
-            loginHelper.onDestroy();
 
             if (account.username != null && !account.username.equals(""))
                 args.putString("username", account.username);

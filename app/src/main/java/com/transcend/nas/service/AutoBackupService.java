@@ -72,8 +72,6 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
         if (mThread != null)
             mThread.interrupt();
         mThread = null;
-        if (mHelper != null)
-            mHelper.onDestroy();
         mHelper = null;
         mLocalFileObserver.removeListener();
         mLocalFileObserver.stopWatching();

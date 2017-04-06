@@ -2,9 +2,14 @@ package com.transcend.nas.management;
 
 import android.app.Activity;
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.transcend.nas.R;
 import com.transcend.nas.common.CustomNotificationManager;
+import com.transcend.nas.management.firmware.ShareFolderManager;
+import com.transcend.nas.service.FileRecentFactory;
+import com.transcend.nas.service.FileRecentInfo;
+import com.transcend.nas.service.FileRecentManager;
 
 import java.net.MalformedURLException;
 import java.util.List;
@@ -50,19 +55,37 @@ public class SmbFileMoveLoader extends SmbAbstractLoader {
                 return true;
 
             SmbFile source = new SmbFile(getSmbUrl(path));
+            FileRecentInfo oldAction = FileRecentFactory.create(getContext(), source, null);
+
+            SmbFile target;
             if (source.getParent().endsWith(mDest))
                 continue;
             if (source.isDirectory())
-                moveDirectory(source, getSmbUrl(mDest));
+                target = moveDirectory(source, getSmbUrl(mDest));
             else
-                moveFile(source, getSmbUrl(mDest));
+                target = moveFile(source, getSmbUrl(mDest));
+
+            if(oldAction != null && target != null) {
+                if(oldAction.info != null) {
+                    oldAction.info.path = path;
+                    oldAction.realPath = ShareFolderManager.getInstance().getRealPath(path);
+                }
+
+                FileRecentInfo newAction = FileRecentFactory.create(getContext(), target, FileRecentInfo.ActionType.REVISE);
+                if(newAction != null && newAction.info != null) {
+                    String filePath = TextUtils.concat(mDest, target.getName().replace("/", "")).toString();
+                    newAction.info.path = filePath;
+                    newAction.realPath = ShareFolderManager.getInstance().getRealPath(filePath);
+                }
+                FileRecentManager.getInstance().setAction(oldAction, newAction);
+            }
             mCurrent++;
         }
         updateResult(mType, getContext().getString(R.string.done), mDest);
         return true;
     }
 
-    private void moveDirectory(SmbFile source, String destination) throws MalformedURLException, SmbException {
+    private SmbFile moveDirectory(SmbFile source, String destination) throws MalformedURLException, SmbException {
         String name = createRemoteUniqueName(source, destination);
         SmbFile target = new SmbFile(destination, name);
         target.mkdirs();
@@ -74,7 +97,7 @@ public class SmbFileMoveLoader extends SmbAbstractLoader {
         String path = target.getPath();
         for (SmbFile file : files) {
             if(isLoadInBackgroundCanceled())
-                return;
+                return null;
 
             if(file.isHidden())
                 continue;
@@ -86,12 +109,14 @@ public class SmbFileMoveLoader extends SmbAbstractLoader {
             mCurrent++;
         }
         source.delete();
+        return target;
     }
 
-    private void moveFile(SmbFile source, String destination) throws MalformedURLException, SmbException {
+    private SmbFile moveFile(SmbFile source, String destination) throws MalformedURLException, SmbException {
         String name = createRemoteUniqueName(source, destination);
         SmbFile target = new SmbFile(destination, name);
         source.renameTo(target);
         updateProgress(mType, name, 0, 0, false);
+        return target;
     }
 }

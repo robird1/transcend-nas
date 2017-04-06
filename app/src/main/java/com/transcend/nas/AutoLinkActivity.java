@@ -173,7 +173,6 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
             account.email = NASPref.getCloudUsername(this);
             account.macAddress = NASPref.getMacAddress(this);
             boolean exist = loginHelper.getAccount(account);
-            loginHelper.onDestroy();
             if (exist) {
                 Bundle args = new Bundle();
                 args.putString("hostname", isRemote ? hostname : account.ip);

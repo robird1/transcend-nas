@@ -46,6 +46,9 @@ import com.transcend.nas.management.externalstorage.ExternalStorageController;
 import com.transcend.nas.management.externalstorage.ExternalStorageLollipop;
 import com.transcend.nas.management.externalstorage.OTGFileDeleteLoader;
 import com.transcend.nas.management.firmware.FileFactory;
+import com.transcend.nas.service.FileRecentFactory;
+import com.transcend.nas.service.FileRecentInfo;
+import com.transcend.nas.service.FileRecentManager;
 
 import java.util.ArrayList;
 
@@ -302,6 +305,10 @@ public class ViewerActivity extends AppCompatActivity implements
             @Override
             public void onPageSelected(int position) {
                 doPhotoCast(position);
+                if(mList != null && position < mList.size()) {
+                    FileRecentInfo action = FileRecentFactory.create(ViewerActivity.this, mList.get(position), FileRecentInfo.ActionType.OPEN);
+                    FileRecentManager.getInstance().setAction(action);
+                }
             }
 
             @Override
@@ -310,6 +317,10 @@ public class ViewerActivity extends AppCompatActivity implements
             }
         });
         doPhotoCast(index);
+        if(mList != null && index < mList.size()) {
+            FileRecentInfo action = FileRecentFactory.create(ViewerActivity.this, mList.get(index), FileRecentInfo.ActionType.OPEN);
+            FileRecentManager.getInstance().setAction(action);
+        }
     }
 
     private void doPhotoCast(int position) {

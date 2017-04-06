@@ -69,6 +69,9 @@ import com.transcend.nas.management.firmware.FileFactory;
 import com.transcend.nas.management.firmware.MediaFactory;
 import com.transcend.nas.management.firmware.TwonkyManager;
 import com.transcend.nas.service.AutoBackupService;
+import com.transcend.nas.service.FileRecentFactory;
+import com.transcend.nas.service.FileRecentInfo;
+import com.transcend.nas.service.FileRecentManager;
 import com.transcend.nas.service.LanCheckManager;
 import com.transcend.nas.DrawerMenuActivity;
 import com.transcend.nas.DrawerMenuController;
@@ -94,41 +97,43 @@ public class FileManageActivity extends DrawerMenuActivity implements
 
     private static final String TAG = FileManageActivity.class.getSimpleName();
 
-    private static final int GRID_PORTRAIT = 3;
-    private static final int GRID_LANDSCAPE = 5;
+    protected static final int GRID_PORTRAIT = 3;
+    protected static final int GRID_LANDSCAPE = 5;
 
-    private Context mContext;
-    private Toolbar mToolbar;
-    private AppCompatSpinner mDropdown;
-    private FileManageDropdownAdapter mDropdownAdapter;
-    private RecyclerView mRecyclerView;
-    private LinearLayout mRecyclerEmptyView;
-    private FileManageRecyclerAdapter mRecyclerAdapter;
-    private FloatingActionButton mFab;
-    private RelativeLayout mProgressView;
-    private Snackbar mSnackbar;
-    private ActionMode mEditorMode;
-    private RelativeLayout mEditorModeView;
-    private TextView mEditorModeTitle;
-    private Toast mToast;
+    protected Context mContext;
+    protected Toolbar mToolbar;
+    protected AppCompatSpinner mDropdown;
+    protected FileManageDropdownAdapter mDropdownAdapter;
+    protected RecyclerView mRecyclerView;
+    protected LinearLayout mRecyclerEmptyView;
+    protected FileManageRecyclerAdapter mRecyclerAdapter;
+    protected FloatingActionButton mFab;
+    protected RelativeLayout mProgressView;
+    protected Snackbar mSnackbar;
+    protected ActionMode mEditorMode;
+    protected RelativeLayout mEditorModeView;
+    protected TextView mEditorModeTitle;
+    protected Toast mToast;
 
-    private String mPath;
-    private ArrayList<FileInfo> mFileList;
-    private boolean isDownloadFolder = false;
+    protected String mPath;
+    protected ArrayList<FileInfo> mFileList;
+    protected boolean isDownloadFolder = false;
 
-    private VideoCastManager mCastManager;
-    private VideoCastConsumer mCastConsumer;
+    protected VideoCastManager mCastManager;
+    protected VideoCastConsumer mCastConsumer;
 
-    private SmbFileListLoader mSmbFileListLoader;
-    private FileInfo mFileInfo;
-    private String mDownloadFilePath;
-    private String mOriginMD5Checksum;
+    protected SmbFileListLoader mSmbFileListLoader;
+    protected FileInfo mFileInfo;
+    protected String mDownloadFilePath;
+    protected String mOriginMD5Checksum;
 
-    private ExternalStorageController mStorageController;
+    protected ExternalStorageController mStorageController;
 
-    private ActionHelper mActionHelper;
-    private FileActionManager mFileActionManager;
-    private CustomActionManager mCustomActionManager;
+    protected ActionHelper mActionHelper;
+    protected FileActionManager mFileActionManager;
+    protected CustomActionManager mCustomActionManager;
+    protected FileActionManager.FileActionServiceType mDefaultType = FileActionManager.FileActionServiceType.SMB;
+    protected boolean mChoiceAllSameTypeFile = true;
 
     @Override
     public int onLayoutID() {
@@ -303,7 +308,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         return mCastManager.onDispatchVolumeKeyEvent(event, 0.05) || super.dispatchKeyEvent(event);
     }
 
-    private void onReceiveIntent(Intent intent) {
+    protected void onReceiveIntent(Intent intent) {
         checkCurrentSelectedItem(intent);
         if (intent != null) {
             String action = intent.getAction();
@@ -327,7 +332,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         mContext = this;
         mFileList = new ArrayList<FileInfo>();
 
-        mFileActionManager = new FileActionManager(this, FileActionManager.FileActionServiceType.SMB, this);
+        mFileActionManager = new FileActionManager(this, mDefaultType, this);
         mPath = mFileActionManager.getServiceRootPath();
 
         mCustomActionManager = new CustomActionManager(this, this);
@@ -417,7 +422,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         mDropdownAdapter.notifyDataSetChanged();
     }
 
-    private void initRecyclerView() {
+    protected void initRecyclerView() {
         FileManageRecyclerAdapter.LayoutType type = NASPref.getFileViewType(this);
         mRecyclerAdapter = new FileManageRecyclerAdapter(this, mFileList);
         mRecyclerAdapter.setOnRecyclerItemCallbackListener(this);
@@ -627,7 +632,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         mDrawerController.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
     }
 
-    private void initMenu(Menu menu) {
+    protected void initMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.file_manage_editor, menu);
         MenuItem item = menu.findItem(R.id.file_manage_editor_action_transmission);
         if (mFileActionManager.isRemoteAction(mPath)) {
@@ -828,7 +833,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
      * FILE BROWSER
      */
 
-    private void doRefresh() {
+    protected void doRefresh() {
         Log.w(TAG, "doRefresh");
         doLoad(mPath);
     }
@@ -900,7 +905,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     /**
      * FILE EDITOR
      */
-    private int getSelectedCount() {
+    protected int getSelectedCount() {
         int count = 0;
         for (FileInfo file : mFileList) {
             if (file.checked) count++;
@@ -908,7 +913,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         return count;
     }
 
-    private ArrayList<String> getSelectedPaths() {
+    protected ArrayList<String> getSelectedPaths() {
         ArrayList<String> paths = new ArrayList<String>();
         for (FileInfo file : mFileList) {
             if (file.checked) paths.add(file.path);
@@ -916,7 +921,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         return paths;
     }
 
-    private ArrayList<FileInfo> getSelectedFiles() {
+    protected ArrayList<FileInfo> getSelectedFiles() {
         ArrayList<FileInfo> files = new ArrayList<FileInfo>();
         for (FileInfo file : mFileList) {
             if (file.checked) files.add(file);
@@ -999,7 +1004,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         mFileActionManager.move(dest, paths);
     }
 
-    private void doDelete(ArrayList<String> paths) {
+    protected void doDelete(ArrayList<String> paths) {
         new FileActionDeleteDialog(this, paths) {
             @Override
             public void onConfirm(ArrayList<String> paths) {
@@ -1012,7 +1017,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     /**
      * UX CONTROL
      */
-    private void updateScreen() {
+    protected void updateScreen() {
         mDropdownAdapter.updateList(mPath, mFileActionManager.getServiceMode());
         mDropdownAdapter.notifyDataSetChanged();
         mRecyclerAdapter.updateList(mFileList);
@@ -1021,15 +1026,15 @@ public class FileManageActivity extends DrawerMenuActivity implements
         invalidateOptionsMenu();
     }
 
-    private void checkTopView() {
+    protected void checkTopView() {
         mDrawerController.setDrawerIndicatorEnabled(mFileActionManager.isTopDirectory(mPath) || (isDownloadFolder && mFileActionManager.isDownloadDirectory(this, mPath)));
     }
 
-    private void checkEmptyView() {
+    protected void checkEmptyView() {
         mRecyclerEmptyView.setVisibility((mFileList != null && mFileList.size() > 0) ? View.GONE : View.VISIBLE);
     }
 
-    private void updateListView(boolean update) {
+    protected void updateListView(boolean update) {
         LinearLayoutManager list = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(list);
         if (update) {
@@ -1038,7 +1043,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         }
     }
 
-    private void updateGridView(boolean update) {
+    protected void updateGridView(boolean update) {
         int orientation = getResources().getConfiguration().orientation;
         int spanCount = (orientation == Configuration.ORIENTATION_PORTRAIT)
                 ? GRID_PORTRAIT : GRID_LANDSCAPE;
@@ -1059,7 +1064,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         array.recycle();
     }
 
-    private void enableFabEdit(boolean enabled) {
+    protected void enableFabEdit(boolean enabled) {
         mFab.setImageResource(R.drawable.ic_floating_edit_white);
         mFab.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
     }
@@ -1094,7 +1099,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
             startSupportActionMode(this);
     }
 
-    private void closeEditorMode() {
+    protected void closeEditorMode() {
         if (mEditorMode != null)
             mEditorMode.finish();
     }
@@ -1141,7 +1146,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         mRecyclerAdapter.notifyDataSetChanged();
     }
 
-    private void toggleEditorModeAction(int count) {
+    protected void toggleEditorModeAction(int count) {
         boolean visible = (count == 1);
         boolean containFolder = false;
         if (visible) {
@@ -1153,7 +1158,6 @@ public class FileManageActivity extends DrawerMenuActivity implements
         }
         mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_rename).setVisible(visible);
         mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_share).setVisible(!containFolder & visible);
-        mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_new_folder).setVisible(count == 0);
     }
 
     @Override
@@ -1177,7 +1181,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         mDrawerController.setCheckedItem(id);
     }
 
-    private void toast(int resId) {
+    protected void toast(int resId) {
         if (mToast != null)
             mToast.cancel();
         mToast = Toast.makeText(this, resId, Toast.LENGTH_SHORT);
@@ -1257,6 +1261,25 @@ public class FileManageActivity extends DrawerMenuActivity implements
         startActivityForResult(intent, FileActionPickerActivity.REQUEST_CODE);
     }
 
+    public void startMusicPrepare(String path) {
+        ArrayList<FileInfo> list = new ArrayList<FileInfo>();
+        if (mChoiceAllSameTypeFile) {
+            for (FileInfo info : mFileList) {
+                if (FileInfo.TYPE.MUSIC.equals(info.type) && MusicActivity.checkFormatSupportOrNot(info.path)) {
+                    list.add(info);
+                }
+            }
+        } else {
+            for (FileInfo info : mFileList) {
+                if (FileInfo.TYPE.MUSIC.equals(info.type) && path.equals(info.path)) {
+                    list.add(info);
+                    break;
+                }
+            }
+        }
+        MusicManager.getInstance().setMusicList(list);
+    }
+
     private void startMusicActivity(String mode, String root, FileInfo fileInfo) {
         if (!MusicActivity.checkFormatSupportOrNot(fileInfo.path)) {
             startVideoActivity(fileInfo);
@@ -1280,14 +1303,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
             }
         }
 
-        ArrayList<FileInfo> list = new ArrayList<FileInfo>();
-        for (FileInfo info : mFileList) {
-            if (FileInfo.TYPE.MUSIC.equals(info.type) && MusicActivity.checkFormatSupportOrNot(info.path)) {
-                list.add(info);
-            }
-        }
-        MusicManager.getInstance().setMusicList(list);
-
+        startMusicPrepare(fileInfo.path);
         Bundle args = new Bundle();
         args.putString("path", fileInfo.path);
         args.putString("mode", mode);
@@ -1302,6 +1318,8 @@ public class FileManageActivity extends DrawerMenuActivity implements
     }
 
     private void startVideoActivity(FileInfo fileInfo) {
+        FileRecentManager.getInstance().setAction(FileRecentFactory.create(this, fileInfo, FileRecentInfo.ActionType.OPEN));
+
         if (mFileActionManager.isRemoteAction(mPath) && mCastManager != null && mCastManager.isConnected()) {
             try {
                 //clean image
@@ -1322,14 +1340,26 @@ public class FileManageActivity extends DrawerMenuActivity implements
         MediaFactory.open(this, fileInfo.path);
     }
 
-    private void startViewerActivity(String mode, String root, String path) {
+    public void startViewerPrepare(String path) {
         ArrayList<FileInfo> list = new ArrayList<FileInfo>();
-        for (FileInfo info : mFileList) {
-            if (FileInfo.TYPE.PHOTO.equals(info.type))
-                list.add(info);
+        if(mChoiceAllSameTypeFile) {
+            for (FileInfo info : mFileList) {
+                if (FileInfo.TYPE.PHOTO.equals(info.type))
+                    list.add(info);
+            }
+        } else {
+            for (FileInfo info : mFileList) {
+                if (FileInfo.TYPE.PHOTO.equals(info.type) && path.equals(info.path)) {
+                    list.add(info);
+                    break;
+                }
+            }
         }
         FileFactory.getInstance().setFileList(list);
+    }
 
+    private void startViewerActivity(String mode, String root, String path) {
+        startViewerPrepare(path);
         Bundle args = new Bundle();
         args.putString("path", path);
         args.putString("mode", mode);
@@ -1391,6 +1421,8 @@ public class FileManageActivity extends DrawerMenuActivity implements
     }
 
     public void openFileBy3rdApp(Context context, FileInfo fileInfo) {
+        FileRecentManager.getInstance().setAction(FileRecentFactory.create(this, fileInfo, FileRecentInfo.ActionType.OPEN));
+
         mFileInfo = fileInfo;
         if (fileInfo.isLocalFile()) {
             fileInfo.openLocalFile(context);

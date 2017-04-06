@@ -88,7 +88,6 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
             account.macAddress = info.mac;
             account.ip = info.ipAddress;
             mLoginHelper.setAccount(account);
-            mLoginHelper.onDestroy();
         }
     }
 

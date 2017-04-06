@@ -33,7 +33,7 @@ public class FileActionManager extends AbstractActionManager {
     private LoaderManager.LoaderCallbacks<Boolean> mCallbacks;
 
     public enum FileActionServiceType {
-        PHONE, SD, SMB
+        PHONE, SD, SMB, RECENT
     }
 
     public FileActionManager(Context context, FileActionServiceType service, LoaderManager.LoaderCallbacks<Boolean> callbacks) {
@@ -67,6 +67,9 @@ public class FileActionManager extends AbstractActionManager {
                 case SMB:
                     service = new SmbFileActionService();
                     break;
+                case RECENT:
+                    service = new RecentActionService();
+                    break;
             }
             mFileActionServicePool.put(type, service);
         }
@@ -82,7 +85,10 @@ public class FileActionManager extends AbstractActionManager {
             else
                 setServiceType(FileActionManager.FileActionServiceType.PHONE);
         } else {
-            setServiceType(FileActionManager.FileActionServiceType.SMB);
+            if(path.startsWith(NASApp.ROOT_RECENT))
+                setServiceType(FileActionManager.FileActionServiceType.RECENT);
+            else
+                setServiceType(FileActionManager.FileActionServiceType.SMB);
         }
     }
 
@@ -111,6 +117,11 @@ public class FileActionManager extends AbstractActionManager {
 
     public void setProgressLayout(RelativeLayout progressLayout) {
         mProgressLayout = progressLayout;
+    }
+
+    public void open(String path) {
+        createLoader(FileActionService.FileAction.OPEN, null, path, null);
+        Log.w(TAG, "doOpen: " + path);
     }
 
     public void list(String path) {
@@ -200,6 +211,7 @@ public class FileActionManager extends AbstractActionManager {
                             case DELETE:
                             case CreateFOLDER:
                             case SHARE:
+                            case OPEN:
                                 mProgressLayout.setVisibility(View.VISIBLE);
                                 break;
                             default:
@@ -234,6 +246,7 @@ public class FileActionManager extends AbstractActionManager {
                 File base = new File(root);
                 File file = new File(path);
                 return file.equals(base);
+            case RECENT:
             case SMB:
                 return path.equals(root);
             default:
@@ -274,7 +287,7 @@ public class FileActionManager extends AbstractActionManager {
     public boolean isRemoteAction(String path) {
         checkServiceType(path);
         String mode = getServiceMode();
-        return NASApp.MODE_SMB.equals(mode);
+        return NASApp.MODE_SMB.equals(mode);// || NASApp.MODE_RECENT.equals(mode);
     }
 
 }

@@ -83,6 +83,12 @@
         </activity>
 
         <activity
+            android:name=".management.FileRecentActivity"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
+
+        <activity
             android:name=".management.FileSharedActivity"
             android:launchMode="singleTask"
             android:configChanges="orientation|keyboardHidden|screenSize">

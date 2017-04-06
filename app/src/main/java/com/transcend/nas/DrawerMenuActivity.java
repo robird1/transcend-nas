@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import com.transcend.nas.common.ManageFactory;
 import com.transcend.nas.connection.LoginActivity;
 import com.transcend.nas.connection.old.StartActivity;
+import com.transcend.nas.management.FileRecentActivity;
 import com.transcend.nas.management.externalstorage.ExternalStorageController;
 import com.transcend.nas.management.FileManageActivity;
 import com.transcend.nas.management.externalstorage.SDCardReceiver;
@@ -115,6 +116,10 @@ public abstract class DrawerMenuActivity extends AppCompatActivity implements
                 mDrawerController.closeDrawer();
                 startFileManageActivity(id);
                 break;
+            case R.id.nav_recent:
+                mDrawerController.closeDrawer();
+                startFileRecentActivity(id);
+                break;
             case R.id.nav_sdcard:
                 mDrawerController.closeDrawer();
                 new ExternalStorageController(this).onDrawerItemSelected(this, id);
@@ -189,13 +194,29 @@ public abstract class DrawerMenuActivity extends AppCompatActivity implements
         }, 280);
     }
 
-    public void startFileManageActivity(final int itemId) {
+    public void startFileManageActivity(final int itemId, final String path) {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 Intent intent = new Intent(DrawerMenuActivity.this, FileManageActivity.class);
                 intent.putExtra("selectedItemId", itemId);
-                intent.putExtra("path", getFileManagePath(itemId));
+                intent.putExtra("path", path);
+                startActivity(intent);
+                overridePendingTransition(0, 0);
+            }
+        }, 280);
+    }
+
+    public void startFileManageActivity(int itemId) {
+        startFileManageActivity(itemId, getFileManagePath(itemId));
+    }
+
+    public void startFileRecentActivity(final int itemId) {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Intent intent = new Intent(DrawerMenuActivity.this, FileRecentActivity.class);
+                intent.putExtra("selectedItemId", itemId);
                 startActivity(intent);
                 overridePendingTransition(0, 0);
             }

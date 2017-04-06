@@ -10,6 +10,11 @@
             android:icon="@drawable/ic_drawer_sjc"
             android:title="@string/app_name" />
 
+        <item
+            android:id="@+id/nav_recent"
+            android:icon="@drawable/icon_disk_info_gray_24dp"
+            android:title="Recent" />
+
     </group>
 
     <group

@@ -63,6 +63,8 @@ public class FileManageDropdownAdapter extends BaseAdapter {
     public void updateList(String path, String mode) {
         if (NASApp.MODE_SMB.equals(mode)) {
             path = PREFIX_REMOTE + path;
+        } else if (NASApp.MODE_RECENT.equals(mode)) {
+            //path = PREFIX_RECENT + path;
         } else {
             if (!NASUtils.isSDCardPath(mContext, path)) {
                 File storage = Environment.getExternalStorageDirectory();

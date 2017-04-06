@@ -80,7 +80,7 @@ public final class NASUtils {
         account.email = NASPref.getCloudUsername(context);
         account.uuid = NASPref.getCloudUUID(context);
         loginHelper.deleteAccount(account);
-        loginHelper.onDestroy();
+        //loginHelper.onDestroy();
     }
 
     public static void logOutFB(Context context) {

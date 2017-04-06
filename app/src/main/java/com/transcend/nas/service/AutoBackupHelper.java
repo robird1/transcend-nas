@@ -31,9 +31,6 @@ public class AutoBackupHelper {
     private Context mContext;
     private String mPath;
 
-    private MyDBHelper dbHelper;
-    private SQLiteDatabase db;
-
     private Server mServer;
     private String mUsername;
     private String mPassword;
@@ -43,8 +40,6 @@ public class AutoBackupHelper {
     public AutoBackupHelper(Context context, String path) {
         mContext = context;
         mPath = path;
-        dbHelper = new MyDBHelper(context);
-        db = dbHelper.getWritableDatabase();
         updateServerInfo();
     }
 
@@ -56,10 +51,6 @@ public class AutoBackupHelper {
         } catch (SmbException e) {
             e.printStackTrace();
         }
-    }
-
-    public void onDestroy(){
-        db.close();
     }
 
     public void updateServerInfo(){
@@ -182,17 +173,17 @@ public class AutoBackupHelper {
         cv.put(MyDBHelper.PATH, path);
         cv.put(MyDBHelper.LAST_MODIFY, modify);
         cv.put(MyDBHelper.DESTINATION, destination);
-        long id = db.insert(MyDBHelper.TABLE_NAME, null, cv);
+        long id = MyDBManager.getInstance(mContext).insert(MyDBHelper.TABLE_NAME, null, cv);
     }
 
     public void UpdateTask(String name,String key, String value){
         ContentValues cv = new ContentValues();
         cv.put(key, value);
-        int count = db.update(MyDBHelper.TABLE_NAME, cv, MyDBHelper.NAME + "=" + name, null);
+        int count = MyDBManager.getInstance(mContext).update(MyDBHelper.TABLE_NAME, cv, MyDBHelper.NAME + "=" + name, null);
     }
 
     public void DeleteTask(String name){
-        int count = db.delete(MyDBHelper.TABLE_NAME, MyDBHelper.NAME + "=" + name, null);
+        int count = MyDBManager.getInstance(mContext).delete(MyDBHelper.TABLE_NAME, MyDBHelper.NAME + "=" + name, null);
     }
 
     public boolean existTask(String key, String value){
@@ -201,13 +192,12 @@ public class AutoBackupHelper {
         Cursor c = null;
         url = "select * from " + MyDBHelper.TABLE_NAME + " WHERE " + key + "='" + value + "' AND " + MyDBHelper.DESTINATION + "='" + mMacAddress + "'";
         try {
-            c = db.rawQuery(url, null);
+            c = MyDBManager.getInstance(mContext).rawQuery(url, null);
             exist = c.getCount() > 0;
             c.close();
             c = null;
         } catch (IllegalStateException e){
-            dbHelper = new MyDBHelper(mContext);
-            db = dbHelper.getWritableDatabase();
+            MyDBManager.getInstance(mContext).init(mContext);
         } finally {
             if(c != null)
                 c.close();
