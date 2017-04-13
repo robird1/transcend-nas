@@ -510,6 +510,22 @@ public class NASPref {
         PrefUtil.write(context, name, key, mode.ordinal());
     }
 
+    /**
+     * Music Shuffle
+     */
+    public static boolean getMusicShuffle(Context context) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_music_shuffle);
+        boolean def = false;
+        return PrefUtil.read(context, name, key, def);
+    }
+
+    public static void setMusicShuffle(Context context, boolean enable) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = context.getResources().getString(R.string.pref_music_shuffle);
+        PrefUtil.write(context, name, key, enable);
+    }
+
     public static void clearDataAfterSwitch(Context context){
         setBackupScenario(context, false);
         setBackupSetting(context, false);

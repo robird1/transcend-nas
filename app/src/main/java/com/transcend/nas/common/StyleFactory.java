@@ -12,6 +12,7 @@ import android.support.v4.content.ContextCompat;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.transcend.nas.R;
@@ -173,6 +174,40 @@ public class StyleFactory {
                         break;
                     case MotionEvent.ACTION_UP:
                         textView.setTextColor(ContextCompat.getColor(context, R.color.colorAccentDialog));
+                        break;
+                }
+                return false;
+            }
+        });
+    }
+
+    public static void set_white_image_touch_effect(final Context context, final ImageView imageView) {
+        imageView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        imageView.setColorFilter(ContextCompat.getColor(context, R.color.colorAccent));
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        imageView.setColorFilter(null);
+                        break;
+                }
+                return false;
+            }
+        });
+    }
+
+    public static void set_red_image_touch_effect(final Context context, final ImageView imageView) {
+        imageView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        imageView.setColorFilter(null);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        imageView.setColorFilter(ContextCompat.getColor(context, R.color.colorAccent));
                         break;
                 }
                 return false;

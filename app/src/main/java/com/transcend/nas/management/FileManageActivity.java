@@ -1263,6 +1263,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
 
     public void startMusicPrepare(String path) {
         ArrayList<FileInfo> list = new ArrayList<FileInfo>();
+        int index = -1;
         if (mChoiceAllSameTypeFile) {
             for (FileInfo info : mFileList) {
                 if (FileInfo.TYPE.MUSIC.equals(info.type) && MusicActivity.checkFormatSupportOrNot(info.path)) {
@@ -1277,7 +1278,13 @@ public class FileManageActivity extends DrawerMenuActivity implements
                 }
             }
         }
-        MusicManager.getInstance().setMusicList(list);
+
+        for(FileInfo info : list) {
+            index++;
+            if(path.equals(info.path))
+                break;
+        }
+        MusicManager.getInstance().setMusicList(list, index);
     }
 
     private void startMusicActivity(String mode, String root, FileInfo fileInfo) {
@@ -1311,9 +1318,10 @@ public class FileManageActivity extends DrawerMenuActivity implements
         Intent intent = new Intent();
         intent.setClass(FileManageActivity.this, MusicActivity.class);
         intent.putExtras(args);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-            startActivityForResult(intent, MusicActivity.REQUEST_CODE, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
-        else
+        //TODO : improve the switch activity animation
+        //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        //    startActivityForResult(intent, MusicActivity.REQUEST_CODE, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
+        //else
             startActivityForResult(intent, MusicActivity.REQUEST_CODE);
     }
 

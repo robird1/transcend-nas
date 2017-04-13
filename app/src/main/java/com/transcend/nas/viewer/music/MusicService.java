@@ -58,8 +58,8 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
 
         if (showProgress)
             mHandler = new Handler();
-        mFileList = MusicManager.getInstance().getMusicList();
-        mFileIndex = MusicManager.getInstance().getMusicIndex();
+
+        loadMusicList();
         mRemoteViews = new RemoteViews(getPackageName(), R.layout.notification_music);
 
         mBuilder = new NotificationCompat.Builder(this);
@@ -88,6 +88,15 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    private void loadMusicList() {
+        if(NASPref.getMusicShuffle(this)) {
+            mFileList = MusicManager.getInstance().getShuffleList();
+        } else {
+            mFileList = MusicManager.getInstance().getMusicList();
+        }
+        mFileIndex = MusicManager.getInstance().getMusicIndex();
     }
 
     private void loadMusicPlayer(int index) {
@@ -220,7 +229,7 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
         Bitmap bm = null;
         int icon = play ? R.drawable.player_pause_button : R.drawable.player_play_button;
 
-        if(init) {
+        if (init) {
             if (mFileList != null && mFileIndex >= 0 && mFileList.size() > mFileIndex) {
                 tmp = mFileList.get(mFileIndex).name;
                 if (tmp != null && !tmp.equals(""))
@@ -256,7 +265,7 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
             setBigRemoteViews(title, artist, album, bm, pendingIntent);
         }
 
-        if(addIntent) {
+        if (addIntent) {
             Intent intent1 = new Intent();
             intent1.setAction(play ? MusicReceiver.MUSIC_PAUSE : MusicReceiver.MUSIC_PLAY);
             PendingIntent pendingIntent1 = PendingIntent.getBroadcast(getApplicationContext(), 0, intent1, 0);
@@ -276,8 +285,7 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
                 mBigRemoteViews.setOnClickPendingIntent(R.id.music_previous, pendingIntent);
             }
-        }
-        else{
+        } else {
             mRemoteViews.setOnClickPendingIntent(R.id.music_play, null);
             mRemoteViews.setOnClickPendingIntent(R.id.music_next, null);
             if (mBigRemoteViews != null) {
@@ -288,7 +296,7 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
         }
 
         mRemoteViews.setImageViewResource(R.id.music_play, icon);
-        if(mBigRemoteViews != null) {
+        if (mBigRemoteViews != null) {
             mBigRemoteViews.setImageViewResource(R.id.music_play, icon);
         }
 
@@ -381,7 +389,7 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
         if (mMediaPlayer != null) {
             MusicManager.getInstance().setMusicIndex(mFileIndex);
             MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.NEW);
-            if(mFileList != null && mFileIndex < mFileList.size()) {
+            if (mFileList != null && mFileIndex < mFileList.size()) {
                 FileRecentInfo action = FileRecentFactory.create(getApplicationContext(), mFileList.get(mFileIndex), FileRecentInfo.ActionType.OPEN);
                 FileRecentManager.getInstance().setAction(action);
             }
@@ -437,6 +445,9 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
                 break;
             case NEXT:
                 loadNextMusic();
+                break;
+            case SHUFFLE:
+                loadMusicList();
                 break;
         }
     }

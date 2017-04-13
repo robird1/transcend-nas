@@ -229,6 +229,7 @@
                 <action android:name="transcend_music_play" />
                 <action android:name="transcend_music_pause" />
                 <action android:name="transcend_music_close" />
+                <action android:name="transcend_music_shuffle" />
             </intent-filter>
         </receiver>
 

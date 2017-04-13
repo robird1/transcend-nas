@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -59,11 +60,14 @@ public class MusicActivity extends AppCompatActivity implements MusicManager.Med
 
     private RelativeLayout mProgressView;
     private Toolbar mHeaderBar;
+    private TextView mHeaderTitle;
     private ImageView musicImage;
     private ImageView musicPrev;
     private ImageView musicNext;
     private ImageView musicPlay;
     private ImageView musicMode;
+    private ImageView musicShuffle;
+    private ImageView musicShuffleCheck;
     private TextView musicStart;
     private TextView musicEnd;
     private TextView musicTitle;
@@ -92,17 +96,15 @@ public class MusicActivity extends AppCompatActivity implements MusicManager.Med
         initHeaderBar();
         initPager();
         updateMusicMode(true);
+        updateMusicShuffle(true);
 
         MusicManager.getInstance().addMediaPlayerListener(this);
         if (mCurrentIndex >= 0) {
             stopMusicService();
-            MusicManager.getInstance().setMusicIndex(mCurrentIndex);
             startMusicService();
         } else {
-            MusicManager.getInstance().setMusicIndex(-1);
             finish();
         }
-
     }
 
     @Override
@@ -115,12 +117,29 @@ public class MusicActivity extends AppCompatActivity implements MusicManager.Med
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.music_manage_viewer, menu);
+        menu.findItem(R.id.music_more).setVisible(false);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.music_list:
+                new MusicListDialog(this, mList, mCurrentIndex) {
+                    @Override
+                    public void onConfirm(int position) {
+                        if(mCurrentIndex != position) {
+                            mCurrentIndex = position;
+                            stopMusicService();
+                            MusicManager.getInstance().setMusicIndex(position);
+                            startMusicService();
+                        }
+                    }
+                };
+                break;
+            case R.id.music_detail:
+                break;
             case android.R.id.home:
                 doFinish();
                 break;
@@ -137,22 +156,34 @@ public class MusicActivity extends AppCompatActivity implements MusicManager.Med
             mPath = args.getString("path");
             mMode = args.getString("mode");
             mRoot = args.getString("root");
-            mList = MusicManager.getInstance().getMusicList();
-            if (mList != null) {
-                for (int i = 0; i < mList.size(); i++) {
-                    if (mPath.equals(mList.get(i).path)) {
-                        mCurrentIndex = i;
-                        break;
-                    }
-                }
+            if(NASPref.getMusicShuffle(this)) {
+                int index = MusicManager.getInstance().getMusicIndex();
+                MusicManager.getInstance().setShuffleList(index);
+                MusicManager.getInstance().setMusicIndex(0);
             }
+            initMusicList();
         }
+    }
+
+    private void initMusicList(){
+        if(NASPref.getMusicShuffle(MusicActivity.this)) {
+            mList = MusicManager.getInstance().getShuffleList();
+        } else {
+            mList = MusicManager.getInstance().getMusicList();
+        }
+        mCurrentIndex = MusicManager.getInstance().getMusicIndex();
     }
 
     private void initHeaderBar() {
         mHeaderBar = (Toolbar) findViewById(R.id.music_header_bar);
         mHeaderBar.setTitle("");
         mHeaderBar.setNavigationIcon(R.drawable.ic_navi_backaarow_white);
+        mHeaderTitle = (TextView) findViewById(R.id.music_toolbar_title);
+        String title = mCurrentIndex >= 0 && mList.size() > mCurrentIndex ? mList.get(mCurrentIndex).name : "";
+        if (title != null && !title.equals(""))
+            mHeaderTitle.setText(title);
+        else
+            mHeaderTitle.setText(getString(R.string.music));
         setSupportActionBar(mHeaderBar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -161,6 +192,7 @@ public class MusicActivity extends AppCompatActivity implements MusicManager.Med
     private void initPager() {
         mProgressView = (RelativeLayout) findViewById(R.id.music_progress_view);
         musicImage = (ImageView) findViewById(R.id.music_image);
+        musicImage.setColorFilter(Color.WHITE);
         musicStart = (TextView) findViewById(R.id.music_start_time);
         musicEnd = (TextView) findViewById(R.id.music_end_time);
         musicTitle = (TextView) findViewById(R.id.music_title);
@@ -202,6 +234,17 @@ public class MusicActivity extends AppCompatActivity implements MusicManager.Med
                 updateMusicMode(false);
             }
         });
+
+        musicShuffle = (ImageView) findViewById(R.id.music_shuffle);
+        musicShuffle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateMusicShuffle(false);
+                MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.SHUFFLE);
+            }
+        });
+
+        musicShuffleCheck = (ImageView) findViewById(R.id.music_shuffle_check);
 
         musicSeekBar = (SeekBar) findViewById(R.id.music_seekbar);
         musicSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -295,6 +338,30 @@ public class MusicActivity extends AppCompatActivity implements MusicManager.Med
         }
     }
 
+    private void updateMusicShuffle(boolean init){
+        boolean shuffle = NASPref.getMusicShuffle(this);
+        if(init) {
+            if (shuffle) {
+                musicShuffleCheck.setVisibility(View.VISIBLE);
+            } else {
+                musicShuffleCheck.setVisibility(View.GONE);
+            }
+        } else {
+            if (shuffle) {
+                int index = 0;
+                if(mCurrentIndex >= 0 && mList.size() > mCurrentIndex)
+                    index = MusicManager.getInstance().getMusicIndex(mList.get(mCurrentIndex));
+                MusicManager.getInstance().setMusicIndex(index);
+                musicShuffleCheck.setVisibility(View.GONE);
+            } else {
+                MusicManager.getInstance().setShuffleList(mCurrentIndex);
+                MusicManager.getInstance().setMusicIndex(0);
+                musicShuffleCheck.setVisibility(View.VISIBLE);
+            }
+            NASPref.setMusicShuffle(this, !shuffle);
+        }
+    }
+
     private void updateStartTimeLabel() {
         if (mMediaPlayer != null) {
             try {
@@ -332,12 +399,18 @@ public class MusicActivity extends AppCompatActivity implements MusicManager.Med
         mCurrentIndex = MusicManager.getInstance().getMusicIndex();
         String title = mCurrentIndex >= 0 && mList.size() > mCurrentIndex ? mList.get(mCurrentIndex).name : "";
         if (title != null && !title.equals(""))
-            musicTitle.setText(title);
+            mHeaderTitle.setText(title);
         else
-            musicTitle.setText(getString(R.string.unknown_title));
+            mHeaderTitle.setText(getString(R.string.music));
 
         if (mMediaMetadataRetriever != null) {
             try {
+                String song = mMediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+                if(song == null || "".equals(song))
+                    song = getString(R.string.unknown_title);
+
+                musicTitle.setText(song);
+
                 String artist = mMediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
                 if(artist == null || "".equals(artist))
                     artist = getString(R.string.unknown_artist);
@@ -353,17 +426,21 @@ public class MusicActivity extends AppCompatActivity implements MusicManager.Med
                     InputStream is = new ByteArrayInputStream(bytes);
                     Bitmap bm = BitmapFactory.decodeStream(is);
                     musicImage.setImageBitmap(bm);
+                    musicImage.setColorFilter(null);
                 } else {
                     musicImage.setImageResource(R.drawable.player_album);
+                    musicImage.setColorFilter(Color.WHITE);
                 }
             } catch (IllegalStateException e){
                 e.printStackTrace();
                 musicAlbum.setText(getString(R.string.unknown_album));
                 musicImage.setImageResource(R.drawable.player_album);
+                musicImage.setColorFilter(Color.WHITE);
             }
         } else {
             musicAlbum.setVisibility(View.GONE);
             musicImage.setImageResource(R.drawable.player_album);
+            musicImage.setColorFilter(Color.WHITE);
         }
 
         updateStartTimeLabel();
@@ -448,6 +525,8 @@ public class MusicActivity extends AppCompatActivity implements MusicManager.Med
                 mProgressView.setVisibility(View.INVISIBLE);
                 pauseMusicPlayer();
                 doFinish();
+            } else if (index == MusicManager.MediaPlayerStatus.SHUFFLE.ordinal()) {
+                initMusicList();
             }
             super.handleMessage(msg);
         }

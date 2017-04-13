@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <item
+        android:id="@+id/music_more"
+        android:icon="@drawable/ic_toolbar_more_white"
+        android:title="@string/more"
+        app:showAsAction="always">
+
+        <menu>
+
+            <item
+                android:id="@+id/music_list"
+                android:icon="@drawable/ic_file_white_24dp"
+                android:title="List"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/music_detail"
+                android:icon="@drawable/ic_toolbar_info_white"
+                android:title="Information"
+                app:showAsAction="never" />
+
+        </menu>
+
+    </item>
+
+</menu>

@@ -15,6 +15,7 @@ public class MusicReceiver extends BroadcastReceiver {
     public static final String MUSIC_PLAY = "transcend_music_play";
     public static final String MUSIC_PAUSE = "transcend_music_pause";
     public static final String MUSIC_CLOSE = "transcend_music_close";
+    public static final String MUSIC_SHUFFLE = "transcend_music_shuffle";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -31,6 +32,8 @@ public class MusicReceiver extends BroadcastReceiver {
                 MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.PAUSE);
             }else if(MUSIC_CLOSE.equals(action)){
                 MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.STOP);
+            }else if(MUSIC_CLOSE.equals(action)){
+                MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.SHUFFLE);
             }
         }
     }

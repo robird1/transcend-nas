@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -50,6 +51,8 @@ public class FileRecentActivity extends FileManageActivity {
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setOnScrollListener(new FileManageRecyclerListener(ImageLoader.getInstance(), true, false));
         mRecyclerEmptyView = (LinearLayout) findViewById(R.id.main_recycler_empty_view);
+        ImageView image = (ImageView) findViewById(R.id.main_recycler_empty_image);
+        image.setImageResource(R.drawable.image_recent_empty);
         mSectionDecoration = new SectionDecoration(null, mContext);
         mRecyclerView.addItemDecoration(mSectionDecoration);
     }

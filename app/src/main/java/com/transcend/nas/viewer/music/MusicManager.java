@@ -6,7 +6,9 @@ import android.util.Log;
 
 import com.transcend.nas.management.FileInfo;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Created by ike_lee on 2016/11/16.
@@ -18,13 +20,14 @@ public class MusicManager {
     private static final Object mMute = new Object();
 
     private ArrayList<FileInfo> mMusicList;
+    private ArrayList<FileInfo> mShuffleList;
     private int mMusicIndex = -1;
     private MediaPlayer mMediaPlayer;
     private MediaMetadataRetriever mMediaMetadataRetriever;
     private ArrayList<MediaPlayerListener> mMediaPlayerListener;
 
     public enum MediaPlayerStatus {
-        NEW, LOAD, PLAY, PAUSE, STOP, PREV, NEXT, ERROR
+        NEW, LOAD, PLAY, PAUSE, STOP, PREV, NEXT, SHUFFLE, ERROR
     }
 
     public interface MediaPlayerListener {
@@ -32,7 +35,8 @@ public class MusicManager {
     }
 
     public MusicManager() {
-        mMusicList = new ArrayList<FileInfo>();
+        mMusicList = new ArrayList<>();
+        mShuffleList = new ArrayList<>();
         mMediaPlayerListener = new ArrayList<MediaPlayerListener>();
     }
 
@@ -45,22 +49,65 @@ public class MusicManager {
     }
 
     public void setMusicList(ArrayList<FileInfo> list) {
+        setMusicList(list, 0);
+    }
+
+    public void setMusicList(ArrayList<FileInfo> list, int index) {
         if (mMusicList == null)
             mMusicList = new ArrayList<FileInfo>();
         mMusicList.clear();
 
+        if (mShuffleList == null)
+            mShuffleList = new ArrayList<FileInfo>();
+        mShuffleList.clear();
+
         for (FileInfo info : list) {
             mMusicList.add(info);
         }
+
+        mMusicIndex = index;
     }
 
     public ArrayList<FileInfo> getMusicList() {
         return mMusicList;
     }
 
-    public int getMusicListSize(){
+    public int getMusicIndex(FileInfo info) {
+        if (info != null && mMusicList != null) {
+            int index = -1;
+            for (FileInfo tmp : mMusicList) {
+                index++;
+                if (tmp.path.equals(info.path) && tmp.name.equals(info.name))
+                    return index;
+            }
+        }
+        return -1;
+    }
+
+    public void setShuffleList(int index) {
+        if (mShuffleList == null)
+            mShuffleList = new ArrayList<FileInfo>();
+        mShuffleList.clear();
+
+        if (mMusicList != null && mMusicList.size() > 0) {
+            int length = mMusicList.size();
+            for (int i = 0; i < length; i++) {
+                if (i != index)
+                    mShuffleList.add(mMusicList.get(i));
+            }
+            Collections.shuffle(mShuffleList);
+            if (length > index && index >= 0)
+                mShuffleList.add(0, mMusicList.get(index));
+        }
+    }
+
+    public ArrayList<FileInfo> getShuffleList() {
+        return mShuffleList;
+    }
+
+    public int getMusicListSize() {
         int size = 0;
-        if(mMusicList != null)
+        if (mMusicList != null)
             size = mMusicList.size();
         return size;
     }
