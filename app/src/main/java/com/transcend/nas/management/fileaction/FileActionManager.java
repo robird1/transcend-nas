@@ -287,7 +287,7 @@ public class FileActionManager extends AbstractActionManager {
     public boolean isRemoteAction(String path) {
         checkServiceType(path);
         String mode = getServiceMode();
-        return NASApp.MODE_SMB.equals(mode);// || NASApp.MODE_RECENT.equals(mode);
+        return NASApp.MODE_SMB.equals(mode) || NASApp.MODE_RECENT.equals(mode);
     }
 
 }

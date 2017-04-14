@@ -20,6 +20,15 @@
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
+        <TextView
+            android:id="@+id/viewer_toolbar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/photo"
+            android:textColor="@color/colorPrimary"
+            android:textSize="20sp" />
+
     </android.support.v7.widget.Toolbar>
 
     <android.support.v7.widget.Toolbar

@@ -13,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.transcend.nas.NASApp;
 import com.transcend.nas.R;
 import com.transcend.nas.management.fileaction.FileActionManager;
 import com.transcend.nas.service.FileRecentInfo;
@@ -43,6 +44,13 @@ public class FileRecentActivity extends FileManageActivity {
 
     @Override
     protected void initRecyclerView() {
+        //mRecyclerRefresh = (SwipeRefreshLayout) findViewById(R.id.main_recycler_refresh);
+        //mRecyclerRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        //    @Override
+        //    public void onRefresh() {
+        //        doRefresh();
+        //    }
+        //});
         mRecyclerAdapter = new FileRecentRecyclerAdapter(this, mFileList);
         mRecyclerAdapter.setOnRecyclerItemCallbackListener(this);
         mRecyclerView = (RecyclerView) findViewById(R.id.main_recycler_view);
@@ -137,6 +145,7 @@ public class FileRecentActivity extends FileManageActivity {
             updateScreen();
             checkEmptyView();
             mProgressView.setVisibility(View.INVISIBLE);
+            //mRecyclerRefresh.setRefreshing(false);
         } else if (loader instanceof RecentCheckLoader) {
             checkRecentCheckLoader(success, (RecentCheckLoader) loader);
             mProgressView.setVisibility(View.INVISIBLE);
@@ -171,10 +180,17 @@ public class FileRecentActivity extends FileManageActivity {
             boolean exist = loader.isExistFile();
             if (exist) {
                 FileInfo info = mFileList.get(mFileIndex);
-                if (FileInfo.TYPE.DIR.equals(info.type))
-                    startFileManageActivity(R.id.nav_storage, info.path);
-                else
-                    super.onRecyclerItemClick(mFileIndex);
+                switch (info.type) {
+                    case DIR:
+                        startFileManageActivity(R.id.nav_storage, info.path);
+                        break;
+                    case PHOTO:
+                        startViewerActivity(NASApp.MODE_SMB, NASApp.ROOT_SMB, info.path);
+                        break;
+                    default:
+                        super.onRecyclerItemClick(mFileIndex);
+                }
+
             } else {
                 removeData(mFileIndex);
                 Toast.makeText(this, "File not found", Toast.LENGTH_SHORT).show();

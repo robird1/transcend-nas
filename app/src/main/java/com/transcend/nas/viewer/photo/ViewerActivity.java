@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.cast.ApplicationMetadata;
@@ -68,6 +69,7 @@ public class ViewerActivity extends AppCompatActivity implements
     private RelativeLayout mProgressView;
     private Toolbar mHeaderBar;
     private Toolbar mFooterBar;
+    private TextView mHeaderTitle;
     private ImageView mInfo;
     private ImageView mDelete;
     private ImageView mUpload;
@@ -205,6 +207,9 @@ public class ViewerActivity extends AppCompatActivity implements
         mHeaderBar = (Toolbar) findViewById(R.id.viewer_header_bar);
         mHeaderBar.setTitle("");
         mHeaderBar.setNavigationIcon(R.drawable.ic_navi_backaarow_white);
+        mHeaderTitle = (TextView) findViewById(R.id.viewer_toolbar_title);
+        if(mList != null && mList.size() > mCurrentIndex && mCurrentIndex >= 0)
+            mHeaderTitle.setText(mList.get(mCurrentIndex).name);
         setSupportActionBar(mHeaderBar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -304,8 +309,9 @@ public class ViewerActivity extends AppCompatActivity implements
 
             @Override
             public void onPageSelected(int position) {
-                doPhotoCast(position);
-                if(mList != null && position < mList.size()) {
+                if(mList != null && 0 <= position && position < mList.size()) {
+                    doPhotoCast(position);
+                    mHeaderTitle.setText(mList.get(position).name);
                     FileRecentInfo action = FileRecentFactory.create(ViewerActivity.this, mList.get(position), FileRecentInfo.ActionType.OPEN);
                     FileRecentManager.getInstance().setAction(action);
                 }
@@ -317,7 +323,7 @@ public class ViewerActivity extends AppCompatActivity implements
             }
         });
         doPhotoCast(index);
-        if(mList != null && index < mList.size()) {
+        if(mList != null && 0 <= index && index < mList.size()) {
             FileRecentInfo action = FileRecentFactory.create(ViewerActivity.this, mList.get(index), FileRecentInfo.ActionType.OPEN);
             FileRecentManager.getInstance().setAction(action);
         }

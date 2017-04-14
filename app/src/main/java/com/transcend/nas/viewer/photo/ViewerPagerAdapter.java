@@ -3,11 +3,14 @@ package com.transcend.nas.viewer.photo;
 import android.content.Context;
 import android.support.v4.view.PagerAdapter;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.transcend.nas.R;
 import com.transcend.nas.management.firmware.FileFactory;
 
 import java.util.ArrayList;
@@ -52,25 +55,29 @@ public class ViewerPagerAdapter extends PagerAdapter {
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
+        LayoutInflater layoutInflater = LayoutInflater.from(mContext);
+        View view = layoutInflater.inflate(R.layout.viewer_item, container, false);
         String path = mList.get(position);
-        PhotoView pv = new PhotoView(mContext);
+        PhotoView pv = (PhotoView) view.findViewById(R.id.viewer_image);
         pv.setDrawingCacheEnabled(false);
         pv.setOnPhotoTapListener(mOnPhotoTapListener);
-        FileFactory.getInstance().displayPhoto(mContext, false, path, pv);
-        container.addView(pv);
+        ProgressBar pb = (ProgressBar) view.findViewById(R.id.viewer_progress);
+        FileFactory.getInstance().displayPhoto(mContext, false, path, pv, pb);
+        container.addView(view);
         Log.w(TAG, "instantiateItem [" + position + "]: " + path);
-        return pv;
+        return view;
     }
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
-        if (object instanceof ImageView) {
-            ImageView iv = (ImageView) object;
-            ImageLoader.getInstance().cancelDisplayTask(iv);
+        if (object instanceof View) {
+            View iv = (View) object;
+            ImageView img = (ImageView) iv.findViewById(R.id.viewer_image);
+            if(img != null)
+                ImageLoader.getInstance().cancelDisplayTask(img);
             container.removeView(iv);
         }
     }
-
 
     public void removeView(int index) {
         mList.remove(index);

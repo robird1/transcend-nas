@@ -2,16 +2,17 @@ package com.transcend.nas.management.firmware;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.media.Image;
 import android.net.Uri;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
-import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListener;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
@@ -107,6 +108,10 @@ public class FileFactory {
     }
 
     public void displayPhoto(Context context, boolean thumbnail, String path, ImageView view) {
+        displayPhoto(context, thumbnail, path, view, null);
+    }
+
+    public void displayPhoto(Context context, boolean thumbnail, String path, ImageView view, final ProgressBar progressBar) {
         String url = getPhotoPath(context, thumbnail, path);
         if (path.startsWith(NASApp.ROOT_STG) || NASUtils.isSDCardPath(context, path)) {
             FileInfo.TYPE type = FileInfo.getType(path);
@@ -121,18 +126,57 @@ public class FileFactory {
                     url = Uri.decode(url);
                 }
                 ImageLoader.getInstance().displayImage(url, view, options);
-            } else if(type.equals(FileInfo.TYPE.VIDEO)){
+            } else if (type.equals(FileInfo.TYPE.VIDEO)) {
                 //TODO : load video thumbnail
                 //MICRO_KIND, size: 96 x 96 thumbnail
                 //Bitmap bmThumbnail = ThumbnailUtils.createVideoThumbnail(path, MediaStore.Video.Thumbnails.MICRO_KIND);
                 //view.setImageBitmap(bmThumbnail);
                 ImageLoader.getInstance().cancelDisplayTask(view);
-            } else if(type.equals(FileInfo.TYPE.MUSIC)){
+            } else if (type.equals(FileInfo.TYPE.MUSIC)) {
                 //TODO : load music thumbnail
                 ImageLoader.getInstance().cancelDisplayTask(view);
             }
         } else {
-            ImageLoader.getInstance().displayImage(url, view);
+            if (progressBar != null) {
+                DisplayImageOptions options = new DisplayImageOptions.Builder()
+                        .bitmapConfig(Bitmap.Config.RGB_565)
+                        .cacheInMemory(true)
+                        .cacheOnDisk(true)
+                        .build();
+                SimpleImageLoadingListener simpleImageLoadingListener = new SimpleImageLoadingListener() {
+                    @Override
+                    public void onLoadingStarted(String imageUri, View view) {
+                        if(progressBar != null) {
+                            progressBar.setProgress(0);
+                            progressBar.setMax(100);
+                            progressBar.setVisibility(View.VISIBLE);
+                        }
+                    }
+
+                    @Override
+                    public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+                        if(progressBar != null)
+                            progressBar.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                        if(progressBar != null)
+                            progressBar.setVisibility(View.GONE);
+                    }
+                };
+
+                ImageLoadingProgressListener imageLoadingProgressListener = new ImageLoadingProgressListener() {
+                    @Override
+                    public void onProgressUpdate(String imageUri, View view, final int current, final int total) {
+                        if(progressBar != null)
+                            progressBar.setProgress(Math.round(100.0f * current / total));
+                    }
+                };
+                ImageLoader.getInstance().displayImage(url, view, options, simpleImageLoadingListener, imageLoadingProgressListener);
+            } else {
+                ImageLoader.getInstance().displayImage(url, view);
+            }
         }
     }
 
@@ -154,7 +198,7 @@ public class FileFactory {
         } else {
             //First, try twonky image, and try webdav image when twonky image empty
             url = TwonkyManager.getInstance().getUrlFromPath(thumbnail, path);
-            if(null == url || "".equals(url)) {
+            if (null == url || "".equals(url)) {
                 Server server = ServerManager.INSTANCE.getCurrentServer();
                 String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
                 String username = server.getUsername();
@@ -183,12 +227,12 @@ public class FileFactory {
                 }
 
                 String convert = NASUtils.encodeString(filepath);
-                if(convert != null && !"".equals(convert))
+                if (convert != null && !"".equals(convert))
                     filepath = convert;
 
-                if(forceLocal) {
+                if (forceLocal) {
                     ServerInfo info = server.getServerInfo();
-                    if(info != null)
+                    if (info != null)
                         hostname = info.ipAddress;
                 }
 

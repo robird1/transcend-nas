@@ -15,6 +15,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.AppCompatSpinner;
@@ -104,6 +105,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     protected Toolbar mToolbar;
     protected AppCompatSpinner mDropdown;
     protected FileManageDropdownAdapter mDropdownAdapter;
+    //protected SwipeRefreshLayout mRecyclerRefresh;
     protected RecyclerView mRecyclerView;
     protected LinearLayout mRecyclerEmptyView;
     protected FileManageRecyclerAdapter mRecyclerAdapter;
@@ -423,6 +425,13 @@ public class FileManageActivity extends DrawerMenuActivity implements
     }
 
     protected void initRecyclerView() {
+        //mRecyclerRefresh = (SwipeRefreshLayout) findViewById(R.id.main_recycler_refresh);
+        //mRecyclerRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        //    @Override
+        //    public void onRefresh() {
+        //        doRefresh();
+        //    }
+        //});
         FileManageRecyclerAdapter.LayoutType type = NASPref.getFileViewType(this);
         mRecyclerAdapter = new FileManageRecyclerAdapter(this, mFileList);
         mRecyclerAdapter.setOnRecyclerItemCallbackListener(this);
@@ -749,6 +758,8 @@ public class FileManageActivity extends DrawerMenuActivity implements
         Loader<Boolean> loader = mActionHelper.onCreateLoader(id, args);
         if (loader instanceof SmbFileListLoader)
             mSmbFileListLoader = (SmbFileListLoader) loader;
+        //if(mRecyclerRefresh.isRefreshing())
+        //    mProgressView.setVisibility(View.INVISIBLE);
         return loader;
     }
 
@@ -822,6 +833,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
 
         checkEmptyView();
         mProgressView.setVisibility(View.INVISIBLE);
+        //mRecyclerRefresh.setRefreshing(false);
     }
 
     @Override
@@ -1366,7 +1378,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         FileFactory.getInstance().setFileList(list);
     }
 
-    private void startViewerActivity(String mode, String root, String path) {
+    public void startViewerActivity(String mode, String root, String path) {
         startViewerPrepare(path);
         Bundle args = new Bundle();
         args.putString("path", path);
@@ -1375,9 +1387,9 @@ public class FileManageActivity extends DrawerMenuActivity implements
         Intent intent = new Intent();
         intent.setClass(FileManageActivity.this, ViewerActivity.class);
         intent.putExtras(args);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-            startActivityForResult(intent, ViewerActivity.REQUEST_CODE, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
-        else
+        //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        //    startActivityForResult(intent, ViewerActivity.REQUEST_CODE, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
+        //else
             startActivityForResult(intent, ViewerActivity.REQUEST_CODE);
     }
 
