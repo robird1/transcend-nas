@@ -281,8 +281,7 @@ public abstract class DrawerMenuActivity extends AppCompatActivity implements
         TwonkyManager.getInstance().cleanTwonky();
 
         //clean lan check
-        LanCheckManager.getInstance().setLanConnect(false, "");
-        LanCheckManager.getInstance().setInit(false);
+        LanCheckManager.getInstance().destroy();
     }
 
     protected void clearDataAfterLogout() {

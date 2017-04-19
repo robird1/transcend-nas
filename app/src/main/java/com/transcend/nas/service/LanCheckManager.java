@@ -8,7 +8,10 @@ import android.net.nsd.NsdServiceInfo;
 import android.os.Handler;
 import android.util.Log;
 
+import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
+import com.tutk.IOTC.P2PService;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -56,8 +59,24 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
     /**
      * LanCheck Module
      */
-    public void setInit(boolean init) {
-        isInit = init;
+    public void initLanCheck() {
+        if (!isInit) {
+            Server server = ServerManager.INSTANCE.getCurrentServer();
+            String hostname = server.getHostname();
+            if (hostname.contains(P2PService.getInstance().getP2PIP())) {
+                setLanConnect(false, "");
+                startLanCheck();
+            } else {
+                setLanConnect(true, hostname);
+            }
+        }
+
+        isInit = true;
+    }
+
+    public void destroy() {
+        setLanConnect(false, "");
+        isInit = false;
     }
 
     public void setLanConnect(boolean connect, String ip) {
@@ -134,7 +153,7 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
     public void startAndroidDiscovery() {
         mServiceList.clear();
         mServiceInfoList.clear();
-        if(mNsdManager == null)
+        if (mNsdManager == null)
             mNsdManager = (NsdManager) NASApp.getContext().getSystemService(Context.NSD_SERVICE);
 
         ConnectivityManager connectivityManager = (ConnectivityManager) NASApp.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -146,7 +165,7 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
                     stopAndroidDiscovery();  // Cancel any existing discovery request
                     initializeResolveListener();
                     initializeDiscoveryListener();
-                    if(mNsdManager != null)
+                    if (mNsdManager != null)
                         mNsdManager.discoverServices(TYPE, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
                     break;
             }
@@ -156,7 +175,7 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
     public void stopAndroidDiscovery() {
         if (mDiscoveryListener != null) {
             try {
-                if(mNsdManager != null)
+                if (mNsdManager != null)
                     mNsdManager.stopServiceDiscovery(mDiscoveryListener);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -187,7 +206,7 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
                     mServiceInfoList.add(service);
                     if (!isStartResolve) {
                         isStartResolve = true;
-                        if(mNsdManager != null)
+                        if (mNsdManager != null)
                             mNsdManager.resolveService(service, mResolveListener);
                     }
                 }
@@ -238,7 +257,7 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
                 if (size > 0) {
                     mServiceInfoList.remove(0);
                     if (size - 1 > 0) {
-                        if(mNsdManager != null)
+                        if (mNsdManager != null)
                             mNsdManager.resolveService(mServiceInfoList.get(0), mResolveListener);
                         return;
                     }

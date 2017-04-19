@@ -48,7 +48,8 @@ public class FileRecentActivity extends FileManageActivity {
         //mRecyclerRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
         //    @Override
         //    public void onRefresh() {
-        //        doRefresh();
+        //        if(!mRecyclerRefresh.isRefreshing())
+        //            doRefresh();
         //    }
         //});
         mRecyclerAdapter = new FileRecentRecyclerAdapter(this, mFileList);
@@ -146,12 +147,14 @@ public class FileRecentActivity extends FileManageActivity {
             checkEmptyView();
             mProgressView.setVisibility(View.INVISIBLE);
             //mRecyclerRefresh.setRefreshing(false);
-        } else if (loader instanceof RecentCheckLoader) {
+            return;
+        } else if (loader instanceof RecentCheckLoader && success) {
             checkRecentCheckLoader(success, (RecentCheckLoader) loader);
             mProgressView.setVisibility(View.INVISIBLE);
-        } else {
-            super.onLoadFinished(loader, success);
+            return;
         }
+
+        super.onLoadFinished(loader, success);
     }
 
     private void checkRecentListLoader(boolean success, RecentListLoader loader) {

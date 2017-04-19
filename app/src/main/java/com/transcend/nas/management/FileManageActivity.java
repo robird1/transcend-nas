@@ -293,7 +293,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
                     startActivity(intent);
                 }
             } else {
-                LanCheckManager.getInstance().setInit(true);
+                LanCheckManager.getInstance().initLanCheck();
             }
         } else if (requestCode == ExternalStorageLollipop.REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
@@ -373,21 +373,12 @@ public class FileManageActivity extends DrawerMenuActivity implements
         };
 
         Server server = ServerManager.INSTANCE.getCurrentServer();
-        String hostname = server.getHostname();
-
-        LanCheckManager.getInstance().setInit(true);
-        if (hostname.contains(P2PService.getInstance().getP2PIP())) {
-            LanCheckManager.getInstance().setLanConnect(false, "");
-            LanCheckManager.getInstance().startLanCheck();
-        } else {
-            LanCheckManager.getInstance().setLanConnect(true, hostname);
-        }
-
         ServerInfo info = server.getServerInfo();
         if (info != null && info.hostName != null && !"".equals(info.hostName)) {
             NASPref.setDeviceName(this, info.hostName);
         }
 
+        LanCheckManager.getInstance().initLanCheck();
         TwonkyManager.getInstance().initTwonky();
     }
 

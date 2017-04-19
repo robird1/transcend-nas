@@ -38,7 +38,7 @@ public class CustomActionManager extends AbstractActionManager {
     private int mPreviousLoaderID = -1;
     private Bundle mPreviousLoaderArgs = null;
     private int[] RETRY_CMD = new int[]{LoaderID.SMB_FILE_LIST, LoaderID.SMB_FILE_RENAME, LoaderID.SMB_FILE_DELETE,
-            LoaderID.SMB_NEW_FOLDER, LoaderID.EVENT_NOTIFY};
+            LoaderID.SMB_NEW_FOLDER, LoaderID.EVENT_NOTIFY, LoaderID.SMB_FILE_CHECK};
 
     private OpenWithUploadHandler mOpenWithUploadHandler;
 
