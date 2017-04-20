@@ -113,7 +113,7 @@
                 android:layout_width="56dp"
                 android:layout_height="56dp"
                 android:layout_centerInParent="true"
-
+                android:background="@drawable/player_selector"
                 android:src="@drawable/player_play_button" />
 
             <ImageView

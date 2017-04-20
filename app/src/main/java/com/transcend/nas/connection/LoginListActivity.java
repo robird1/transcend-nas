@@ -5,7 +5,6 @@ import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
-import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -846,11 +845,11 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                     public boolean onTouch(View v, MotionEvent event) {
                         switch (event.getAction()) {
                             case MotionEvent.ACTION_DOWN:
-                                v.setBackground(ContextCompat.getDrawable(LoginListActivity.this, R.drawable.dotted_line_selected_layout));
+                                v.setBackground(ContextCompat.getDrawable(LoginListActivity.this, R.drawable.button_dotted_line_press));
                                 break;
                             case MotionEvent.ACTION_CANCEL:
                             case MotionEvent.ACTION_UP:
-                                v.setBackground(ContextCompat.getDrawable(LoginListActivity.this, R.drawable.dotted_line_layout));
+                                v.setBackground(ContextCompat.getDrawable(LoginListActivity.this, R.drawable.button_dotted_line));
                                 break;
                         }
                         return false;

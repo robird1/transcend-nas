@@ -18,6 +18,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -68,12 +69,12 @@ public class ViewerActivity extends AppCompatActivity implements
 
     private RelativeLayout mProgressView;
     private Toolbar mHeaderBar;
-    private Toolbar mFooterBar;
+    private LinearLayout mFooterBar;
     private TextView mHeaderTitle;
     private ImageView mInfo;
     private ImageView mDelete;
-    private ImageView mUpload;
-    private ImageView mDownload;
+    private ImageView mTransmit;
+    private ImageView mShare;
     private ViewerPager mPager;
     private ViewerPagerAdapter mPagerAdapter;
     private VideoCastManager mCastManager;
@@ -87,6 +88,8 @@ public class ViewerActivity extends AppCompatActivity implements
     private ArrayList<FileInfo> mList;
     private int mCurrentIndex = -1;
     private boolean evenDelete = false;
+    private int[] mTransmitDrawable;
+    private boolean isDownload = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -163,12 +166,6 @@ public class ViewerActivity extends AppCompatActivity implements
             case android.R.id.home:
                 doFinish();
                 break;
-            case R.id.image_manage_editor_action_upload:
-                startFileActionLocateActivity(NASApp.ACT_UPLOAD);
-                break;
-            case R.id.image_manage_editor_action_download:
-                startFileActionLocateActivity(NASApp.ACT_DOWNLOAD);
-                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -179,10 +176,10 @@ public class ViewerActivity extends AppCompatActivity implements
             doInfo();
         } else if (v.equals(mDelete)) {
             doDelete();
-        } else if (v.equals(mDownload)) {
-            startFileActionLocateActivity(NASApp.ACT_DOWNLOAD);
-        } else if (v.equals(mUpload)) {
-            startFileActionLocateActivity(NASApp.ACT_UPLOAD);
+        } else if (v.equals(mTransmit)) {
+            startFileActionLocateActivity(isDownload ? NASApp.ACT_DOWNLOAD : NASApp.ACT_UPLOAD);
+        } else if (v.equals(mShare)) {
+
         }
     }
 
@@ -201,6 +198,17 @@ public class ViewerActivity extends AppCompatActivity implements
         mMode = args.getString("mode");
         mRoot = args.getString("root");
         mList = FileFactory.getInstance().getFileList();
+
+        mTransmitDrawable = new int[2];
+        if(NASApp.MODE_SMB.equals(mMode)) {
+            isDownload = true;
+            mTransmitDrawable[0] = R.drawable.ic_toolbar_download_white;
+            mTransmitDrawable[1] = R.drawable.ic_toolbar_download_gray;
+        } else {
+            isDownload = false;
+            mTransmitDrawable[0] = R.drawable.ic_toolbar_upload_white;
+            mTransmitDrawable[1] = R.drawable.ic_toolbar_upload_gray;
+        }
     }
 
     private void initHeaderBar() {
@@ -216,7 +224,7 @@ public class ViewerActivity extends AppCompatActivity implements
     }
 
     private void initFooterBar() {
-        mFooterBar = (Toolbar) findViewById(R.id.viewer_footer_bar);
+        mFooterBar = (LinearLayout) findViewById(R.id.viewer_footer_bar);
         mInfo = (ImageView) findViewById(R.id.viewer_action_info);
         mInfo.setOnClickListener(this);
         mInfo.setOnTouchListener(new View.OnTouchListener() {
@@ -251,37 +259,35 @@ public class ViewerActivity extends AppCompatActivity implements
             }
         });
 
-        mDownload = (ImageView) findViewById(R.id.viewer_action_download);
-        mDownload.setVisibility(NASApp.MODE_SMB.equals(mMode) ? View.VISIBLE : View.GONE);
-        mDownload.setOnClickListener(this);
-        mDownload.setOnTouchListener(new View.OnTouchListener() {
+        mTransmit = (ImageView) findViewById(R.id.viewer_action_transmit);
+        mTransmit.setImageResource(mTransmitDrawable[0]);
+        mTransmit.setOnClickListener(this);
+        mTransmit.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        mDownload.setImageResource(R.drawable.ic_toolbar_download_gray);
+                        mTransmit.setImageResource(mTransmitDrawable[1]);
                         break;
                     case MotionEvent.ACTION_UP:
-                        mDownload.setImageResource(R.drawable.ic_toolbar_download_white);
+                        mTransmit.setImageResource(mTransmitDrawable[0]);
                         break;
                 }
                 return false;
             }
         });
 
-
-        mUpload = (ImageView) findViewById(R.id.viewer_action_upload);
-        mUpload.setVisibility(NASApp.MODE_SMB.equals(mMode) ? View.GONE : View.VISIBLE);
-        mUpload.setOnClickListener(this);
-        mUpload.setOnTouchListener(new View.OnTouchListener() {
+        mShare = (ImageView) findViewById(R.id.viewer_action_share);
+        mShare.setOnClickListener(this);
+        mShare.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        mUpload.setImageResource(R.drawable.ic_toolbar_upload_gray);
+                        mShare.setImageResource(R.drawable.ic_toolbar_share_gray);
                         break;
                     case MotionEvent.ACTION_UP:
-                        mUpload.setImageResource(R.drawable.ic_toolbar_upload_white);
+                        mShare.setImageResource(R.drawable.ic_toolbar_share_white);
                         break;
                 }
                 return false;

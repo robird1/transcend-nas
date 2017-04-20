@@ -7,18 +7,18 @@
         android:id="@+id/listitem_split"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@android:color/black"/>
+        android:background="@android:color/black" />
 
     <LinearLayout
-        android:layout_below="@id/listitem_split"
         android:id="@+id/listitem_nas_finder_add_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/listitem_split"
         android:layout_centerInParent="true"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginTop="20dp"
-        android:background="@drawable/dotted_line_layout"
+        android:background="@drawable/button_dotted_line"
         android:orientation="horizontal"
         android:visibility="visible">
 
@@ -32,9 +32,9 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:ellipsize="marquee"
             android:gravity="center_vertical"
-            android:layout_weight="1"
             android:text="@string/add_device"
             android:textColor="@color/textColorPrimary"
             android:textSize="16sp" />
@@ -45,8 +45,8 @@
         android:id="@+id/listitem_nas_finder_list_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/selector"
         android:layout_below="@id/listitem_split"
+        android:background="?android:attr/selectableItemBackground"
         android:visibility="gone">
 
         <View
@@ -65,8 +65,8 @@
             android:layout_width="72dp"
             android:layout_height="72dp"
             android:layout_alignParentRight="true"
-            android:padding="20dp"
             android:background="?selectableItemBackgroundBorderless"
+            android:padding="20dp"
             android:src="@drawable/ic_toolbar_delete_gray" />
 
         <LinearLayout

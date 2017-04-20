@@ -31,53 +31,48 @@
 
     </android.support.v7.widget.Toolbar>
 
-    <android.support.v7.widget.Toolbar
+    <LinearLayout
         android:id="@+id/viewer_footer_bar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:layout_alignParentBottom="true"
+        android:layout_marginLeft="-16dp"
+        android:layout_marginRight="-16dp"
         android:background="@drawable/viewer_footer_bar">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignParentBottom="true">
+        <ImageView
+            android:id="@+id/viewer_action_transmit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:src="@drawable/ic_toolbar_download_white" />
 
-            <ImageView
-                android:id="@+id/viewer_action_delete"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:src="@drawable/ic_toolbar_delete_white" />
+        <ImageView
+            android:id="@+id/viewer_action_share"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:src="@drawable/ic_toolbar_share_white" />
 
-            <ImageView
-                android:id="@+id/viewer_action_info"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:src="@drawable/ic_toolbar_info_white" />
+        <ImageView
+            android:id="@+id/viewer_action_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:src="@drawable/ic_toolbar_info_white" />
 
-            <ImageView
-                android:id="@+id/viewer_action_download"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:src="@drawable/ic_toolbar_download_white" />
+        <ImageView
+            android:id="@+id/viewer_action_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:src="@drawable/ic_toolbar_delete_white" />
 
-            <ImageView
-                android:id="@+id/viewer_action_upload"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:src="@drawable/ic_toolbar_upload_white" />
-
-        </LinearLayout>
-
-    </android.support.v7.widget.Toolbar>
+    </LinearLayout>
 
     <RelativeLayout
         android:id="@+id/viewer_progress_view"

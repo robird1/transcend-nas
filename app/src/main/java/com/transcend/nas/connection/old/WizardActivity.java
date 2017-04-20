@@ -77,7 +77,7 @@ public class WizardActivity extends AppCompatActivity implements LoaderManager.L
         Button button = (Button) findViewById(R.id.wizard_start);
         button.setOnClickListener(this);
         StyleFactory.set_gray_button_touch_effect(this, button);
-        StyleFactory.set_button_Drawable_right(this, button, R.drawable.ic_navigation_arrow_rotation, 50);
+        StyleFactory.set_button_Drawable_right(this, button, R.drawable.ic_navi_backaarrow_rotation, 50);
         iBackground = (ImageView) findViewById(R.id.wizard_bg);
         Point p = new Point();
         getWindowManager().getDefaultDisplay().getSize(p);
