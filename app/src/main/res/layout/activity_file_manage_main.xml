@@ -40,12 +40,19 @@
             android:layout_below="@+id/main_app_bar"
             android:background="@drawable/toolbar_dropshadow" />
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/main_recycler_view"
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/main_recycler_refresh"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/main_toolbar_shadow"
-            android:background="@color/colorPrimary" />
+            android:layout_below="@+id/main_toolbar_shadow">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/main_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/colorPrimary" />
+
+        </android.support.v4.widget.SwipeRefreshLayout>
 
         <LinearLayout
             android:id="@+id/main_recycler_empty_view"
@@ -134,6 +141,7 @@
         android:visibility="invisible">
 
         <ProgressBar
+            android:id="@+id/main_progress_bar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true" />

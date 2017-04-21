@@ -34,6 +34,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -105,12 +106,13 @@ public class FileManageActivity extends DrawerMenuActivity implements
     protected Toolbar mToolbar;
     protected AppCompatSpinner mDropdown;
     protected FileManageDropdownAdapter mDropdownAdapter;
-    //protected SwipeRefreshLayout mRecyclerRefresh;
+    protected SwipeRefreshLayout mRecyclerRefresh;
     protected RecyclerView mRecyclerView;
     protected LinearLayout mRecyclerEmptyView;
     protected FileManageRecyclerAdapter mRecyclerAdapter;
     protected FloatingActionButton mFab;
     protected RelativeLayout mProgressView;
+    protected ProgressBar mProgressBar;
     protected Snackbar mSnackbar;
     protected ActionMode mEditorMode;
     protected RelativeLayout mEditorModeView;
@@ -416,13 +418,13 @@ public class FileManageActivity extends DrawerMenuActivity implements
     }
 
     protected void initRecyclerView() {
-        //mRecyclerRefresh = (SwipeRefreshLayout) findViewById(R.id.main_recycler_refresh);
-        //mRecyclerRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-        //    @Override
-        //    public void onRefresh() {
-        //        doRefresh();
-        //    }
-        //});
+        mRecyclerRefresh = (SwipeRefreshLayout) findViewById(R.id.main_recycler_refresh);
+        mRecyclerRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                doRefresh();
+            }
+        });
         FileManageRecyclerAdapter.LayoutType type = NASPref.getFileViewType(this);
         mRecyclerAdapter = new FileManageRecyclerAdapter(this, mFileList);
         mRecyclerAdapter.setOnRecyclerItemCallbackListener(this);
@@ -457,6 +459,8 @@ public class FileManageActivity extends DrawerMenuActivity implements
     private void initProgressView() {
         mProgressView = (RelativeLayout) findViewById(R.id.main_progress_view);
         mProgressView.setVisibility(View.VISIBLE);
+        mProgressBar = (ProgressBar) findViewById(R.id.main_progress_bar);
+        mProgressBar.setVisibility(View.VISIBLE);
         mActionHelper.setProgressLayout(mProgressView);
     }
 
@@ -630,12 +634,13 @@ public class FileManageActivity extends DrawerMenuActivity implements
         mEditorMode = mode;
         mEditorMode.setCustomView(mEditorModeView);
         mDrawerController.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        enableRecyclerRefresh(false);
     }
 
     protected void initMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.file_manage_editor, menu);
         MenuItem item = menu.findItem(R.id.file_manage_editor_action_transmission);
-        if (mFileActionManager.isRemoteAction(mPath)) {
+        if (mFileActionManager.isRemoteMode()) {
             item.setTitle(R.string.download);
             item.setIcon(R.drawable.ic_toolbar_download_white);
         } else {
@@ -658,7 +663,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         } else {
             switch (id) {
                 case R.id.file_manage_editor_action_transmission:
-                    String type = mFileActionManager.isRemoteAction(mPath) ? NASApp.ACT_DOWNLOAD : NASApp.ACT_UPLOAD;
+                    String type = mFileActionManager.isRemoteMode() ? NASApp.ACT_DOWNLOAD : NASApp.ACT_UPLOAD;
                     startFileActionLocateActivity(type);
                     break;
                 case R.id.file_manage_editor_action_rename:
@@ -690,6 +695,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         mEditorMode = null;
         clearAllSelection();
         enableFabEdit(true);
+        enableRecyclerRefresh(true);
     }
 
     /**
@@ -701,24 +707,18 @@ public class FileManageActivity extends DrawerMenuActivity implements
         clearDownloadTask();
         toggleDrawerCheckedItem();
 
-        if (mProgressView.isShown()) {
-            getLoaderManager().destroyLoader(mActionHelper.getCurrentLoaderID());
-            mActionHelper.destroyLoader();
-            mProgressView.setVisibility(View.INVISIBLE);
-            return;
-        }
-
-        if (mDrawerController.isDrawerOpen()) {
-            mDrawerController.closeDrawer();
-        } else {
-            if (mFileActionManager.isTopDirectory(mPath) || (isDownloadFolder && mFileActionManager.isDownloadDirectory(this, mPath))) {
-                mDrawerController.openDrawer();
+        if (!stopRunningLoader()) {
+            if (mDrawerController.isDrawerOpen()) {
+                mDrawerController.closeDrawer();
             } else {
-                String parent = new File(mPath).getParent();
-                doLoad(parent);
+                if (mFileActionManager.isTopDirectory(mPath) || (isDownloadFolder && mFileActionManager.isDownloadDirectory(this, mPath))) {
+                    mDrawerController.openDrawer();
+                } else {
+                    String parent = new File(mPath).getParent();
+                    doLoad(parent);
+                }
             }
         }
-
     }
 
     @Override
@@ -740,6 +740,19 @@ public class FileManageActivity extends DrawerMenuActivity implements
         resizeToolbar();
     }
 
+    protected boolean stopRunningLoader() {
+        if (mProgressView.isShown()) {
+            getLoaderManager().destroyLoader(mActionHelper.getCurrentLoaderID());
+            mActionHelper.destroyLoader();
+            mProgressView.setVisibility(View.INVISIBLE);
+            mProgressBar.setVisibility(View.VISIBLE);
+            mRecyclerRefresh.setRefreshing(false);
+            return true;
+        }
+
+        return false;
+    }
+
 
     /**
      * LOADER CONTROL
@@ -749,8 +762,8 @@ public class FileManageActivity extends DrawerMenuActivity implements
         Loader<Boolean> loader = mActionHelper.onCreateLoader(id, args);
         if (loader instanceof SmbFileListLoader)
             mSmbFileListLoader = (SmbFileListLoader) loader;
-        //if(mRecyclerRefresh.isRefreshing())
-        //    mProgressView.setVisibility(View.INVISIBLE);
+        if(mRecyclerRefresh.isRefreshing())
+            mProgressBar.setVisibility(View.INVISIBLE);
         return loader;
     }
 
@@ -784,8 +797,10 @@ public class FileManageActivity extends DrawerMenuActivity implements
                 updateScreen();
                 toggleDrawerCheckedItem();
             } else {
-                if (mProgressView.isShown())
+                if (mProgressView.isShown()) {
                     doRefresh();
+                    return;
+                }
 
                 if (loader instanceof SmbAbstractLoader || loader instanceof LocalAbstractLoader) {
                     String type;
@@ -824,7 +839,8 @@ public class FileManageActivity extends DrawerMenuActivity implements
 
         checkEmptyView();
         mProgressView.setVisibility(View.INVISIBLE);
-        //mRecyclerRefresh.setRefreshing(false);
+        mProgressBar.setVisibility(View.VISIBLE);
+        mRecyclerRefresh.setRefreshing(false);
     }
 
     @Override
@@ -1067,6 +1083,10 @@ public class FileManageActivity extends DrawerMenuActivity implements
         array.recycle();
     }
 
+    protected void enableRecyclerRefresh(boolean enable){
+        mRecyclerRefresh.setEnabled(enable);
+    }
+
     protected void enableFabEdit(boolean enabled) {
         mFab.setImageResource(R.drawable.ic_floating_edit_white);
         mFab.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
@@ -1166,7 +1186,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     @Override
     public void toggleDrawerCheckedItem() {
         int id;
-        if (mFileActionManager.isRemoteAction(mPath)) {
+        if (mFileActionManager.isRemoteMode()) {
             id = R.id.nav_storage;
         } else {
             if (isDownloadFolder) {
@@ -1282,12 +1302,12 @@ public class FileManageActivity extends DrawerMenuActivity implements
             }
         }
 
-        for(FileInfo info : list) {
+        for (FileInfo info : list) {
             index++;
-            if(path.equals(info.path))
+            if (path.equals(info.path))
                 break;
         }
-        MusicManager.getInstance().setMusicList(list, index, mFileActionManager.isRemoteAction(path));
+        MusicManager.getInstance().setMusicList(list, index, mFileActionManager.isRemoteMode());
     }
 
     private void startMusicActivity(String mode, String root, FileInfo fileInfo) {
@@ -1321,18 +1341,14 @@ public class FileManageActivity extends DrawerMenuActivity implements
         Intent intent = new Intent();
         intent.setClass(FileManageActivity.this, MusicActivity.class);
         intent.putExtras(args);
-        //TODO : improve the switch activity animation
-        //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-        //    startActivityForResult(intent, MusicActivity.REQUEST_CODE, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
-        //else
-            startActivityForResult(intent, MusicActivity.REQUEST_CODE);
+        startActivityForResult(intent, MusicActivity.REQUEST_CODE);
     }
 
     private void startVideoActivity(FileInfo fileInfo) {
-        if(mFileActionManager.isRemoteAction(fileInfo.path))
+        if (mFileActionManager.isRemoteMode())
             FileRecentManager.getInstance().setAction(FileRecentFactory.create(this, fileInfo, FileRecentInfo.ActionType.OPEN));
 
-        if (mFileActionManager.isRemoteAction(mPath) && mCastManager != null && mCastManager.isConnected()) {
+        if (mFileActionManager.isRemoteMode() && mCastManager != null && mCastManager.isConnected()) {
             try {
                 //clean image
                 mCastManager.sendDataMessage("close");
@@ -1354,7 +1370,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
 
     public void startViewerPrepare(String path) {
         ArrayList<FileInfo> list = new ArrayList<FileInfo>();
-        if(mChoiceAllSameTypeFile) {
+        if (mChoiceAllSameTypeFile) {
             for (FileInfo info : mFileList) {
                 if (FileInfo.TYPE.PHOTO.equals(info.type))
                     list.add(info);
@@ -1379,10 +1395,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         Intent intent = new Intent();
         intent.setClass(FileManageActivity.this, ViewerActivity.class);
         intent.putExtras(args);
-        //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-        //    startActivityForResult(intent, ViewerActivity.REQUEST_CODE, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
-        //else
-            startActivityForResult(intent, ViewerActivity.REQUEST_CODE);
+        startActivityForResult(intent, ViewerActivity.REQUEST_CODE);
     }
 
     private void startFileInfoActivity(FileInfo info) {
@@ -1413,6 +1426,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
 
                 if (mProgressView != null) {
                     mProgressView.setVisibility(View.INVISIBLE);
+                    mProgressBar.setVisibility(View.VISIBLE);
                 }
 
                 NASUtils.showAppChooser(FileManageActivity.this, destUri);
@@ -1422,6 +1436,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
             public void onFail() {
                 if (mProgressView != null) {
                     mProgressView.setVisibility(View.INVISIBLE);
+                    mProgressBar.setVisibility(View.VISIBLE);
                 }
                 Toast.makeText(mContext, getString(R.string.error), Toast.LENGTH_SHORT).show();
             }
@@ -1433,7 +1448,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     }
 
     public void openFileBy3rdApp(Context context, FileInfo fileInfo) {
-        if(mFileActionManager.isRemoteAction(fileInfo.path))
+        if (mFileActionManager.isRemoteMode())
             FileRecentManager.getInstance().setAction(FileRecentFactory.create(this, fileInfo, FileRecentInfo.ActionType.OPEN));
 
         mFileInfo = fileInfo;
@@ -1444,6 +1459,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         } else {
             if (mProgressView != null) {
                 mProgressView.setVisibility(View.VISIBLE);
+                mProgressBar.setVisibility(View.VISIBLE);
             }
 
             Bundle data = new Bundle();

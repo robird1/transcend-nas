@@ -92,6 +92,7 @@ public class MusicActivity extends AppCompatActivity implements MusicManager.Med
         super.onCreate(savedInstanceState);
         Log.w(TAG, "onCreate");
         setContentView(R.layout.activity_music);
+        overridePendingTransition(R.animator.slide_in_right, R.animator.slide_alpha_out);
         initData();
         initHeaderBar();
         initPager();
@@ -542,5 +543,6 @@ public class MusicActivity extends AppCompatActivity implements MusicManager.Med
         intent.putExtras(bundle);
         setResult(RESULT_OK, intent);
         finish();
+        overridePendingTransition(R.animator.slide_alpha_in, R.animator.slide_out_right);
     }
 }

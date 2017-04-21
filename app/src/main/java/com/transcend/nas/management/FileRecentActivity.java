@@ -3,6 +3,7 @@ package com.transcend.nas.management;
 import android.content.Intent;
 import android.content.Loader;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
@@ -44,14 +45,13 @@ public class FileRecentActivity extends FileManageActivity {
 
     @Override
     protected void initRecyclerView() {
-        //mRecyclerRefresh = (SwipeRefreshLayout) findViewById(R.id.main_recycler_refresh);
-        //mRecyclerRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-        //    @Override
-        //    public void onRefresh() {
-        //        if(!mRecyclerRefresh.isRefreshing())
-        //            doRefresh();
-        //    }
-        //});
+        mRecyclerRefresh = (SwipeRefreshLayout) findViewById(R.id.main_recycler_refresh);
+        mRecyclerRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                doRefresh();
+            }
+        });
         mRecyclerAdapter = new FileRecentRecyclerAdapter(this, mFileList);
         mRecyclerAdapter.setOnRecyclerItemCallbackListener(this);
         mRecyclerView = (RecyclerView) findViewById(R.id.main_recycler_view);
@@ -89,7 +89,7 @@ public class FileRecentActivity extends FileManageActivity {
         int id = item.getItemId();
         switch (id) {
             case R.id.file_manage_viewer_action_upload:
-                if(mFileList != null && mFileList.size() > 0) {
+                if (mFileList != null && mFileList.size() > 0) {
                     ArrayList<String> paths = new ArrayList<String>();
                     for (FileInfo file : mFileList)
                         paths.add(file.path);
@@ -146,11 +146,13 @@ public class FileRecentActivity extends FileManageActivity {
             updateScreen();
             checkEmptyView();
             mProgressView.setVisibility(View.INVISIBLE);
-            //mRecyclerRefresh.setRefreshing(false);
+            mProgressBar.setVisibility(View.VISIBLE);
+            mRecyclerRefresh.setRefreshing(false);
             return;
         } else if (loader instanceof RecentCheckLoader && success) {
             checkRecentCheckLoader(success, (RecentCheckLoader) loader);
             mProgressView.setVisibility(View.INVISIBLE);
+            mProgressBar.setVisibility(View.VISIBLE);
             return;
         }
 
@@ -225,16 +227,34 @@ public class FileRecentActivity extends FileManageActivity {
     }
 
     private void removeData(int position) {
-        FileRecentInfo info = mFileRecentList.get(position);
-        mFileRecentList.remove(position);
-        mFileList.remove(position);
-        mFileIDList.remove(position);
-        mSectionDecoration.updateList(mFileIDList);
-        mRecyclerAdapter.updateList(mFileList);
-        mRecyclerAdapter.notifyItemRemoved(position);
-        //mRecyclerAdapter.notifyItemRangeChanged(position, mFileRecentList.size());
+        if (mFileRecentList != null && mFileRecentList.size() > position && position >= 0) {
+            FileRecentInfo info = mFileRecentList.get(position);
+            mFileRecentList.remove(position);
+            mFileList.remove(position);
+            mFileIDList.remove(position);
+            if (mFileRecentList.size() > 0) {
+                mSectionDecoration.updateList(mFileIDList);
+                mRecyclerAdapter.updateList(mFileList);
+                mRecyclerAdapter.notifyItemRemoved(position);
+            } else {
+                updateScreen();
+                checkEmptyView();
+            }
+            FileRecentManager.getInstance().deleteAction(info);
+        }
         mFileIndex = -1;
-        FileRecentManager.getInstance().deleteAction(info);
+    }
+
+    @Override
+    public void onBackPressed() {
+        toggleDrawerCheckedItem();
+        if (!stopRunningLoader()) {
+            if (mDrawerController.isDrawerOpen()) {
+                mDrawerController.closeDrawer();
+            } else {
+                mDrawerController.openDrawer();
+            }
+        }
     }
 }
 

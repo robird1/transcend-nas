@@ -85,7 +85,7 @@ public class FileActionManager extends AbstractActionManager {
             else
                 setServiceType(FileActionManager.FileActionServiceType.PHONE);
         } else {
-            if(path.startsWith(NASApp.ROOT_RECENT))
+            if (path.startsWith(NASApp.ROOT_RECENT))
                 setServiceType(FileActionManager.FileActionServiceType.RECENT);
             else
                 setServiceType(FileActionManager.FileActionServiceType.SMB);
@@ -270,8 +270,8 @@ public class FileActionManager extends AbstractActionManager {
         return false;
     }
 
-    public boolean isDirectorySupportFileAction(String path){
-        if(isRemoteAction(path) && isTopDirectory(path))
+    public boolean isDirectorySupportFileAction(String path) {
+        if (isRemoteAction(path) && isTopDirectory(path))
             return false;
         else
             return true;
@@ -286,6 +286,11 @@ public class FileActionManager extends AbstractActionManager {
 
     public boolean isRemoteAction(String path) {
         checkServiceType(path);
+        String mode = getServiceMode();
+        return NASApp.MODE_SMB.equals(mode) || NASApp.MODE_RECENT.equals(mode);
+    }
+
+    public boolean isRemoteMode() {
         String mode = getServiceMode();
         return NASApp.MODE_SMB.equals(mode) || NASApp.MODE_RECENT.equals(mode);
     }

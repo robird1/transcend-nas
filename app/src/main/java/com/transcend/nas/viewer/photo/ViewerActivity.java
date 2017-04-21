@@ -47,7 +47,6 @@ import com.transcend.nas.management.firmware.FileFactory;
 import com.transcend.nas.service.FileRecentFactory;
 import com.transcend.nas.service.FileRecentInfo;
 import com.transcend.nas.service.FileRecentManager;
-import com.transcend.nas.view.ProgressDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,6 +94,7 @@ public class ViewerActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_viewer);
+        overridePendingTransition(R.animator.slide_in_right, R.animator.slide_alpha_out);
         mCastManager = VideoCastManager.getInstance();
         mCastConsumer = new VideoCastConsumerImpl() {
 
@@ -220,8 +220,6 @@ public class ViewerActivity extends AppCompatActivity implements
         mHeaderBar.setTitle("");
         mHeaderBar.setNavigationIcon(R.drawable.ic_navi_backaarow_white);
         mHeaderTitle = (TextView) findViewById(R.id.viewer_toolbar_title);
-        if (mList != null && mList.size() > mCurrentIndex && mCurrentIndex >= 0)
-            mHeaderTitle.setText(mList.get(mCurrentIndex).name);
         setSupportActionBar(mHeaderBar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -337,6 +335,7 @@ public class ViewerActivity extends AppCompatActivity implements
         if (mList != null && 0 <= index && index < mList.size()) {
             FileInfo info = mList.get(index);
             doRecentRecord(info);
+            mHeaderTitle.setText(info.name);
         }
     }
 
@@ -506,6 +505,7 @@ public class ViewerActivity extends AppCompatActivity implements
         intent.putExtras(bundle);
         setResult(RESULT_OK, intent);
         finish();
+        overridePendingTransition(R.animator.slide_alpha_in, R.animator.slide_out_right);
     }
 
     /**
