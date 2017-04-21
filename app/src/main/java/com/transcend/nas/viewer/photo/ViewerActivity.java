@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.Loader;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.provider.DocumentFile;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -30,29 +29,28 @@ import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCa
 import com.google.android.libraries.cast.companionlibrary.cast.exceptions.CastException;
 import com.google.android.libraries.cast.companionlibrary.cast.exceptions.NoConnectionException;
 import com.google.android.libraries.cast.companionlibrary.cast.exceptions.TransientNetworkDisconnectionException;
-import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
-import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.management.FileActionDeleteDialog;
 import com.transcend.nas.management.FileActionLocateActivity;
 import com.transcend.nas.management.FileInfo;
 import com.transcend.nas.management.FileInfoActivity;
 import com.transcend.nas.management.LocalFileDeleteLoader;
-import com.transcend.nas.management.LocalFileUploadLoader;
 import com.transcend.nas.management.SmbAbstractLoader;
 import com.transcend.nas.management.SmbFileDeleteLoader;
-import com.transcend.nas.management.FileDownloadLoader;
-import com.transcend.nas.management.externalstorage.ExternalStorageController;
-import com.transcend.nas.management.externalstorage.ExternalStorageLollipop;
 import com.transcend.nas.management.externalstorage.OTGFileDeleteLoader;
+import com.transcend.nas.management.fileaction.AbstractActionManager;
+import com.transcend.nas.management.fileaction.ActionHelper;
+import com.transcend.nas.management.fileaction.FileActionManager;
 import com.transcend.nas.management.firmware.FileFactory;
 import com.transcend.nas.service.FileRecentFactory;
 import com.transcend.nas.service.FileRecentInfo;
 import com.transcend.nas.service.FileRecentManager;
+import com.transcend.nas.view.ProgressDialog;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
 
@@ -81,7 +79,6 @@ public class ViewerActivity extends AppCompatActivity implements
     private VideoCastConsumer mCastConsumer;
     private MenuItem mMediaRouteMenuItem;
 
-    private int mLoaderID;
     private String mPath;
     private String mMode;
     private String mRoot;
@@ -89,7 +86,10 @@ public class ViewerActivity extends AppCompatActivity implements
     private int mCurrentIndex = -1;
     private boolean evenDelete = false;
     private int[] mTransmitDrawable;
-    private boolean isDownload = false;
+    private boolean isRemoteAction = false;
+    protected FileActionManager.FileActionServiceType mDefaultType = FileActionManager.FileActionServiceType.SMB;
+    private FileActionManager mFileActionManager;
+    protected ActionHelper mActionHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -177,9 +177,9 @@ public class ViewerActivity extends AppCompatActivity implements
         } else if (v.equals(mDelete)) {
             doDelete();
         } else if (v.equals(mTransmit)) {
-            startFileActionLocateActivity(isDownload ? NASApp.ACT_DOWNLOAD : NASApp.ACT_UPLOAD);
+            startFileActionLocateActivity(isRemoteAction ? NASApp.ACT_DOWNLOAD : NASApp.ACT_UPLOAD);
         } else if (v.equals(mShare)) {
-
+            doShare();
         }
     }
 
@@ -199,13 +199,17 @@ public class ViewerActivity extends AppCompatActivity implements
         mRoot = args.getString("root");
         mList = FileFactory.getInstance().getFileList();
 
+        mFileActionManager = new FileActionManager(this, mDefaultType, this);
+        List<AbstractActionManager> actionManagerList = new ArrayList<>();
+        actionManagerList.add(mFileActionManager);
+        mActionHelper = new ActionHelper(actionManagerList);
+
         mTransmitDrawable = new int[2];
-        if(NASApp.MODE_SMB.equals(mMode)) {
-            isDownload = true;
+        isRemoteAction = mFileActionManager.isRemoteAction(mPath);
+        if (isRemoteAction) {
             mTransmitDrawable[0] = R.drawable.ic_toolbar_download_white;
             mTransmitDrawable[1] = R.drawable.ic_toolbar_download_gray;
         } else {
-            isDownload = false;
             mTransmitDrawable[0] = R.drawable.ic_toolbar_upload_white;
             mTransmitDrawable[1] = R.drawable.ic_toolbar_upload_gray;
         }
@@ -216,7 +220,7 @@ public class ViewerActivity extends AppCompatActivity implements
         mHeaderBar.setTitle("");
         mHeaderBar.setNavigationIcon(R.drawable.ic_navi_backaarow_white);
         mHeaderTitle = (TextView) findViewById(R.id.viewer_toolbar_title);
-        if(mList != null && mList.size() > mCurrentIndex && mCurrentIndex >= 0)
+        if (mList != null && mList.size() > mCurrentIndex && mCurrentIndex >= 0)
             mHeaderTitle.setText(mList.get(mCurrentIndex).name);
         setSupportActionBar(mHeaderBar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -297,6 +301,7 @@ public class ViewerActivity extends AppCompatActivity implements
 
     private void initPager() {
         mProgressView = (RelativeLayout) findViewById(R.id.viewer_progress_view);
+        mActionHelper.setProgressLayout(mProgressView);
 
         ArrayList<String> list = new ArrayList<String>();
         for (FileInfo info : mList) list.add(info.path);
@@ -315,11 +320,11 @@ public class ViewerActivity extends AppCompatActivity implements
 
             @Override
             public void onPageSelected(int position) {
-                if(mList != null && 0 <= position && position < mList.size()) {
+                if (mList != null && 0 <= position && position < mList.size()) {
                     doPhotoCast(position);
-                    mHeaderTitle.setText(mList.get(position).name);
-                    FileRecentInfo action = FileRecentFactory.create(ViewerActivity.this, mList.get(position), FileRecentInfo.ActionType.OPEN);
-                    FileRecentManager.getInstance().setAction(action);
+                    FileInfo info = mList.get(position);
+                    doRecentRecord(info);
+                    mHeaderTitle.setText(info.name);
                 }
             }
 
@@ -329,9 +334,9 @@ public class ViewerActivity extends AppCompatActivity implements
             }
         });
         doPhotoCast(index);
-        if(mList != null && 0 <= index && index < mList.size()) {
-            FileRecentInfo action = FileRecentFactory.create(ViewerActivity.this, mList.get(index), FileRecentInfo.ActionType.OPEN);
-            FileRecentManager.getInstance().setAction(action);
+        if (mList != null && 0 <= index && index < mList.size()) {
+            FileInfo info = mList.get(index);
+            doRecentRecord(info);
         }
     }
 
@@ -376,113 +381,70 @@ public class ViewerActivity extends AppCompatActivity implements
     }
 
     private void doDelete() {
-        ArrayList<String> paths = new ArrayList<String>();
-        int position = mPager.getCurrentItem();
-        final FileInfo info = mList.get(position);
-        paths.add(info.path);
-
-        new FileActionDeleteDialog(this, paths) {
+        new FileActionDeleteDialog(this, getSelectedPaths()) {
             @Override
             public void onConfirm(ArrayList<String> paths) {
-                int id = (NASApp.MODE_SMB.equals(mMode))
-                        ? LoaderID.SMB_FILE_DELETE
-                        : new ExternalStorageController(ViewerActivity.this).isWritePermissionRequired(info.path) ? LoaderID.OTG_FILE_DELETE: LoaderID.LOCAL_FILE_DELETE;
-                Bundle args = new Bundle();
-                args.putStringArrayList("paths", paths);
-                getLoaderManager().restartLoader(id, args, ViewerActivity.this).forceLoad();
-                Log.w(TAG, "doDelete: " + paths.size() + " items");
+                mFileActionManager.delete(paths);
             }
         };
     }
 
+    private void doShare() {
+        mFileActionManager.share(NASPref.getShareLocation(ViewerActivity.this), getSelectedFiles());
+        /*Bundle value = new Bundle();
+        value.putString(ProgressDialog.DIALOG_TITLE, getString(R.string.share));
+        value.putInt(ProgressDialog.DIALOG_ICON, R.drawable.ic_toolbar_share_gray);
+        value.putString(ProgressDialog.DIALOG_MESSAGE, String.format(getString(R.string.msg_file_selected), 1));
+        new ProgressDialog(this, value) {
+            @Override
+            public void onConfirm() {
+                mFileActionManager.share(NASPref.getShareLocation(ViewerActivity.this), getSelectedFiles());
+                dismiss();
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+        };*/
+    }
+
     private void doUpload(String dest) {
-        ArrayList<String> paths = new ArrayList<String>();
-        int position = mPager.getCurrentItem();
-        FileInfo info = mList.get(position);
-        paths.add(info.path);
-        int id = LoaderID.LOCAL_FILE_UPLOAD;
-        Bundle args = new Bundle();
-        args.putStringArrayList("paths", paths);
-        args.putString("path", dest);
-        getLoaderManager().restartLoader(id, args, ViewerActivity.this).forceLoad();
-        Log.w(TAG, "doUpload: " + paths.size() + " item(s) to " + dest);
+        mFileActionManager.upload(dest, getSelectedPaths());
     }
 
     private void doDownload(String dest) {
+        mFileActionManager.download(dest, getSelectedPaths());
+    }
+
+    protected ArrayList<String> getSelectedPaths() {
         ArrayList<String> paths = new ArrayList<String>();
         int position = mPager.getCurrentItem();
         FileInfo info = mList.get(position);
         paths.add(info.path);
-        int id = LoaderID.FILE_DOWNLOAD;
-        Bundle args = new Bundle();
-        args.putStringArrayList("paths", paths);
-        args.putString("path", dest);
-        getLoaderManager().restartLoader(id, args, ViewerActivity.this).forceLoad();
-        Log.w(TAG, "doDownload: " + paths.size() + " item(s) to " + dest);
+        return paths;
     }
 
-
-    /**
-     * UX CONTROL
-     */
-    private void toggleFullScreen() {
-        if (getSupportActionBar().isShowing()) {
-            getSupportActionBar().hide();
-            mFooterBar.setVisibility(View.INVISIBLE);
-        } else {
-            getSupportActionBar().show();
-            mFooterBar.setVisibility(View.VISIBLE);
-        }
+    protected ArrayList<FileInfo> getSelectedFiles() {
+        ArrayList<FileInfo> files = new ArrayList<FileInfo>();
+        int position = mPager.getCurrentItem();
+        FileInfo info = mList.get(position);
+        files.add(info);
+        return files;
     }
 
-    private void startFileInfoActivity(FileInfo info) {
-        Bundle args = new Bundle();
-        args.putSerializable("info", info);
-        Intent intent = new Intent();
-        intent.setClass(ViewerActivity.this, FileInfoActivity.class);
-        intent.putExtras(args);
-        startActivity(intent);
-    }
 
     @Override
     public Loader<Boolean> onCreateLoader(int id, Bundle args) {
-        ArrayList<String> paths = args.getStringArrayList("paths");
-        String path = args.getString("path");
-        String name = args.getString("name");
-        switch (mLoaderID = id) {
-            case LoaderID.FILE_DOWNLOAD:
-                return new FileDownloadLoader(this, paths, path);
-            case LoaderID.LOCAL_FILE_UPLOAD:
-                return new LocalFileUploadLoader(this, paths, path);
-            case LoaderID.SMB_FILE_DELETE:
-                mProgressView.setVisibility(View.VISIBLE);
-                return new SmbFileDeleteLoader(this, paths);
-            case LoaderID.LOCAL_FILE_DELETE:
-                mProgressView.setVisibility(View.VISIBLE);
-                return new LocalFileDeleteLoader(this, paths);
-            case LoaderID.OTG_FILE_DELETE:                                           // SD
-                mProgressView.setVisibility(View.VISIBLE);
-                return new OTGFileDeleteLoader(this, getSelectedDocumentFiles(paths));
-        }
-        return null;
+        return mActionHelper.onCreateLoader(id, args);
     }
 
     @Override
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
-        mProgressView.setVisibility(View.INVISIBLE);
-        if (!success) {
-            if (loader instanceof SmbAbstractLoader)
-                Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
-            else {
-                if (loader instanceof LocalFileDeleteLoader && (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT)) {
-                    Toast.makeText(this, getString(R.string.dialog_write_operation_not_allowed), Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
-                }
-            }
+        if (mActionHelper.onLoadFinished(loader, success))
             return;
-        }
 
+        mProgressView.setVisibility(View.INVISIBLE);
         if (success) {
             if (loader instanceof SmbFileDeleteLoader || loader instanceof LocalFileDeleteLoader || loader instanceof OTGFileDeleteLoader) {
                 evenDelete = true;
@@ -507,8 +469,16 @@ public class ViewerActivity extends AppCompatActivity implements
                     }
                     doPhotoCast(position);
                 }
-            } else if (loader instanceof FileDownloadLoader || loader instanceof LocalFileUploadLoader) {
-                //do nothing
+            }
+        } else {
+            if (loader instanceof SmbAbstractLoader)
+                Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
+            else {
+                if (loader instanceof LocalFileDeleteLoader && (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT)) {
+                    Toast.makeText(this, getString(R.string.dialog_write_operation_not_allowed), Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+                }
             }
         }
     }
@@ -519,6 +489,13 @@ public class ViewerActivity extends AppCompatActivity implements
     }
 
     public void onBackPressed() {
+        if (mProgressView.isShown()) {
+            getLoaderManager().destroyLoader(mActionHelper.getCurrentLoaderID());
+            mActionHelper.destroyLoader();
+            mProgressView.setVisibility(View.INVISIBLE);
+            return;
+        }
+
         doFinish();
     }
 
@@ -529,6 +506,28 @@ public class ViewerActivity extends AppCompatActivity implements
         intent.putExtras(bundle);
         setResult(RESULT_OK, intent);
         finish();
+    }
+
+    /**
+     * UX CONTROL
+     */
+    private void toggleFullScreen() {
+        if (getSupportActionBar().isShowing()) {
+            getSupportActionBar().hide();
+            mFooterBar.setVisibility(View.INVISIBLE);
+        } else {
+            getSupportActionBar().show();
+            mFooterBar.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void startFileInfoActivity(FileInfo info) {
+        Bundle args = new Bundle();
+        args.putSerializable("info", info);
+        Intent intent = new Intent();
+        intent.setClass(ViewerActivity.this, FileInfoActivity.class);
+        intent.putExtras(args);
+        startActivity(intent);
     }
 
     private void startFileActionLocateActivity(String type) {
@@ -571,7 +570,6 @@ public class ViewerActivity extends AppCompatActivity implements
             args.putString("type", type);
             args.putString("root", root);
             args.putString("path", path);
-            //args.putSerializable("list", mFileList);
             Intent intent = new Intent();
             intent.setClass(ViewerActivity.this, FileActionLocateActivity.class);
             intent.putExtras(args);
@@ -597,14 +595,11 @@ public class ViewerActivity extends AppCompatActivity implements
         }
     }
 
-    private ArrayList<DocumentFile> getSelectedDocumentFiles(ArrayList list) {
-        ArrayList<DocumentFile> files = new ArrayList<>();
-        String filePath = (String) list.get(0);
-        if (NASUtils.isSDCardPath(this, filePath)) {
-            DocumentFile d = new ExternalStorageLollipop(this).getSDFileLocation(filePath);
-            files.add(d);
+    private void doRecentRecord(FileInfo info){
+        if(isRemoteAction) {
+            FileRecentInfo action = FileRecentFactory.create(ViewerActivity.this, info, FileRecentInfo.ActionType.OPEN);
+            FileRecentManager.getInstance().setAction(action);
         }
-        return files;
     }
 
 }

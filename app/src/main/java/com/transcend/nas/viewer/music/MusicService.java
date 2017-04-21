@@ -47,6 +47,7 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
     private Notification mNotification;
     private Handler mHandler;
     private ArrayList<FileInfo> mFileList;
+    private boolean isRemoteAction = false;
     private int mFileIndex = -1;
     private MusicActivity.MUSIC_MODE mMusicMode = MusicActivity.MUSIC_MODE.NORMAL;
     private boolean showProgress = false;
@@ -97,6 +98,7 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
             mFileList = MusicManager.getInstance().getMusicList();
         }
         mFileIndex = MusicManager.getInstance().getMusicIndex();
+        isRemoteAction = MusicManager.getInstance().isRemoteAction();
     }
 
     private void loadMusicPlayer(int index) {
@@ -389,7 +391,7 @@ public class MusicService extends Service implements MusicLoader.MusicLoaderCall
         if (mMediaPlayer != null) {
             MusicManager.getInstance().setMusicIndex(mFileIndex);
             MusicManager.getInstance().notifyMediaPlayerListener(MusicManager.MediaPlayerStatus.NEW);
-            if (mFileList != null && mFileIndex < mFileList.size()) {
+            if (isRemoteAction && mFileList != null && mFileIndex < mFileList.size()) {
                 FileRecentInfo action = FileRecentFactory.create(getApplicationContext(), mFileList.get(mFileIndex), FileRecentInfo.ActionType.OPEN);
                 FileRecentManager.getInstance().setAction(action);
             }

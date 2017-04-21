@@ -1287,7 +1287,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
             if(path.equals(info.path))
                 break;
         }
-        MusicManager.getInstance().setMusicList(list, index);
+        MusicManager.getInstance().setMusicList(list, index, mFileActionManager.isRemoteAction(path));
     }
 
     private void startMusicActivity(String mode, String root, FileInfo fileInfo) {
@@ -1329,7 +1329,8 @@ public class FileManageActivity extends DrawerMenuActivity implements
     }
 
     private void startVideoActivity(FileInfo fileInfo) {
-        FileRecentManager.getInstance().setAction(FileRecentFactory.create(this, fileInfo, FileRecentInfo.ActionType.OPEN));
+        if(mFileActionManager.isRemoteAction(fileInfo.path))
+            FileRecentManager.getInstance().setAction(FileRecentFactory.create(this, fileInfo, FileRecentInfo.ActionType.OPEN));
 
         if (mFileActionManager.isRemoteAction(mPath) && mCastManager != null && mCastManager.isConnected()) {
             try {
@@ -1432,7 +1433,8 @@ public class FileManageActivity extends DrawerMenuActivity implements
     }
 
     public void openFileBy3rdApp(Context context, FileInfo fileInfo) {
-        FileRecentManager.getInstance().setAction(FileRecentFactory.create(this, fileInfo, FileRecentInfo.ActionType.OPEN));
+        if(mFileActionManager.isRemoteAction(fileInfo.path))
+            FileRecentManager.getInstance().setAction(FileRecentFactory.create(this, fileInfo, FileRecentInfo.ActionType.OPEN));
 
         mFileInfo = fileInfo;
         if (fileInfo.isLocalFile()) {

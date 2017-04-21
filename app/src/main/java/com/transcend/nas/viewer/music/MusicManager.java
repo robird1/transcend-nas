@@ -22,6 +22,7 @@ public class MusicManager {
     private ArrayList<FileInfo> mMusicList;
     private ArrayList<FileInfo> mShuffleList;
     private int mMusicIndex = -1;
+    private boolean isRemoteAction = false;
     private MediaPlayer mMediaPlayer;
     private MediaMetadataRetriever mMediaMetadataRetriever;
     private ArrayList<MediaPlayerListener> mMediaPlayerListener;
@@ -49,10 +50,10 @@ public class MusicManager {
     }
 
     public void setMusicList(ArrayList<FileInfo> list) {
-        setMusicList(list, 0);
+        setMusicList(list, 0, false);
     }
 
-    public void setMusicList(ArrayList<FileInfo> list, int index) {
+    public void setMusicList(ArrayList<FileInfo> list, int index, boolean remote) {
         if (mMusicList == null)
             mMusicList = new ArrayList<FileInfo>();
         mMusicList.clear();
@@ -66,6 +67,7 @@ public class MusicManager {
         }
 
         mMusicIndex = index;
+        isRemoteAction = remote;
     }
 
     public ArrayList<FileInfo> getMusicList() {
@@ -118,6 +120,10 @@ public class MusicManager {
 
     public int getMusicIndex() {
         return mMusicIndex;
+    }
+
+    public boolean isRemoteAction() {
+        return isRemoteAction;
     }
 
     public void addMediaPlayerListener(MediaPlayerListener listener) {
