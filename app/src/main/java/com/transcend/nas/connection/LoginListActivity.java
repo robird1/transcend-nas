@@ -400,6 +400,9 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                 mWizardDialog.showFinishView();
             } else {
                 hideDialog(true);
+
+                storeCurrentNASInfo(loader.getNasName(), loader.getNasID());
+
                 startFileManageActivity();
             }
         } else {
@@ -732,6 +735,11 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
         };
     }
 
+    private void storeCurrentNASInfo(String nasName, String nasID) {
+        NASPref.setCloudNickName(this, nasName);
+        NASPref.setCloudNasID(this, nasID);
+    }
+
     /**
      * RECYCLER VIEW ADAPTER
      */
@@ -884,6 +892,8 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                                 nickname = splitname[0];
                             }
                         }
+
+                        storeCurrentNASInfo(nickname, nas.get("nasId"));
 
                         args.putString("nasId", nas.get("nasId"));
                         args.putString("nickname", nickname);

@@ -59,6 +59,16 @@
             android:layout="@layout/preference_item"
             android:title="@string/about" />
 
+        <Preference
+            android:key="@string/pref_fb_invite"
+            android:layout="@layout/preference_item"
+            android:title="@string/invite_fb_friends" />
+
+        <Preference
+            android:key="@string/pref_invite"
+            android:layout="@layout/preference_item"
+            android:title="@string/invite_friends" />
+
     </PreferenceCategory>
 
     <PreferenceCategory>

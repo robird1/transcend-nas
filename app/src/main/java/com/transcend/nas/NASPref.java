@@ -295,6 +295,32 @@ public class NASPref {
         return PrefUtil.read(context, name, key, def);
     }
 
+    public static String getCloudNasID(Context context) {
+        String name = context.getString(R.string.pref_name);
+        String key = context.getString(R.string.pref_cloud_nas_id);
+        String def = "";
+        return PrefUtil.read(context, name, key, def);
+    }
+
+    public static void setCloudNasID(Context context, String nasID) {
+        String name = context.getString(R.string.pref_name);
+        String key = context.getString(R.string.pref_cloud_nas_id);
+        PrefUtil.write(context, name, key, nasID);
+    }
+
+    public static String getCloudNickName(Context context) {
+        String name = context.getString(R.string.pref_name);
+        String key = context.getString(R.string.pref_cloud_nas_nick_name);
+        String def = "";
+        return PrefUtil.read(context, name, key, def);
+    }
+
+    public static void setCloudNickName(Context context, String nickName) {
+        String name = context.getString(R.string.pref_name);
+        String key = context.getString(R.string.pref_cloud_nas_nick_name);
+        PrefUtil.write(context, name, key, nickName);
+    }
+
     /**
      * Backup setting
      */
@@ -547,18 +573,18 @@ public class NASPref {
         return PrefUtil.read(context, name, key, null);
     }
 
-    public static void setIsFirstUse(Context context, boolean isFirstUse)
+    public static void setIsLicenseAgreed(Context context, boolean isFirstUse)
     {
         String name = context.getResources().getString(R.string.pref_name);
         String key = "is_first_use";
         PrefUtil.write(context, name, key, isFirstUse);
     }
 
-    public static boolean getIsFirstUse(Context context)
+    public static boolean getIsLicenseAgreed(Context context)
     {
         String name = context.getResources().getString(R.string.pref_name);
         String key = "is_first_use";
-        return PrefUtil.read(context, name, key, true);
+        return PrefUtil.read(context, name, key, false);
     }
 
 }

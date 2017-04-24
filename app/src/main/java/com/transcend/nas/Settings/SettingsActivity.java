@@ -1,10 +1,12 @@
 package com.transcend.nas.settings;
 
+import android.app.LoaderManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -16,6 +18,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -28,10 +32,28 @@ import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
+import com.transcend.nas.connection.InviteAccountActivity;
+import com.transcend.nas.connection.InviteShortLinkLoader;
+import com.transcend.nas.connection.LoginListActivity;
+import com.transcend.nas.connection.LoginLoader;
+import com.transcend.nas.connection.NASListLoader;
+import com.transcend.nas.connection.WizardCheckLoader;
+import com.transcend.nas.connection.WizardSetLoader;
 import com.transcend.nas.management.FileActionLocateActivity;
 import com.transcend.nas.management.firmware.FileFactory;
+import com.transcend.nas.service.LanCheckManager;
+import com.transcend.nas.tutk.P2PStautsLoader;
+import com.transcend.nas.tutk.TutkCreateNasLoader;
+import com.transcend.nas.tutk.TutkDeleteNasLoader;
+import com.transcend.nas.tutk.TutkGetNasLoader;
+import com.transcend.nas.tutk.TutkLinkNasLoader;
 
 import java.io.File;
+
+import static android.R.attr.id;
+import static com.facebook.messenger.MessengerUtils.EXTRA_APP_ID;
+import static com.transcend.nas.NASApp.TUTK_NAME_TAG;
+import static org.apache.http.params.CoreProtocolPNames.PROTOCOL_VERSION;
 
 
 /**
@@ -127,9 +149,10 @@ public class SettingsActivity extends DrawerMenuActivity {
 
     }
 
-    public static class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
+    public static class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener, LoaderManager.LoaderCallbacks<Boolean> {
         public final String TAG = SettingsActivity.class.getSimpleName();
         private Toast mToast;
+        private RelativeLayout mProgressView;
 
         public SettingsFragment() {
 
@@ -138,6 +161,7 @@ public class SettingsActivity extends DrawerMenuActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+            initProgressView();
             addPreferencesFromResource(R.xml.preference_settings);
             getPreferenceManager().setSharedPreferencesName(getString(R.string.pref_name));
             getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
@@ -189,6 +213,10 @@ public class SettingsActivity extends DrawerMenuActivity {
                 showCleanCacheDialog();
             } else if (key.equals(getString(R.string.pref_about))) {
                 startAboutActivity();
+            } else if (key.equals(getString(R.string.pref_fb_invite))) {
+                startFBInviteActivity();
+            } else if (key.equals(getString(R.string.pref_invite))) {
+                startInviteActivity();
             }
 
             return super.onPreferenceTreeClick(preferenceScreen, preference);
@@ -201,6 +229,39 @@ public class SettingsActivity extends DrawerMenuActivity {
             } else if (key.equals(getString(R.string.pref_cache_size))) {
                 refreshColumnCacheSize();
             }
+        }
+
+        @Override
+        public Loader<Boolean> onCreateLoader(int id, Bundle args) {
+            switch (id) {
+                case LoaderID.INVITE_SHORT_LINK:
+                    Log.d(TAG, "[Enter] new InviteShortLinkLoader");
+                    mProgressView.setVisibility(View.VISIBLE);
+                    return new InviteShortLinkLoader(getActivity(), args.getString("url"));
+                default:
+                    return null;
+            }
+        }
+
+        @Override
+        public void onLoadFinished(Loader<Boolean> loader, Boolean aBoolean) {
+            if (loader instanceof InviteShortLinkLoader) {
+                Log.d(TAG, "[Enter] loader instanceof InviteShortLinkLoader");
+                mProgressView.setVisibility(View.INVISIBLE);
+                String link = ((InviteShortLinkLoader) loader).getLink();
+                String msg = "Enjoy my StoreJet Cloud!\n\n";
+                Intent shareIntent = new Intent();
+                shareIntent.setAction(Intent.ACTION_SEND);
+                shareIntent.putExtra(Intent.EXTRA_TEXT, msg + link);
+                shareIntent.setType("text/*");
+                shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(Intent.createChooser(shareIntent, getResources().getText(R.string.invite_friends)));
+            }
+        }
+
+        @Override
+        public void onLoaderReset(Loader<Boolean> loader) {
+
         }
 
         private void showCleanCacheDialog() {
@@ -292,6 +353,40 @@ public class SettingsActivity extends DrawerMenuActivity {
             startActivity(intent);
         }
 
+        private void startFBInviteActivity() {
+            Intent intent = new Intent();
+            intent.setClass(getActivity(), InviteAccountActivity.class);
+
+            startActivity(intent);
+        }
+
+        // TODO check .split("@tS#")
+        private void startInviteActivity() {
+            Log.d(TAG, "[Enter] startInviteActivity");
+
+            String uuid = NASPref.getCloudUUID(getActivity());
+            String nasId = NASPref.getCloudNasID(getActivity());
+//            String nickName = NASPref.getCloudNickName(getActivity()).split("%40tS#")[0];
+            String nickName = NASPref.getCloudNickName(getActivity()).split("@tS#")[0];
+            String userName = NASPref.getUsername(getActivity());
+            String password = NASPref.getCloudPassword(getActivity());
+            String password2 = NASPref.getPassword(getActivity());
+
+            Log.d(TAG, "nasName: "+ NASPref.getCloudNickName(getActivity()));
+            Log.d(TAG, "nickName: "+ nickName);
+            Log.d(TAG, "userName: "+ userName);
+            Log.d(TAG, "password: "+ password);
+            Log.d(TAG, "password2: "+ password2);
+
+            //TODO add IOS info
+            String url = "https://z69nd.app.goo.gl/?link=http://www.storejetcloud.com?uuid%3D"+
+                    uuid+ "%26nasId%3D"+ nasId+ "%26nickName%3D"+ nickName+ "%26username%3D"+ userName+ "%26password%3D"+ password2+"&apn=com.transcend.nas";
+
+            Bundle arg = new Bundle();
+            arg.putString("url", url);
+            getLoaderManager().restartLoader(LoaderID.INVITE_SHORT_LINK, arg, this).forceLoad();
+        }
+
         private void startDiskInfoActivity() {
             Intent intent = new Intent();
             intent.setClass(getActivity(), DiskInfoActivity.class);
@@ -313,6 +408,12 @@ public class SettingsActivity extends DrawerMenuActivity {
             Server server = ServerManager.INSTANCE.getCurrentServer();
             return NASPref.defaultUserName.equals(server.getUsername());
         }
+
+        private void initProgressView() {
+            mProgressView = (RelativeLayout) getActivity().findViewById(R.id.settings_progress_view);
+        }
+
     }
+
 }
 

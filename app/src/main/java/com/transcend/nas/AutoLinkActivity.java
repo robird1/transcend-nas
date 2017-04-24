@@ -43,8 +43,8 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
         mTextView = (TextView) findViewById(R.id.welcome_text);
         mTextView.setText(getString(R.string.try_search_device));
 
-        boolean isFirstUse = NASPref.getIsFirstUse(this);
-        if(isFirstUse) {
+        boolean isLicenseAgreed = NASPref.getIsLicenseAgreed(this);
+        if(!isLicenseAgreed) {
             startActivity(new Intent(this, FirstUseActivity.class));
             finish();
             return;

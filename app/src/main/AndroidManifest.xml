@@ -54,6 +54,49 @@
         </activity>
 
         <activity
+            android:name=".connection.DeepLinkFBInviteActivity"
+            android:screenOrientation="portrait">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Accepts URIs "com.example.myapp://" -->
+                <data android:scheme="http"
+                    android:host="www.storejetcloud.com"
+                    android:pathPrefix="/fbinvite" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".connection.DeepLinkInviteActivity"
+            android:screenOrientation="portrait">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Accepts URIs "com.example.myapp://" -->
+                <data android:scheme="http"
+                    android:host="www.storejetcloud.com"
+                    android:pathPrefix="/invite" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".introduce.InviteLicenseActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
+
+        <activity
+            android:name=".connection.InviteAccountActivity"
+            android:windowSoftInputMode="adjustPan"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
+
+        <activity
             android:name=".connection.old.GuideActivity"
             android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden|screenSize">
@@ -212,6 +255,12 @@
 
         <activity
             android:name=".settings.FeedbackActivity"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
+
+        <activity
+            android:name=".settings.FBInviteActivity"
             android:launchMode="singleTask"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>

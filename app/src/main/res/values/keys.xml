@@ -57,8 +57,12 @@
     <string name="pref_cloud_token">CLOUD AUTHTOKEN</string>
     <string name="pref_cloud_uuid">CLOUD UUID</string>
     <string name="pref_cloud_account_status">CLOUD ACCOUNT STATUS</string>
+    <string name="pref_cloud_nas_id">NAS ID</string>
+    <string name="pref_cloud_nas_nick_name">NAS NICK NAME</string>
     <string name="pref_fb_account_status">FB ACCOUNT STATUS</string>
     <string name="pref_fb_user_name">FB USER NAME</string>
+    <string name="pref_fb_invite">FB INVITE</string>
+    <string name="pref_invite">INVITE</string>
 
     <string name="pref_file_sort_type">FILE SORT TYPE</string>
     <string name="pref_file_view_type">FILE VIEW TYPE</string>
