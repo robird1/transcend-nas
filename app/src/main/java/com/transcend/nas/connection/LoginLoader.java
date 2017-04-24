@@ -16,7 +16,7 @@ import com.transcend.nas.management.firmware.ShareFolderManager;
  */
 public class LoginLoader extends AsyncTaskLoader<Boolean> {
 
-    private Server mServer;
+    protected Server mServer;
     private String mError;
     private Bundle mArgs;
     private boolean mReplace = true;

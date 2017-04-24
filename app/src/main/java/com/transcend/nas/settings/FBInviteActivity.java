@@ -20,10 +20,16 @@ import com.transcend.nas.NASPref;
 public class FBInviteActivity extends AppCompatActivity {
     private static String TAG = FBInviteActivity.class.getSimpleName();
     private CallbackManager mCallbackManager;
+    private String mUserName;
+    private String mPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mUserName = getIntent().getStringExtra("username");
+        mPassword = getIntent().getStringExtra("password");
+        Log.d(TAG, "mUserName: "+ mUserName);
+        Log.d(TAG, "mPassword: "+ mPassword);
         registerFBCallback();
         showInviteDialog();
     }
@@ -72,11 +78,11 @@ public class FBInviteActivity extends AppCompatActivity {
         Log.d(TAG, "uuid: "+ uuid);
         Log.d(TAG, "nasId: "+ nasId);
         Log.d(TAG, "nickName: "+ nickName);
-        String userName = NASPref.getUsername(this);
-        String password = NASPref.getPassword(this);
+//        String userName = NASPref.getUsername(this);
+//        String password = NASPref.getPassword(this);
 
         String appLinkUrl = "https://s3-ap-northeast-1.amazonaws.com/appinvite.storejetcloud.com/fb_invite_test.html?uuid="
-                + uuid+ "&nasId="+ nasId+ "&nickName="+ nickName+ "&username="+ userName+ "&password="+ password;
+                + uuid+ "&nasId="+ nasId+ "&nickName="+ nickName+ "&username="+ mUserName+ "&password="+ mPassword;
 
         Log.d(TAG, "appLinkUrl: "+ appLinkUrl);
 
@@ -95,6 +101,8 @@ public class FBInviteActivity extends AppCompatActivity {
             if (requestCode == CallbackManagerImpl.RequestCodeOffset.AppInvite.toRequestCode()) {
                 mCallbackManager.onActivityResult(requestCode, resultCode, data);
             }
+        } else {
+            finish();
         }
     }
 

@@ -268,5 +268,6 @@
     <string name="invite_fb_friends">邀請Facebook朋友</string>
     <string name="sign_up_by_invite">使用Facebook邀請登入</string>
     <string name="invite_friends">邀請朋友</string>
+    <string name="invite_wrong_password">密碼錯誤</string>
 
 </resources>

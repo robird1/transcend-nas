@@ -79,12 +79,19 @@
                 <!-- Accepts URIs "com.example.myapp://" -->
                 <data android:scheme="http"
                     android:host="www.storejetcloud.com"
-                    />
+                    android:pathPrefix="/invite" />
             </intent-filter>
         </activity>
 
         <activity
             android:name=".introduce.InviteLicenseActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
+
+        <activity
+            android:name=".connection.InviteAccountActivity"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>

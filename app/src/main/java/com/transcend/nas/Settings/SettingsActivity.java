@@ -32,6 +32,7 @@ import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
+import com.transcend.nas.connection.InviteAccountActivity;
 import com.transcend.nas.connection.InviteShortLinkLoader;
 import com.transcend.nas.connection.LoginListActivity;
 import com.transcend.nas.connection.LoginLoader;
@@ -248,22 +249,10 @@ public class SettingsActivity extends DrawerMenuActivity {
                 Log.d(TAG, "[Enter] loader instanceof InviteShortLinkLoader");
                 mProgressView.setVisibility(View.INVISIBLE);
                 String link = ((InviteShortLinkLoader) loader).getLink();
-                String mimeType = "text/*";
                 String msg = "Enjoy my StoreJet Cloud!\n\n";
-//                Intent i = new Intent(Intent.ACTION_SEND);
-//                i.setType(mimeType);
-//                i.putExtra(Intent.EXTRA_TEXT, msg + link);
-//                startActivity(Intent.createChooser(i, getResources().getText(R.string.invite_friends)));
-
-//                Uri imageUri = Uri.parse("android.resource://" + getActivity().getPackageName()
-//                        + "/drawable/" + "drawer_icon");
                 Intent shareIntent = new Intent();
                 shareIntent.setAction(Intent.ACTION_SEND);
                 shareIntent.putExtra(Intent.EXTRA_TEXT, msg + link);
-//                shareIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
-//                shareIntent.setType("text/plain");           error in Messenger
-//                shareIntent.setType("image/jpeg");           only photo in Messenger; error in Line
-//                shareIntent.setType("*/*");                  Can not be handled in Messenger and Line
                 shareIntent.setType("text/*");
                 shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 startActivity(Intent.createChooser(shareIntent, getResources().getText(R.string.invite_friends)));
@@ -366,7 +355,8 @@ public class SettingsActivity extends DrawerMenuActivity {
 
         private void startFBInviteActivity() {
             Intent intent = new Intent();
-            intent.setClass(getActivity(), FBInviteActivity.class);
+            intent.setClass(getActivity(), InviteAccountActivity.class);
+
             startActivity(intent);
         }
 

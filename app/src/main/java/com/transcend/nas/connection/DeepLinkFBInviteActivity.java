@@ -37,4 +37,9 @@ public class DeepLinkFBInviteActivity extends AbstractInviteActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+//        finishAffinity();
+    }
 }

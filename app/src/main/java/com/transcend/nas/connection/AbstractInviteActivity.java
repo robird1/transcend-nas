@@ -37,14 +37,16 @@ import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.common.StyleFactory;
 import com.transcend.nas.introduce.InviteLicenseActivity;
 import com.transcend.nas.management.FileManageActivity;
+import com.transcend.nas.tutk.TutkCodeID;
+import com.transcend.nas.tutk.TutkCreateNasLoader;
 import com.transcend.nas.tutk.TutkFBLoginLoader;
 import com.transcend.nas.tutk.TutkGetNasLoader;
 import com.transcend.nas.tutk.TutkLinkNasLoader;
-import com.tutk.IOTC.P2PService;
 
 import org.json.JSONObject;
 
@@ -163,6 +165,8 @@ public abstract class AbstractInviteActivity extends AppCompatActivity implement
                 return new WizardCheckLoader(this, args);
             case LoaderID.LOGIN:
                 return new LoginLoader(this, args, true);
+            case LoaderID.TUTK_NAS_CREATE:
+                return new TutkCreateNasLoader(this, args);
             default:
                 return null;
         }
@@ -184,6 +188,8 @@ public abstract class AbstractInviteActivity extends AppCompatActivity implement
             checkWizardLoader(isSuccess, (WizardCheckLoader) loader);
         } else if (loader instanceof LoginLoader) {
             checkLoginLoader(isSuccess, (LoginLoader) loader);
+        } else if (loader instanceof TutkCreateNasLoader) {
+            checkCreateNASResult(isSuccess, (TutkCreateNasLoader) loader);
         }
 
     }
@@ -271,10 +277,10 @@ protected void extractInviteData(String url) {
             //token not null mean login success
 //            GoogleAnalysisFactory.getInstance(this).sendEvent(GoogleAnalysisFactory.VIEW.START, GoogleAnalysisFactory.ACTION.LoginTutk,
 //                    GoogleAnalysisFactory.LABEL.LoginByFacebook + "_" + GoogleAnalysisFactory.SUCCESS);
-//            NASPref.setFBAccountStatus(mContext, true);
-//            NASPref.setCloudUsername(mContext, loader.getEmail());
-//            NASPref.setCloudPassword(mContext, loader.getPassword());
-//            NASPref.setCloudAuthToken(mContext, token);
+            NASPref.setFBAccountStatus(mContext, true);
+            NASPref.setCloudUsername(mContext, loader.getEmail());
+            NASPref.setCloudPassword(mContext, loader.getPassword());
+            NASPref.setCloudAuthToken(mContext, token);
 //            Bundle arg = new Bundle();
 //            arg.putString("server", loader.getServer());
 //            arg.putString("token", token);
@@ -292,7 +298,7 @@ protected void extractInviteData(String url) {
             else
                 Toast.makeText(this, getString(R.string.error_format), Toast.LENGTH_SHORT).show();
             // remove the FB authentication if the email address is already taken
-//            NASUtils.logOutFB(this);
+            NASUtils.logOutFB(this);
 //            GoogleAnalysisFactory.getInstance(this).sendEvent(GoogleAnalysisFactory.VIEW.START, GoogleAnalysisFactory.ACTION.LoginTutk,
 //                    GoogleAnalysisFactory.LABEL.LoginByFacebook + "_" + status);
         }
@@ -444,25 +450,91 @@ protected void extractInviteData(String url) {
 //            return;
 //        }
 
-//        startTutkCreateNasLoader(args);
-        String hostname = P2PService.getInstance().getP2PIP() + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
-        String userName = loader.getBundleArgs().getString("username");
-        String password = loader.getBundleArgs().getString("password");
-        Log.d(TAG, "hostname: "+ hostname);
-        Log.d(TAG, "userName: "+ userName);
-        Log.d(TAG, "password: "+ password);
-
-//        Server server = new Server(hostname, userName, password);
-//        ServerManager.INSTANCE.saveServer(server);
-//        ServerManager.INSTANCE.setCurrentServer(server);
-
-        Intent intent = new Intent();
-        intent.setClass(this, FileManageActivity.class);
-        intent.putExtra("is_invite", true);
-        startActivity(intent);
-        finish();
+        startTutkCreateNasLoader(args);
+//        String hostname = P2PService.getInstance().getP2PIP() + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
+//        String userName = loader.getBundleArgs().getString("username");
+//        String password = loader.getBundleArgs().getString("password");
+//        Log.d(TAG, "hostname: "+ hostname);
+//        Log.d(TAG, "userName: "+ userName);
+//        Log.d(TAG, "password: "+ password);
+//
+////        Server server = new Server(hostname, userName, password);
+////        ServerManager.INSTANCE.saveServer(server);
+////        ServerManager.INSTANCE.setCurrentServer(server);
+//
+//        Intent intent = new Intent();
+//        intent.setClass(this, FileManageActivity.class);
+//        intent.putExtra("is_invite", true);
+//        startActivity(intent);
+//        finish();
 
     }
+
+    private void startTutkCreateNasLoader(Bundle args) {
+        Log.d(TAG, "[Enter] startTutkCreateNasLoader");
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        String nasName = server.getServerInfo().hostName;
+        String uuid = server.getTutkUUID();
+        String serialNum = NASPref.getSerialNum(this);
+        if (serialNum != null && !serialNum.equals(""))
+            nasName = nasName + NASApp.TUTK_NAME_TAG + serialNum;
+
+//        boolean wizard = args.getBoolean("wizard", false);
+//        if (!wizard) {
+//            for (HashMap<String, String> nas : mNASList) {
+//                String hostname = nas.get("hostname");
+//                if (hostname.equals(uuid)) {
+//                    hideDialog(true);
+//                    startFileManageActivity();
+//                    return;
+//                }
+//            }
+//        }
+
+        if (uuid != null && !uuid.equals("")) {
+            args.putString("server", NASPref.getCloudServer(this));
+            args.putString("token", NASPref.getCloudAuthToken(this));
+            args.putString("nasName", nasName);
+            args.putString("nasUUID", uuid);
+            getLoaderManager().restartLoader(LoaderID.TUTK_NAS_CREATE, args, this).forceLoad();
+        }
+//        else {
+//            hideDialog(wizard);
+//            Toast.makeText(LoginListActivity.this, getString(R.string.error), Toast.LENGTH_SHORT).show();
+//        }
+    }
+
+    private void checkCreateNASResult(boolean success, TutkCreateNasLoader loader) {
+        Log.d(TAG, "[Enter] checkCreateNASResult");
+        boolean wizard = loader.getBundleArgs().getBoolean("wizard");
+        if (!success) {
+//            hideDialog(wizard);
+            Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String status = loader.getStatus();
+        String code = loader.getCode();
+        if (code.equals("") || code.equals(TutkCodeID.SUCCESS) || code.equals(TutkCodeID.UID_ALREADY_TAKEN)) {
+//            if (wizard && mWizardDialog != null) {
+//                //hide keyboard
+//                InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+//                imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+//                mWizardDialog.showFinishView();
+//            } else {
+//                hideDialog(true);
+
+                storeCurrentNASInfo(loader.getNasName(), loader.getNasID());
+
+                startFileManageActivity();
+//            }
+        } else {
+            Log.d(TAG, "[Enter] else section");
+//            hideDialog(wizard);
+            Toast.makeText(this, code + " : " + status, Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     private void startFileManageActivity() {
 //        if (getCallingActivity() == null) {
