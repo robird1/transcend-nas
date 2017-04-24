@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.Loader;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -82,7 +81,6 @@ import com.transcend.nas.view.ProgressDialog;
 import com.transcend.nas.viewer.music.MusicActivity;
 import com.transcend.nas.viewer.music.MusicManager;
 import com.transcend.nas.viewer.photo.ViewerActivity;
-import com.tutk.IOTC.P2PService;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -640,7 +638,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     protected void initMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.file_manage_editor, menu);
         MenuItem item = menu.findItem(R.id.file_manage_editor_action_transmission);
-        if (mFileActionManager.isRemoteMode()) {
+        if (mFileActionManager.isRemoteAction(mPath)) {
             item.setTitle(R.string.download);
             item.setIcon(R.drawable.ic_toolbar_download_white);
         } else {
@@ -663,7 +661,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         } else {
             switch (id) {
                 case R.id.file_manage_editor_action_transmission:
-                    String type = mFileActionManager.isRemoteMode() ? NASApp.ACT_DOWNLOAD : NASApp.ACT_UPLOAD;
+                    String type = mFileActionManager.isRemoteAction(mPath) ? NASApp.ACT_DOWNLOAD : NASApp.ACT_UPLOAD;
                     startFileActionLocateActivity(type);
                     break;
                 case R.id.file_manage_editor_action_rename:
@@ -762,7 +760,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         Loader<Boolean> loader = mActionHelper.onCreateLoader(id, args);
         if (loader instanceof SmbFileListLoader)
             mSmbFileListLoader = (SmbFileListLoader) loader;
-        if(mRecyclerRefresh.isRefreshing())
+        if (mRecyclerRefresh.isRefreshing())
             mProgressBar.setVisibility(View.INVISIBLE);
         return loader;
     }
@@ -1083,7 +1081,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         array.recycle();
     }
 
-    protected void enableRecyclerRefresh(boolean enable){
+    protected void enableRecyclerRefresh(boolean enable) {
         mRecyclerRefresh.setEnabled(enable);
     }
 
@@ -1186,7 +1184,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     @Override
     public void toggleDrawerCheckedItem() {
         int id;
-        if (mFileActionManager.isRemoteMode()) {
+        if (mFileActionManager.isRemoteAction(mPath)) {
             id = R.id.nav_storage;
         } else {
             if (isDownloadFolder) {
@@ -1307,7 +1305,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
             if (path.equals(info.path))
                 break;
         }
-        MusicManager.getInstance().setMusicList(list, index, mFileActionManager.isRemoteMode());
+        MusicManager.getInstance().setMusicList(list, index, mFileActionManager.isRemoteAction(path));
     }
 
     private void startMusicActivity(String mode, String root, FileInfo fileInfo) {
@@ -1345,23 +1343,24 @@ public class FileManageActivity extends DrawerMenuActivity implements
     }
 
     private void startVideoActivity(FileInfo fileInfo) {
-        if (mFileActionManager.isRemoteMode())
+        if (mFileActionManager.isRemoteAction(fileInfo.path)) {
             FileRecentManager.getInstance().setAction(FileRecentFactory.create(this, fileInfo, FileRecentInfo.ActionType.OPEN));
 
-        if (mFileActionManager.isRemoteMode() && mCastManager != null && mCastManager.isConnected()) {
-            try {
-                //clean image
-                mCastManager.sendDataMessage("close");
+            if (mCastManager != null && mCastManager.isConnected()) {
+                try {
+                    //clean image
+                    mCastManager.sendDataMessage("close");
 
-                MediaInfo info = MediaFactory.createMediaInfo(this, MediaMetadata.MEDIA_TYPE_MOVIE, fileInfo.path);
-                if (info != null) {
-                    mCastManager.startVideoCastControllerActivity(this, info, 0, true);
-                    return;
+                    MediaInfo info = MediaFactory.createMediaInfo(this, MediaMetadata.MEDIA_TYPE_MOVIE, fileInfo.path);
+                    if (info != null) {
+                        mCastManager.startVideoCastControllerActivity(this, info, 0, true);
+                        return;
+                    }
+                } catch (TransientNetworkDisconnectionException e) {
+                    e.printStackTrace();
+                } catch (NoConnectionException e) {
+                    e.printStackTrace();
                 }
-            } catch (TransientNetworkDisconnectionException e) {
-                e.printStackTrace();
-            } catch (NoConnectionException e) {
-                e.printStackTrace();
             }
         }
 
@@ -1448,7 +1447,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     }
 
     public void openFileBy3rdApp(Context context, FileInfo fileInfo) {
-        if (mFileActionManager.isRemoteMode())
+        if (mFileActionManager.isRemoteAction(fileInfo.path))
             FileRecentManager.getInstance().setAction(FileRecentFactory.create(this, fileInfo, FileRecentInfo.ActionType.OPEN));
 
         mFileInfo = fileInfo;

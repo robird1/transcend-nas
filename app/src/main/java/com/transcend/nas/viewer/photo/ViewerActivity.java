@@ -390,22 +390,6 @@ public class ViewerActivity extends AppCompatActivity implements
 
     private void doShare() {
         mFileActionManager.share(NASPref.getShareLocation(ViewerActivity.this), getSelectedFiles());
-        /*Bundle value = new Bundle();
-        value.putString(ProgressDialog.DIALOG_TITLE, getString(R.string.share));
-        value.putInt(ProgressDialog.DIALOG_ICON, R.drawable.ic_toolbar_share_gray);
-        value.putString(ProgressDialog.DIALOG_MESSAGE, String.format(getString(R.string.msg_file_selected), 1));
-        new ProgressDialog(this, value) {
-            @Override
-            public void onConfirm() {
-                mFileActionManager.share(NASPref.getShareLocation(ViewerActivity.this), getSelectedFiles());
-                dismiss();
-            }
-
-            @Override
-            public void onCancel() {
-
-            }
-        };*/
     }
 
     private void doUpload(String dest) {

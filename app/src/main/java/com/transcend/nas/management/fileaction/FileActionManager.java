@@ -13,7 +13,6 @@ import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.NASUtils;
 import com.transcend.nas.management.FileInfo;
-import com.transcend.nas.management.externalstorage.ExternalStorageController;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -31,6 +30,7 @@ public class FileActionManager extends AbstractActionManager {
     private Map<FileActionServiceType, FileActionService> mFileActionServicePool;
     private FileActionServiceType mFileActionServiceType;
     private LoaderManager.LoaderCallbacks<Boolean> mCallbacks;
+    private boolean isLockType = false;
 
     public enum FileActionServiceType {
         PHONE, SD, SMB, RECENT
@@ -46,6 +46,7 @@ public class FileActionManager extends AbstractActionManager {
         mCallbacks = callbacks;
         mProgressLayout = progressLayout;
         setServiceType(service);
+        isLockType = false;
     }
 
     public void setServiceType(FileActionServiceType type) {
@@ -78,7 +79,10 @@ public class FileActionManager extends AbstractActionManager {
         mFileActionService = service;
     }
 
-    public void checkServiceType(String path) {
+    public void setServiceType(String path) {
+        if (isLockType)
+            return;
+
         if (path.startsWith("/storage")) {
             if (NASUtils.isSDCardPath(mContext, path))
                 setServiceType(FileActionManager.FileActionServiceType.SD);
@@ -285,14 +289,20 @@ public class FileActionManager extends AbstractActionManager {
     }
 
     public boolean isRemoteAction(String path) {
-        checkServiceType(path);
+        setServiceType(path);
+        return isRemoteAction();
+    }
+
+    public boolean isRemoteAction() {
         String mode = getServiceMode();
         return NASApp.MODE_SMB.equals(mode) || NASApp.MODE_RECENT.equals(mode);
     }
 
-    public boolean isRemoteMode() {
-        String mode = getServiceMode();
-        return NASApp.MODE_SMB.equals(mode) || NASApp.MODE_RECENT.equals(mode);
+    public void doLockActionType() {
+        isLockType = true;
     }
 
+    public void doUnLockActionType() {
+        isLockType = false;
+    }
 }
