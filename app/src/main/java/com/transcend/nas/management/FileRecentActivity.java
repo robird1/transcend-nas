@@ -35,6 +35,7 @@ public class FileRecentActivity extends FileManageActivity {
         mChoiceAllSameTypeFile = false;
         super.onCreate(savedInstanceState);
         enableFabEdit(false);
+        mFileActionManager.doLockActionType();
     }
 
     @Override
