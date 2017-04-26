@@ -51,13 +51,9 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:key="@string/pref_other"
         android:layout="@layout/preference_category_widget"
         android:title="@string/other">
-
-        <Preference
-            android:key="@string/pref_about"
-            android:layout="@layout/preference_item"
-            android:title="@string/about" />
 
         <Preference
             android:key="@string/pref_fb_invite"
@@ -65,9 +61,14 @@
             android:title="@string/invite_fb_friends" />
 
         <Preference
-            android:key="@string/pref_invite"
+            android:key="@string/pref_about"
             android:layout="@layout/preference_item"
-            android:title="@string/invite_friends" />
+            android:title="@string/about" />
+
+        <!--<Preference-->
+            <!--android:key="@string/pref_invite"-->
+            <!--android:layout="@layout/preference_item"-->
+            <!--android:title="@string/invite_friends" />-->
 
     </PreferenceCategory>
 

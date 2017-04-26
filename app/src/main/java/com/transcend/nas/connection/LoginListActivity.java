@@ -34,6 +34,7 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.common.GoogleAnalysisFactory;
 import com.transcend.nas.LoaderID;
@@ -456,6 +457,8 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                     account.email = NASPref.getCloudUsername(LoginListActivity.this);
                     account.uuid = nas.get("hostname");
                     loginHelper.deleteAccount(account);
+
+                    NASUtils.deleteInvitedNAS(this, nas.get("hostname"));
                     break;
                 }
             }
