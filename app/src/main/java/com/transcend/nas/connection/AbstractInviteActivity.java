@@ -157,6 +157,8 @@ public abstract class AbstractInviteActivity extends AppCompatActivity implement
     @Override
     public Loader<Boolean> onCreateLoader(int id, Bundle args) {
         switch (id) {
+            case LoaderID.TUTK_NAS_GET:
+                return new TutkGetNasLoader(this, args.getString("server"), args.getString("token"));
             case LoaderID.TUTK_FB_LOGIN:
                 return new TutkFBLoginLoader(this, args.getString("server"), args.getString("email"), args.getString("name"), args.getString("uid"), args.getString("token"));
             case LoaderID.TUTK_NAS_LINK:
@@ -190,6 +192,8 @@ public abstract class AbstractInviteActivity extends AppCompatActivity implement
             checkLoginLoader(isSuccess, (LoginLoader) loader);
         } else if (loader instanceof TutkCreateNasLoader) {
             checkCreateNASResult(isSuccess, (TutkCreateNasLoader) loader);
+        } else if (loader instanceof TutkGetNasLoader) {
+            checkTutkGetNasLoader((TutkGetNasLoader) loader);
         }
 
     }
@@ -274,6 +278,8 @@ protected void extractInviteData(String url) {
         String token = loader.getAuthToke();
 
         if (!token.equals("")) {
+            Log.d(TAG, "[Enter] !token.equals(\"\")");
+
             //token not null mean login success
 //            GoogleAnalysisFactory.getInstance(this).sendEvent(GoogleAnalysisFactory.VIEW.START, GoogleAnalysisFactory.ACTION.LoginTutk,
 //                    GoogleAnalysisFactory.LABEL.LoginByFacebook + "_" + GoogleAnalysisFactory.SUCCESS);
@@ -290,6 +296,8 @@ protected void extractInviteData(String url) {
             startP2PService();
 
         } else {
+            Log.d(TAG, "[Enter] else section");
+
             mProgressView.setVisibility(View.INVISIBLE);
             String code = loader.getCode();
             String status = loader.getStatus();
@@ -331,7 +339,6 @@ protected void extractInviteData(String url) {
             account.email = NASPref.getCloudUsername(this);
             account.uuid = loader.getNasUUID();
             boolean exist = loginHelper.getAccount(account);
-            loginHelper.onDestroy();
 
             //get network status
             boolean isWiFi = false;
@@ -443,14 +450,17 @@ protected void extractInviteData(String url) {
     private void checkLoginLoader(boolean success, LoginLoader loader) {
         Log.d(TAG, "[Enter] checkLoginLoader");
         Bundle args = loader.getBundleArgs();
-//        if (!success) {
+        if (!success) {
 //            boolean wizard = args.getBoolean("wizard", false);
 //            hideDialog(wizard);
-//            Toast.makeText(this, loader.getLoginError(), Toast.LENGTH_SHORT).show();
-//            return;
-//        }
+            Toast.makeText(this, loader.getLoginError(), Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        startTutkCreateNasLoader(args);
+        startNASListLoader(true);
+//            startTutkCreateNasLoader(args);
+
+
 //        String hostname = P2PService.getInstance().getP2PIP() + ":" + P2PService.getInstance().getP2PPort(P2PService.P2PProtocalType.HTTP);
 //        String userName = loader.getBundleArgs().getString("username");
 //        String password = loader.getBundleArgs().getString("password");
@@ -470,7 +480,59 @@ protected void extractInviteData(String url) {
 
     }
 
-    private void startTutkCreateNasLoader(Bundle args) {
+    private void startNASListLoader(boolean remoteAccess) {
+        if (remoteAccess) {
+            //tutk list
+            Bundle args = new Bundle();
+            args.putString("server", NASPref.getCloudServer(this));
+            args.putString("token", NASPref.getCloudAuthToken(this));
+            getLoaderManager().restartLoader(LoaderID.TUTK_NAS_GET, args, this).forceLoad();
+        }
+//        else {
+//            //local list
+//
+//            //get network status
+//            boolean isWiFi = false;
+//            ConnectivityManager mConnMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+//            NetworkInfo info = mConnMgr.getActiveNetworkInfo();
+//            if (info != null)
+//                isWiFi = (info.getType() == ConnectivityManager.TYPE_WIFI);
+//
+//            if(isWiFi) {
+//                showListDialog(null);
+//                getLoaderManager().restartLoader(LoaderID.NAS_LIST, null, this).forceLoad();
+//            } else {
+//                showWifiNotificationDialog();
+//            }
+//        }
+    }
+
+    private void checkTutkGetNasLoader(TutkGetNasLoader loader) {
+        Log.d(TAG, "[Enter] checkTutkGetNasLoader");
+        boolean isInvitedNasExisted = false;
+        ArrayList<HashMap<String, String>> list = loader.getNasArrayList();
+        for (HashMap<String, String> nas : list) {
+            String listUUID = nas.get("hostname");
+            Log.d(TAG, "listUUID: "+ listUUID);
+
+            if (mUUID.equals(listUUID)) {
+                isInvitedNasExisted = true;
+                Log.d(TAG, "[Enter] mUUID.equals(listUUID)");
+                break;
+            }
+        }
+
+        if (!isInvitedNasExisted) {
+            startTutkCreateNasLoader();
+        } else {
+            Log.d(TAG, "[Enter] startFileManageActivity");
+            startFileManageActivity();
+
+            NASUtils.addInvitedNAS(mContext, mUUID, mUserName);
+        }
+    }
+
+    private void startTutkCreateNasLoader() {
         Log.d(TAG, "[Enter] startTutkCreateNasLoader");
         Server server = ServerManager.INSTANCE.getCurrentServer();
         String nasName = server.getServerInfo().hostName;
@@ -492,6 +554,7 @@ protected void extractInviteData(String url) {
 //        }
 
         if (uuid != null && !uuid.equals("")) {
+            Bundle args = new Bundle();
             args.putString("server", NASPref.getCloudServer(this));
             args.putString("token", NASPref.getCloudAuthToken(this));
             args.putString("nasName", nasName);
@@ -527,6 +590,8 @@ protected void extractInviteData(String url) {
                 storeCurrentNASInfo(loader.getNasName(), loader.getNasID());
 
                 startFileManageActivity();
+
+            NASUtils.addInvitedNAS(mContext, mUUID, mUserName);
 //            }
         } else {
             Log.d(TAG, "[Enter] else section");
@@ -547,34 +612,6 @@ protected void extractInviteData(String url) {
 //            setResult(RESULT_OK, intent);
 //            finish();
 //        }
-    }
-
-
-    private void startLoginListActivity() {
-        Log.d(TAG, "[Enter] startLoginListActivity");
-
-        TutkGetNasLoader.TutkNasNode node = new TutkGetNasLoader.TutkNasNode();
-        node.nasID = mNasID;
-        node.nasUUID = mUUID;
-        node.nasName = mNickName;
-        HashMap<String, String> nas = new HashMap<String, String>();
-        nas.put("nasId", node.nasID);
-        nas.put("nickname", node.nasName);
-        nas.put("hostname", node.nasUUID);
-
-        ArrayList<HashMap<String, String>> nasList = new ArrayList();
-        nasList.add(nas);
-
-        Intent intent = new Intent();
-        intent.setClass(this, LoginListActivity.class);
-        intent.putExtra("NASList", nasList);
-        intent.putExtra("RemoteAccess", true);
-        intent.putExtra("start_by_invite", true);
-        intent.putExtra("is_invite", true);
-        intent.putExtra("username", mUserName);
-        intent.putExtra("password", mPassword);
-        startActivity(intent);
-//        finish();
     }
 
     // TODO duplicate code in LoginActivity

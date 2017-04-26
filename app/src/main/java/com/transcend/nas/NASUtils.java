@@ -10,8 +10,9 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.storage.StorageManager;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 import android.util.Log;
-import android.webkit.MimeTypeMap;
+import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
@@ -21,6 +22,11 @@ import com.facebook.login.LoginManager;
 import com.transcend.nas.connection.LoginHelper;
 import com.transcend.nas.management.FileInfo;
 import com.transcend.nas.utils.MimeUtil;
+import com.transcend.nas.utils.PrefUtil;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -31,9 +37,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-
-import static android.R.attr.data;
-import static android.R.attr.mimeType;
 
 /**
  * Created by steve_su on 2016/12/2.
@@ -326,5 +329,108 @@ public final class NASUtils {
 
         return encodePath;
     }
+
+    public static void addInvitedNAS(Context context, String uuid, String account) {
+        Log.d(TAG, "[Enter] addInvitedNAS uuid: "+ uuid+ " account: "+ account);
+        if (TextUtils.isEmpty(uuid) || TextUtils.isEmpty(account)) {
+            return;
+        }
+
+        String jsonString = getInvitedNASList(context);
+        Log.d(TAG, "jsonString: "+ jsonString);
+
+        try {
+            JSONArray jsonArray;
+            if (!jsonString.equals("")) {
+                jsonArray = new JSONArray(jsonString);
+                if (isInvitedNasExisting(uuid, account, jsonArray)) {
+                    return;
+                }
+            } else {
+                jsonArray = new JSONArray();
+            }
+
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("uuid", uuid);
+            jsonObject.put("account", account);
+            jsonArray.put(jsonObject);
+
+            setInvitedNASList(context, jsonArray.toString());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(context, context.getString(R.string.error), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private static boolean isInvitedNasExisting(String uuid, String account, JSONArray jsonArray) throws JSONException {
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject temp = (JSONObject) jsonArray.get(i);
+            boolean isExisting = uuid.equals(temp.optString("uuid")) && account.equals(temp.optString("account"));
+            if (isExisting) {
+                Log.d(TAG, "invited NAS is already existing...");
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static void setInvitedNASList(Context context, String jsonString) {
+        String name = context.getString(R.string.pref_name);
+        String key = "invited_nas_list";
+        PrefUtil.write(context, name, key, jsonString);
+    }
+
+    public static String getInvitedNASList(Context context)
+    {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = "invited_nas_list";
+        return PrefUtil.read(context, name, key, "");
+    }
+
+    public static void deleteInvitedNAS(Context context, String uuid) {
+        Log.d(TAG, "[Enter] deleteInvitedNAS");
+        String jsonString = getInvitedNASList(context);
+        if (!jsonString.equals("")) {
+            try {
+                JSONArray list = new JSONArray();
+                JSONArray tempArray = new JSONArray(jsonString);
+                if (tempArray == null) {
+                    Toast.makeText(context, context.getString(R.string.error), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                getUpdatedList(uuid, list, tempArray);
+
+                Log.d(TAG, "invited NAS list size(before): "+ tempArray.length());
+                Log.d(TAG, "invited NAS list size(after): "+ list.length());
+
+                if (tempArray.length() > list.length()) {
+                    Log.d(TAG, "[Enter] setInvitedNASList");
+                    setInvitedNASList(context, list.toString());
+
+                } else if (tempArray.length() == list.length()) {
+                    Log.d(TAG, "It is not a invited NAS...");
+                } else {
+                    Toast.makeText(context, context.getString(R.string.error), Toast.LENGTH_SHORT).show();
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Toast.makeText(context, context.getString(R.string.error), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private static void getUpdatedList(String uuid, JSONArray list, JSONArray tempArray) throws JSONException {
+        for (int i=0; i < tempArray.length(); i++) {
+            JSONObject temp = (JSONObject) tempArray.get(i);
+            boolean isUuidEqual = uuid.equals(temp.optString("uuid"));
+            if (!isUuidEqual) {
+                list.put(temp);
+            }
+        }
+    }
+
 
 }

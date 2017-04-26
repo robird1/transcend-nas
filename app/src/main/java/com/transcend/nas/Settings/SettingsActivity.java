@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -31,29 +30,18 @@ import com.transcend.nas.DrawerMenuController;
 import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.connection.InviteAccountActivity;
 import com.transcend.nas.connection.InviteShortLinkLoader;
-import com.transcend.nas.connection.LoginListActivity;
-import com.transcend.nas.connection.LoginLoader;
-import com.transcend.nas.connection.NASListLoader;
-import com.transcend.nas.connection.WizardCheckLoader;
-import com.transcend.nas.connection.WizardSetLoader;
 import com.transcend.nas.management.FileActionLocateActivity;
 import com.transcend.nas.management.firmware.FileFactory;
-import com.transcend.nas.service.LanCheckManager;
-import com.transcend.nas.tutk.P2PStautsLoader;
-import com.transcend.nas.tutk.TutkCreateNasLoader;
-import com.transcend.nas.tutk.TutkDeleteNasLoader;
-import com.transcend.nas.tutk.TutkGetNasLoader;
-import com.transcend.nas.tutk.TutkLinkNasLoader;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
-
-import static android.R.attr.id;
-import static com.facebook.messenger.MessengerUtils.EXTRA_APP_ID;
-import static com.transcend.nas.NASApp.TUTK_NAME_TAG;
-import static org.apache.http.params.CoreProtocolPNames.PROTOCOL_VERSION;
 
 
 /**
@@ -171,6 +159,12 @@ public class SettingsActivity extends DrawerMenuActivity {
                 PreferenceCategory pref = (PreferenceCategory) findPreference(getString(R.string.pref_firmware));
                 getPreferenceScreen().removePreference(pref);
             }
+
+            if (!isInviteItemVisible()) {
+                PreferenceCategory category = (PreferenceCategory) findPreference(getString(R.string.pref_other));
+                category.removePreference(findPreference(getString(R.string.pref_fb_invite)));
+            }
+
             getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
         }
 
@@ -411,6 +405,35 @@ public class SettingsActivity extends DrawerMenuActivity {
 
         private void initProgressView() {
             mProgressView = (RelativeLayout) getActivity().findViewById(R.id.settings_progress_view);
+        }
+
+        private boolean isInviteItemVisible() {
+            boolean isVisible = true;
+            String currentUUID = NASPref.getCloudUUID(this.getActivity());
+            String account = NASPref.getUsername(this.getActivity());
+            Log.d(TAG, "currentUUID: "+ currentUUID);
+            Log.d(TAG, "account: "+ account);
+
+            try {
+                String jsonString = NASUtils.getInvitedNASList(this.getActivity());
+                JSONArray jsonArray = new JSONArray(jsonString);
+                for (int i=0; i< jsonArray.length(); i++) {
+                    JSONObject temp = (JSONObject) jsonArray.get(i);
+                    Log.d(TAG, "temp.optString(\"uuid\"): " + temp.optString("uuid"));
+                    Log.d(TAG, "temp.optString(\"account\"): "+ temp.optString("account"));
+
+                    boolean isInvitedMode = currentUUID.equals(temp.optString("uuid")) && account.equals(temp.optString("account"));
+                    Log.d(TAG, "isInvitedMode: "+ isInvitedMode);
+
+                    if (isInvitedMode) {
+                        isVisible = false;
+                        break;
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return isVisible;
         }
 
     }
