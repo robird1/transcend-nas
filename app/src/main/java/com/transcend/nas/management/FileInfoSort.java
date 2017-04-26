@@ -52,7 +52,7 @@ public class FileInfoSort {
             if (lhs.time.equals(rhs.time)) {
                 result = compareByName(lhs, rhs);
             } else {
-                result = compareByDate(lhs, rhs);
+                result = -compareByDate(lhs, rhs);
             }
             return result;
         }
@@ -67,7 +67,7 @@ public class FileInfoSort {
             if (lhs.time.equals(rhs.time)) {
                 result = compareByName(lhs, rhs);
             } else {
-                result = -compareByDate(lhs, rhs);
+                result = compareByDate(lhs, rhs);
             }
             return result;
         }

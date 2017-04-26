@@ -153,16 +153,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:background="@drawable/player_selector"
-                android:src="@drawable/player_mode_shuffle" />
-
-            <ImageView
-                android:id="@+id/music_shuffle_check"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_alignRight="@id/music_shuffle"
-                android:layout_below="@id/music_shuffle"
-                android:layout_marginTop="-4dp"
-                android:src="@drawable/ic_check_white_24dp" />
+                android:src="@drawable/player_mode_linear" />
         </RelativeLayout>
 
     </RelativeLayout>

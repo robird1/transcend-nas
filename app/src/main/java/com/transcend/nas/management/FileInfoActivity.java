@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import com.transcend.nas.LoaderID;
 import com.transcend.nas.R;
 import com.transcend.nas.management.firmware.FileFactory;
+import com.transcend.nas.management.firmware.PhotoFactory;
 
 import java.util.Map;
 
@@ -95,7 +96,7 @@ public class FileInfoActivity extends AppCompatActivity implements LoaderManager
         else if (fileInfo.type.equals(FileInfo.TYPE.MUSIC))
             ivImage.setImageResource(R.drawable.ic_audiotrack_gray_big);
         if (fileInfo.type.equals(FileInfo.TYPE.PHOTO) || fileInfo.type.equals(FileInfo.TYPE.VIDEO) || fileInfo.type.equals(FileInfo.TYPE.MUSIC))
-            FileFactory.getInstance().displayPhoto(this, true, fileInfo.path, ivImage);
+            PhotoFactory.getInstance().displayPhoto(this, true, fileInfo.path, ivImage);
     }
 
     private void initFragment() {

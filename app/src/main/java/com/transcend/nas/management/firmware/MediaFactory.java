@@ -55,8 +55,13 @@ public class MediaFactory {
         } else {
             Server server = ServerManager.INSTANCE.getCurrentServer();
             String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
+            if (forceLocal) {
+                ServerInfo info = server.getServerInfo();
+                if (info != null)
+                    hostname = info.ipAddress;
+            }
+
             String username = server.getUsername();
-            String hash = server.getHash();
             String url;
             String filepath;
             if (path.startsWith(Server.HOME))
@@ -85,12 +90,7 @@ public class MediaFactory {
             if(convert != null && !"".equals(convert))
                 filepath = convert;
 
-            if (forceLocal) {
-                ServerInfo info = server.getServerInfo();
-                if (info != null)
-                    hostname = info.ipAddress;
-            }
-
+            String hash = server.getHash();
             url = "http://" + hostname + filepath + "?session=" + hash;
             url = url.replaceAll(" ", "%20");
             uri = Uri.parse(url);
@@ -106,7 +106,7 @@ public class MediaFactory {
             String type = MimeUtil.getMimeType(path);
             MediaMetadata metadata = new MediaMetadata(mediaType);
             metadata.putString(MediaMetadata.KEY_TITLE, FilenameUtils.getName(path));
-            metadata.addImage(new WebImage(Uri.parse(FileFactory.getInstance().getPhotoPath(context, true, path))));
+            metadata.addImage(new WebImage(Uri.parse(PhotoFactory.getInstance().getPhotoPath(context, true, true, path))));
 
             info = new MediaInfo.Builder(uri)
                     .setContentType(type)

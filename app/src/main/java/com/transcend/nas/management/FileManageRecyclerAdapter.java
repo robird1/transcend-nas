@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.transcend.nas.R;
 import com.transcend.nas.management.firmware.FileFactory;
+import com.transcend.nas.management.firmware.PhotoFactory;
 
 import java.util.ArrayList;
 
@@ -112,7 +113,7 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
                 holder.indicate.setVisibility( fileInfo.type.equals(FileInfo.TYPE.VIDEO) ? View.VISIBLE : View.GONE);
             }
             if (fileInfo.type.equals(FileInfo.TYPE.PHOTO) || fileInfo.type.equals(FileInfo.TYPE.VIDEO) || fileInfo.type.equals(FileInfo.TYPE.MUSIC) )
-                FileFactory.getInstance().displayPhoto(mContext, true, path, holder.icon);
+                PhotoFactory.getInstance().displayPhoto(mContext, true, path, holder.icon);
             else
                 ImageLoader.getInstance().cancelDisplayTask(holder.icon);
 
