@@ -2,9 +2,12 @@ package com.transcend.nas.common;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.support.v4.view.ViewCompat;
+import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
+import android.view.animation.OvershootInterpolator;
 import android.view.animation.ScaleAnimation;
 
 import com.transcend.nas.NASApp;
@@ -62,5 +65,25 @@ public class AnimFactory {
         anim.setDuration(1000); //You can manage the blinking time with this parameter
         anim.setStartOffset(100);
         return anim;
+    }
+
+
+    public void setRollBackAnimation(View view){
+        ViewCompat.animate(view)
+                .rotation(0F)
+                .withLayer()
+                .setDuration(720L)
+                .setInterpolator(new OvershootInterpolator(1F))
+                .start();
+    }
+
+    public void setRollAnimation(View view){
+        view.setRotation(0);
+        ViewCompat.animate(view)
+                .rotation(360F)
+                .withLayer()
+                .setDuration(720L)
+                .setInterpolator(new OvershootInterpolator(1F))
+                .start();
     }
 }

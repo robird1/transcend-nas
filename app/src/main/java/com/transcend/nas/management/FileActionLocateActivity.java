@@ -447,7 +447,7 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         List<String> folderNames = new ArrayList<String>();
         for (FileInfo file : mFileList) {
             if (file.type.equals(FileInfo.TYPE.DIR))
-                folderNames.add(file.name);
+                folderNames.add(file.name.toLowerCase());
         }
         new FileActionNewFolderDialog(this, folderNames) {
             @Override

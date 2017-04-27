@@ -908,7 +908,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         List<String> folderNames = new ArrayList<String>();
         for (FileInfo file : mFileList) {
             if (file.type.equals(FileInfo.TYPE.DIR))
-                folderNames.add(file.name);
+                folderNames.add(file.name.toLowerCase());
         }
         new FileActionNewFolderDialog(this, folderNames) {
             @Override
@@ -968,7 +968,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
             if (file.checked)
                 target = file;
             else
-                names.add(file.name);
+                names.add(file.name.toLowerCase());
         }
 
         final String path = target.path;
