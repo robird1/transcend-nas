@@ -11,7 +11,7 @@ import android.widget.ProgressBar;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.transcend.nas.R;
-import com.transcend.nas.management.firmware.FileFactory;
+import com.transcend.nas.management.firmware.PhotoFactory;
 
 import java.util.ArrayList;
 
@@ -62,7 +62,7 @@ public class ViewerPagerAdapter extends PagerAdapter {
         pv.setDrawingCacheEnabled(false);
         pv.setOnPhotoTapListener(mOnPhotoTapListener);
         ProgressBar pb = (ProgressBar) view.findViewById(R.id.viewer_progress);
-        FileFactory.getInstance().displayPhoto(mContext, false, path, pv, pb);
+        PhotoFactory.getInstance().displayPhoto(mContext, false, path, pv, pb);
         container.addView(view);
         Log.w(TAG, "instantiateItem [" + position + "]: " + path);
         return view;

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Define the background properties like color etc -->
+    <item android:id="@android:id/background">
+        <shape
+            android:innerRadiusRatio="4"
+            android:shape="ring"
+            android:thickness="3dp"
+            android:useLevel="false">
+            <solid android:color="@color/textColorPrimary" />
+        </shape>
+    </item>
+
+    <!-- Define the progress properties like start color, end color etc -->
+    <item android:id="@android:id/progress">
+        <rotate
+            android:fromDegrees="270"
+            android:toDegrees="270">
+            <shape
+                android:innerRadiusRatio="4"
+                android:shape="ring"
+                android:thickness="3dp"
+                android:useLevel="true"><!-- this line fixes the issue for lollipop api 21 -->
+                <gradient
+                    android:angle="0"
+                    android:endColor="#FFFFFF"
+                    android:startColor="#FFFFFF"
+                    android:type="sweep"
+                    android:useLevel="false" />
+            </shape>
+        </rotate>
+    </item>
+</layer-list>

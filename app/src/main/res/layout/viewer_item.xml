@@ -11,10 +11,10 @@
     <ProgressBar
         android:id="@+id/viewer_progress"
         style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="40dp"
-        android:layout_height="4dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_centerInParent="true"
-        android:progressDrawable="@drawable/viewer_progress_bar"
+        android:progressDrawable="@drawable/viewer_circle_progress_bar"
         android:visibility="invisible" />
 
 </RelativeLayout>

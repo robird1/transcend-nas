@@ -115,13 +115,26 @@ public class TwonkyManager {
         //startTwonkyParser(mPath, 0, 100);
     }
 
+
     private String getTwonkyIP() {
         Server server = ServerManager.INSTANCE.getCurrentServer();
-        String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.TWONKY);
+        return getTwonkyIP(false, server);
+    }
+
+    private String getTwonkyIP(boolean forceLocal, Server server) {
+        String hostname = "";
+        if(server != null) {
+            hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.TWONKY);
+            if(forceLocal) {
+                ServerInfo info = server.getServerInfo();
+                if(info != null)
+                    hostname = info.ipAddress + ":9000";
+            }
+        }
         return hostname;
     }
 
-    public String getUrlFromPath(boolean thumbnail, String path) {
+    public String getUrlFromPath(boolean forceLocal, boolean thumbnail, String path) {
         if (!useTwonkyServer)
             return null;
 
@@ -129,10 +142,12 @@ public class TwonkyManager {
         //String twonkyUrl = getUrlFromMap(thumbnail, FileInfo.TYPE.PHOTO, path);
         //url = twonkyUrl + (thumbnail ? "?scale=192x192" : "");
 
-        String value = "http://" + getTwonkyIP() + "/rpc/get_thumbnail?path=";
         Server server = ServerManager.INSTANCE.getCurrentServer();
-        String username = server.getUsername();
+        String ip = getTwonkyIP(forceLocal, server);
+        String value = "http://" + ip + "/rpc/get_thumbnail?path=";
         String realPath = ShareFolderManager.getInstance().getRealPath(path);
+
+        String username = server.getUsername();
         if (path.equals(realPath) && path.startsWith("/" + username + "/"))
             realPath = "/home" + path;
 

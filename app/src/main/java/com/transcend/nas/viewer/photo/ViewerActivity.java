@@ -44,6 +44,7 @@ import com.transcend.nas.management.fileaction.AbstractActionManager;
 import com.transcend.nas.management.fileaction.ActionHelper;
 import com.transcend.nas.management.fileaction.FileActionManager;
 import com.transcend.nas.management.firmware.FileFactory;
+import com.transcend.nas.management.firmware.PhotoFactory;
 import com.transcend.nas.service.FileRecentFactory;
 import com.transcend.nas.service.FileRecentInfo;
 import com.transcend.nas.service.FileRecentManager;
@@ -360,7 +361,7 @@ public class ViewerActivity extends AppCompatActivity implements
             }
 
             try {
-                mCastManager.sendDataMessage(FileFactory.getInstance().getPhotoPath(this, false, mList.get(position).path));
+                mCastManager.sendDataMessage(PhotoFactory.getInstance().getPhotoPath(this, true, false, mList.get(position).path));
             } catch (TransientNetworkDisconnectionException e) {
                 e.printStackTrace();
             } catch (NoConnectionException e) {

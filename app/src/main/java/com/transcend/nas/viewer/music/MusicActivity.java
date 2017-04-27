@@ -67,7 +67,6 @@ public class MusicActivity extends AppCompatActivity implements MusicManager.Med
     private ImageView musicPlay;
     private ImageView musicMode;
     private ImageView musicShuffle;
-    private ImageView musicShuffleCheck;
     private TextView musicStart;
     private TextView musicEnd;
     private TextView musicTitle;
@@ -245,8 +244,6 @@ public class MusicActivity extends AppCompatActivity implements MusicManager.Med
             }
         });
 
-        musicShuffleCheck = (ImageView) findViewById(R.id.music_shuffle_check);
-
         musicSeekBar = (SeekBar) findViewById(R.id.music_seekbar);
         musicSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -342,22 +339,17 @@ public class MusicActivity extends AppCompatActivity implements MusicManager.Med
     private void updateMusicShuffle(boolean init){
         boolean shuffle = NASPref.getMusicShuffle(this);
         if(init) {
-            if (shuffle) {
-                musicShuffleCheck.setVisibility(View.VISIBLE);
-            } else {
-                musicShuffleCheck.setVisibility(View.GONE);
-            }
+            musicShuffle.setImageResource(shuffle ? R.drawable.player_mode_shuffle : R.drawable.player_mode_linear);
         } else {
+            musicShuffle.setImageResource(shuffle ? R.drawable.player_mode_linear: R.drawable.player_mode_shuffle);
             if (shuffle) {
                 int index = 0;
                 if(mCurrentIndex >= 0 && mList.size() > mCurrentIndex)
                     index = MusicManager.getInstance().getMusicIndex(mList.get(mCurrentIndex));
                 MusicManager.getInstance().setMusicIndex(index);
-                musicShuffleCheck.setVisibility(View.GONE);
             } else {
                 MusicManager.getInstance().setShuffleList(mCurrentIndex);
                 MusicManager.getInstance().setMusicIndex(0);
-                musicShuffleCheck.setVisibility(View.VISIBLE);
             }
             NASPref.setMusicShuffle(this, !shuffle);
         }
