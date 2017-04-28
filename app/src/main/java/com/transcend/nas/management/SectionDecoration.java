@@ -99,7 +99,7 @@ public class SectionDecoration extends RecyclerView.ItemDecoration {
             if(prePosition > position)
                 continue;
 
-            if (0 <= position && position < itemCount) {
+            if (0 <= position && position < itemCount && position < idList.size()) {
                 preGroupId = groupId;
                 groupId = idList.get(position);
 

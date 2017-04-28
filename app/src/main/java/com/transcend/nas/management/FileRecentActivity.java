@@ -176,7 +176,7 @@ public class FileRecentActivity extends FileManageActivity {
             tmp.path = info.info.path;
             tmp.type = info.info.type;
             tmp.size = info.info.size;
-            tmp.time = "Last " + info.actionType.toString() + " : " + info.actionTime;
+            tmp.time = "Last " + info.actionType.toString() + " : " + info.actionTime.replaceAll("-", "_");
             mFileList.add(tmp);
         }
     }
@@ -230,6 +230,8 @@ public class FileRecentActivity extends FileManageActivity {
     private void removeData(int position) {
         if (mFileRecentList != null && mFileRecentList.size() > position && position >= 0) {
             FileRecentInfo info = mFileRecentList.get(position);
+            FileRecentManager.getInstance().deleteAction(info);
+
             mFileRecentList.remove(position);
             mFileList.remove(position);
             mFileIDList.remove(position);
@@ -238,10 +240,10 @@ public class FileRecentActivity extends FileManageActivity {
                 mRecyclerAdapter.updateList(mFileList);
                 mRecyclerAdapter.notifyItemRemoved(position);
             } else {
-                updateScreen();
-                checkEmptyView();
+                doRefresh();
+                //updateScreen();
+                //checkEmptyView();
             }
-            FileRecentManager.getInstance().deleteAction(info);
         }
         mFileIndex = -1;
     }
