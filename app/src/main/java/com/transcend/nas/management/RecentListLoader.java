@@ -5,6 +5,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.transcend.nas.NASPref;
+import com.transcend.nas.R;
 import com.transcend.nas.service.FileRecentInfo;
 import com.transcend.nas.service.FileRecentManager;
 
@@ -77,6 +78,8 @@ public class RecentListLoader extends AsyncTaskLoader {
         int dayCount = 0;
         int dayWeekTotal = WEEK_REVERSE.length;
         String day = dateFormat.format(cal.getTime());
+        String today = getContext().getString(R.string.today);
+        String yesterday = getContext().getString(R.string.yesterday);
         for (FileRecentInfo file : files) {
             if (file.actionTime != null && !"".equals(file.actionTime)) {
                 String time = file.actionTime.split(" ")[0];
@@ -84,10 +87,10 @@ public class RecentListLoader extends AsyncTaskLoader {
                     if (time.startsWith(day)) {
                         switch (dayCount) {
                             case 0:
-                                time = "Today";
+                                time = today;
                                 break;
                             case 1:
-                                time = "Yesterday";
+                                time = yesterday;
                                 break;
                             default:
                                 time = WEEK_REVERSE[(dayWeekTotal - dayOfWeek + dayCount) % dayWeekTotal];

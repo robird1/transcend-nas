@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
  Loco xml export: Android string resources
- Project: 2016Q4 SJC App
+ Project: 2017Q2 SJC App
  Release: Working copy
  Locale: en_US, English (USA)
  Tagged: Android_SJC
+ Status: Translated
  Exported by: Translator TS
- Exported at: Wed, 08 Mar 2017 02:35:07 +0000
+ Exported at: Fri, 28 Apr 2017 16:57:26 +0800
 -->
 <resources>
     <string name="about">About</string>
@@ -55,7 +56,7 @@
     <string name="cut">Cut</string>
     <string name="date">Date</string>
     <string name="delete">Delete</string>
-    <string name="deleting">Deleting</string>
+    <string name="deleting">Deleting...</string>
     <string name="detail">Detail</string>
     <string name="device">Device</string>
     <string name="device_information">Device Information</string>
@@ -71,14 +72,13 @@
     <string name="dialog_write_operation_not_allowed">Operation failed due to the writing limitation of Android 4.4</string>
     <string name="disk">Disk</string>
     <string name="disk_info">Disk info</string>
-    <!-- No need to translate -->
     <string name="disk_smart">S.M.A.R.T</string>
     <string name="disk_smart_info">Help to check disk status</string>
     <string name="dlg_msg_delete">Are you sure to delete files?</string>
     <string name="done">Done</string>
     <string name="download">Download</string>
     <string name="download_location_error">Please check your download location, the target destination does not exist</string>
-    <string name="downloading">Downloading</string>
+    <string name="downloading">Downloading...</string>
     <string name="duplicate_name">Duplicate name</string>
     <string name="edit_mode">Edit mode</string>
     <string name="email">Email</string>
@@ -114,7 +114,7 @@
     <string name="legal">Privacy</string>
     <string name="license_agreement_description">You must agree to the Transcend license agreement and privacy policy to continue.</string>
     <string name="licenses">Licenses</string>
-    <string name="loading">Loading</string>
+    <string name="loading">Loading...</string>
     <string name="location">Location</string>
     <string name="login">Login</string>
     <string name="login_error">Invalid account or password</string>
@@ -143,6 +143,8 @@
     <string name="msg_upload_to">Upload to..</string>
     <string name="music">Music</string>
     <string name="name">Name</string>
+    <string name="name_ascending">Name (Ascending)</string>
+    <string name="name_descending">Name (Descending)</string>
     <string name="nas_list">StoreJet Cloud List</string>
     <string name="nas_logout">Are you sure to logout StoreJet Cloud?</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -226,10 +228,11 @@
     <string name="termsofuse">Terms of Use</string>
     <string name="thank_you">Thank you</string>
     <string name="toast_invalid_name">The input name contains invalid character</string>
+    <string name="today">Today</string>
     <string name="total">Total</string>
-    <string name="try_auto_connect">Auto connecting</string>
+    <string name="try_auto_connect">Auto connecting...</string>
     <string name="try_remote_access">Remote access</string>
-    <string name="try_search_device">Searching device</string>
+    <string name="try_search_device">Searching device...</string>
     <string name="type">Type</string>
     <string name="unknown_album">Unknown Album</string>
     <string name="unknown_artist">Unknown Artist</string>
@@ -239,7 +242,7 @@
     <string name="update_firmware">Please update StoreJet Cloud firmware to the lastest version</string>
     <string name="upload">Upload</string>
     <string name="upload_modified_file">Do you want to upload the modified file?</string>
-    <string name="uploading">Uploading</string>
+    <string name="uploading">Uploading...</string>
     <string name="use_cellular_network">Use Cellular Network</string>
     <string name="used">Used</string>
     <string name="user_feedback">Feedback</string>
@@ -263,4 +266,5 @@
     <string name="wizard_success">StoreJet Cloud is Ready</string>
     <string name="wizard_try">Try Again</string>
     <string name="wizard_wifi_info">Connect device Wi-Fi to router network</string>
+    <string name="yesterday">Yesterday</string>
 </resources>

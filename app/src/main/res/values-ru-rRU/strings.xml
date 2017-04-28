@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
  Loco xml export: Android string resources
- Project: 2016Q4 SJC App
+ Project: 2017Q2 SJC App
  Release: Working copy
  Locale: ru_RU, Russian
  Tagged: Android_SJC
+ Status: Translated
  Exported by: Translator TS
- Exported at: Wed, 08 Mar 2017 02:35:07 +0000
+ Exported at: Fri, 28 Apr 2017 16:57:26 +0800
 -->
 <resources>
     <string name="about">О программе</string>
@@ -55,7 +56,7 @@
     <string name="cut">Вырезать</string>
     <string name="date">Дата</string>
     <string name="delete">Удалить</string>
-    <string name="deleting">Удаление</string>
+    <string name="deleting">Удаление...</string>
     <string name="detail">Подробно</string>
     <string name="device">Устройство</string>
     <string name="device_information">Информация об устройстве</string>
@@ -64,14 +65,13 @@
     <string name="dialog_button_replace">Заместить</string>
     <string name="dialog_button_save">Сохранить</string>
     <string name="dialog_button_yes">ДА</string>
-    <string name="dialog_clean_cache">Вы хотите очистить кэш?\u0020</string>
+    <string name="dialog_clean_cache">Вы хотите очистить кэш?</string>
     <string name="dialog_grant_permission_failed">Выбранная папка не является корневой папкой на SD карте</string>
     <string name="dialog_remote_file_changed">Этот файл был удаленно изменен. Вы хотите заменить его или сохранить на устройстве?</string>
     <string name="dialog_request_write_permission">Пожалуйста, выберите корневую папку, чтобы разрешить запись</string>
     <string name="dialog_write_operation_not_allowed">Операция прервана из-за ограничений Android 4.4</string>
     <string name="disk">Диск</string>
     <string name="disk_info">Информация о диске</string>
-    <!-- No need to translate -->
     <string name="disk_smart">S.M.A.R.T.</string>
     <string name="disk_smart_info">Помогает отслеживать состояние дисков</string>
     <string name="dlg_msg_delete">Вы уверены, что хотите удалить эти файлы?</string>
@@ -114,7 +114,7 @@
     <string name="legal">Конфиденциальность</string>
     <string name="license_agreement_description">Для продолжения Вам нужно принять лицензионное соглашение и политику конфиденциальности Transcend.</string>
     <string name="licenses">Лицензии</string>
-    <string name="loading">Загрузка...\u0020</string>
+    <string name="loading">Загрузка...</string>
     <string name="location">Расположение</string>
     <string name="login">Логин</string>
     <string name="login_error">Неверная учетная запись или пароль</string>
@@ -143,6 +143,8 @@
     <string name="msg_upload_to">Загрузить в...</string>
     <string name="music">Музыка</string>
     <string name="name">Имя</string>
+    <string name="name_ascending">Name (Ascending)</string>
+    <string name="name_descending">Name (Descending)</string>
     <string name="nas_list">Список StoreJet Cloud</string>
     <string name="nas_logout">Вы уверены, что хотите выйти из учетной записи StoreJet Cloud?</string>
     <string name="navigation_drawer_close">Закрыть боковое меню</string>
@@ -226,10 +228,11 @@
     <string name="termsofuse">Условия Пользования</string>
     <string name="thank_you">Спасибо</string>
     <string name="toast_invalid_name">Введенное имя содержит недопустимые символы</string>
+    <string name="today">сегодня</string>
     <string name="total">Всего</string>
-    <string name="try_auto_connect">Автоматическое подключение</string>
+    <string name="try_auto_connect">Автоматическое подключение...</string>
     <string name="try_remote_access">Удаленный доступ</string>
-    <string name="try_search_device">Поиск устройства</string>
+    <string name="try_search_device">Поиск устройства...</string>
     <string name="type">Тип</string>
     <string name="unknown_album">Неизвестный альбом</string>
     <string name="unknown_artist">Неизвестный исполнитель</string>
@@ -239,7 +242,7 @@
     <string name="update_firmware">Пожалуйста, обновите прошивку StoreJet Cloud до последней версии</string>
     <string name="upload">Загрузить</string>
     <string name="upload_modified_file">Вы хотите загрузить измененный файл?</string>
-    <string name="uploading">Загрузка</string>
+    <string name="uploading">Загрузка...</string>
     <string name="use_cellular_network">Использовать мобильный интернет</string>
     <string name="used">Занято</string>
     <string name="user_feedback">Обратная связь</string>
@@ -263,4 +266,5 @@
     <string name="wizard_success">StoreJet Cloud готов к использованию</string>
     <string name="wizard_try">Попробуйте еще раз</string>
     <string name="wizard_wifi_info">Подключите устройство к маршрутизатору Wi-Fi</string>
+    <string name="yesterday">вчера</string>
 </resources>
