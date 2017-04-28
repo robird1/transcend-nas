@@ -4,9 +4,11 @@ import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.util.Log;
 
-import com.transcend.nas.service.FileRecentFactory;
+import com.transcend.nas.NASPref;
+import com.transcend.nas.service.FileRecentInfo;
 import com.transcend.nas.service.FileRecentManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,12 +42,20 @@ public class RecentDeleteLoader extends AsyncTaskLoader {
     }
 
     private boolean delete() {
+        ArrayList<FileRecentInfo> files;
         if (mUserID >= 0) {
-            FileRecentManager.getInstance().deleteAction(mUserID);
+            files = FileRecentManager.getInstance().getAction(mUserID, null, NASPref.defaultRecentListSize);
+            //FileRecentManager.getInstance().deleteAction(mUserID);
         } else {
-            FileRecentManager.getInstance().deleteAction();
+            files = FileRecentManager.getInstance().getAction(NASPref.defaultRecentListSize);
+            //FileRecentManager.getInstance().deleteAction();
         }
 
+        if(files != null) {
+            for (FileRecentInfo info : files) {
+                FileRecentManager.getInstance().deleteAction(info);
+            }
+        }
         //for (String path : mPaths) {
         //    if(isLoadInBackgroundCanceled()) {
         //        Log.d(TAG, "Delete cancel");

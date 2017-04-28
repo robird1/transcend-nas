@@ -80,7 +80,7 @@ public class FileRecentManager {
         }
     }
 
-    public ArrayList<FileRecentInfo> getAction(int userId, String path) {
+    public ArrayList<FileRecentInfo> getAction(int userId, String path, int size) {
         if (userId < 0)
             return null;
 
@@ -96,7 +96,7 @@ public class FileRecentManager {
                 String url = "select * from " + MyDBHelper.TABLE_RECENT + " WHERE " + MyDBHelper.RECENT_USER + "='" + userId
                         + folderUrl
                         + "' AND " + MyDBHelper.RECENT_ACTION_TIME + key
-                        + " ORDER by " + MyDBHelper.RECENT_ACTION_TIME + " DESC";
+                        + " ORDER by " + MyDBHelper.RECENT_ACTION_TIME + " DESC" + (size >= 0 ? " LIMIT " + size : "");
                 c = MyDBManager.getInstance(mContext).rawQuery(url, null);
                 if (c.moveToFirst()) {
                     do {
@@ -132,20 +132,20 @@ public class FileRecentManager {
         return result;
     }
 
-    public ArrayList<FileRecentInfo> getAction(LoginHelper.LoginInfo user, String path) {
-        return getAction(FileRecentFactory.getUserID(mContext, user), path);
+    public ArrayList<FileRecentInfo> getAction(LoginHelper.LoginInfo user, String path, int size) {
+        return getAction(FileRecentFactory.getUserID(mContext, user), path, size);
     }
 
-    public ArrayList<FileRecentInfo> getAction(LoginHelper.LoginInfo user) {
-        return getAction(user, null);
+    public ArrayList<FileRecentInfo> getAction(LoginHelper.LoginInfo user, int size) {
+        return getAction(user, null, size);
     }
 
-    public ArrayList<FileRecentInfo> getAction(String path) {
-        return getAction(FileRecentFactory.getCurrentUserID(mContext), path);
+    public ArrayList<FileRecentInfo> getAction(String path, int size) {
+        return getAction(FileRecentFactory.getCurrentUserID(mContext), path, size);
     }
 
-    public ArrayList<FileRecentInfo> getAction() {
-        return getAction(FileRecentFactory.getCurrentUserID(mContext), null);
+    public ArrayList<FileRecentInfo> getAction(int size) {
+        return getAction(FileRecentFactory.getCurrentUserID(mContext), null, size);
     }
 
     public void reviseAction(FileRecentInfo oldItem, FileRecentInfo newItem) {

@@ -25,7 +25,8 @@ public class NASPref {
     public static final int useTwonkyMinFirmwareVersion = 20161122;
     public static boolean useTwonkyServer = true;
     public static boolean useSwitchNas = false;
-    public static boolean useRecent = true;
+    public static int defaultRecentListSize = 20;
+    public static int defaultRecentMaxListSize = 1000;
 
 
     public enum Sort {

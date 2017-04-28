@@ -14,7 +14,6 @@ import com.transcend.nas.R;
 
 import org.apache.commons.io.FilenameUtils;
 
-import java.io.File;
 import java.util.List;
 
 /**
@@ -82,8 +81,7 @@ public abstract class FileActionRenameDialog implements TextWatcher, View.OnClic
         if (isInvalid(name)) {
             error = mContext.getResources().getString(R.string.invalid_name);
             enabled = false;
-        }
-        if (isDuplicated(name)) {
+        } else if (isDuplicated(name)) {
             error = mContext.getResources().getString(R.string.duplicate_name);
             enabled = false;
         }
@@ -99,13 +97,15 @@ public abstract class FileActionRenameDialog implements TextWatcher, View.OnClic
     @Override
     public void onClick(View v) {
         if (v.equals(mDlgBtnPos)) {
-            if (mFieldName.getEditText() == null) return;
-            String name = addExtension(mFieldName.getEditText().getText().toString());
-            if (!new FileNameChecker(name).isValid()) {
+            if (mFieldName.getEditText() == null)
+                return;
+            String text = mFieldName.getEditText().getText().toString();
+            FileNameChecker checker = new FileNameChecker(text);
+            if (checker.isContainInvalid() || checker.isStartWithSpace()) {
                 Toast.makeText(mContext, R.string.toast_invalid_name, Toast.LENGTH_SHORT).show();
             } else {
-                if(!mName.equals(name))
-                    onConfirm(name);
+                if(!mName.equals(text))
+                    onConfirm(addExtension(text));
                 mDialog.dismiss();
             }
         }
@@ -117,7 +117,7 @@ public abstract class FileActionRenameDialog implements TextWatcher, View.OnClic
 
     private boolean isDuplicated(String name) {
         if (isInvalid(name)) return false;
-        return mNames.contains(name);
+        return mNames.contains(name.toLowerCase());
     }
 
     private String addExtension(String name){

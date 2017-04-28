@@ -14,12 +14,16 @@ public class FileNameChecker {
         mInput = input;
     }
 
-    public boolean isValid() {
+    public boolean isContainInvalid() {
         for (int i = 0; i < INVALID_CHARS.length; i++) {
             if (mInput.contains(INVALID_CHARS[i].toString())) {
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
+    }
+
+    public boolean isStartWithSpace(){
+        return mInput.startsWith(" ");
     }
 }

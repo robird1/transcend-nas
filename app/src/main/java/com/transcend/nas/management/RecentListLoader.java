@@ -4,10 +4,12 @@ import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.util.Log;
 
+import com.transcend.nas.NASPref;
 import com.transcend.nas.service.FileRecentInfo;
 import com.transcend.nas.service.FileRecentManager;
 
 import java.text.DateFormat;
+import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -34,6 +36,16 @@ public class RecentListLoader extends AsyncTaskLoader {
         mFileDayIdList = new ArrayList<>();
         mUserID = userID;
         mPath = path;
+
+        String[] weekdays = new DateFormatSymbols().getShortWeekdays();
+        int customWeekdaysLength = WEEK_REVERSE.length;
+        int length = weekdays.length;
+        for (int i = 0; i < length; i++) {
+            int index = length - i - 1;
+            if (weekdays[i] != null && !weekdays[i].equals("") && (0 <= index && index < customWeekdaysLength)) {
+                WEEK_REVERSE[index] = weekdays[i];
+            }
+        }
     }
 
     @Override
@@ -50,12 +62,12 @@ public class RecentListLoader extends AsyncTaskLoader {
         ArrayList<FileRecentInfo> files;
         if (mUserID >= 0) {
             //files = FileRecentManager.getInstance().getAction(mUserID, mPath);
-            files = FileRecentManager.getInstance().getAction(mUserID, null);
+            files = FileRecentManager.getInstance().getAction(mUserID, null, -1);
         } else {
             //files = FileRecentManager.getInstance().getAction(mPath);
-            files = FileRecentManager.getInstance().getAction();
+            files = FileRecentManager.getInstance().getAction(-1);
         }
-        Log.w(TAG, "mFileList origin size: " + files.size());
+        checkRecentListSize(files);
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Calendar cal = Calendar.getInstance();
@@ -95,11 +107,24 @@ public class RecentListLoader extends AsyncTaskLoader {
 
                 mFileDayIdList.add(time);
                 mFileList.add(file);
+                if (mFileList.size() >= NASPref.defaultRecentListSize)
+                    break;
             }
         }
 
         Log.w(TAG, "mFileList size: " + mFileList.size());
         return true;
+    }
+
+    private void checkRecentListSize(ArrayList<FileRecentInfo> files){
+        int size = files.size();
+        Log.w(TAG, "mFileList origin size: " + size);
+        if (size > NASPref.defaultRecentMaxListSize) {
+            for (int i = NASPref.defaultRecentListSize; i < size; i++) {
+                FileRecentInfo info = files.get(i);
+                FileRecentManager.getInstance().deleteAction(info);
+            }
+        }
     }
 
     public String getPath() {
@@ -110,7 +135,7 @@ public class RecentListLoader extends AsyncTaskLoader {
         return mFileList;
     }
 
-    public ArrayList<String> getFileDayIDList(){
+    public ArrayList<String> getFileDayIDList() {
         return mFileDayIdList;
     }
 

@@ -15,6 +15,8 @@ import android.widget.Toast;
 
 import com.transcend.nas.R;
 
+import org.apache.commons.io.FilenameUtils;
+
 import java.util.List;
 
 /**
@@ -52,7 +54,7 @@ public abstract class FileActionNewFolderDialog implements TextWatcher, View.OnC
     }
 
     private void initFieldName() {
-        mFieldName = (TextInputLayout)mDialog.findViewById(R.id.dialog_folder_create_name);
+        mFieldName = (TextInputLayout) mDialog.findViewById(R.id.dialog_folder_create_name);
         if (mFieldName.getEditText() == null)
             return;
         mFieldName.getEditText().setText(getUniqueName());
@@ -72,8 +74,7 @@ public abstract class FileActionNewFolderDialog implements TextWatcher, View.OnC
         if (isInvalid(name)) {
             error = mContext.getResources().getString(R.string.invalid_name);
             enabled = false;
-        }
-        if (isDuplicated(name)) {
+        } else if (isDuplicated(name)) {
             error = mContext.getResources().getString(R.string.duplicate_name);
             enabled = false;
         }
@@ -91,7 +92,8 @@ public abstract class FileActionNewFolderDialog implements TextWatcher, View.OnC
         if (v.equals(mDlgBtnPos)) {
             if (mFieldName.getEditText() == null) return;
             String name = mFieldName.getEditText().getText().toString();
-            if (!new FileNameChecker(name).isValid()) {
+            FileNameChecker checker = new FileNameChecker(name);
+            if (checker.isContainInvalid() || checker.isStartWithSpace()) {
                 Toast.makeText(mContext, R.string.toast_invalid_name, Toast.LENGTH_SHORT).show();
             } else {
                 onConfirm(name);
@@ -116,7 +118,7 @@ public abstract class FileActionNewFolderDialog implements TextWatcher, View.OnC
 
     private boolean isDuplicated(String name) {
         if (isInvalid(name)) return false;
-        return mFolderNames.contains(name);
+        return mFolderNames.contains(name.toLowerCase());
     }
 
 }
