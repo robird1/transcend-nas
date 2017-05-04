@@ -5,6 +5,8 @@ import android.content.res.Resources;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.management.firmware.ShareFolderManager;
 import com.transcend.nas.management.firmware.TwonkyManager;
@@ -48,8 +50,9 @@ public class SmbFileListLoader extends SmbAbstractLoader {
                             ShareFolderManager.getInstance().updateSharedFolder();
 
                         //update twonky image
-                        if (!inTwonkyLifeCycle)
+                        if (!inTwonkyLifeCycle) {
                             TwonkyManager.getInstance().updateTwonky();
+                        }
 
                         mFinish = true;
                     }

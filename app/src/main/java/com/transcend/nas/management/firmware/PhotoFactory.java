@@ -154,7 +154,13 @@ public class PhotoFactory {
     }
 
     private String getTwonkyUrl(boolean forceLocal, boolean thumbnail, String path) {
-        return TwonkyManager.getInstance().getUrlFromPath(forceLocal, thumbnail, path);
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        String username = server.getUsername();
+
+        String realPath = ShareFolderManager.getInstance().getRealPath(path);
+        if (path.equals(realPath) && path.startsWith("/" + username + "/"))
+            realPath = "/home" + path;
+        return TwonkyManager.getInstance().getPhotoUrl(server, forceLocal, thumbnail, realPath);
     }
 
     private String getWebDavUrl(boolean forceLocal, boolean thumbnail, String path) {

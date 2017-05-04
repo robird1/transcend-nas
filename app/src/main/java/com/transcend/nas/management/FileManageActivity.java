@@ -670,6 +670,9 @@ public class FileManageActivity extends DrawerMenuActivity implements
                 case R.id.file_manage_editor_action_share:
                     doShare(getSelectedFiles());
                     break;
+                case R.id.file_manage_editor_action_share_link:
+                    doShareLink(getSelectedFiles());
+                    break;
                 case R.id.file_manage_editor_action_copy:
                     startFileActionLocateActivity(NASApp.ACT_COPY);
                     break;
@@ -1003,6 +1006,28 @@ public class FileManageActivity extends DrawerMenuActivity implements
         closeEditorMode();
     }
 
+    private void doShareLink(final ArrayList<FileInfo> files) {
+        Bundle value = new Bundle();
+        value.putString(ProgressDialog.DIALOG_TITLE, "Share Link");
+        value.putInt(ProgressDialog.DIALOG_ICON, R.drawable.ic_toolbar_share_gray);
+        String format = mContext.getResources().getString(files.size() <= 1 ? R.string.msg_file_selected : R.string.msg_files_selected);
+        value.putString(ProgressDialog.DIALOG_MESSAGE, String.format(format, files.size()));
+        new ProgressDialog(mContext, value) {
+            @Override
+            public void onConfirm() {
+                mFileActionManager.shareLink(files);
+                dismiss();
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+        };
+        closeEditorMode();
+    }
+
+
     private void doCopy(String dest, ArrayList<String> paths) {
         if (mFileActionManager.isSubDirectory(dest, paths)) {
             Toast.makeText(this, getString(R.string.select_folder_error), Toast.LENGTH_SHORT).show();
@@ -1170,15 +1195,19 @@ public class FileManageActivity extends DrawerMenuActivity implements
     protected void toggleEditorModeAction(int count) {
         boolean visible = (count == 1);
         boolean containFolder = false;
+        boolean containFile = false;
         if (visible) {
             ArrayList<FileInfo> files = getSelectedFiles();
             for (FileInfo file : files) {
                 if (file.type.equals(FileInfo.TYPE.DIR))
                     containFolder = true;
+                if (file.type.equals(FileInfo.TYPE.FILE))
+                    containFile = true;
             }
         }
         mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_rename).setVisible(visible);
         mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_share).setVisible(!containFolder & visible);
+        mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_share_link).setVisible(!containFolder & !containFile & visible);
     }
 
     @Override

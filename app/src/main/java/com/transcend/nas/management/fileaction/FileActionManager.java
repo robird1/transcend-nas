@@ -185,6 +185,14 @@ public class FileActionManager extends AbstractActionManager {
         }
     }
 
+    public void shareLink(ArrayList<FileInfo> files) {
+        ArrayList<String> paths = new ArrayList<String>();
+        for (FileInfo file : files) {
+            paths.add(file.path);
+        }
+        createLoader(FileActionService.FileAction.ShareLINK, null, null, paths);
+    }
+
     private void createLoader(FileActionService.FileAction type, String name, String dest, ArrayList<String> paths) {
         int id = mFileActionService.getLoaderID(type);
         Bundle args = new Bundle();
@@ -215,6 +223,7 @@ public class FileActionManager extends AbstractActionManager {
                             case DELETE:
                             case CreateFOLDER:
                             case SHARE:
+                            case ShareLINK:
                             case OPEN:
                                 mProgressLayout.setVisibility(View.VISIBLE);
                                 break;

@@ -2,19 +2,17 @@ package com.transcend.nas.management.fileaction;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
-import android.content.Intent;
 import android.content.Loader;
-import android.net.Uri;
-import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
 
 import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASApp;
+import com.transcend.nas.NASPref;
 import com.transcend.nas.NASUtils;
-import com.transcend.nas.R;
 import com.transcend.nas.management.FileDownloadLoader;
 import com.transcend.nas.management.FileInfo;
+import com.transcend.nas.management.FileShareLinkLoader;
 import com.transcend.nas.management.LocalFileUploadLoader;
 import com.transcend.nas.management.SmbFileCopyLoader;
 import com.transcend.nas.management.SmbFileDeleteLoader;
@@ -26,36 +24,52 @@ import com.transcend.nas.management.SmbFolderCreateLoader;
 import com.transcend.nas.management.externalstorage.ExternalStorageLollipop;
 import com.transcend.nas.management.externalstorage.OTGFileDownloadLoader;
 
-import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import static com.transcend.nas.management.fileaction.FileActionService.FileAction.*;
 
 /**
  * Created by ike_lee on 2016/12/21.
  */
 class SmbFileActionService extends FileActionService {
-    public SmbFileActionService(){
+    public SmbFileActionService() {
         TAG = SmbFileActionService.class.getSimpleName();
-        LIST = LoaderID.SMB_FILE_LIST;
-        DOWNLOAD = LoaderID.FILE_DOWNLOAD;
-        UPLOAD = LoaderID.LOCAL_FILE_UPLOAD;
-        CreateFOLDER = LoaderID.SMB_NEW_FOLDER;
-        RENAME = LoaderID.SMB_FILE_RENAME;
-        COPY = LoaderID.SMB_FILE_COPY;
-        MOVE = LoaderID.SMB_FILE_MOVE;
-        DELETE = LoaderID.SMB_FILE_DELETE;
-        SHARE = LoaderID.SMB_FILE_SHARE;
         mMode = NASApp.MODE_SMB;
         mRoot = NASApp.ROOT_SMB;
         mPath = NASApp.ROOT_SMB;
     }
 
     @Override
+    public void initLoaderID(HashMap<FileAction, Integer> ids) {
+        ids.put(OPEN, LoaderID.SMB_FILE_CHECK);
+        ids.put(LIST, LoaderID.SMB_FILE_LIST);
+        ids.put(DOWNLOAD, LoaderID.FILE_DOWNLOAD);
+        ids.put(UPLOAD, LoaderID.LOCAL_FILE_UPLOAD);
+        ids.put(CreateFOLDER, LoaderID.SMB_NEW_FOLDER);
+        ids.put(RENAME, LoaderID.SMB_FILE_RENAME);
+        ids.put(COPY, LoaderID.SMB_FILE_COPY);
+        ids.put(MOVE, LoaderID.SMB_FILE_MOVE);
+        ids.put(DELETE, LoaderID.SMB_FILE_DELETE);
+        ids.put(SHARE, LoaderID.SMB_FILE_SHARE);
+        ids.put(ShareLINK, LoaderID.FILE_SHARE_LINK);
+    }
+
+    @Override
     public boolean onLoadFinished(Context context, RelativeLayout progress, Loader<Boolean> loader, Boolean success) {
-        if(loader instanceof SmbFileShareLoader) {
+        if (loader instanceof SmbFileShareLoader) {
             ArrayList<FileInfo> shareList = ((SmbFileShareLoader) loader).getShareList();
             NASUtils.shareLocalFile(context, shareList);
-            if(progress != null)
+            if (progress != null)
+                progress.setVisibility(View.INVISIBLE);
+            return true;
+        } else if (loader instanceof FileShareLinkLoader && success) {
+            String uuid = NASPref.getCloudUUID(context);
+            ArrayList<String> urls = ((FileShareLinkLoader) loader).getFileShareLinks();
+            ArrayList<String> absolutePaths = ((FileShareLinkLoader) loader).getFileAbsolutePaths();
+            //TODO : open third-party app to delivery message
+            if (progress != null)
                 progress.setVisibility(View.INVISIBLE);
             return true;
         }
@@ -74,7 +88,7 @@ class SmbFileActionService extends FileActionService {
 
     @Override
     protected AsyncTaskLoader download(Context context, List<String> list, String dest) {
-        if(isWritePermissionRequired(context, dest))
+        if (isWritePermissionRequired(context, dest))
             return new OTGFileDownloadLoader(context, list, dest, new ExternalStorageLollipop(context).getSDFileLocation(dest));
         return new FileDownloadLoader(context, list, dest);
     }
@@ -112,5 +126,10 @@ class SmbFileActionService extends FileActionService {
     @Override
     protected AsyncTaskLoader share(Context context, ArrayList<String> paths, String dest) {
         return new SmbFileShareLoader(context, paths, dest);
+    }
+
+    @Override
+    protected AsyncTaskLoader shareLink(Context context, ArrayList<String> paths) {
+        return new FileShareLinkLoader(context, paths);
     }
 }

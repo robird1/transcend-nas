@@ -158,6 +158,9 @@ public class EventNotifyLoader extends AsyncTaskLoader<Boolean> {
             } else {
                 NASPref.setSessionVerifiedTime(getContext(), Long.toString(System.currentTimeMillis()));
                 Log.w(TAG, "hash key time update");
+                //check need to get server info or not
+                if(server.getServerInfo() == null)
+                    server.doGetServerInfo(hostname);
             }
         } else {
             Log.w(TAG, "hash key check error");
