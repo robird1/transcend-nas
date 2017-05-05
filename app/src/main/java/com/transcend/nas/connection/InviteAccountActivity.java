@@ -12,8 +12,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -26,8 +28,10 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASPref;
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.settings.FBInviteActivity;
+import com.transcend.nas.tutk.TutkLinkNasLoader;
 import com.tutk.IOTC.P2PService;
 
 import java.util.ArrayList;
@@ -53,6 +57,7 @@ public class InviteAccountActivity extends AppCompatActivity implements View.OnC
         setContentView(R.layout.activity_invite_account);
         mRecyclerView = (RecyclerView) findViewById(R.id.account_list);
         mProgressView = (RelativeLayout) findViewById(R.id.progress_view);
+        initToolbar();
 
         startAccountListLoader();
 
@@ -61,12 +66,42 @@ public class InviteAccountActivity extends AppCompatActivity implements View.OnC
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button_ok:
+//                if (!isGuestSelected()) {
+//                    showPasswordDialog();
+//                } else {
+//                    Intent intent = new Intent(this, FBInviteActivity.class);
+//                    intent.putExtra("username", "guest");
+//                    intent.putExtra("password", "");
+//                    startActivity(intent);
+//                    finish();
+//                }
                 showPasswordDialog();
                 break;
         }
+    }
+
+    private boolean isGuestSelected() {
+        return mListAdapter.mLastSelected == (mAccountList.size()- 1);
+    }
+
+    private void initToolbar() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("");
+        toolbar.setNavigationIcon(R.drawable.ic_navi_backaarow_white);
+        setSupportActionBar(toolbar);
     }
 
     private void startAccountListLoader() {
@@ -129,23 +164,45 @@ public class InviteAccountActivity extends AppCompatActivity implements View.OnC
                 mProgressView.setVisibility(View.VISIBLE);
                 return new InviteNASAccountLoader(this);
             case LoaderID.LOGIN:
-                mDialogProgressView.setVisibility(View.VISIBLE);
-                return new InviteLoginLoader(this, bundle);
+                if (bundle != null) {
+                    mDialogProgressView.setVisibility(View.VISIBLE);
+                    return new InviteLoginLoader(this, bundle);
+                } else {
+//                    mProgressView.setVisibility(View.VISIBLE);
+                    Bundle args = new Bundle();
+                    Server server = ServerManager.INSTANCE.getCurrentServer();
+                    String ip = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
+                    args.putString("hostname", ip);
+                    args.putString("username", NASPref.getUsername(this));
+                    args.putString("password", NASPref.getPassword(this));
+                    return new RetryLoginLoader(this, args);
+                }
+            case LoaderID.TUTK_NAS_LINK:
+//                mProgressView.setVisibility(View.VISIBLE);
+                return new TutkLinkNasLoader(this, bundle);
+
         }
         return null;
     }
 
     @Override
     public void onLoadFinished(Loader<Boolean> loader, Boolean isSuccess) {
-        mProgressView.setVisibility(View.INVISIBLE);
+//        mProgressView.setVisibility(View.INVISIBLE);
         if (loader instanceof InviteNASAccountLoader) {
-            Log.d(TAG, "[Enter] loader instanceof InviteNASAccountLoader");
-            Log.d(TAG, "isSuccess: "+ isSuccess);
-            mAccountList = ((InviteNASAccountLoader) loader).getAccountList();
-            Log.d(TAG, "mAccountList.size(): "+ mAccountList.size());
+            if (isSuccess) {
+                mProgressView.setVisibility(View.INVISIBLE);
+                Log.d(TAG, "[Enter] loader instanceof InviteNASAccountLoader");
+                Log.d(TAG, "isSuccess: " + isSuccess);
+                mAccountList = ((InviteNASAccountLoader) loader).getAccountList();
+//                mAccountList.add("guest");
+                mRecyclerView.setAdapter(mListAdapter = new ListAdapter(mAccountList));
+                mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+            } else {
+                Bundle args = new Bundle();
+                args.putString("hostname", NASPref.getUUID(this));
+                getLoaderManager().restartLoader(LoaderID.TUTK_NAS_LINK, args, this).forceLoad();
+            }
 
-            mRecyclerView.setAdapter(mListAdapter = new ListAdapter(mAccountList));
-            mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         } else if (loader instanceof InviteLoginLoader) {
             mDialogProgressView.setVisibility(View.INVISIBLE);
             if (isSuccess) {
@@ -157,6 +214,21 @@ public class InviteAccountActivity extends AppCompatActivity implements View.OnC
                 finish();
             } else {
                 Toast.makeText(mContext, getString(R.string.invite_wrong_password),Toast.LENGTH_SHORT).show();
+            }
+        } else if (loader instanceof RetryLoginLoader) {
+            if (isSuccess) {
+                startAccountListLoader();
+            } else {
+                mProgressView.setVisibility(View.INVISIBLE);
+                Toast.makeText(mContext, ((RetryLoginLoader) loader).getLoginError(),Toast.LENGTH_SHORT).show();
+            }
+
+        } else if (loader instanceof TutkLinkNasLoader) {
+            if (isSuccess) {
+                getLoaderManager().restartLoader(LoaderID.LOGIN, null, this).forceLoad();
+            } else {
+                mProgressView.setVisibility(View.INVISIBLE);
+                Toast.makeText(mContext, getString(R.string.error),Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -203,11 +275,15 @@ public class InviteAccountActivity extends AppCompatActivity implements View.OnC
             });
 
             if (position == 0) {
-                myViewHolder.mAccountBtn.setChecked(true);
-                mLastSelected = 0;
-                mLastSelectedBtn = myViewHolder.mAccountBtn;
+                setDefaultSeletedBtn(myViewHolder);
             }
 
+        }
+
+        private void setDefaultSeletedBtn(ViewHolder myViewHolder) {
+            myViewHolder.mAccountBtn.setChecked(true);
+            mLastSelected = 0;
+            mLastSelectedBtn = myViewHolder.mAccountBtn;
         }
 
         @Override
@@ -225,6 +301,40 @@ public class InviteAccountActivity extends AppCompatActivity implements View.OnC
             }
         }
 
+    }
+
+
+    public static class InviteLoginLoader extends LoginLoader {
+        private String mUserName;
+        private String mPassword;
+
+        public InviteLoginLoader(Context context, Bundle args) {
+            super(context, args, true);
+            mUserName = (String) args.get("username");
+            mPassword = (String) args.get("password");
+        }
+
+//        @Override
+//        public Boolean loadInBackground() {
+//            return mServer.connect(true);
+//        }
+
+        public String getUserName() {
+            return mUserName;
+        }
+
+        public String getPassword() {
+            return mPassword;
+        }
+
+    }
+
+
+    private static class RetryLoginLoader extends LoginLoader {
+
+        public RetryLoginLoader(Context context, Bundle args) {
+            super(context, args, true);
+        }
     }
 
 }

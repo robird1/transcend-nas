@@ -209,9 +209,10 @@ public class SettingsActivity extends DrawerMenuActivity {
                 startAboutActivity();
             } else if (key.equals(getString(R.string.pref_fb_invite))) {
                 startFBInviteActivity();
-            } else if (key.equals(getString(R.string.pref_invite))) {
-                startInviteActivity();
             }
+//            else if (key.equals(getString(R.string.pref_invite))) {
+//                startInviteActivity();
+//            }
 
             return super.onPreferenceTreeClick(preferenceScreen, preference);
         }
@@ -354,32 +355,32 @@ public class SettingsActivity extends DrawerMenuActivity {
             startActivity(intent);
         }
 
-        // TODO check .split("@tS#")
-        private void startInviteActivity() {
-            Log.d(TAG, "[Enter] startInviteActivity");
-
-            String uuid = NASPref.getCloudUUID(getActivity());
-            String nasId = NASPref.getCloudNasID(getActivity());
-//            String nickName = NASPref.getCloudNickName(getActivity()).split("%40tS#")[0];
-            String nickName = NASPref.getCloudNickName(getActivity()).split("@tS#")[0];
-            String userName = NASPref.getUsername(getActivity());
-            String password = NASPref.getCloudPassword(getActivity());
-            String password2 = NASPref.getPassword(getActivity());
-
-            Log.d(TAG, "nasName: "+ NASPref.getCloudNickName(getActivity()));
-            Log.d(TAG, "nickName: "+ nickName);
-            Log.d(TAG, "userName: "+ userName);
-            Log.d(TAG, "password: "+ password);
-            Log.d(TAG, "password2: "+ password2);
-
-            //TODO add IOS info
-            String url = "https://z69nd.app.goo.gl/?link=http://www.storejetcloud.com?uuid%3D"+
-                    uuid+ "%26nasId%3D"+ nasId+ "%26nickName%3D"+ nickName+ "%26username%3D"+ userName+ "%26password%3D"+ password2+"&apn=com.transcend.nas";
-
-            Bundle arg = new Bundle();
-            arg.putString("url", url);
-            getLoaderManager().restartLoader(LoaderID.INVITE_SHORT_LINK, arg, this).forceLoad();
-        }
+//        // TODO check .split("@tS#")
+//        private void startInviteActivity() {
+//            Log.d(TAG, "[Enter] startInviteActivity");
+//
+//            String uuid = NASPref.getCloudUUID(getActivity());
+//            String nasId = NASPref.getCloudNasID(getActivity());
+////            String nickName = NASPref.getCloudNickName(getActivity()).split("%40tS#")[0];
+//            String nickName = NASPref.getCloudNickName(getActivity()).split("@tS#")[0];
+//            String userName = NASPref.getUsername(getActivity());
+//            String password = NASPref.getCloudPassword(getActivity());
+//            String password2 = NASPref.getPassword(getActivity());
+//
+//            Log.d(TAG, "nasName: "+ NASPref.getCloudNickName(getActivity()));
+//            Log.d(TAG, "nickName: "+ nickName);
+//            Log.d(TAG, "userName: "+ userName);
+//            Log.d(TAG, "password: "+ password);
+//            Log.d(TAG, "password2: "+ password2);
+//
+//            //TODO add IOS info
+//            String url = "https://z69nd.app.goo.gl/?link=http://www.storejetcloud.com?uuid%3D"+
+//                    uuid+ "%26nasId%3D"+ nasId+ "%26nickName%3D"+ nickName+ "%26username%3D"+ userName+ "%26password%3D"+ password2+"&apn=com.transcend.nas";
+//
+//            Bundle arg = new Bundle();
+//            arg.putString("url", url);
+//            getLoaderManager().restartLoader(LoaderID.INVITE_SHORT_LINK, arg, this).forceLoad();
+//        }
 
         private void startDiskInfoActivity() {
             Intent intent = new Intent();
