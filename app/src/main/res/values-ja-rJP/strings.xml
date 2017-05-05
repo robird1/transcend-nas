@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
  Loco xml export: Android string resources
- Project: 2016Q4 SJC App
+ Project: 2017Q2 SJC App
  Release: Working copy
  Locale: ja_JP, Japanese
  Tagged: Android_SJC
+ Status: Translated
  Exported by: Translator TS
- Exported at: Wed, 08 Mar 2017 02:35:07 +0000
+ Exported at: Fri, 28 Apr 2017 16:57:26 +0800
 -->
 <resources>
     <string name="about">情報</string>
@@ -55,7 +56,7 @@
     <string name="cut">カット</string>
     <string name="date">日時</string>
     <string name="delete">削除</string>
-    <string name="deleting">削除中</string>
+    <string name="deleting">削除中...</string>
     <string name="detail">詳細</string>
     <string name="device">機器</string>
     <string name="device_information">機器情報</string>
@@ -71,7 +72,6 @@
     <string name="dialog_write_operation_not_allowed">Android 4.4の書込み制限による動作エラー</string>
     <string name="disk">ディスク</string>
     <string name="disk_info">ディスク情報</string>
-    <!-- No need to translate -->
     <string name="disk_smart">S.M.A.R.T</string>
     <string name="disk_smart_info">ディスクの状態を確認してください。</string>
     <string name="dlg_msg_delete">選択したファイルを削除しますか？</string>
@@ -114,7 +114,7 @@
     <string name="legal">プライバシー</string>
     <string name="license_agreement_description">続けるにはトランセンドのライセンス契約および個人情報保護に関する方針に同意いただく必要があります。</string>
     <string name="licenses">ライセンス</string>
-    <string name="loading">ロード中</string>
+    <string name="loading">ロード中...</string>
     <string name="location">場所</string>
     <string name="login">ログイン</string>
     <string name="login_error">無効なアカウントまたはパスワード</string>
@@ -143,6 +143,8 @@
     <string name="msg_upload_to">.. へアップロード</string>
     <string name="music">音楽</string>
     <string name="name">名前</string>
+    <string name="name_ascending">Name (Ascending)</string>
+    <string name="name_descending">Name (Descending)</string>
     <string name="nas_list">StoreJet Cloudリスト</string>
     <string name="nas_logout">StoreJet Cloudからログアウトしますか?</string>
     <string name="navigation_drawer_close">ナビゲーションドロワーを閉じる</string>
@@ -226,10 +228,11 @@
     <string name="termsofuse">利用規約</string>
     <string name="thank_you">ありがとうございます。</string>
     <string name="toast_invalid_name">入力情報に使用できない文字が含まれています。</string>
+    <string name="today">今日</string>
     <string name="total">トータル</string>
-    <string name="try_auto_connect">自動接続</string>
+    <string name="try_auto_connect">自動接続...</string>
     <string name="try_remote_access">リモートアクセス</string>
-    <string name="try_search_device">機器を検索</string>
+    <string name="try_search_device">機器を検索...</string>
     <string name="type">種類</string>
     <string name="unknown_album">不明なアルバム</string>
     <string name="unknown_artist">不明なアーティスト</string>
@@ -239,7 +242,7 @@
     <string name="update_firmware">StoreJet Cloudのファームウェアを最新バージョンにアップデートしてください。</string>
     <string name="upload">アップロード</string>
     <string name="upload_modified_file">変更したファイルをアップロードしますか?</string>
-    <string name="uploading">アップロード中</string>
+    <string name="uploading">アップロード中...</string>
     <string name="use_cellular_network">セルラーネットワークの利用</string>
     <string name="used">使用中</string>
     <string name="user_feedback">フィードバック</string>
@@ -263,4 +266,5 @@
     <string name="wizard_success">StoreJet Cloudは利用可能な状態です。</string>
     <string name="wizard_try">再実行</string>
     <string name="wizard_wifi_info">機器のWi-Fiをルーターのネットワークに接続します。</string>
+    <string name="yesterday">昨日</string>
 </resources>

@@ -81,8 +81,8 @@
         <item>@string/type</item>
         <item>@string/sort_date_newest_first</item>
         <item>@string/sort_date_oldest_first</item>
-        <item>@string/sort_name_a_to_z</item>
-        <item>@string/sort_name_z_to_a</item>
+        <item>@string/name_ascending</item>
+        <item>@string/name_descending</item>
     </string-array>
 
     <string-array name="cache_size_entries">

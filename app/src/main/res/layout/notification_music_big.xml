@@ -34,8 +34,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_alignParentRight="true"
-                android:background="@drawable/player_selector"
-                android:src="@drawable/ic_toolbar_close_white" />
+                android:src="@drawable/player_close_button" />
 
             <LinearLayout
                 android:id="@+id/music_info_layout"
@@ -70,7 +69,6 @@
                 android:layout_height="54dp"
                 android:layout_below="@id/music_info_layout"
                 android:layout_centerHorizontal="true"
-                android:background="@drawable/player_selector"
                 android:padding="2dp"
                 android:src="@drawable/player_play_button" />
 
@@ -82,7 +80,6 @@
                 android:layout_centerHorizontal="true"
                 android:layout_marginRight="10dp"
                 android:layout_toLeftOf="@id/music_play"
-                android:background="@drawable/player_selector"
                 android:padding="2dp"
                 android:src="@drawable/player_prev_button" />
 
@@ -94,7 +91,6 @@
                 android:layout_centerHorizontal="true"
                 android:layout_marginLeft="10dp"
                 android:layout_toRightOf="@id/music_play"
-                android:background="@drawable/player_selector"
                 android:padding="2dp"
                 android:src="@drawable/player_next_button" />
 

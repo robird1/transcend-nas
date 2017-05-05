@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
  Loco xml export: Android string resources
- Project: 2016Q4 SJC App
+ Project: 2017Q2 SJC App
  Release: Working copy
  Locale: ko_KR, Korean
  Tagged: Android_SJC
+ Status: Translated
  Exported by: Translator TS
- Exported at: Wed, 08 Mar 2017 02:35:07 +0000
+ Exported at: Fri, 28 Apr 2017 16:57:26 +0800
 -->
 <resources>
     <string name="about">약</string>
@@ -55,7 +56,7 @@
     <string name="cut">잘라내기</string>
     <string name="date">날짜</string>
     <string name="delete">삭제</string>
-    <string name="deleting">삭제 중</string>
+    <string name="deleting">삭제 중...</string>
     <string name="detail">상세사항</string>
     <string name="device">기기</string>
     <string name="device_information">장치 정보</string>
@@ -71,7 +72,6 @@
     <string name="dialog_write_operation_not_allowed">안드로이드 4.4의 쓰기 제한으로 작동되지 않습니다. SD 카드 작동을 위해 시스템을 업그레이드 해주시기 바랍니다.</string>
     <string name="disk">디스크</string>
     <string name="disk_info">디스크 정보</string>
-    <!-- No need to translate -->
     <string name="disk_smart">S.M.A.R.T</string>
     <string name="disk_smart_info">디스크 상태를 확인합니다.</string>
     <string name="dlg_msg_delete">해당 파일을 정말 삭제하시겠습니까?</string>
@@ -143,6 +143,8 @@
     <string name="msg_upload_to">..로 업로드</string>
     <string name="music">음악</string>
     <string name="name">Name</string>
+    <string name="name_ascending">Name (Ascending)</string>
+    <string name="name_descending">Name (Descending)</string>
     <string name="nas_list">StoreJet Cloud 목록</string>
     <string name="nas_logout">로그아웃 하시겠습니까?</string>
     <string name="navigation_drawer_close">내비게이션 드로어 닫기</string>
@@ -159,7 +161,7 @@
     <string name="on">켜기</string>
     <string name="online">온라인</string>
     <string name="open_source_statement">오픈 소스 상태</string>
-    <string name="open_with">..로 열기\n</string>
+    <string name="open_with">..로 열기</string>
     <string name="operation_error">유효하지 않은 작업</string>
     <string name="or">또는</string>
     <string name="other">기타</string>
@@ -188,7 +190,7 @@
     <string name="rename">이름 변경</string>
     <string name="resend">재전송</string>
     <string name="reverse_date">날짜 (역순)</string>
-    <string name="reverse_name">이름 (역순)\n</string>
+    <string name="reverse_name">이름 (역순)</string>
     <string name="sdcard">SD 카드</string>
     <string name="search">검색</string>
     <string name="search_result_empty">일치하는 결과 없음</string>
@@ -226,10 +228,11 @@
     <string name="termsofuse">이용 약관</string>
     <string name="thank_you">감사합니다.</string>
     <string name="toast_invalid_name">사용 가능한 문자로 파일명을 설정해 주십시오.</string>
+    <string name="today">오늘</string>
     <string name="total">합계</string>
-    <string name="try_auto_connect">자동 연결</string>
+    <string name="try_auto_connect">자동 연결...</string>
     <string name="try_remote_access">원격 접속</string>
-    <string name="try_search_device">장치 검색 시도</string>
+    <string name="try_search_device">장치 검색 시도...</string>
     <string name="type">파일 종류</string>
     <string name="unknown_album">알 수 없는 앨범</string>
     <string name="unknown_artist">알 수 없는 아티스트</string>
@@ -239,10 +242,10 @@
     <string name="update_firmware">최신 버전 펌웨어로 업데이트하십시오.</string>
     <string name="upload">업로드</string>
     <string name="upload_modified_file">수정된 파일을 업로드 하시겠습니까?</string>
-    <string name="uploading">업로드 중</string>
+    <string name="uploading">업로드 중...</string>
     <string name="use_cellular_network">셀룰러 네트워크 이용하기</string>
     <string name="used">사용됨</string>
-    <string name="user_feedback">사용자 피드백\u0020</string>
+    <string name="user_feedback">사용자 피드백</string>
     <string name="video">비디오</string>
     <string name="view">보기</string>
     <string name="warning">경고</string>
@@ -263,4 +266,5 @@
     <string name="wizard_success">사용할 준비가 완료되었습니다.</string>
     <string name="wizard_try">다시 시도하십시오.</string>
     <string name="wizard_wifi_info">모바일 기기의 Wi-Fi를 공유기 네트워크로 연결하십시오.</string>
+    <string name="yesterday">어제</string>
 </resources>

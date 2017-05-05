@@ -3,7 +3,6 @@ package com.transcend.nas.management.fileaction;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 
-import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.management.RecentCheckLoader;
 import com.transcend.nas.management.RecentDeleteLoader;
@@ -18,7 +17,6 @@ class RecentActionService extends SmbFileActionService {
     public RecentActionService() {
         super();
         TAG = RecentActionService.class.getSimpleName();
-        OPEN = LoaderID.SMB_FILE_CHECK;
         mMode = NASApp.MODE_RECENT;
         mRoot = NASApp.ROOT_RECENT;
         mPath = NASApp.ROOT_RECENT;

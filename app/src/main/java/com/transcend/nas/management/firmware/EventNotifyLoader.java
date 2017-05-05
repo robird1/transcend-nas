@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.realtek.nasfun.api.HttpClientManager;
 import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
 import com.tutk.IOTC.P2PService;
@@ -138,13 +139,18 @@ public class EventNotifyLoader extends AsyncTaskLoader<Boolean> {
             if (!isValid) {
                 Log.w(TAG, "hash key not valid, start login again");
                 Server mServer = ServerManager.INSTANCE.getCurrentServer();
-                mServer.setHostname(P2PService.getInstance().getIP(mServer.getHostname(), P2PService.P2PProtocalType.HTTP));
+                String newHostname = P2PService.getInstance().getIP(mServer.getHostname(), P2PService.P2PProtocalType.HTTP);
+                mServer.setHostname(newHostname);
                 isSuccess = mServer.connect(false);
                 if (isSuccess) {
                     ServerManager.INSTANCE.saveServer(mServer);
                     ServerManager.INSTANCE.setCurrentServer(mServer);
                     NASPref.setSessionVerifiedTime(getContext(), Long.toString(System.currentTimeMillis()));
                     Log.w(TAG, "hash key time update");
+
+                    //check need to get server info or not
+                    if(mServer.getServerInfo() == null)
+                        server.doGetServerInfo(newHostname);
                 } else {
                     mError = mServer.getLoginError();
                     Log.d(TAG, "login fail due to : " + mError);
@@ -152,6 +158,9 @@ public class EventNotifyLoader extends AsyncTaskLoader<Boolean> {
             } else {
                 NASPref.setSessionVerifiedTime(getContext(), Long.toString(System.currentTimeMillis()));
                 Log.w(TAG, "hash key time update");
+                //check need to get server info or not
+                if(server.getServerInfo() == null)
+                    server.doGetServerInfo(hostname);
             }
         } else {
             Log.w(TAG, "hash key check error");

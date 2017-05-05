@@ -9,6 +9,7 @@ import android.widget.RelativeLayout;
 import com.transcend.nas.management.externalstorage.ExternalStorageController;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -20,20 +21,18 @@ abstract class FileActionService {
     protected String mRoot;
     protected String mPath;
     protected ExternalStorageController mExternalStorageController;
-    protected int OPEN;
-    protected int LIST;
-    protected int DOWNLOAD;
-    protected int UPLOAD;
-    protected int CreateFOLDER;
-    protected int RENAME;
-    protected int COPY;
-    protected int MOVE;
-    protected int DELETE;
-    protected int SHARE;
+    protected HashMap<FileAction, Integer> mFileActionIDs;
 
     public enum FileAction {
-        OPEN, LIST, DOWNLOAD, UPLOAD, RENAME, COPY, MOVE, DELETE, CreateFOLDER, SHARE
+        OPEN, LIST, DOWNLOAD, UPLOAD, RENAME, COPY, MOVE, DELETE, CreateFOLDER, SHARE, ShareLINK
     }
+
+    public FileActionService (){
+        mFileActionIDs = new HashMap<>();
+        initLoaderID(mFileActionIDs);
+    }
+
+    public abstract void initLoaderID(HashMap<FileAction, Integer> ids);
 
     public String getMode(Context context){
         return mMode;
@@ -54,65 +53,16 @@ abstract class FileActionService {
     }
 
     public FileAction getFileAction(int action){
-        FileAction fileAction = null;
-        if(action == OPEN)
-            fileAction = FileAction.OPEN;
-        else if(action == LIST)
-            fileAction = FileAction.LIST;
-        else if(action == DOWNLOAD)
-            fileAction = FileAction.DOWNLOAD;
-        else if(action == UPLOAD)
-            fileAction = FileAction.UPLOAD;
-        else if(action == RENAME)
-            fileAction = FileAction.RENAME;
-        else if(action == COPY)
-            fileAction = FileAction.COPY;
-        else if(action == MOVE)
-            fileAction = FileAction.MOVE;
-        else if(action == DELETE)
-            fileAction = FileAction.DELETE;
-        else if(action == CreateFOLDER)
-            fileAction = FileAction.CreateFOLDER;
-        else if(action == SHARE)
-            fileAction = FileAction.SHARE;
-        return fileAction;
+        for(FileAction type : mFileActionIDs.keySet()) {
+            int id = mFileActionIDs.get(type);
+            if(id > 0 && id == action)
+                return type;
+        }
+        return null;
     }
 
     public int getLoaderID(FileAction action){
-        int id = -1;
-        switch (action) {
-            case OPEN:
-                id = OPEN;
-                break;
-            case LIST:
-                id = LIST;
-                break;
-            case DOWNLOAD:
-                id = DOWNLOAD;
-                break;
-            case UPLOAD:
-                id = UPLOAD;
-                break;
-            case RENAME:
-                id = RENAME;
-                break;
-            case COPY:
-                id = COPY;
-                break;
-            case MOVE:
-                id = MOVE;
-                break;
-            case DELETE:
-                id = DELETE;
-                break;
-            case CreateFOLDER:
-                id = CreateFOLDER;
-                break;
-            case SHARE:
-                id = SHARE;
-                break;
-        }
-
+        int id = mFileActionIDs.get(action);
         return id;
     }
 
@@ -141,6 +91,8 @@ abstract class FileActionService {
                 return createFolder(context, path);
             case SHARE:
                 return share(context, paths, path);
+            case ShareLINK:
+                return shareLink(context, paths);
         }
 
         return null;
@@ -171,4 +123,6 @@ abstract class FileActionService {
     protected abstract AsyncTaskLoader createFolder(Context context, String path);
 
     protected abstract AsyncTaskLoader share(Context context, ArrayList<String> paths, String dest);
+
+    protected abstract AsyncTaskLoader shareLink(Context context, ArrayList<String> paths);
 }

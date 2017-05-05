@@ -219,7 +219,7 @@ public class FileRecentActivity extends FileManageActivity {
             mRecyclerAdapter.updateList(mFileList);
 
             mFileIDList.remove(position);
-            mFileIDList.add(target, "Today");
+            mFileIDList.add(target, getString(R.string.today));
             mSectionDecoration.updateList(mFileIDList);
             mRecyclerAdapter.notifyItemMoved(position, target);
             mRecyclerAdapter.notifyItemChanged(target);

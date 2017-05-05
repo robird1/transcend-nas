@@ -27,7 +27,10 @@ import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import static com.transcend.nas.management.fileaction.FileActionService.FileAction.*;
 
 /**
  * Created by ike_lee on 2016/12/21.
@@ -35,16 +38,20 @@ import java.util.List;
 class PhoneActionService extends FileActionService {
     public PhoneActionService(){
         TAG = PhoneActionService.class.getSimpleName();
-        LIST = LoaderID.LOCAL_FILE_LIST;
-        UPLOAD = LoaderID.LOCAL_FILE_UPLOAD;
-        CreateFOLDER = LoaderID.LOCAL_NEW_FOLDER;
-        RENAME = LoaderID.LOCAL_FILE_RENAME;
-        COPY = LoaderID.LOCAL_FILE_COPY;
-        MOVE = LoaderID.LOCAL_FILE_MOVE;
-        DELETE = LoaderID.LOCAL_FILE_DELETE;
         mMode = NASApp.MODE_STG;
         mRoot = NASApp.ROOT_STG;
         mPath = NASApp.ROOT_STG;
+    }
+
+    @Override
+    public void initLoaderID(HashMap<FileAction, Integer> ids) {
+        ids.put(LIST, LoaderID.LOCAL_FILE_LIST);
+        ids.put(UPLOAD, LoaderID.LOCAL_FILE_UPLOAD);
+        ids.put(CreateFOLDER, LoaderID.LOCAL_NEW_FOLDER);
+        ids.put(RENAME, LoaderID.LOCAL_FILE_RENAME);
+        ids.put(COPY, LoaderID.LOCAL_FILE_COPY);
+        ids.put(MOVE, LoaderID.LOCAL_FILE_MOVE);
+        ids.put(DELETE, LoaderID.LOCAL_FILE_DELETE);
     }
 
     @Override
@@ -112,6 +119,11 @@ class PhoneActionService extends FileActionService {
 
     @Override
     protected AsyncTaskLoader share(Context context, ArrayList<String> paths, String dest) {
+        return null;
+    }
+
+    @Override
+    protected AsyncTaskLoader shareLink(Context context, ArrayList<String> paths) {
         return null;
     }
 

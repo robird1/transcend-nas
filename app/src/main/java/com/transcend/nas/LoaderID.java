@@ -56,7 +56,8 @@ public class LoaderID {
     public static final int FIRMWARE_DEVICE_NAME = 48;
     public static final int SMB_FILE_INFO = 49;
     public static final int SMB_FILE_CHECK = 50;
-    public static final int INVITE_SHORT_LINK = 51;
-    public static final int INVITE_NAS_ACCOUNT = 52;
+    public static final int FILE_SHARE_LINK = 51;
+    public static final int INVITE_SHORT_LINK = 52;
+    public static final int INVITE_NAS_ACCOUNT = 53;
 
 }

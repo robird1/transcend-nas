@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
  Loco xml export: Android string resources
- Project: 2016Q4 SJC App
+ Project: 2017Q2 SJC App
  Release: Working copy
  Locale: zh_TW, Chinese (Taiwan)
  Tagged: Android_SJC
+ Status: Translated
  Exported by: Translator TS
- Exported at: Wed, 08 Mar 2017 02:35:07 +0000
+ Exported at: Fri, 28 Apr 2017 16:57:26 +0800
 -->
 <resources>
     <string name="about">關於</string>
@@ -55,7 +56,7 @@
     <string name="cut">剪下</string>
     <string name="date">日期</string>
     <string name="delete">刪除</string>
-    <string name="deleting">刪除中</string>
+    <string name="deleting">刪除中...</string>
     <string name="detail">詳細資訊</string>
     <string name="device">裝置</string>
     <string name="device_information">裝置資訊</string>
@@ -71,14 +72,13 @@
     <string name="dialog_write_operation_not_allowed">因Android 4.4的寫入限制以致操作失敗</string>
     <string name="disk">磁碟</string>
     <string name="disk_info">磁碟資訊</string>
-    <!-- No need to translate -->
     <string name="disk_smart">S.M.A.R.T</string>
     <string name="disk_smart_info">協助確認磁碟狀態</string>
     <string name="dlg_msg_delete">確定刪除已選檔案？</string>
     <string name="done">完成</string>
     <string name="download">下載</string>
     <string name="download_location_error">請檢查下載位置，所設定的位置不存在</string>
-    <string name="downloading">下載中</string>
+    <string name="downloading">下載中...</string>
     <string name="duplicate_name">名稱重複</string>
     <string name="edit_mode">編輯模式</string>
     <string name="email">電子信箱</string>
@@ -114,7 +114,7 @@
     <string name="legal">隱私</string>
     <string name="license_agreement_description">您必須同意授權合約才能繼續。</string>
     <string name="licenses">許可權利</string>
-    <string name="loading">載入中</string>
+    <string name="loading">載入中...</string>
     <string name="location">位置</string>
     <string name="login">登入</string>
     <string name="login_error">帳號或密碼錯誤</string>
@@ -143,6 +143,8 @@
     <string name="msg_upload_to">上傳到..</string>
     <string name="music">音樂</string>
     <string name="name">名稱</string>
+    <string name="name_ascending">名稱(升序)</string>
+    <string name="name_descending">名稱(降序)</string>
     <string name="nas_list">StoreJet Cloud 清單</string>
     <string name="nas_logout">確定登出 StoreJet Cloud?</string>
     <string name="navigation_drawer_close">關閉導覽頁</string>
@@ -226,10 +228,11 @@
     <string name="termsofuse">使用條款</string>
     <string name="thank_you">感謝您</string>
     <string name="toast_invalid_name">輸入的名稱包含不合法字元</string>
+    <string name="today">今天</string>
     <string name="total">全部</string>
-    <string name="try_auto_connect">自動連線中</string>
+    <string name="try_auto_connect">自動連線中...</string>
     <string name="try_remote_access">遠端存取</string>
-    <string name="try_search_device">搜尋裝置中</string>
+    <string name="try_search_device">搜尋裝置中...</string>
     <string name="type">類型</string>
     <string name="unknown_album">未知專輯</string>
     <string name="unknown_artist">未知藝人</string>
@@ -239,7 +242,7 @@
     <string name="update_firmware">請更新StoreJet Cloud韌體至最新版本</string>
     <string name="upload">上傳</string>
     <string name="upload_modified_file">是否上傳已修改檔案</string>
-    <string name="uploading">上傳中</string>
+    <string name="uploading">上傳中...</string>
     <string name="use_cellular_network">使用行動網路</string>
     <string name="used">已使用</string>
     <string name="user_feedback">意見回饋</string>
@@ -263,6 +266,7 @@
     <string name="wizard_success">StoreJet Cloud 已準備完成</string>
     <string name="wizard_try">重試</string>
     <string name="wizard_wifi_info">將手機Wi-Fi連線到路由器網路</string>
+    <string name="yesterday">昨天</string>
 
     <string name="invite_fb_friends">邀請Facebook朋友</string>
     <string name="sign_up_by_invite">使用Facebook邀請登入</string>
