@@ -61,7 +61,6 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Accepts URIs "com.example.myapp://" -->
                 <data android:scheme="http"
                     android:host="www.storejetcloud.com"
                     android:pathPrefix="/fbinvite" />
@@ -76,7 +75,6 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Accepts URIs "com.example.myapp://" -->
                 <data android:scheme="http"
                     android:host="www.storejetcloud.com"
                     android:pathPrefix="/invite" />
@@ -209,6 +207,15 @@
         <activity
             android:name=".viewer.photo.ViewerActivity"
             android:configChanges="orientation|keyboardHidden|screenSize">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http"
+                    android:host="www.storejetcloud.com"
+                    android:pathPrefix="/sharedlink" />
+            </intent-filter>
         </activity>
 
         <activity
@@ -231,12 +238,6 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
-
-        <activity android:name="com.facebook.FacebookActivity"
-            android:configChanges=
-                "keyboard|keyboardHidden|screenLayout|screenSize|orientation"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:label="@string/app_name" />
 
         <activity
             android:name=".introduce.FirstUseActivity"

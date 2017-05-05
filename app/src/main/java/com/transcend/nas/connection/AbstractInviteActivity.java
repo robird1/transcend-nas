@@ -203,42 +203,27 @@ public abstract class AbstractInviteActivity extends AppCompatActivity implement
 
     }
 
-//    protected void extractInviteData(String url) {
-//        Log.d(TAG, "[Enter] extractInviteData");
-//        Log.d(TAG, "[Enter] url: "+ url);
-//
-//        String[] temp = url.split("uuid=")[1].split("&nasId=");
-//        mUUID = temp[0];
-//        String[] temp2 = temp[1].split("&nickName=");
-//        mNasID = temp2[0];
-//        mNickName = temp2[1];
-//
-//        Log.d(TAG, "uuid: "+ mUUID);
-//        Log.d(TAG, "nasId: "+ mNasID);
-//        Log.d(TAG, "nickName: "+ mNickName);
-//    }
-protected void extractInviteData(String url) {
-    Log.d(TAG, "[Enter] extractInviteData");
-    Log.d(TAG, "[Enter] url: "+ url);
+    protected void extractInviteData(String url) {
+        Log.d(TAG, "[Enter] extractInviteData");
+        Log.d(TAG, "[Enter] url: "+ url);
 
-    String[] temp = url.split("uuid=")[1].split("&nasId=");
-    mUUID = temp[0];
-    String[] temp2 = temp[1].split("&nickName=");
-    mNasID = temp2[0];
-    String[] temp3 = temp2[1].split("&username=");
-    mNickName = temp3[0];
-    String[] temp4 = temp3[1].split("&password=");
-    mUserName = temp4[0];
-    mPassword = temp4[1];
+        String[] temp = url.split("uuid=")[1].split("&nasId=");
+        mUUID = temp[0];
+        String[] temp2 = temp[1].split("&nickName=");
+        mNasID = temp2[0];
+        String[] temp3 = temp2[1].split("&username=");
+        mNickName = temp3[0];
+        String[] temp4 = temp3[1].split("&password=");
+        mUserName = temp4[0];
+        mPassword = temp4[1];
 
-    Log.d(TAG, "uuid: "+ mUUID);
-    Log.d(TAG, "nasId: "+ mNasID);
-    Log.d(TAG, "nickName: "+ mNickName);
-    Log.d(TAG, "mUserName: "+ mUserName);
-    Log.d(TAG, "mPassword: "+ mPassword);
+        Log.d(TAG, "uuid: "+ mUUID);
+        Log.d(TAG, "nasId: "+ mNasID);
+        Log.d(TAG, "nickName: "+ mNickName);
+        Log.d(TAG, "mUserName: "+ mUserName);
+        Log.d(TAG, "mPassword: "+ mPassword);
 
-}
-
+    }
 
     private void initView() {
         mProgressView = (RelativeLayout) findViewById(R.id.login_progress_view);

@@ -43,7 +43,10 @@ public class InviteNASAccountLoader extends AsyncTaskLoader<Boolean> {
     @Override
     public Boolean loadInBackground() {
         mAccountList = queryList();
-        return true;
+        if (mAccountList != null && mAccountList.size() > 0) {
+            return true;
+        }
+        return false;
     }
 
     private ArrayList queryList() {

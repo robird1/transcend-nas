@@ -1,5 +1,6 @@
 package com.transcend.nas;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -7,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.storage.StorageManager;
 import android.support.annotation.NonNull;
@@ -21,6 +23,7 @@ import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
 import com.transcend.nas.connection.LoginHelper;
 import com.transcend.nas.management.FileInfo;
+import com.transcend.nas.management.firmware.TwonkyManager;
 import com.transcend.nas.utils.MimeUtil;
 import com.transcend.nas.utils.PrefUtil;
 
@@ -432,5 +435,30 @@ public final class NASUtils {
         }
     }
 
+    public static void sendFileSharedLink(Context context, FileInfo info) {
+        Log.d(TAG, "[Enter] sendFileSharedLink");
+
+        String uuid = NASPref.getCloudUUID(context);
+        String fileUrl = TwonkyManager.getInstance().getUrlFromPath(false, false, info.path);
+        Log.d(TAG, "fileUrl: "+ fileUrl);
+
+        //TODO add IOS info
+        String url = "https://z69nd.app.goo.gl/?link=http://www.storejetcloud.com/sharedlink?uuid%3D"+
+                uuid+ "%26url%3D"+ fileUrl+ "&apn=com.transcend.nas";
+
+        Bundle arg = new Bundle();
+        arg.putString("url", url);
+//            getLoaderManager().restartLoader(LoaderID.INVITE_SHORT_LINK, arg, this).forceLoad();
+
+
+        String msg = "Enjoy my StoreJet Cloud!\n\n";
+        Intent shareIntent = new Intent();
+        shareIntent.setAction(Intent.ACTION_SEND);
+        shareIntent.putExtra(Intent.EXTRA_TEXT, msg + url);
+        shareIntent.setType("text/*");
+        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        context.startActivity(Intent.createChooser(shareIntent, context.getResources().getText(R.string.invite_friends)));
+
+    }
 
 }

@@ -271,5 +271,6 @@
     <string name="invite_fb_friends">Invite Facebook Friends</string>
     <string name="sign_up_by_invite">Sign in with facebook invitation</string>
     <string name="invite_friends">Invite Friends</string>
+    <string name="invite_account_title">Select an account</string>
     <string name="invite_wrong_password">Wrong password</string>
 </resources>
