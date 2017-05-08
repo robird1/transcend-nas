@@ -14,13 +14,10 @@ import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.realtek.nasfun.api.Server;
-import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
-import com.transcend.nas.NASPref;
 import com.transcend.nas.NASUtils;
 import com.transcend.nas.management.FileInfo;
-import com.tutk.IOTC.P2PService;
 
 /**
  * Created by ike_lee on 2017/4/24.
@@ -164,57 +161,11 @@ public class PhotoFactory {
     }
 
     private String getWebDavUrl(boolean forceLocal, boolean thumbnail, String path) {
-        String url;
-        String filepath;
-
-        Server server = ServerManager.INSTANCE.getCurrentServer();
-        String username = server.getUsername();
-        if (path.startsWith(Server.HOME))
-            filepath = Server.USER_DAV_HOME + path.replaceFirst(Server.HOME, "/");
-        else if (path.startsWith("/" + username + "/"))
-            filepath = Server.USER_DAV_HOME + path.replaceFirst("/" + username + "/", "/");
-        else {
-            if (username.equals(NASPref.defaultUserName)) {
-                path = ShareFolderManager.getInstance().getRealPath(path);
-                filepath = Server.DEVICE_DAV_HOME + path.replaceFirst("/home/", "/");
-            } else {
-                String newPath = "";
-                String[] paths = path.replaceFirst("/", "").split("/");
-                int length = paths.length;
-                for (int i = 0; i < length; i++) {
-                    if (i == 0)
-                        newPath = "/" + paths[i].toLowerCase();
-                    else
-                        newPath = newPath + "/" + paths[i];
-                }
-                filepath = "/dav" + newPath;
-            }
-        }
-
-        String convert = NASUtils.encodeString(filepath);
-        if (convert != null && !"".equals(convert))
-            filepath = convert;
-
-        String hostname = getServerHostName(forceLocal, server);
-        String hash = server.getHash();
+        String url = WebDavFactory.createUri(forceLocal, path).toString();
         if (thumbnail)
-            url = "http://" + hostname + filepath + "?session=" + hash + "&thumbnail";
+            url += "&thumbnail";
         else
-            url = "http://" + hostname + filepath + "?session=" + hash + "&webview";
-
+            url += "&webview";
         return url;
-    }
-
-    public String getServerHostName(boolean forceLocal, Server server) {
-        String hostname = "";
-        if(server != null) {
-            hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
-            if (forceLocal) {
-                ServerInfo info = server.getServerInfo();
-                if (info != null)
-                    hostname = info.ipAddress;
-            }
-        }
-        return hostname;
     }
 }

@@ -2,7 +2,6 @@ package com.transcend.nas.management.firmware;
 
 import android.util.Log;
 
-import com.realtek.nasfun.api.HttpClientManager;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
@@ -11,22 +10,11 @@ import com.transcend.nas.NASUtils;
 import com.transcend.nas.common.HttpRequestFactory;
 import com.tutk.IOTC.P2PService;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TwonkyManager {
     private static final String TAG = TwonkyManager.class.getSimpleName();
@@ -114,10 +102,11 @@ public class TwonkyManager {
         if (useTwonkyServer != STATUS.ENABLE || server == null)
             return null;
 
+        if(isInValid(path))
+            return null;
+
+        path = NASUtils.encodeString(path);
         String ip = forceLocal ? getTwonkyLocalIP(server) : getTwonkyIP(server);
-        String convert = NASUtils.encodeString(path);
-        if (convert != null && !"".equals(convert))
-            path = convert;
 
         String value = "http://" + ip + "/rpc/get_thumbnail?path=";
         if (thumbnail)
@@ -141,50 +130,11 @@ public class TwonkyManager {
 
         String value = "http://" + getTwonkyIP(server) + "/nmc/rss/server/RBuuid%3A" + serverUDN + "/IBuuid%3A" + serverUDN
                 + "," + fileID;
-        try {
-            DefaultHttpClient httpClient = HttpClientManager.getClient();
-            HttpGet httpGet = new HttpGet(value);
-            HttpResponse httpResponse;
-            httpResponse = httpClient.execute(httpGet);
-            HttpEntity httpEntity = httpResponse.getEntity();
-            InputStream inputStream = httpEntity.getContent();
-            String inputEncoding = EntityUtils.getContentCharSet(httpEntity);
-            if (inputEncoding == null) {
-                inputEncoding = HTTP.DEFAULT_CONTENT_CHARSET;
-            }
-            try {
-                XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-                factory.setNamespaceAware(true);
-                XmlPullParser xpp = factory.newPullParser();
-                xpp.setInput(inputStream, inputEncoding);
-                int eventType = xpp.getEventType();
-                String curTagName = null;
-
-                do {
-                    String tagName = xpp.getName();
-                    if (eventType == XmlPullParser.START_TAG) {
-                        curTagName = tagName;
-                    } else if (eventType == XmlPullParser.TEXT) {
-                        if("res".equals(curTagName)) {
-                            return xpp.getText();
-                        }
-                    }
-                    eventType = xpp.next();
-
-                } while (eventType != XmlPullParser.END_DOCUMENT);
-            } catch (XmlPullParserException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        }
+        ArrayList<String> keywords = new ArrayList<>();
+        keywords.add("res");
+        HashMap<String, String> results = HttpRequestFactory.doXmlGetRequest(value, keywords);
+        if(results != null)
+            return results.get("res");
 
         return null;
     }
@@ -225,8 +175,14 @@ public class TwonkyManager {
     }
 
     private String getFileID(Server server, String path) {
-        String value = "http://" + getTwonkyIP(server) + "/rpc/share_local_file?" + path;
+        String value = "http://" + getTwonkyIP(server) + "/rpc/share_local_file?" + NASUtils.encodeString(path);
         String result = HttpRequestFactory.doGetRequest(value, false);
         return result;
+    }
+
+    private boolean isInValid(String path){
+        Pattern special = Pattern.compile ("[+%&]");
+        Matcher hasSpecial = special.matcher(path);
+        return hasSpecial.find();
     }
 }

@@ -190,6 +190,7 @@ public class AutoBackupHelper {
         boolean exist = false;
         String url;
         Cursor c = null;
+        value = value.replaceAll("'", "''");
         url = "select * from " + MyDBHelper.TABLE_NAME + " WHERE " + key + "='" + value + "' AND " + MyDBHelper.DESTINATION + "='" + mMacAddress + "'";
         try {
             c = MyDBManager.getInstance(mContext).rawQuery(url, null);

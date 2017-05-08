@@ -86,7 +86,7 @@ public class FileRecentManager {
 
         String folderUrl = "";
         if(path != null && "".equals(path))
-            folderUrl = "' AND" + MyDBHelper.PATH + " LIKE " + path + "%";
+            folderUrl = "' AND" + MyDBHelper.PATH + " LIKE " + path.replaceAll("'", "''") + "%";
 
         LinkedHashMap<String, String> days = doGenerateSearchFileMap();
         ArrayList<FileRecentInfo> result = new ArrayList<>();
@@ -214,8 +214,8 @@ public class FileRecentManager {
 
     private String doGenerateSearchFileUrl(FileRecentInfo item) {
         String url = MyDBHelper.RECENT_USER + "='" + item.id
-                + "' AND " + MyDBHelper.NAME + "='" + item.info.name.replace("'", "''")
-                + "' AND " + MyDBHelper.PATH + "='" + item.info.path.replace("'", "''")
+                + "' AND " + MyDBHelper.NAME + "='" + item.info.name.replaceAll("'", "''")
+                + "' AND " + MyDBHelper.PATH + "='" + item.info.path.replaceAll("'", "''")
                 + "' AND " + MyDBHelper.SIZE + "='" + item.info.size
                 //+ "' AND " + MyDBHelper.REAL_PATH + "='" + item.realPath
                 //+ "' AND " + MyDBHelper.LAST_MODIFY + "='" + item.info.time

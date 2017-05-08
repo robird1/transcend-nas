@@ -1348,7 +1348,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
                 //clean image
                 mCastManager.sendDataMessage("close");
 
-                MediaInfo info = MediaFactory.createMediaInfo(this, MediaMetadata.MEDIA_TYPE_MUSIC_TRACK, fileInfo.path);
+                MediaInfo info = MediaFactory.createChromeCastMediaInfo(this, MediaMetadata.MEDIA_TYPE_MUSIC_TRACK, fileInfo.path);
                 if (info != null) {
                     mCastManager.startVideoCastControllerActivity(this, info, 0, true);
                     return;
@@ -1380,7 +1380,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
                     //clean image
                     mCastManager.sendDataMessage("close");
 
-                    MediaInfo info = MediaFactory.createMediaInfo(this, MediaMetadata.MEDIA_TYPE_MOVIE, fileInfo.path);
+                    MediaInfo info = MediaFactory.createChromeCastMediaInfo(this, MediaMetadata.MEDIA_TYPE_MOVIE, fileInfo.path);
                     if (info != null) {
                         mCastManager.startVideoCastControllerActivity(this, info, 0, true);
                         return;

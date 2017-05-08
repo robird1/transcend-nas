@@ -315,12 +315,15 @@ public final class NASUtils {
                     newPath = newPath + "/" + URLEncoder.encode(paths[i], "UTF-8");
                 }
             }
-            encodePath = newPath;
+            encodePath = newPath.replaceAll(" ", "%20");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
 
-        return encodePath;
+        if(encodePath != null && !"".equals(encodePath))
+            return encodePath;
+        else
+            return origPath;
     }
 
 }
