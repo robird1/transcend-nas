@@ -1207,7 +1207,8 @@ public class FileManageActivity extends DrawerMenuActivity implements
         }
         mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_rename).setVisible(visible);
         mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_share).setVisible(!containFolder & visible);
-        mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_share_link).setVisible(!containFolder & !containFile & visible);
+        //mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_share_link).setVisible(!containFolder & !containFile & visible);
+        mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_share_link).setVisible(false);
     }
 
     @Override
