@@ -1207,7 +1207,8 @@ public class FileManageActivity extends DrawerMenuActivity implements
         }
         mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_rename).setVisible(visible);
         mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_share).setVisible(!containFolder & visible);
-        mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_share_link).setVisible(!containFolder & !containFile & visible);
+        //mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_share_link).setVisible(!containFolder & !containFile & visible);
+        mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_share_link).setVisible(false);
     }
 
     @Override
@@ -1348,7 +1349,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
                 //clean image
                 mCastManager.sendDataMessage("close");
 
-                MediaInfo info = MediaFactory.createMediaInfo(this, MediaMetadata.MEDIA_TYPE_MUSIC_TRACK, fileInfo.path);
+                MediaInfo info = MediaFactory.createChromeCastMediaInfo(this, MediaMetadata.MEDIA_TYPE_MUSIC_TRACK, fileInfo.path);
                 if (info != null) {
                     mCastManager.startVideoCastControllerActivity(this, info, 0, true);
                     return;
@@ -1380,7 +1381,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
                     //clean image
                     mCastManager.sendDataMessage("close");
 
-                    MediaInfo info = MediaFactory.createMediaInfo(this, MediaMetadata.MEDIA_TYPE_MOVIE, fileInfo.path);
+                    MediaInfo info = MediaFactory.createChromeCastMediaInfo(this, MediaMetadata.MEDIA_TYPE_MOVIE, fileInfo.path);
                     if (info != null) {
                         mCastManager.startVideoCastControllerActivity(this, info, 0, true);
                         return;

@@ -3,13 +3,26 @@ package com.transcend.nas.common;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.realtek.nasfun.api.HttpClientManager;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import org.w3c.dom.Text;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +99,63 @@ public class HttpRequestFactory {
         return result;
     }
 
-    public static String getStringFromInputStream(InputStream is)
+    public static HashMap<String, String> doXmlGetRequest(String url, ArrayList<String> keywords){
+        HashMap<String, String> results = new HashMap<>();
+        try {
+            DefaultHttpClient httpClient = HttpClientManager.getClient();
+            HttpGet httpGet = new HttpGet(url);
+            HttpResponse httpResponse;
+            httpResponse = httpClient.execute(httpGet);
+            HttpEntity httpEntity = httpResponse.getEntity();
+            InputStream inputStream = httpEntity.getContent();
+            String inputEncoding = EntityUtils.getContentCharSet(httpEntity);
+            if (inputEncoding == null) {
+                inputEncoding = HTTP.DEFAULT_CONTENT_CHARSET;
+            }
+            try {
+                XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+                factory.setNamespaceAware(true);
+                XmlPullParser xpp = factory.newPullParser();
+                xpp.setInput(inputStream, inputEncoding);
+                int eventType = xpp.getEventType();
+                String curTagName = null;
+
+                do {
+                    String tagName = xpp.getName();
+                    if (eventType == XmlPullParser.START_TAG) {
+                        curTagName = tagName;
+                    } else if (eventType == XmlPullParser.TEXT) {
+                        if(keywords.contains(curTagName)) {
+                            String currValue = results.get(curTagName);
+                            String value = xpp.getText();
+                            if(currValue != null && !"".equals(currValue))
+                                currValue = currValue + "|" + value;
+                            else
+                                currValue = value;
+                            results.put(curTagName, currValue);
+                        }
+                    }
+                    eventType = xpp.next();
+
+                } while (eventType != XmlPullParser.END_DOCUMENT);
+            } catch (XmlPullParserException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        }
+
+        return results;
+    }
+
+    private static String getStringFromInputStream(InputStream is)
             throws IOException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];

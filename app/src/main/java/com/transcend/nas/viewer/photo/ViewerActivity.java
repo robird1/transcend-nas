@@ -64,7 +64,8 @@ public class ViewerActivity extends AppCompatActivity implements
 
     public static final int REQUEST_CODE = ViewerActivity.class.hashCode() & 0xFFFF;
     public static final String TAG = ViewerActivity.class.getSimpleName();
-
+    public static final String READONLY = "readonly";
+    private boolean mReadOnly = false;
     private RelativeLayout mProgressView;
     private Toolbar mHeaderBar;
     private LinearLayout mFooterBar;
@@ -96,39 +97,21 @@ public class ViewerActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_viewer);
         overridePendingTransition(R.animator.slide_in_right, R.animator.slide_alpha_out);
-        mCastManager = VideoCastManager.getInstance();
-        mCastConsumer = new VideoCastConsumerImpl() {
 
-            @Override
-            public void onFailed(int resourceId, int statusCode) {
-                String reason = "Not Available";
-                if (resourceId > 0) {
-                    reason = getString(resourceId);
-                }
-                Log.e(TAG, "Action failed, reason:  " + reason + ", status code: " + statusCode);
-            }
+        if(initData()) {
+            initChromeCast();
+            initHeaderBar();
+            initFooterBar();
+            initPager();
 
-            @Override
-            public void onApplicationConnected(ApplicationMetadata appMetadata, String sessionId,
-                                               boolean wasLaunched) {
-                invalidateOptionsMenu();
-                doPhotoCast(mCurrentIndex);
+            Intent intent = getIntent();
+            if (intent != null) {
+                mReadOnly = intent.getBooleanExtra(READONLY, false);
+                mFooterBar.setVisibility(mReadOnly ? View.INVISIBLE : View.VISIBLE);
             }
-
-            @Override
-            public void onDisconnected() {
-                invalidateOptionsMenu();
-            }
-
-            @Override
-            public void onConnectionSuspended(int cause) {
-                Log.d(TAG, "onConnectionSuspended() was called with cause: " + cause);
-            }
-        };
-        initData();
-        initHeaderBar();
-        initFooterBar();
-        initPager();
+        } else {
+            doFinish();
+        }
     }
 
     @Override
@@ -193,12 +176,46 @@ public class ViewerActivity extends AppCompatActivity implements
     /**
      * INITIALIZATION
      */
-    private void initData() {
+    private void initChromeCast(){
+        mCastManager = VideoCastManager.getInstance();
+        mCastConsumer = new VideoCastConsumerImpl() {
+
+            @Override
+            public void onFailed(int resourceId, int statusCode) {
+                String reason = "Not Available";
+                if (resourceId > 0) {
+                    reason = getString(resourceId);
+                }
+                Log.e(TAG, "Action failed, reason:  " + reason + ", status code: " + statusCode);
+            }
+
+            @Override
+            public void onApplicationConnected(ApplicationMetadata appMetadata, String sessionId,
+                                               boolean wasLaunched) {
+                invalidateOptionsMenu();
+                doPhotoCast(mCurrentIndex);
+            }
+
+            @Override
+            public void onDisconnected() {
+                invalidateOptionsMenu();
+            }
+
+            @Override
+            public void onConnectionSuspended(int cause) {
+                Log.d(TAG, "onConnectionSuspended() was called with cause: " + cause);
+            }
+        };
+    }
+
+    private boolean initData() {
         Bundle args = getIntent().getExtras();
         mPath = args.getString("path");
         mMode = args.getString("mode");
         mRoot = args.getString("root");
         mList = FileFactory.getInstance().getFileList();
+        if(mList == null || mList.size() == 0)
+            return false;
 
         mFileActionManager = new FileActionManager(this, mDefaultType, this);
         List<AbstractActionManager> actionManagerList = new ArrayList<>();
@@ -214,6 +231,7 @@ public class ViewerActivity extends AppCompatActivity implements
             mTransmitDrawable[0] = R.drawable.ic_toolbar_upload_white;
             mTransmitDrawable[1] = R.drawable.ic_toolbar_upload_gray;
         }
+        return true;
     }
 
     private void initHeaderBar() {
@@ -502,7 +520,7 @@ public class ViewerActivity extends AppCompatActivity implements
             mFooterBar.setVisibility(View.INVISIBLE);
         } else {
             getSupportActionBar().show();
-            mFooterBar.setVisibility(View.VISIBLE);
+            mFooterBar.setVisibility(mReadOnly? View.INVISIBLE : View.VISIBLE);
         }
     }
 

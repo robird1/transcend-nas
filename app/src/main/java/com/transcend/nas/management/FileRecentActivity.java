@@ -107,9 +107,11 @@ public class FileRecentActivity extends FileManageActivity {
 
     @Override
     public void onRecyclerItemClick(int position) {
-        mFileIndex = position;
-        FileInfo info = mFileList.get(position);
-        mFileActionManager.open(info.path);
+        if(0 <= position && position < mFileList.size()) {
+            mFileIndex = position;
+            FileInfo info = mFileList.get(position);
+            mFileActionManager.open(info.path);
+        }
     }
 
     @Override
