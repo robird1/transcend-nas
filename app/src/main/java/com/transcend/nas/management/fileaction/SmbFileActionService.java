@@ -69,6 +69,9 @@ class SmbFileActionService extends FileActionService {
             ArrayList<String> urls = ((FileShareLinkLoader) loader).getFileShareLinks();
             ArrayList<String> absolutePaths = ((FileShareLinkLoader) loader).getFileAbsolutePaths();
             //TODO : open third-party app to delivery message
+
+            NASUtils.sendFileSharedLink(context, ((FileShareLinkLoader) loader));
+
             if (progress != null)
                 progress.setVisibility(View.INVISIBLE);
             return true;

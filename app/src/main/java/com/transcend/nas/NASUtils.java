@@ -21,8 +21,10 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
+import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.connection.LoginHelper;
 import com.transcend.nas.management.FileInfo;
+import com.transcend.nas.management.FileShareLinkLoader;
 import com.transcend.nas.management.firmware.TwonkyManager;
 import com.transcend.nas.utils.MimeUtil;
 import com.transcend.nas.utils.PrefUtil;
@@ -435,19 +437,25 @@ public final class NASUtils {
         }
     }
 
-    public static void sendFileSharedLink(Context context, FileInfo info) {
+    public static void sendFileSharedLink(Context context, FileShareLinkLoader loader) {
         Log.d(TAG, "[Enter] sendFileSharedLink");
 
+        if (loader.getFileShareLinks() == null || loader.getFileAbsolutePaths() == null) {
+            return;
+        }
+
         String uuid = NASPref.getCloudUUID(context);
-        String fileUrl = TwonkyManager.getInstance().getUrlFromPath(false, false, info.path);
-        Log.d(TAG, "fileUrl: "+ fileUrl);
+//        String fileUrl = TwonkyManager.getInstance().getPhotoUrl(ServerManager.INSTANCE.getCurrentServer(), false, false, info.path);
+        Log.d(TAG, "url: "+ loader.getFileShareLinks().get(0));
+        Log.d(TAG, "absolute path: "+ loader.getFileAbsolutePaths().get(0));
 
         //TODO add IOS info
         String url = "https://z69nd.app.goo.gl/?link=http://www.storejetcloud.com/sharedlink?uuid%3D"+
-                uuid+ "%26url%3D"+ fileUrl+ "&apn=com.transcend.nas";
+                uuid+ "%26url%3D"+ loader.getFileShareLinks().get(0)+ "%26path%3D"+ loader.getFileAbsolutePaths().get(0)+
+                "&apn=com.transcend.nas";
 
-        Bundle arg = new Bundle();
-        arg.putString("url", url);
+//        Bundle arg = new Bundle();
+//        arg.putString("url", url);
 //            getLoaderManager().restartLoader(LoaderID.INVITE_SHORT_LINK, arg, this).forceLoad();
 
 
