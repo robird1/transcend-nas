@@ -3,6 +3,7 @@ package com.transcend.nas.management;
 import android.content.Intent;
 import android.content.Loader;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
@@ -107,7 +108,7 @@ public class FileRecentActivity extends FileManageActivity {
 
     @Override
     public void onRecyclerItemClick(int position) {
-        if(0 <= position && position < mFileList.size()) {
+        if (0 <= position && position < mFileList.size()) {
             mFileIndex = position;
             FileInfo info = mFileList.get(position);
             mFileActionManager.open(info.path);
@@ -178,7 +179,7 @@ public class FileRecentActivity extends FileManageActivity {
             tmp.path = info.info.path;
             tmp.type = info.info.type;
             tmp.size = info.info.size;
-            tmp.time = "Last " + info.actionType.toString() + " : " + info.actionTime.replaceAll("-", "_");
+            tmp.time = convertActionTypeToString(info.actionType) + " : " + info.actionTime.replaceAll("-", "/");
             mFileList.add(tmp);
         }
     }
@@ -201,21 +202,29 @@ public class FileRecentActivity extends FileManageActivity {
 
             } else {
                 removeData(mFileIndex);
-                Toast.makeText(this, "File not found", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.file_not_found), Toast.LENGTH_SHORT).show();
             }
         } else {
             Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void moveData(int position, int target) {
+    private void moveData(int position, final int target) {
         if (mFileRecentList != null && mFileRecentList.size() > position && position >= 0) {
             FileRecentInfo recentInfo = mFileRecentList.get(position);
             mFileRecentList.remove(position);
             mFileRecentList.add(target, recentInfo);
 
-            FileInfo info = mFileList.get(position);
-            info.time = "Last OPEN : " + FileInfo.getTime(System.currentTimeMillis());
+            FileInfo info;
+            ArrayList<FileRecentInfo> lists = FileRecentManager.getInstance().getAction(1);
+            if (lists != null && lists.size() > 0) {
+                FileRecentInfo tmp = lists.get(0);
+                info = tmp.info;
+                info.time = convertActionTypeToString(tmp.actionType) + " : " + tmp.actionTime.replaceAll("-", "/");
+            } else {
+                info = mFileList.get(position);
+                info.time = getString(R.string.last_opened) + " : " + FileInfo.getTime(System.currentTimeMillis());
+            }
             mFileList.remove(position);
             mFileList.add(target, info);
             mRecyclerAdapter.updateList(mFileList);
@@ -223,10 +232,39 @@ public class FileRecentActivity extends FileManageActivity {
             mFileIDList.remove(position);
             mFileIDList.add(target, getString(R.string.today));
             mSectionDecoration.updateList(mFileIDList);
+
             mRecyclerAdapter.notifyItemMoved(position, target);
-            mRecyclerAdapter.notifyItemChanged(target);
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mRecyclerAdapter.notifyItemChanged(target);
+                }
+            }, 200);
         }
         mFileIndex = -1;
+    }
+
+    private String convertActionTypeToString(FileRecentInfo.ActionType actionType) {
+        String actionString;
+        switch (actionType) {
+            case UPLOAD:
+                actionString = getString(R.string.last_uploaded);
+                break;
+            case RENAME:
+                actionString = getString(R.string.last_renamed);
+                break;
+            case MOVE:
+                actionString = getString(R.string.last_moved);
+                break;
+            case OPEN:
+                actionString = getString(R.string.last_opened);
+                break;
+            default:
+                actionString = "Last " + actionType.toString().toLowerCase();
+                break;
+        }
+        return actionString;
     }
 
     private void removeData(int position) {

@@ -13,7 +13,7 @@
         <item
             android:id="@+id/nav_recent"
             android:icon="@drawable/ic_drawer_recent"
-            android:title="Recent" />
+            android:title="@string/recent" />
 
     </group>
 

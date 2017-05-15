@@ -20,6 +20,7 @@ import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
 import com.transcend.nas.connection.LoginHelper;
 import com.transcend.nas.management.FileInfo;
+import com.transcend.nas.service.FileRecentManager;
 import com.transcend.nas.utils.MimeUtil;
 
 import java.io.BufferedReader;
@@ -75,6 +76,7 @@ public final class NASUtils {
     }
 
     private static void clearDatabaseData(Context context) {
+        FileRecentManager.getInstance().deleteAction();
         LoginHelper loginHelper = new LoginHelper(context);
         LoginHelper.LoginInfo account = new LoginHelper.LoginInfo();
         account.email = NASPref.getCloudUsername(context);

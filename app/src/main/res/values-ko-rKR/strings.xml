@@ -5,9 +5,8 @@
  Release: Working copy
  Locale: ko_KR, Korean
  Tagged: Android_SJC
- Status: Translated
  Exported by: Translator TS
- Exported at: Fri, 28 Apr 2017 16:57:26 +0800
+ Exported at: Mon, 15 May 2017 13:22:06 +0800
 -->
 <resources>
     <string name="about">약</string>
@@ -56,6 +55,7 @@
     <string name="cut">잘라내기</string>
     <string name="date">날짜</string>
     <string name="delete">삭제</string>
+    <string name="delete_all_records">모든 기록 지우기</string>
     <string name="deleting">삭제 중...</string>
     <string name="detail">상세사항</string>
     <string name="device">기기</string>
@@ -99,6 +99,7 @@
     <string name="file_format_document">문서</string>
     <string name="file_format_image">사진</string>
     <string name="file_format_video">영상</string>
+    <string name="file_not_found">파일을 찾을 수 없습니다.</string>
     <string name="find_nas">StoreJet Cloud 찾기</string>
     <string name="folder">폴더</string>
     <string name="forget_password">비밀번호가 기억나지 않으십니까?</string>
@@ -111,6 +112,10 @@
     <string name="invalid_message">비어있습니다.</string>
     <string name="invalid_name">유효하지 않은 이름</string>
     <string name="last_modified">최근 수정됨</string>
+    <string name="last_moved">최근 이동한 항목</string>
+    <string name="last_opened">최근 열어본 항목</string>
+    <string name="last_renamed">최근 이름변경한 항목</string>
+    <string name="last_uploaded">최근 업로드한 항목</string>
     <string name="legal">개인 정보</string>
     <string name="license_agreement_description">라인센스 계약서</string>
     <string name="licenses">라이센스</string>
@@ -143,8 +148,8 @@
     <string name="msg_upload_to">..로 업로드</string>
     <string name="music">음악</string>
     <string name="name">Name</string>
-    <string name="name_ascending">Name (Ascending)</string>
-    <string name="name_descending">Name (Descending)</string>
+    <string name="name_ascending">이름(오름차순)</string>
+    <string name="name_descending">이름(내림차순)</string>
     <string name="nas_list">StoreJet Cloud 목록</string>
     <string name="nas_logout">로그아웃 하시겠습니까?</string>
     <string name="navigation_drawer_close">내비게이션 드로어 닫기</string>
@@ -169,6 +174,8 @@
     <string name="password_size">비밀번호 :</string>
     <string name="path">경로</string>
     <string name="photo">사진</string>
+    <!-- use for recent record -->
+    <string name="recent">최근 항목</string>
     <string name="refresh">새로고침</string>
     <string name="register">등록</string>
     <string name="remote_access">원격 접속</string>
@@ -207,6 +214,7 @@
     <string name="settings_ip_address_title">IP 주소</string>
     <string name="settings_mac_address_title">MAC(Media Access Control) 계정</string>
     <string name="share">공유</string>
+    <string name="share_link">링크 공유</string>
     <string name="sign_in">로그인</string>
     <string name="sign_in_by_email">이메일로 가입하기</string>
     <string name="sign_in_with_other">다른 계정으로 로그인하기</string>

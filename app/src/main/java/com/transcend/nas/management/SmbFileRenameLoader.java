@@ -59,7 +59,7 @@ public class SmbFileRenameLoader extends SmbAbstractLoader {
             target.renameTo(rename);
 
             //create new action info
-            FileRecentInfo newAction = FileRecentFactory.create(getContext(), rename, FileRecentInfo.ActionType.REVISE);
+            FileRecentInfo newAction = FileRecentFactory.create(getContext(), rename, FileRecentInfo.ActionType.RENAME);
 
             //update action in db
             if (oldAction != null && newAction != null) {

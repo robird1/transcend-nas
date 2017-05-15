@@ -71,7 +71,7 @@ public class SmbFileMoveLoader extends SmbAbstractLoader {
                     oldAction.realPath = ShareFolderManager.getInstance().getRealPath(path);
                 }
 
-                FileRecentInfo newAction = FileRecentFactory.create(getContext(), target, FileRecentInfo.ActionType.REVISE);
+                FileRecentInfo newAction = FileRecentFactory.create(getContext(), target, FileRecentInfo.ActionType.MOVE);
                 if(newAction != null && newAction.info != null) {
                     String filePath = TextUtils.concat(mDest, target.getName().replace("/", "")).toString();
                     newAction.info.path = filePath;

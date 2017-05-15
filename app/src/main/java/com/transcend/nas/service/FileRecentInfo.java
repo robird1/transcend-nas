@@ -9,7 +9,7 @@ public class FileRecentInfo {
     private static final String TAG = FileRecentInfo.class.getSimpleName();
 
     public enum ActionType {
-        OPEN, REVISE, UPLOAD
+        OPEN, REVISE, RENAME, MOVE, UPLOAD
     }
 
     public int id;
