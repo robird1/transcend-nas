@@ -38,6 +38,8 @@ public class ShareFolderManager {
 
     private Map<String, String> mPathMap;
     private int mMapLifeCycle = 0;
+    private Long mHashCreateTime = 0L;
+    private Long mHashUseTime = 0L;
 
     public ShareFolderManager() {
         mPathMap = new HashMap<String, String>();
@@ -59,6 +61,20 @@ public class ShareFolderManager {
             mMapLifeCycle = defaultLifeCycle;
         }
         Log.d(TAG, "shared folder map size : " + getMapSize());
+    }
+
+    public void setHashCreateTime(Long time){
+        mHashCreateTime = time;
+        setHashUseTime(time);
+    }
+
+    public void setHashUseTime(Long time) {
+        mHashUseTime = time;
+    }
+
+    public boolean isInValidHash(){
+        Long currTime = System.currentTimeMillis();
+        return (currTime - mHashUseTime) >= 6000000;
     }
 
     public void addMap(String key, String path) {

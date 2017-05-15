@@ -5,19 +5,13 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
-import android.os.Handler;
 import android.util.Log;
 
 import com.realtek.nasfun.api.Server;
-import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
+import com.transcend.nas.utils.SystemUtil;
 import com.tutk.IOTC.P2PService;
 
-import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -59,19 +53,23 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
     /**
      * LanCheck Module
      */
-    public void initLanCheck() {
-        if (!isInit) {
-            Server server = ServerManager.INSTANCE.getCurrentServer();
-            String hostname = server.getHostname();
-            if (hostname.contains(P2PService.getInstance().getP2PIP())) {
-                setLanConnect(false, "");
-                startLanCheck();
-            } else {
-                setLanConnect(true, hostname);
-            }
-        }
+    public void initLanCheck(Context context, Server server) {
+        if (isInit || server == null)
+            return;
 
         isInit = true;
+        String hostname = server.getHostname();
+        boolean isWifi = SystemUtil.isWifiMode(context);
+        if (isWifi) {
+            if (!hostname.contains(P2PService.getInstance().getP2PIP())) {
+                setLanConnect(true, hostname);
+            } else {
+                setLanConnect(false, "");
+                startLanCheck();
+            }
+        } else {
+            setLanConnect(false, "");
+        }
     }
 
     public void destroy() {

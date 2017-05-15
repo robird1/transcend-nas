@@ -10,6 +10,7 @@ import android.util.Log;
 import com.realtek.nasfun.api.HttpClientManager;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.management.firmware.ShareFolderManager;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -168,7 +169,9 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
     private void updateServerManager() {
         ServerManager.INSTANCE.saveServer(mServer);
         ServerManager.INSTANCE.setCurrentServer(mServer);
-        NASPref.setSessionVerifiedTime(getContext(), Long.toString(System.currentTimeMillis()));
+        Long time = System.currentTimeMillis();
+        NASPref.setSessionVerifiedTime(getContext(), Long.toString(time));
+        ShareFolderManager.getInstance().setHashCreateTime(time);
     }
 
     public boolean isWizard() {

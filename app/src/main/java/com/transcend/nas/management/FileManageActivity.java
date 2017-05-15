@@ -292,8 +292,6 @@ public class FileManageActivity extends DrawerMenuActivity implements
                     finish();
                     startActivity(intent);
                 }
-            } else {
-                LanCheckManager.getInstance().initLanCheck();
             }
         } else if (requestCode == ExternalStorageLollipop.REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
@@ -378,7 +376,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
             NASPref.setDeviceName(this, info.hostName);
         }
 
-        LanCheckManager.getInstance().initLanCheck();
+        LanCheckManager.getInstance().initLanCheck(this, server);
         TwonkyManager.getInstance().initTwonky();
     }
 

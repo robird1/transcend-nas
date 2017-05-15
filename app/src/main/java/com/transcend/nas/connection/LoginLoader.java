@@ -61,7 +61,9 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
     private void updateServerManager() {
         ServerManager.INSTANCE.saveServer(mServer);
         ServerManager.INSTANCE.setCurrentServer(mServer);
-        NASPref.setSessionVerifiedTime(getContext(), Long.toString(System.currentTimeMillis()));
+        Long time = System.currentTimeMillis();
+        NASPref.setSessionVerifiedTime(getContext(), Long.toString(time));
+        ShareFolderManager.getInstance().setHashCreateTime(time);
     }
 
     private void updateLoginPreference() {

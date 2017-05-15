@@ -9,6 +9,7 @@ import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
+import com.transcend.nas.management.firmware.FirmwareHelper;
 import com.transcend.nas.service.LanCheckManager;
 import com.tutk.IOTC.P2PService;
 
@@ -133,15 +134,12 @@ public class DiskDeviceInfoLoader extends AsyncTaskLoader<Boolean> {
                                 device.infos.put(curTagName, text);
                             } else if (curTagName.equals("reason")) {
                                 if ("No Permission".equals(text)) {
-                                    boolean success = server.connect(false);
+                                    FirmwareHelper helper = new FirmwareHelper();
+                                    boolean success = helper.doReLogin(getContext());
                                     if (success) {
-                                        ServerManager.INSTANCE.saveServer(server);
-                                        ServerManager.INSTANCE.setCurrentServer(server);
-                                        NASPref.setSessionVerifiedTime(getContext(), Long.toString(System.currentTimeMillis()));
                                         return getDevicesInfo(retry-1);
                                     } else {
-                                        mError = server.getLoginError();
-                                        Log.d(TAG, "login fail due to : " + mError);
+                                        mError = helper.getResult();
                                         return false;
                                     }
                                 } else {
