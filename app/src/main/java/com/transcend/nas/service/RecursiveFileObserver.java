@@ -50,7 +50,7 @@ public class RecursiveFileObserver extends FileObserver {
             if (null == files)
                 continue;
             for (File f : files) {
-                if (f.isDirectory() && !f.getName().equals(".")
+                if (f.isDirectory() && !f.isHidden() && !f.getName().equals(".")
                         && !f.getName().equals("..")) {
                     stack.push(f.getPath());
                 }

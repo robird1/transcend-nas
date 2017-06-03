@@ -3,7 +3,6 @@ package com.transcend.nas.service;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.realtek.nasfun.api.SambaStatus;
@@ -17,7 +16,6 @@ import com.tutk.IOTC.P2PService;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import jcifs.smb.SmbException;
@@ -168,6 +166,11 @@ public class AutoBackupHelper {
     }
 
     public void insertTask(String name, String path, String modify, String destination){
+        if(existTask(MyDBHelper.PATH, path, destination)) {
+            Log.d(TAG, "already backup : " + path);
+            return;
+        }
+
         ContentValues cv = new ContentValues();
         cv.put(MyDBHelper.NAME, name);
         cv.put(MyDBHelper.PATH, path);
@@ -187,11 +190,15 @@ public class AutoBackupHelper {
     }
 
     public boolean existTask(String key, String value){
+        return existTask(key, value, mMacAddress);
+    }
+
+    public boolean existTask(String key, String value, String destination){
         boolean exist = false;
         String url;
         Cursor c = null;
         value = value.replaceAll("'", "''");
-        url = "select * from " + MyDBHelper.TABLE_NAME + " WHERE " + key + "='" + value + "' AND " + MyDBHelper.DESTINATION + "='" + mMacAddress + "'";
+        url = "select * from " + MyDBHelper.TABLE_NAME + " WHERE " + key + "='" + value + "' AND " + MyDBHelper.DESTINATION + "='" + destination + "'";
         try {
             c = MyDBManager.getInstance(mContext).rawQuery(url, null);
             exist = c.getCount() > 0;

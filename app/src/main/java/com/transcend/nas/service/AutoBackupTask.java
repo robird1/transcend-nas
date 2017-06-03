@@ -54,12 +54,12 @@ public class AutoBackupTask extends AsyncTask<String, String, Boolean>
     private String mHostname;
     private AutoBackupTaskCallback mListener;
 
-    public AutoBackupTask(Context context, List<String> srcs, String dest, boolean isRemoteAccess, String errorPath) {
+    public AutoBackupTask(Context context, List<String> srcs, String dest, String errorPath) {
         mContext = context;
         mSrcs = srcs;
         mDest = dest;
         mErrorPath = errorPath;
-        updateServerInfo(isRemoteAccess);
+        updateServerInfo();
     }
 
     @Override
@@ -67,7 +67,7 @@ public class AutoBackupTask extends AsyncTask<String, String, Boolean>
         super.onPreExecute();
     }
 
-    public void updateServerInfo(boolean isRemoteAccess){
+    public void updateServerInfo(){
         mServer = ServerManager.INSTANCE.getCurrentServer();
         mHostname = mServer.getHostname();
         mUsername = mServer.getUsername();
@@ -140,6 +140,10 @@ public class AutoBackupTask extends AsyncTask<String, String, Boolean>
 
     private boolean upload() throws IOException {
         int size = mSrcs.size();
+        if(mListener != null) {
+            mListener.onAutoBackupTaskStarted(this, size);
+        }
+
         for (int i = 0; i < size; i++) {
             String path = mSrcs.get(i);
             File source = new File(path);
@@ -278,6 +282,7 @@ public class AutoBackupTask extends AsyncTask<String, String, Boolean>
     }
 
     public interface AutoBackupTaskCallback{
+        public void onAutoBackupTaskStarted(AutoBackupTask task, int total);
         public void onAutoBackupTaskPerFinished(AutoBackupTask task, int total, int progress);
         public void onAutoBackupTaskFinished(AutoBackupTask task);
         public void onAutoBackupTaskFail(AutoBackupTask task, Exception e);

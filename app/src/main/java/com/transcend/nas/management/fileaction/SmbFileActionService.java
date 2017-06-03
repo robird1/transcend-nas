@@ -2,6 +2,7 @@ package com.transcend.nas.management.fileaction;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.content.Intent;
 import android.content.Loader;
 import android.view.View;
 import android.widget.RelativeLayout;

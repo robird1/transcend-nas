@@ -75,9 +75,30 @@ public class AutoBackupQueue {
         return false;
     }
 
+    public boolean addTaskCheck(String checkPath) {
+        if (mUploadQueue != null) {
+            if (checkPath != null && !"".equals(checkPath)) {
+                for (AutoBackupTask tmp : mUploadQueue) {
+                    if (tmp != null) {
+                        ArrayList<String> paths = tmp.getFilePaths();
+                        if (paths != null && paths.size() > 0) {
+                            String path = paths.get(0);
+                            if (checkPath.equals(path)) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
     public void addUploadTask(AutoBackupTask task) {
         if (mUploadQueue != null) {
             mUploadQueue.add(task);
+            Log.d(TAG, "Auto backup, queue size: " + mUploadQueue.size() );
         }
     }
 

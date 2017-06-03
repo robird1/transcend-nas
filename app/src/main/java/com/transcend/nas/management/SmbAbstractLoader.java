@@ -56,7 +56,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
     protected Runnable mWatcher;
     protected boolean success = true;
     protected int mCount = 0;
-    private String[] mLoadingString = {".","..","..."};
+    private String[] mLoadingString = {".", "..", "..."};
     private NotificationCompat.Builder mBuilder;
 
     public SmbAbstractLoader(Context context) {
@@ -132,6 +132,8 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
                 String msg = e.getMessage();
                 if (msg != null && msg.contains("Invalid operation")) {
                     message = getContext().getString(R.string.operation_error);
+                } else if (msg != null && msg.contains("path specified")) {
+                    message = msg;
                 } else {
                     if (mExceptionMessage != null && "".equals(mExceptionMessage)) {
                         message = mExceptionMessage;
@@ -209,7 +211,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         mHandler.postDelayed(mWatcher = new Runnable() {
             @Override
             public void run() {
-                if(isLoadInBackgroundCanceled())
+                if (isLoadInBackgroundCanceled())
                     return;
 
                 try {
@@ -244,12 +246,12 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         }
     }
 
-    protected void updateProgress(String type, String name, int count, int total){
+    protected void updateProgress(String type, String name, int count, int total) {
         updateProgress(type, name, count, total, true);
     }
 
     protected void updateProgress(String type, String name, int count, int total, boolean showProgress) {
-        if(isLoadInBackgroundCanceled()) {
+        if (isLoadInBackgroundCanceled()) {
             return;
         }
 
@@ -258,7 +260,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
             mBuilder = CustomNotificationManager.createProgressBuilder(getContext(), mActivity, mNotificationID);
         }
 
-        if(showProgress) {
+        if (showProgress) {
             int max = 100;
             int progress = (total > 100) ? count / (total / 100) : 0;
             boolean indeterminate = (total == 0);
@@ -271,7 +273,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
             mBuilder.setContentInfo(info);
             mBuilder.setProgress(max, progress, indeterminate);
         } else {
-            String loading = mLoadingString[mCurrent%mLoadingString.length];
+            String loading = mLoadingString[mCurrent % mLoadingString.length];
             mBuilder.setContentText(String.format("%s%s", type, loading));
         }
 
@@ -283,7 +285,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
     }
 
     protected void updateResult(String type, String result, String destination) {
-        if(isLoadInBackgroundCanceled()) {
+        if (isLoadInBackgroundCanceled()) {
             return;
         }
 

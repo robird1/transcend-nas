@@ -80,6 +80,10 @@ public class CustomNotificationManager {
         mTaskList.clear();
     }
 
+    public static NotificationCompat.Builder createProgressBuilder(Context context, int notificationID) {
+        return createProgressBuilder(context, null, notificationID);
+    }
+
     public static NotificationCompat.Builder createProgressBuilder(Context context, Activity activity, int notificationID) {
         //create builder
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context);
@@ -87,11 +91,13 @@ public class CustomNotificationManager {
         mBuilder.setAutoCancel(true);
 
         //add content intent
-        Intent intent = activity.getIntent();
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        mBuilder.setContentIntent(pendingIntent);
+        if(activity != null) {
+            Intent intent = activity.getIntent();
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            mBuilder.setContentIntent(pendingIntent);
+        }
 
         //add delete intent
         if(enableDeleteNotification) {

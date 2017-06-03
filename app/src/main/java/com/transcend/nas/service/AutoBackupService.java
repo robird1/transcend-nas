@@ -7,12 +7,16 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
+import android.hardware.Camera;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Environment;
+import android.net.Uri;
 import android.os.FileObserver;
 import android.os.Handler;
 import android.os.IBinder;
+import android.provider.MediaStore;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import com.realtek.nasfun.api.Server;
@@ -20,14 +24,17 @@ import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
+import com.transcend.nas.common.CustomNotificationManager;
 import com.transcend.nas.management.FileInfo;
 import com.tutk.IOTC.P2PService;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import jcifs.smb.SmbException;
+
+import static android.hardware.Camera.ACTION_NEW_PICTURE;
+import static android.hardware.Camera.ACTION_NEW_VIDEO;
 
 /**
  * Created by ike_lee on 2016/3/22.
@@ -42,6 +49,7 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
     private RecursiveFileObserver mLocalFileObserver;
     private Handler mHandler;
     private Thread mThread;
+    private NotificationCompat.Builder mBuilder;
 
     @Override
     public void onCreate() {
@@ -57,6 +65,17 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
         IntentFilter mFilter = new IntentFilter();
         mFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(mReceiver, mFilter);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Camera.ACTION_NEW_PICTURE);
+        filter.addAction(Camera.ACTION_NEW_VIDEO);
+        try {
+            filter.addDataType("image/*");
+            filter.addDataType("video/*");
+        } catch (IntentFilter.MalformedMimeTypeException e) {
+            e.printStackTrace();
+        }
+        registerReceiver(mCameraReceiver, filter);
     }
 
     @Override
@@ -69,6 +88,7 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
     public void onDestroy() {
         super.onDestroy();
         unregisterReceiver(mReceiver);
+        unregisterReceiver(mCameraReceiver);
         if (mThread != null)
             mThread.interrupt();
         mThread = null;
@@ -130,6 +150,40 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
         }
     };
 
+    private BroadcastReceiver mCameraReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(ACTION_NEW_PICTURE) || action.equals(ACTION_NEW_VIDEO)) {
+                Log.d(TAG, "onReceiveIntent : " + action);
+                Uri imageUri = intent.getData();
+                if (imageUri != null) {
+                    String realPath = getRealPathFromURI(imageUri);
+                    String backupSource = NASPref.getBackupSource(getApplicationContext());
+                    if (realPath != null && realPath.contains(backupSource))
+                        prepareBackupTask(realPath);
+                    else
+                        Log.d(TAG, "Ignore file name : " + realPath + ", due to different backup source");
+                }
+            }
+        }
+    };
+
+
+    private String getRealPathFromURI(Uri contentURI) {
+        String result;
+        Cursor cursor = getContentResolver().query(contentURI, null, null, null, null);
+        if (cursor == null) { // Source is Dropbox or other similar local file path
+            result = contentURI.getPath();
+        } else {
+            cursor.moveToFirst();
+            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+            result = cursor.getString(idx);
+            cursor.close();
+        }
+        return result;
+    }
+
     private boolean isWifiOnly() {
         boolean scenario = NASPref.getBackupScenario(getApplicationContext());
         return !scenario;
@@ -138,8 +192,10 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
     private void initBackup() {
         mThread = new Thread() {
             public void run() {
-                if (mHelper == null)
-                    mHelper = new AutoBackupHelper(getApplicationContext(), Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
+                if (mHelper == null) {
+                    String backupSource = NASPref.getBackupSource(getApplicationContext());
+                    mHelper = new AutoBackupHelper(getApplicationContext(), backupSource);
+                }
                 ArrayList<String> list = mHelper.getNeedUploadImageList(true);
                 if (list != null && list.size() > 0) {
                     Log.d(TAG, "Clean upload task due to init backup");
@@ -155,34 +211,18 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
     }
 
     private void showProgressNotification(String title, int id, int TotalItem, int FinishItem) {
-        final int notifyID = id; // 通知的識別號碼
-        final boolean autoCancel = true; // 點擊通知後是否要自動移除掉通知
-        final int progressMax = TotalItem; // 進度條的最大值，通常都是設為100。若是設為0，且indeterminate為false的話，表示不使用進度條
-        final int progress = FinishItem; // 進度值
-        final boolean indeterminate = false; // 是否為不確定的進度，如果不確定的話，進度條將不會明確顯示目前的進度。若是設為false，且progressMax為0的話，表示不使用進度條
+        if (mBuilder == null) {
+            mBuilder = CustomNotificationManager.createProgressBuilder(getApplicationContext(), id);
+        }
 
-        final NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE); // 取得系統的通知服務
-        final Notification notification = new Notification.Builder(getApplicationContext())
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle(title)
-                .setProgress(progressMax, progress, indeterminate)
-                .setAutoCancel(autoCancel)
-                .build();
-        notificationManager.notify(notifyID, notification); // 發送通知
+        mBuilder.setProgress(TotalItem, FinishItem, false);
+        mBuilder.setContentTitle(title);
+        NotificationManager ntfMgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        ntfMgr.notify(id, mBuilder.build());
     }
 
     private void showOnceNotification(String title, String contentText, int id) {
-        final int notifyID = id; // 通知的識別號碼
-        final boolean autoCancel = true; // 點擊通知後是否要自動移除掉通知
-
-        final NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE); // 取得系統的通知服務
-        final Notification notification = new Notification.Builder(getApplicationContext())
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle(title)
-                .setContentText(contentText)
-                .setAutoCancel(autoCancel)
-                .build();
-        notificationManager.notify(notifyID, notification); // 發送通知
+        CustomNotificationManager.updateResult(getApplicationContext(), id, title, contentText, NASPref.getBackupLocation(getApplicationContext()));
     }
 
     @Override
@@ -196,33 +236,49 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
 
         switch (event) {
             case FileObserver.CLOSE_WRITE:
-                File pictureFile = new File(path);
-                if (pictureFile.exists() && canAddTaskToQueue()) {
-                    boolean addVideo = NASPref.getBackupVideo(getApplicationContext());
-                    FileInfo.TYPE type = pictureFile.isFile() ? FileInfo.getType(path) : FileInfo.TYPE.DIR;
-                    if(type == FileInfo.TYPE.PHOTO) {
-                        ArrayList<String> paths = new ArrayList<String>();
-                        paths.add(path);
-                        addBackupTaskToQueue(paths, 1);
-                    } else if(type == FileInfo.TYPE.VIDEO && addVideo) {
-                        ArrayList<String> paths = new ArrayList<String>();
-                        paths.add(path);
-                        addBackupTaskToQueue(paths, 1);
-                    } else {
-                        Log.d(TAG, "Ignore file name : " + path + ", file type : " + type.toString());
-                    }
-                }
+                prepareBackupTask(path);
                 break;
             default:
                 break;
         }
     }
 
+    private void prepareBackupTask(String path) {
+        if (path == null || "".equals(path))
+            return;
+
+        File pictureFile = new File(path);
+        if (pictureFile.exists() && canAddTaskToQueue()) {
+            boolean addVideo = NASPref.getBackupVideo(getApplicationContext());
+            FileInfo.TYPE type = pictureFile.isFile() ? FileInfo.getType(path) : FileInfo.TYPE.DIR;
+            if (type == FileInfo.TYPE.PHOTO) {
+                ArrayList<String> paths = new ArrayList<String>();
+                paths.add(path);
+                addBackupTaskToQueue(path, paths, 1);
+            } else if (type == FileInfo.TYPE.VIDEO && addVideo) {
+                ArrayList<String> paths = new ArrayList<String>();
+                paths.add(path);
+                addBackupTaskToQueue(path, paths, 1);
+            } else {
+                Log.d(TAG, "Ignore file name : " + path + ", file type : " + type.toString());
+            }
+        }
+    }
+
+    @Override
+    public void onAutoBackupTaskStarted(AutoBackupTask task, int total) {
+        //show backup start notification
+        String value = getString(R.string.auto_backup) + " " + String.format("(%s/%s)" , 0, total);
+        showProgressNotification(value, NOTIFICATION_ID, total, 0);
+    }
+
     @Override
     public void onAutoBackupTaskPerFinished(AutoBackupTask task, int total, int progress) {
         //show backup success notification
-        String value = getString(R.string.backup_file) + " " + Integer.toString(progress) + "/" + Integer.toString(total);
-        showProgressNotification(value, NOTIFICATION_ID, total, progress);
+        if(total > 1) {
+            String value = getString(R.string.auto_backup) + " " + String.format("(%s/%s) ", progress, total);
+            showProgressNotification(value, NOTIFICATION_ID, total, progress);
+        }
 
         //add the finished backup task to database
         String path = task.getFilePaths().get(progress - 1);
@@ -233,13 +289,8 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
     public void onAutoBackupTaskFinished(AutoBackupTask task) {
         int size = task.getFilePaths().size();
         if (size > 1) {
-            showOnceNotification(getString(R.string.backup_success), getString(R.string.backup_file) + " " + size, NOTIFICATION_ID);
-        } else if (size == 1) {
-            showOnceNotification(getString(R.string.backup_success), task.getFileUniqueName(), NOTIFICATION_ID);
-            String path = task.getFilePaths().get(0);
-            addBackupTaskToDatabase(path);
+            showOnceNotification(getString(R.string.backup_success), String.format("(%s/%s)" , size, size), NOTIFICATION_ID);
         } else {
-            //TODO : check why path size is 0
             showOnceNotification(getString(R.string.backup_success), task.getFileUniqueName(), NOTIFICATION_ID);
         }
 
@@ -315,7 +366,7 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
 
     private boolean canAddTaskToQueue() {
         boolean enable = NASPref.getBackupSetting(getApplicationContext());
-        if(!enable) {
+        if (!enable) {
             Log.d(TAG, "Can't add to queue due to service disable");
             return false;
         }
@@ -340,9 +391,19 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
     }
 
     private void addBackupTaskToQueue(ArrayList<String> paths, int retry) {
+        addBackupTaskToQueue(null, paths, retry);
+    }
+
+    private void addBackupTaskToQueue(String checkPath, ArrayList<String> paths, int retry) {
+        boolean pass = AutoBackupQueue.getInstance().addTaskCheck(checkPath);
+        if(!pass) {
+            Log.d(TAG, "task already in the queue");
+            return;
+        }
+
         String errorPath = NASPref.getBackupErrorTask(getApplicationContext());
         String des = NASPref.getBackupLocation(getApplicationContext());
-        AutoBackupTask task = new AutoBackupTask(getApplicationContext(), paths, des, P2PService.getInstance().isConnected(), errorPath);
+        AutoBackupTask task = new AutoBackupTask(getApplicationContext(), paths, des, errorPath);
         task.addListener(this);
         task.setRetryCount(retry);
         AutoBackupQueue.getInstance().addUploadTask(task);
@@ -358,15 +419,17 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
         String macAddress = "";
         Server server = ServerManager.INSTANCE.getCurrentServer();
         ServerInfo info = server.getServerInfo();
-        if(info != null)
-             macAddress = info.mac;
-        if(macAddress == null || "".equals(macAddress)){
+        if (info != null)
+            macAddress = info.mac;
+        if (macAddress == null || "".equals(macAddress)) {
             macAddress = NASPref.getMacAddress(getApplicationContext());
         }
 
         File file = new File(path);
-        if (mHelper == null)
-            mHelper = new AutoBackupHelper(getApplicationContext(), Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
+        if (mHelper == null) {
+            String backupSource = NASPref.getBackupSource(getApplicationContext());
+            mHelper = new AutoBackupHelper(getApplicationContext(), backupSource);
+        }
         mHelper.insertTask(file.getName(), file.getPath(), Long.toString(file.lastModified()), macAddress);
     }
 
