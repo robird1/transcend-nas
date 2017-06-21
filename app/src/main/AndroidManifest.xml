@@ -81,6 +81,12 @@
             android:launchMode="singleTask"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
+        <activity
+            android:name=".management.FileManageFragmentActivity"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
+
 
         <activity
             android:name=".management.FileRecentActivity"

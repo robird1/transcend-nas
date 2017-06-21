@@ -562,4 +562,15 @@ public class NASPref {
         return PrefUtil.read(context, name, key, true);
     }
 
+    public static int getViewMode(Context context, String key) {
+        String name = context.getString(R.string.pref_name);
+        int def = FileManageRecyclerAdapter.LayoutType.LIST.ordinal();
+        return PrefUtil.read(context, name, key, def);
+    }
+
+    public static void setViewMode(Context context, String key, int mode) {
+        String name = context.getString(R.string.pref_name);
+        PrefUtil.write(context, name, key, mode);
+    }
+
 }
