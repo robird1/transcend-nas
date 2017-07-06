@@ -1,5 +1,6 @@
 package com.transcend.nas.settings;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,6 +29,7 @@ import com.transcend.nas.DrawerMenuController;
 import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.management.FileActionLocateActivity;
 import com.transcend.nas.management.firmware.FileFactory;
@@ -66,7 +69,11 @@ public class SettingsActivity extends DrawerMenuActivity {
 
         mFragment = new SettingsFragment();
         getFragmentManager().beginTransaction().replace(R.id.settings_frame, mFragment).commit();
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
         //start firmware version loader
         if (mFragment.isAdmin()) {
             getLoaderManager().restartLoader(LoaderID.FIRMWARE_VERSION, null, this).forceLoad();
@@ -115,8 +122,14 @@ public class SettingsActivity extends DrawerMenuActivity {
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
         if (loader instanceof FirmwareVersionLoader) {
             String version = ((FirmwareVersionLoader) loader).getVersion();
-            if (mFragment != null && version != null && !"".equals(version))
+            String isUpgrade = ((FirmwareVersionLoader) loader).getIsUpgrade();
+            if (!TextUtils.isEmpty(version)) {
                 mFragment.refreshFirmwareVersion(version);
+            }
+
+            if ("no".equals(isUpgrade) || "".equals(isUpgrade)) {
+                mFragment.removeFirmwareUpdate();
+            }
         } else {
             super.onLoadFinished(loader, success);
         }
@@ -126,6 +139,7 @@ public class SettingsActivity extends DrawerMenuActivity {
     public void onLoaderReset(Loader<Boolean> loader) {
 
     }
+
 
     public static class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
         public final String TAG = SettingsActivity.class.getSimpleName();
@@ -161,7 +175,7 @@ public class SettingsActivity extends DrawerMenuActivity {
             super.onActivityResult(requestCode, resultCode, data);
             Log.w(TAG, "onActivityResult");
             if (requestCode == FileActionLocateActivity.REQUEST_CODE) {
-                if (resultCode == getActivity().RESULT_OK) {
+                if (resultCode == Activity.RESULT_OK) {
                     Bundle bundle = data.getExtras();
                     if (bundle == null) return;
                     String mode = bundle.getString("mode");
@@ -189,6 +203,8 @@ public class SettingsActivity extends DrawerMenuActivity {
                 showCleanCacheDialog();
             } else if (key.equals(getString(R.string.pref_about))) {
                 startAboutActivity();
+            } else if (key.equals(getString(R.string.pref_firmware_update))) {
+                NASUtils.showFirmwareNotify(getActivity());
             }
 
             return super.onPreferenceTreeClick(preferenceScreen, preference);
@@ -309,10 +325,19 @@ public class SettingsActivity extends DrawerMenuActivity {
             pref.setSummary(version);
         }
 
+        private void removeFirmwareUpdate() {
+            PreferenceCategory prefCategory = (PreferenceCategory) findPreference(getString(R.string.pref_firmware));
+            Preference pref = findPreference(getString(R.string.pref_firmware_update));
+            if (prefCategory != null) {
+                prefCategory.removePreference(pref);
+            }
+        }
+
         private boolean isAdmin() {
             Server server = ServerManager.INSTANCE.getCurrentServer();
             return NASPref.defaultUserName.equals(server.getUsername());
         }
+
     }
 }
 

@@ -55,6 +55,7 @@ public class NASApp extends MultiDexApplication {
     private static Context mContext;
     private Tracker mTracker;
     private long SPLASH_SCREEN_TIME = 1000;
+    public boolean mIsInBackground = false;
 
     @Override
     public void onCreate() {

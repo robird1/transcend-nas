@@ -38,6 +38,12 @@
             android:title="@string/settings_firmware_version_title" />
 
         <Preference
+            android:key="@string/pref_firmware_update"
+            android:layout="@layout/preference_item"
+            android:summary="@string/settings_firmware_summary_update"
+            android:title="@string/settings_firmware_title_update" />
+
+        <Preference
             android:key="@string/pref_device_info"
             android:layout="@layout/preference_item"
             android:summary="@string/settings_device_info_subtitle"

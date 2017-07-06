@@ -1,17 +1,21 @@
 package com.transcend.nas;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.storage.StorageManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import android.webkit.MimeTypeMap;
+import android.view.View;
+import android.widget.Button;
 
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
@@ -20,8 +24,11 @@ import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
 import com.transcend.nas.connection.LoginHelper;
 import com.transcend.nas.management.FileInfo;
+import com.transcend.nas.management.firmwareupdate.FirmwareUpdateService;
 import com.transcend.nas.service.FileRecentManager;
 import com.transcend.nas.utils.MimeUtil;
+import com.tutk.IOTC.P2PService;
+import com.tutk.IOTC.P2PTunnelAPIs;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -33,8 +40,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.R.attr.data;
-import static android.R.attr.mimeType;
+import static android.support.v7.app.AlertDialog.Builder;
 
 /**
  * Created by steve_su on 2016/12/2.
@@ -203,12 +209,6 @@ public final class NASUtils {
     public static void showAppChooser(final Context context, final Uri fileUri) {
         Log.d(TAG, "[Enter] showAppChooser");
         final Intent intent = getIntentUri(context, fileUri);
-//        String extension = MimeTypeMap.getFileExtensionFromUrl(fileUri.toString());
-//        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-//        Log.d(TAG, "extension: " + extension);
-//        Log.d(TAG, "mimeType: " + mimeType);
-//
-//        intent.setDataAndType(fileUri, mimeType);
 
         try {
             Log.d(TAG, "decoded path: "+ fileUri.getPath());
@@ -326,6 +326,89 @@ public final class NASUtils {
             return encodePath;
         else
             return origPath;
+    }
+
+    public static void showFirmwareNotify(final Activity activity) {
+        Builder builder = new Builder(activity);
+        builder.setTitle(activity.getString(R.string.dialog_firmware_title_notify));
+        builder.setMessage(R.string.dialog_firmware_message_notify);
+        builder.setNegativeButton(R.string.dialog_firmware_button_remind, null);
+        builder.setPositiveButton(R.string.dialog_firmware_button_update, null);
+        builder.setCancelable(true);
+        final android.support.v7.app.AlertDialog dialog = builder.show();
+        Button posBtn = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        posBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showUpdateConfirm(activity);
+                dialog.dismiss();
+
+            }
+        });
+        Button negBtn = dialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+        negBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                NASPref.setFirmwareNotify(activity, false);
+                dialog.dismiss();
+            }
+        });
+    }
+
+    private static void showUpdateConfirm(final Activity activity) {
+        Builder builder = new Builder(activity);
+        builder.setTitle(activity.getString(R.string.dialog_firmware_title_notify));
+        builder.setMessage(R.string.dialog_firmware_message_confirm);
+        builder.setNegativeButton(R.string.cancel, null);
+        builder.setPositiveButton(R.string.confirm, null);
+        final android.support.v7.app.AlertDialog dialog = builder.show();
+        Button posBtn = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        posBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                activity.startService(new Intent(activity, FirmwareUpdateService.class));
+                dialog.dismiss();
+
+            }
+        });
+    }
+
+    public static String startP2PService(Context context) {
+        String errorMsg;
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = connectivityManager.getActiveNetworkInfo();
+        if (info != null && info.isAvailable()) {
+            P2PService.getInstance().stopP2PConnect();
+            int result = P2PService.getInstance().startP2PConnect(getUUID(context));
+            if (result >= 0) {
+                return "";
+            }
+
+            if (result == P2PTunnelAPIs.TUNNEL_ER_INITIALIZED)
+                errorMsg = "Remote Access initial fail";
+            else if (result == P2PTunnelAPIs.TUNNEL_ER_CONNECT)
+                errorMsg = "Sorry, we can't find the device";
+            else if (result == P2PTunnelAPIs.TUNNEL_ER_UID_UNLICENSE)
+                errorMsg = "Sorry, this UID is illegal";
+            else
+                errorMsg = context.getString(R.string.network_error);
+        }
+        else {
+            errorMsg = context.getString(R.string.network_error);
+        }
+        return errorMsg;
+
+    }
+
+    private static String getUUID(Context context) {
+        String uuid = NASPref.getUUID(context);
+        if (uuid == null || "".equals(uuid)) {
+            uuid = NASPref.getCloudUUID(context);
+//            if (uuid == null || "".equals(uuid)) {
+//                return false;
+//            }
+        }
+        return uuid;
     }
 
 }

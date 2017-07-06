@@ -275,4 +275,17 @@
     <string name="wizard_try">Try Again</string>
     <string name="wizard_wifi_info">Connect device Wi-Fi to router network</string>
     <string name="yesterday">Yesterday</string>
+
+    <string name="settings_firmware_title_update">Firmware Update</string>
+    <string name="settings_firmware_summary_update">A newer firmware version is available</string>
+    <string name="dialog_firmware_title_notify">Firmware Update</string>
+    <string name="dialog_firmware_button_update">Update</string>
+    <string name="dialog_firmware_button_remind">Not remind again</string>
+    <string name="dialog_firmware_message_notify">A newer firmware version is available. Update to the latest version?</string>
+    <string name="dialog_firmware_title_updating">Firmware is updating</string>
+    <string name="dialog_firmware_message_success">Firmware has been successfully updated. Please wait for system reboot.</string>
+    <string name="dialog_firmware_message_fail">Firmware update failed. Please try again.</string>
+    <string name="dialog_firmware_message_progress">progress:</string>
+    <string name="dialog_firmware_message_confirm">File operation can not been performed during the update process and it will reboot the system. Continue?</string>
+
 </resources>

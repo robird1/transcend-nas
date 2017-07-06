@@ -20,6 +20,10 @@
         <item name="buttonBarNegativeButtonStyle">@style/AlertDialogButtonNegative</item>
     </style>
 
+    <style name="FirmwareDialog" parent="AppDialog">
+        <item name="windowNoTitle">true</item>
+    </style>
+
     <style name="AlertDialogButtonNegative" parent="Widget.AppCompat.Button.Borderless">
         <item name="android:textColor">@color/textColorSecondary</item>
     </style>

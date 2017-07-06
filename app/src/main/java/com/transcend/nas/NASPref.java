@@ -562,4 +562,16 @@ public class NASPref {
         return PrefUtil.read(context, name, key, true);
     }
 
+    public static void setFirmwareNotify(Context context, boolean isNotify) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = "is_firmware_notify";
+        PrefUtil.write(context, name, key, isNotify);
+    }
+
+    public static boolean getFirmwareNotify(Context context) {
+        String name = context.getResources().getString(R.string.pref_name);
+        String key = "is_firmware_notify";
+        return PrefUtil.read(context, name, key, true);
+    }
+
 }

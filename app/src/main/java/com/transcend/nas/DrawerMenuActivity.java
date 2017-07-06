@@ -15,18 +15,17 @@ import android.view.MenuItem;
 import com.transcend.nas.common.ManageFactory;
 import com.transcend.nas.connection.LoginActivity;
 import com.transcend.nas.connection.old.StartActivity;
+import com.transcend.nas.management.FileManageActivity;
 import com.transcend.nas.management.FileRecentActivity;
 import com.transcend.nas.management.externalstorage.ExternalStorageController;
-import com.transcend.nas.management.FileManageActivity;
 import com.transcend.nas.management.externalstorage.SDCardReceiver;
 import com.transcend.nas.management.firmware.ShareFolderManager;
 import com.transcend.nas.management.firmware.TwonkyManager;
+import com.transcend.nas.management.firmwareupdate.FirmwareUpdateService;
 import com.transcend.nas.service.AutoBackupService;
 import com.transcend.nas.service.LanCheckManager;
-import com.transcend.nas.settings.DeviceInfoActivity;
 import com.transcend.nas.settings.DiskFactory;
 import com.transcend.nas.settings.FeedbackActivity;
-import com.transcend.nas.settings.FirmwareHostNameLoader;
 import com.transcend.nas.settings.HelpActivity;
 import com.transcend.nas.settings.SettingsActivity;
 import com.transcend.nas.tutk.TutkLogoutLoader;
@@ -268,6 +267,12 @@ public abstract class DrawerMenuActivity extends AppCompatActivity implements
         //stop music service
         if (ManageFactory.isServiceRunning(this, MusicService.class)) {
             Intent intent = new Intent(this, MusicService.class);
+            stopService(intent);
+        }
+
+        //stop firmware update service
+        if (ManageFactory.isServiceRunning(this, FirmwareUpdateService.class)) {
+            Intent intent = new Intent(this, FirmwareUpdateService.class);
             stopService(intent);
         }
 

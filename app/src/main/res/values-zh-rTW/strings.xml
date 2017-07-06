@@ -275,4 +275,17 @@
     <string name="wizard_try">重試</string>
     <string name="wizard_wifi_info">將手機Wi-Fi連線到路由器網路</string>
     <string name="yesterday">昨天</string>
+
+    <string name="settings_firmware_title_update">更新韌體</string>
+    <string name="settings_firmware_summary_update">有新版韌體可供更新</string>
+    <string name="dialog_firmware_title_notify">韌體更新</string>
+    <string name="dialog_firmware_button_update">升級</string>
+    <string name="dialog_firmware_button_remind">不再提醒</string>
+    <string name="dialog_firmware_message_notify">有新版韌體可供更新。是否更新至最新版本?</string>
+    <string name="dialog_firmware_title_updating">更新韌體中</string>
+    <string name="dialog_firmware_message_success">韌體更新完成。請等待系統重新開機。</string>
+    <string name="dialog_firmware_message_fail">韌體更新失敗</string>
+    <string name="dialog_firmware_message_progress">進度:</string>
+    <string name="dialog_firmware_message_confirm">更新過程無法進行檔案操作並會重新開機，是否繼續?</string>
+
 </resources>

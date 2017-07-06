@@ -20,6 +20,7 @@
     <string name="pref_cache_clean">CACHE CLEAN</string>
     <string name="pref_firmware">FIRMWARE</string>
     <string name="pref_firmware_version">FIRMWARE VERSION</string>
+    <string name="pref_firmware_update">FIRMWARE UPDATE</string>
     <string name="pref_disk_info">DISK INFORMATION</string>
     <string name="pref_device_info">DEVICE INFORMATION</string>
     <string name="pref_device_name">DEVICE NAME</string>

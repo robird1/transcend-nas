@@ -34,7 +34,9 @@ public class FirmwareVersionLoader extends AsyncTaskLoader<Boolean> {
 
     private static final String TAG = FirmwareVersionLoader.class.getSimpleName();
     private static final String XML_TAG_FIRMWARE_VERSION = "current";
+    private static final String XML_TAG_FIRMWARE_UPGRADE = "upgrade";
     private String mVersion = "";
+    private String mIsUpgrade = "";
 
     public FirmwareVersionLoader(Context context) {
         super(context);
@@ -48,6 +50,10 @@ public class FirmwareVersionLoader extends AsyncTaskLoader<Boolean> {
 
     public String getVersion(){
         return mVersion;
+    }
+
+    public String getIsUpgrade() {
+        return mIsUpgrade;
     }
 
     private String getFirmwareVersion() {
@@ -123,6 +129,10 @@ public class FirmwareVersionLoader extends AsyncTaskLoader<Boolean> {
                     if (tagName.equals(XML_TAG_FIRMWARE_VERSION)) {
                         parser.next();
                         firmwareVersion = parser.getText();
+//                        break;
+                    } else if (tagName.equals(XML_TAG_FIRMWARE_UPGRADE)) {
+                        parser.next();
+                        mIsUpgrade = parser.getText();
                         break;
                     }
                 }

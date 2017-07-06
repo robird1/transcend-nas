@@ -50,6 +50,8 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.DrawerMenuActivity;
+import com.transcend.nas.DrawerMenuController;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.NASUtils;
@@ -74,8 +76,6 @@ import com.transcend.nas.service.FileRecentFactory;
 import com.transcend.nas.service.FileRecentInfo;
 import com.transcend.nas.service.FileRecentManager;
 import com.transcend.nas.service.LanCheckManager;
-import com.transcend.nas.DrawerMenuActivity;
-import com.transcend.nas.DrawerMenuController;
 import com.transcend.nas.tutk.TutkLogoutLoader;
 import com.transcend.nas.view.ProgressDialog;
 import com.transcend.nas.viewer.music.MusicActivity;
@@ -170,6 +170,10 @@ public class FileManageActivity extends DrawerMenuActivity implements
             initDownloadManager();
             onReceiveIntent(getIntent());
             NASPref.setInitial(this, true);
+
+            if (isAdmin() && NASPref.getFirmwareNotify(this) == true) {
+                checkFirmwareVersion();
+            }
         } else {
             startSignInActivity();
         }
@@ -1547,6 +1551,15 @@ public class FileManageActivity extends DrawerMenuActivity implements
 
         //return complete hash
         return sb.toString();
+    }
+
+    private boolean isAdmin() {
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        return NASPref.defaultUserName.equals(server.getUsername());
+    }
+
+    private void checkFirmwareVersion() {
+        mCustomActionManager.checkFirmwareVersion();
     }
 
     /**

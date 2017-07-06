@@ -11,6 +11,7 @@ import android.widget.RelativeLayout;
 
 import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASPref;
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.management.FileInfo;
 import com.transcend.nas.management.FileManageActivity;
 import com.transcend.nas.management.LocalFileUploadLoader;
@@ -19,6 +20,7 @@ import com.transcend.nas.management.SmbFileListLoader;
 import com.transcend.nas.management.SmbFileRenameLoader;
 import com.transcend.nas.management.firmware.EventNotifyLoader;
 import com.transcend.nas.management.firmware.TwonkyManager;
+import com.transcend.nas.settings.FirmwareVersionLoader;
 import com.transcend.nas.tutk.TutkLinkNasLoader;
 import com.transcend.nas.tutk.TutkLogoutLoader;
 import com.transcend.nas.viewer.document.OpenWithUploadHandler;
@@ -80,6 +82,9 @@ public class CustomActionManager extends AbstractActionManager {
             case LoaderID.TUTK_LOGOUT:
                 mProgressLayout.setVisibility(View.VISIBLE);
                 return new TutkLogoutLoader(mContext);
+            case LoaderID.FIRMWARE_VERSION:
+                mProgressLayout.setVisibility(View.VISIBLE);
+                return new FirmwareVersionLoader(mContext);
             default:
                 return null;
         }
@@ -123,6 +128,12 @@ public class CustomActionManager extends AbstractActionManager {
                         return true;
                     }
                 }
+            } else if (loader instanceof FirmwareVersionLoader) {
+                String isUpgrade = ((FirmwareVersionLoader) loader).getIsUpgrade();
+                if ("yes".equals(isUpgrade)) {
+                    NASUtils.showFirmwareNotify(((Activity) mContext));
+                }
+                return true;
             }
         }
 
@@ -225,4 +236,10 @@ public class CustomActionManager extends AbstractActionManager {
         mPreviousLoaderID = -1;
         mPreviousLoaderArgs = null;
     }
+
+    public void checkFirmwareVersion() {
+        Bundle args = new Bundle();
+        ((Activity) mContext).getLoaderManager().restartLoader(LoaderID.FIRMWARE_VERSION, args, mCallbacks).forceLoad();
+    }
+
 }

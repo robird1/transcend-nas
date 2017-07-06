@@ -217,10 +217,20 @@
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 
+        <activity
+            android:name=".management.firmwareupdate.FirmwareDialogActivity"
+            android:theme="@style/FirmwareDialog"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
+
         <service android:name=".service.AutoBackupService">
         </service>
 
         <service android:name=".viewer.music.MusicService">
+        </service>
+
+        <service android:name=".management.firmwareupdate.FirmwareUpdateService">
         </service>
 
         <receiver android:name=".viewer.music.MusicReceiver" >
