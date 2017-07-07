@@ -2,14 +2,12 @@ package com.transcend.nas.management.firmwareupdate;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 
 /**
  * Created by steve_su on 2017/6/26.
  */
 
 class FirmwareStatusLoader extends FirmwareLoader {
-    private static final String TAG = FirmwareStatusLoader.class.getSimpleName();
     private Bundle mData;
     private String mReturnCode;
     private String mPercentage;
@@ -42,7 +40,6 @@ class FirmwareStatusLoader extends FirmwareLoader {
 
     @Override
     protected boolean doParse(String response) {
-        Log.d(TAG, "[Enter] doParse response: "+ response);
         boolean isSuccess = super.doParse(response);
         if (!isSuccess) {
             return false;

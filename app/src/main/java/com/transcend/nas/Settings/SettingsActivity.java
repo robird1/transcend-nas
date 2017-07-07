@@ -328,7 +328,7 @@ public class SettingsActivity extends DrawerMenuActivity {
         private void removeFirmwareUpdate() {
             PreferenceCategory prefCategory = (PreferenceCategory) findPreference(getString(R.string.pref_firmware));
             Preference pref = findPreference(getString(R.string.pref_firmware_update));
-            if (prefCategory != null) {
+            if (prefCategory != null && pref != null) {
                 prefCategory.removePreference(pref);
             }
         }

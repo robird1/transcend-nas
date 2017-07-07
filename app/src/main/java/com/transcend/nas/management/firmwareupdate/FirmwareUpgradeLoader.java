@@ -2,14 +2,12 @@ package com.transcend.nas.management.firmwareupdate;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 
 /**
  * Created by steve_su on 2017/6/27.
  */
 
 class FirmwareUpgradeLoader extends FirmwareLoader {
-    private static final String TAG = FirmwareUpgradeLoader.class.getSimpleName();
     private String mLocalImagePath = "";
     private String mUpgradePath = "";
 
@@ -37,7 +35,6 @@ class FirmwareUpgradeLoader extends FirmwareLoader {
 
     @Override
     protected boolean doParse(String response) {
-        Log.d(TAG, "[Enter] doParse response: "+ response);
         boolean isSuccess = super.doParse(response);
         if (!isSuccess) {
             return false;

@@ -9,7 +9,6 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
@@ -45,7 +44,6 @@ public class FirmwareUpdateService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.d(TAG, "[Enter] onDestroy");
         super.onDestroy();
     }
 
@@ -65,7 +63,6 @@ public class FirmwareUpdateService extends Service {
                 if (isSuccess) {
                     startStatusLoader(loader);
                 } else {
-                    Log.d(TAG, "FAIL in FirmwareDownloadLoader=======================================");
                     if (!loader.isHashValid()) {
                         boolean result = reLogin();
                         if (result) {
@@ -85,52 +82,23 @@ public class FirmwareUpdateService extends Service {
         FirmwareStatusLoader statusLoader = new FirmwareStatusLoader(mContext, loader.getData());
         boolean isSuccess = statusLoader.loadInBackground();
         if (!isSuccess) {
-//            doErrorHandling(loader, statusLoader.getReturnCode());
             doErrorHandling(statusLoader);
             return;
         }
 
-        Log.d(TAG, "getReturnCode: "+ statusLoader.getReturnCode()+ " getPercentage: "+ statusLoader.getPercentage());
-
         if (!isProcessFinished(statusLoader.getPercentage())) {
             showDialog(FirmwareDialogActivity.PROGRESS, statusLoader.getPercentage());
-//            requestStatus(loader);
             requestStatus(statusLoader);
 
         } else {
-            Log.d(TAG, "[Enter] isProcessFinished");
             showDialog(FirmwareDialogActivity.PROGRESS, "99");
             startUpdateLoader(statusLoader);
         }
 
     }
 
-    private boolean reLogin() {
-        Log.d(TAG, "[Enter] reLogin");
-        String msg = NASUtils.startP2PService(mContext);
-        boolean isP2PSuccess = "".equals(msg);
-        if (isP2PSuccess) {
-            Log.d(TAG, "[Enter] isP2PSuccess");
-
-            Server server = ServerManager.INSTANCE.getCurrentServer();
-            String ip = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
-
-            Bundle bundle = new Bundle();
-            bundle.putString("hostname", ip);
-            bundle.putString("username", NASPref.getUsername(mContext));
-            bundle.putString("password", NASPref.getPassword(mContext));
-            new LoginLoader(mContext, bundle, true).loadInBackground();
-
-            return true;
-        } else {
-
-            return false;
-        }
-    }
-
-//    private void doErrorHandling(FirmwareLoader loader, String returnCode) {
-private void doErrorHandling(FirmwareStatusLoader loader) {
-    if (isUnknownError(loader.getReturnCode())) {
+    private void doErrorHandling(FirmwareStatusLoader loader) {
+        if (isUnknownError(loader.getReturnCode())) {
             showDialog(FirmwareDialogActivity.FAILED);
             return;
         }
@@ -146,7 +114,6 @@ private void doErrorHandling(FirmwareStatusLoader loader) {
         }
 
         String msg = NASUtils.startP2PService(mContext);
-        Log.d(TAG, "[Enter] doErrorHandling msg: "+ msg);
         if (msg == null) {
             showDialog(FirmwareDialogActivity.FAILED);
             return;
@@ -154,30 +121,41 @@ private void doErrorHandling(FirmwareStatusLoader loader) {
 
         boolean isP2PSuccess = "".equals(msg);
         if (isP2PSuccess) {
-            Log.d(TAG, "[Enter] isP2PSuccess");
             startStatusLoader(loader);
         } else {
             boolean isNoNetwork = msg.equals(mContext.getString(R.string.network_error));
             if (isNoNetwork) {
-                Log.d(TAG, "[Enter] isNoNetwork");
                 requestStatus(loader);
             } else {
-                Log.d(TAG, "[Enter] FAILED");
                 showDialog(FirmwareDialogActivity.FAILED);
             }
         }
     }
 
     private void startUpdateLoader(FirmwareStatusLoader statusLoader) {
-        Log.d(TAG, "[Enter] startUpdateLoader");
         FirmwareUpgradeLoader updateLoader = new FirmwareUpgradeLoader(mContext, statusLoader.getData());
         boolean isSuccess = updateLoader.loadInBackground();
         if (isSuccess) {
             showDialog(FirmwareDialogActivity.SUCCESS);
             stopSelf();
         } else {
-            Log.d(TAG, "FAIL in startUpdateLoader=======================================");
             showDialog(FirmwareDialogActivity.FAILED);
+        }
+    }
+
+    private boolean reLogin() {
+        String msg = NASUtils.startP2PService(mContext);
+        boolean isP2PSuccess = "".equals(msg);
+        if (isP2PSuccess) {
+            Bundle bundle = new Bundle();
+            bundle.putString("hostname", getIP());
+            bundle.putString("username", NASPref.getUsername(mContext));
+            bundle.putString("password", NASPref.getPassword(mContext));
+            new LoginLoader(mContext, bundle, true).loadInBackground();
+
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -222,6 +200,11 @@ private void doErrorHandling(FirmwareStatusLoader loader) {
 
     private boolean isUnknownError(String returnCode) {
         return "1".equals(returnCode);
+    }
+
+    private String getIP() {
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        return P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
     }
 
 }

@@ -3,7 +3,6 @@ package com.transcend.nas.management.firmwareupdate;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
@@ -22,7 +21,6 @@ import okhttp3.ResponseBody;
  */
 
 abstract class FirmwareLoader {
-    private static final String TAG = FirmwareLoader.class.getSimpleName();
     private Context mContext;
     private boolean isHashValid = true;
 
@@ -49,7 +47,6 @@ abstract class FirmwareLoader {
             return message != null && doParse(message.string());
 
         } catch (IOException e) {
-            Log.d(TAG, "e: "+ e.toString()+ " ====================================================");
             e.printStackTrace();
             return false;
         }
@@ -69,9 +66,6 @@ abstract class FirmwareLoader {
         int begin = response.indexOf(tag);
         String endTag = tag.replace("<", "</");
         int end = response.indexOf(endTag);
-        Log.d(TAG, "response: "+ response);
-        Log.d(TAG, "tag: "+ tag+ " begin: "+ begin+ " end: "+ end);
-
         if (begin == -1 || end == -1) {
             // return "" to parse the tag "percentage"
             // TODO check the response <retcode>
@@ -113,6 +107,5 @@ abstract class FirmwareLoader {
 
     protected abstract String onRequestBody();
     protected abstract String onRequestUrl();
-//    protected abstract boolean doParse(String response);
 
 }

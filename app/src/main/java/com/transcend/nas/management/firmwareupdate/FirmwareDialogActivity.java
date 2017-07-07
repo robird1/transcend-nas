@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -24,7 +23,6 @@ import com.transcend.nas.common.ManageFactory;
  */
 
 public class FirmwareDialogActivity extends AppCompatActivity {
-    private static final String TAG = FirmwareDialogActivity.class.getSimpleName();
     static final String UPDATING = "updating";
     static final String FAILED = "failed";
     static final String SUCCESS = "success";
@@ -47,7 +45,6 @@ public class FirmwareDialogActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        Log.d(TAG, "[Enter] onResume");
         super.onResume();
         NASApp app = (NASApp) this.getApplicationContext();
         app.mIsInBackground = false;
@@ -55,7 +52,6 @@ public class FirmwareDialogActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        Log.d(TAG, "[Enter] onStop");
         NASApp app = (NASApp) this.getApplicationContext();
         app.mIsInBackground = true;
         super.onStop();
@@ -75,7 +71,6 @@ public class FirmwareDialogActivity extends AppCompatActivity {
                 break;
             case PROGRESS:
                 String percentage = intent.getStringExtra("percentage");
-                Log.d(TAG, "percentage: "+ percentage);
                 updateProgress(percentage);
                 break;
         }
