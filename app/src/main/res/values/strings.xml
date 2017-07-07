@@ -276,7 +276,6 @@
     <string name="wizard_wifi_info">Connect device Wi-Fi to router network</string>
     <string name="yesterday">Yesterday</string>
 
-    <string name="settings_firmware_title_update">Firmware Update</string>
     <string name="settings_firmware_summary_update">A newer firmware version is available</string>
     <string name="dialog_firmware_title_notify">Firmware Update</string>
     <string name="dialog_firmware_button_update">Update</string>
