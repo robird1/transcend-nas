@@ -1693,7 +1693,9 @@ public class FileManageFragmentActivity extends DrawerMenuActivity implements
                 break;
             case FRAGMENT_NAVIGATE_FROM_ROOT:
                 if (NASApp.ROOT_SMB.equals(new File(mPath).getParent())) {
-                    replaceFragment(new FileManageTabFragment(), FileManageTabFragment.TAG);
+//                    replaceFragment(new FileManageTabFragment(), FileManageTabFragment.TAG);
+                    replaceFragment(new SJC_TabFragment(), SJC_TabFragment.TAG);
+
                 }
                 break;
             default:

@@ -133,15 +133,15 @@ public class FragmentItemsLoader extends AsyncTaskLoader<ArrayList<FileInfo>> {
         cancelLoad();
     }
 
-    boolean isLazyLoading() {
+    public boolean isLazyLoading() {
         return mArgs.getBoolean("is_lazy_loading", false);
     }
 
-    int nextStartIndex() {
+    public int nextStartIndex() {
         return mStart + mLoadedCount;
     }
 
-    int getPosition() {
+    public int getPosition() {
         return mPosition;
     }
 
