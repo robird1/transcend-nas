@@ -799,6 +799,12 @@ public class FileManageActivity extends DrawerMenuActivity implements
                 enableFabEdit(mFileActionManager.isDirectorySupportFileAction(mPath));
                 updateScreen();
                 toggleDrawerCheckedItem();
+
+                if (mPath.equals(NASApp.ROOT_SMB)) {
+                    if (isAdmin()) {
+                        checkNTPServer();
+                    }
+                }
             } else {
                 if (mProgressView.isShown()) {
                     doRefresh();
@@ -1560,6 +1566,10 @@ public class FileManageActivity extends DrawerMenuActivity implements
 
     private void checkFirmwareVersion() {
         mCustomActionManager.checkFirmwareVersion();
+    }
+
+    private void checkNTPServer() {
+        mCustomActionManager.checkNTPServer();
     }
 
     /**

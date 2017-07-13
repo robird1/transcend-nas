@@ -10,6 +10,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.storage.StorageManager;
 import android.support.annotation.NonNull;
@@ -22,7 +23,10 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
+import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.connection.LoginHelper;
+import com.transcend.nas.connection.LoginLoader;
 import com.transcend.nas.management.FileInfo;
 import com.transcend.nas.management.firmwareupdate.FirmwareUpdateService;
 import com.transcend.nas.service.FileRecentManager;
@@ -409,6 +413,37 @@ public final class NASUtils {
 //            }
         }
         return uuid;
+    }
+
+    public static boolean reLogin(final Context context) {
+        String msg = NASUtils.startP2PService(context);
+        boolean isP2PSuccess = "".equals(msg);
+        if (isP2PSuccess) {
+            final Bundle bundle = new Bundle();
+            bundle.putString("hostname", getIP());
+            bundle.putString("username", NASPref.getUsername(context));
+            bundle.putString("password", NASPref.getPassword(context));
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    new LoginLoader(context, bundle, true).loadInBackground();
+                }
+            }).start();
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private static String getIP() {
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        return P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
+    }
+
+    public static boolean isAdmin() {
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        return NASPref.defaultUserName.equals(server.getUsername());
     }
 
 }

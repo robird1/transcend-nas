@@ -18,7 +18,9 @@ import com.transcend.nas.management.LocalFileUploadLoader;
 import com.transcend.nas.management.SmbFileDeleteLoader;
 import com.transcend.nas.management.SmbFileListLoader;
 import com.transcend.nas.management.SmbFileRenameLoader;
+import com.transcend.nas.management.firmware.ConfigNTPServerLoader;
 import com.transcend.nas.management.firmware.EventNotifyLoader;
+import com.transcend.nas.management.firmware.NTPServerLoader;
 import com.transcend.nas.management.firmware.TwonkyManager;
 import com.transcend.nas.settings.FirmwareVersionLoader;
 import com.transcend.nas.tutk.TutkLinkNasLoader;
@@ -85,6 +87,12 @@ public class CustomActionManager extends AbstractActionManager {
             case LoaderID.FIRMWARE_VERSION:
                 mProgressLayout.setVisibility(View.VISIBLE);
                 return new FirmwareVersionLoader(mContext);
+            case LoaderID.NTP_SERVER:
+                mProgressLayout.setVisibility(View.VISIBLE);
+                return new NTPServerLoader(mContext);
+            case LoaderID.NTP_SERVER_CONFIG:
+                mProgressLayout.setVisibility(View.VISIBLE);
+                return new ConfigNTPServerLoader(mContext);
             default:
                 return null;
         }
@@ -133,6 +141,19 @@ public class CustomActionManager extends AbstractActionManager {
                 if ("yes".equals(isUpgrade)) {
                     NASUtils.showFirmwareNotify(((Activity) mContext));
                 }
+                return true;
+            } else if (loader instanceof NTPServerLoader) {
+                mProgressLayout.setVisibility(View.INVISIBLE);
+                String server = ((NTPServerLoader) loader).getNTPServer();
+                if ("time.windows.com".equals(server)) {
+                    configNTPServer();
+                }
+                return true;
+            } else if (loader instanceof ConfigNTPServerLoader) {
+                String result = ((ConfigNTPServerLoader) loader).getConfigResult();
+
+                NASUtils.reLogin(mContext);
+                mProgressLayout.setVisibility(View.INVISIBLE);
                 return true;
             }
         }
@@ -241,5 +262,17 @@ public class CustomActionManager extends AbstractActionManager {
         Bundle args = new Bundle();
         ((Activity) mContext).getLoaderManager().restartLoader(LoaderID.FIRMWARE_VERSION, args, mCallbacks).forceLoad();
     }
+
+    public void checkNTPServer() {
+        Bundle args = new Bundle();
+        ((Activity) mContext).getLoaderManager().restartLoader(LoaderID.NTP_SERVER, args, mCallbacks).forceLoad();
+    }
+
+    private void configNTPServer() {
+        Bundle args = new Bundle();
+        ((Activity) mContext).getLoaderManager().restartLoader(LoaderID.NTP_SERVER_CONFIG, args, mCallbacks).forceLoad();
+    }
+
+
 
 }

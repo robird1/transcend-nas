@@ -57,5 +57,7 @@ public class LoaderID {
     public static final int SMB_FILE_INFO = 49;
     public static final int SMB_FILE_CHECK = 50;
     public static final int FILE_SHARE_LINK = 51;
+    public static final int NTP_SERVER = 52;
+    public static final int NTP_SERVER_CONFIG = 53;
 
 }
