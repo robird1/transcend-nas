@@ -287,4 +287,7 @@
     <string name="dialog_firmware_message_progress">progress:</string>
     <string name="dialog_firmware_message_confirm">File operation can not been performed during the update process and it will reboot the system. Continue?</string>
 
+    <string name="clear">Clear</string>
+    <string name="msg_conj_clear">%1$d item(s) will be cleared.</string>
+
 </resources>

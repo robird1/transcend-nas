@@ -82,7 +82,7 @@ public class FileRecentActivity extends FileManageActivity {
         MenuItem item = menu.findItem(R.id.file_manage_viewer_action_upload);
         item.setVisible(true);
         item.setIcon(R.drawable.ic_toolbar_delete_white);
-        item.setTitle(getString(R.string.delete));
+        item.setTitle(getString(R.string.clear));
         return true;
     }
 
@@ -95,7 +95,8 @@ public class FileRecentActivity extends FileManageActivity {
                     ArrayList<String> paths = new ArrayList<String>();
                     for (FileInfo file : mFileList)
                         paths.add(file.path);
-                    doDelete(paths);
+//                    doDelete(paths);
+                    doClear(paths);
                 } else {
                     toast(R.string.no_item_selected);
                 }
@@ -299,5 +300,16 @@ public class FileRecentActivity extends FileManageActivity {
             }
         }
     }
+
+    private void doClear(ArrayList<String> paths) {
+        new FileActionDeleteDialog(this, paths, true) {
+            @Override
+            public void onConfirm(ArrayList<String> paths) {
+                mFileActionManager.delete(paths);
+                closeEditorMode();
+            }
+        };
+    }
+
 }
 

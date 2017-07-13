@@ -24,16 +24,31 @@ public abstract class FileActionDeleteDialog implements View.OnClickListener {
     private ArrayList<String> mPaths;
 
     public FileActionDeleteDialog(Context context, ArrayList<String> paths) {
+        this(context, paths, false);
+    }
+
+    public FileActionDeleteDialog(Context context, ArrayList<String> paths, boolean isForRecent) {
         mContext = context;
         mPaths = paths;
-        initDialog();
+        if (isForRecent) {
+            String format = mContext.getResources().getString(R.string.msg_conj_clear);
+            String title = mContext.getResources().getString(R.string.clear);
+            initDialog(format, title);
+        } else {
+            initDialog();
+        }
     }
 
     private void initDialog() {
         String format = mContext.getResources().getString(R.string.msg_conj_deleted);
+        String title = mContext.getResources().getString(R.string.delete);
+        initDialog(format, title);
+    }
+
+    private void initDialog(String format, String title) {
         String message = String.format(format, mPaths.size());
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        builder.setTitle(mContext.getResources().getString(R.string.delete));
+        builder.setTitle(title);
         builder.setIcon(R.drawable.ic_toolbar_delete_gray);
         builder.setMessage(message);
         builder.setNegativeButton(R.string.cancel, null);
@@ -43,6 +58,7 @@ public abstract class FileActionDeleteDialog implements View.OnClickListener {
         mDlgBtnPos = mDialog.getButton(DialogInterface.BUTTON_POSITIVE);
         mDlgBtnPos.setOnClickListener(this);
     }
+
 
     @Override
     public void onClick(View v) {
