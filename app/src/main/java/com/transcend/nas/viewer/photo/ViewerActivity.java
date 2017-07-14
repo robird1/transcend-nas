@@ -29,6 +29,9 @@ import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCa
 import com.google.android.libraries.cast.companionlibrary.cast.exceptions.CastException;
 import com.google.android.libraries.cast.companionlibrary.cast.exceptions.NoConnectionException;
 import com.google.android.libraries.cast.companionlibrary.cast.exceptions.TransientNetworkDisconnectionException;
+import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerInfo;
+import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
@@ -45,6 +48,7 @@ import com.transcend.nas.management.fileaction.ActionHelper;
 import com.transcend.nas.management.fileaction.FileActionManager;
 import com.transcend.nas.management.firmware.FileFactory;
 import com.transcend.nas.management.firmware.PhotoFactory;
+import com.transcend.nas.management.firmware.TwonkyManager;
 import com.transcend.nas.service.FileRecentFactory;
 import com.transcend.nas.service.FileRecentInfo;
 import com.transcend.nas.service.FileRecentManager;
@@ -74,6 +78,7 @@ public class ViewerActivity extends AppCompatActivity implements
     private ImageView mDelete;
     private ImageView mTransmit;
     private ImageView mShare;
+    private ImageView mShareLink;
     private ViewerPager mPager;
     private ViewerPagerAdapter mPagerAdapter;
     private VideoCastManager mCastManager;
@@ -98,7 +103,7 @@ public class ViewerActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_viewer);
         overridePendingTransition(R.animator.slide_in_right, R.animator.slide_alpha_out);
 
-        if(initData()) {
+        if (initData()) {
             initChromeCast();
             initHeaderBar();
             initFooterBar();
@@ -164,6 +169,8 @@ public class ViewerActivity extends AppCompatActivity implements
             startFileActionLocateActivity(isRemoteAction ? NASApp.ACT_DOWNLOAD : NASApp.ACT_UPLOAD);
         } else if (v.equals(mShare)) {
             doShare();
+        } else if (v.equals(mShareLink)) {
+            doShareLink();
         }
     }
 
@@ -176,7 +183,7 @@ public class ViewerActivity extends AppCompatActivity implements
     /**
      * INITIALIZATION
      */
-    private void initChromeCast(){
+    private void initChromeCast() {
         mCastManager = VideoCastManager.getInstance();
         mCastConsumer = new VideoCastConsumerImpl() {
 
@@ -214,7 +221,7 @@ public class ViewerActivity extends AppCompatActivity implements
         mMode = args.getString("mode");
         mRoot = args.getString("root");
         mList = FileFactory.getInstance().getFileList();
-        if(mList == null || mList.size() == 0)
+        if (mList == null || mList.size() == 0)
             return false;
 
         mFileActionManager = new FileActionManager(this, mDefaultType, this);
@@ -314,6 +321,36 @@ public class ViewerActivity extends AppCompatActivity implements
                 return false;
             }
         });
+
+        mShareLink = (ImageView) findViewById(R.id.viewer_action_sharelink);
+        mShareLink.setOnClickListener(this);
+        mShareLink.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        mShareLink.setImageResource(R.drawable.ic_toolbar_sharelink_gray);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        mShareLink.setImageResource(R.drawable.ic_toolbar_sharelink_white);
+                        break;
+                }
+                return false;
+            }
+        });
+
+        boolean enableShareLink = false;
+        String firmware = NASPref.defaultFirmwareVersion;
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        ServerInfo info = server.getServerInfo();
+        if (info != null)
+            firmware = info.firmwareVer;
+        if (firmware != null && !firmware.equals("")) {
+            int version = Integer.parseInt(firmware);
+            if (version >= NASPref.useShareLinkMinFirmwareVersion)
+                enableShareLink = true;
+        }
+        mShareLink.setVisibility(isRemoteAction && enableShareLink ? View.VISIBLE : View.GONE);
     }
 
     private void initPager() {
@@ -409,6 +446,10 @@ public class ViewerActivity extends AppCompatActivity implements
 
     private void doShare() {
         mFileActionManager.share(NASPref.getShareLocation(ViewerActivity.this), getSelectedFiles());
+    }
+
+    private void doShareLink() {
+        mFileActionManager.shareLink(getSelectedFiles());
     }
 
     private void doUpload(String dest) {
@@ -520,7 +561,7 @@ public class ViewerActivity extends AppCompatActivity implements
             mFooterBar.setVisibility(View.INVISIBLE);
         } else {
             getSupportActionBar().show();
-            mFooterBar.setVisibility(mReadOnly? View.INVISIBLE : View.VISIBLE);
+            mFooterBar.setVisibility(mReadOnly ? View.INVISIBLE : View.VISIBLE);
         }
     }
 
@@ -598,8 +639,8 @@ public class ViewerActivity extends AppCompatActivity implements
         }
     }
 
-    private void doRecentRecord(FileInfo info){
-        if(isRemoteAction) {
+    private void doRecentRecord(FileInfo info) {
+        if (isRemoteAction) {
             FileRecentInfo action = FileRecentFactory.create(ViewerActivity.this, info, FileRecentInfo.ActionType.OPEN);
             FileRecentManager.getInstance().setAction(action);
         }

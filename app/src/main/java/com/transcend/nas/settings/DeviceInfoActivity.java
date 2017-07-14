@@ -35,7 +35,7 @@ public class DeviceInfoActivity extends AppCompatActivity{
     public static final int REQUEST_CODE = DeviceInfoActivity.class.hashCode() & 0xFFFF;
     public static final String TAG = DeviceInfoActivity.class.getSimpleName();
     private static final String REGULAR_EXPRESSION = "^[a-zA-Z0-9-]{1,32}$";
-    private static final boolean enableReviseDeviceName = false;
+    private static final boolean enableReviseDeviceName = true;
 
     private static boolean mIsBackButtonEnable = true;
     public static int mLoaderID = -1;

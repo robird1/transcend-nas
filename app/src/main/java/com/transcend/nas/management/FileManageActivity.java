@@ -139,6 +139,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     protected CustomActionManager mCustomActionManager;
     protected FileActionManager.FileActionServiceType mDefaultType = FileActionManager.FileActionServiceType.SMB;
     protected boolean mChoiceAllSameTypeFile = true;
+    protected boolean mCheckTimeSetting = false;
 
     @Override
     public int onLayoutID() {
@@ -803,10 +804,14 @@ public class FileManageActivity extends DrawerMenuActivity implements
                 updateScreen();
                 toggleDrawerCheckedItem();
 
-                if (mPath.equals(NASApp.ROOT_SMB)) {
-                    if (isAdmin()) {
-                        checkTimeZone();
-                    }
+                if (!mCheckTimeSetting && mFileActionManager.isRemoteAction(mPath)
+                        && mFileActionManager.isTopDirectory(mPath) && isAdmin()) {
+                    mCheckTimeSetting = true;
+                    checkEmptyView();
+                    mProgressBar.setVisibility(View.VISIBLE);
+                    mRecyclerRefresh.setRefreshing(false);
+                    checkTimeZone();
+                    return;
                 }
             } else {
                 if (mProgressView.isShown()) {

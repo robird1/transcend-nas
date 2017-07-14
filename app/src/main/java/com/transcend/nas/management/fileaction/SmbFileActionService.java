@@ -6,11 +6,13 @@ import android.content.Intent;
 import android.content.Loader;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.NASUtils;
+import com.transcend.nas.R;
 import com.transcend.nas.management.FileDownloadLoader;
 import com.transcend.nas.management.FileInfo;
 import com.transcend.nas.management.FileShareLinkLoader;
@@ -65,14 +67,25 @@ class SmbFileActionService extends FileActionService {
             if (progress != null)
                 progress.setVisibility(View.INVISIBLE);
             return true;
-        } else if (loader instanceof FileShareLinkLoader && success) {
-            String uuid = NASPref.getCloudUUID(context);
-            ArrayList<String> urls = ((FileShareLinkLoader) loader).getFileShareLinks();
-            ArrayList<String> absolutePaths = ((FileShareLinkLoader) loader).getFileAbsolutePaths();
-            //TODO : open third-party app to delivery message
+        } else if (loader instanceof FileShareLinkLoader) {
+            if (success) {
+                ArrayList<String> urls = ((FileShareLinkLoader) loader).getFileShareLinks();
+                ArrayList<String> absolutePaths = ((FileShareLinkLoader) loader).getFileAbsolutePaths();
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_TEXT, urls.get(0));
+                context.startActivity(intent);
+            } else {
+                String reason = ((FileShareLinkLoader) loader).getResult();
+                if (reason == null || "".equals(reason))
+                    reason = context.getString(R.string.network_error);
+                Toast.makeText(context, reason, Toast.LENGTH_SHORT).show();
+            }
+
             if (progress != null)
                 progress.setVisibility(View.INVISIBLE);
             return true;
+
         }
         return false;
     }

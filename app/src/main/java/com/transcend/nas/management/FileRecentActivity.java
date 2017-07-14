@@ -34,6 +34,7 @@ public class FileRecentActivity extends FileManageActivity {
     protected void onCreate(Bundle savedInstanceState) {
         mDefaultType = FileActionManager.FileActionServiceType.RECENT;
         mChoiceAllSameTypeFile = false;
+        mCheckTimeSetting = true;
         super.onCreate(savedInstanceState);
         enableFabEdit(false);
         mFileActionManager.doLockActionType();

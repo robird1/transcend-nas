@@ -160,24 +160,19 @@ public class CustomActionManager extends AbstractActionManager {
                 return true;
 
             } else if (loader instanceof ConfigTimeZoneLoader) {
-                mProgressLayout.setVisibility(View.INVISIBLE);
                 String result = ((ConfigTimeZoneLoader) loader).getValue();
                 if ("update time zone".equals(result)) {
                     checkNTPServer();
-                } else {
+                    return true;
                 }
-                return true;
-
             } else if (loader instanceof NTPServerLoader) {
-                mProgressLayout.setVisibility(View.INVISIBLE);
                 String server = ((NTPServerLoader) loader).getValue();
                 if ("time.windows.com".equals(server)) {
                     configNTPServer();
+                    return true;
                 }
-                return true;
             } else if (loader instanceof ConfigNTPServerLoader) {
                 String result = ((ConfigNTPServerLoader) loader).getValue();
-
                 NASUtils.reLogin(mContext);
                 mProgressLayout.setVisibility(View.INVISIBLE);
                 return true;

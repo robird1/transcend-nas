@@ -58,6 +58,14 @@
             android:src="@drawable/ic_toolbar_share_white" />
 
         <ImageView
+            android:id="@+id/viewer_action_sharelink"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:src="@drawable/ic_toolbar_sharelink_white" />
+
+        <ImageView
             android:id="@+id/viewer_action_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

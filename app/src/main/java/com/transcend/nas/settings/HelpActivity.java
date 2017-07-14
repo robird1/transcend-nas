@@ -69,11 +69,14 @@ public class HelpActivity extends DrawerMenuActivity {
 
         String url = "http://help.storejetcloud.com/";
         if (current.equals(Locale.TRADITIONAL_CHINESE)) {
-            url = url.concat("TW");
+            url = url.concat("TW/");
+        } else if (current.equals(Locale.JAPANESE)) {
+            url = url.concat("JP/");
+        } else if (current.equals(Locale.KOREAN)) {
+            url = url.concat("KR/");
         } else {
-            url = url.concat("EN");
+            url = url.concat("EN/");
         }
-        url = url.concat("/start.html");
         Log.d(TAG, "url: " + url);
         return url;
     }

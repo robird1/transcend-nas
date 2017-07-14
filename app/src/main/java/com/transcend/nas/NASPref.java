@@ -23,6 +23,7 @@ public class NASPref {
     public static final boolean useFacebookLogin = true;
     public static final boolean useConcurrentLogin = true;
     public static final int useTwonkyMinFirmwareVersion = 20161122;
+    public static final int useShareLinkMinFirmwareVersion = 20170714;
     public static boolean useTwonkyServer = true;
     public static boolean useSwitchNas = false;
     public static int defaultRecentListSize = 20;
