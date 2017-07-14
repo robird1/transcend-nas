@@ -59,5 +59,7 @@ public class LoaderID {
     public static final int FILE_SHARE_LINK = 51;
     public static final int NTP_SERVER = 52;
     public static final int NTP_SERVER_CONFIG = 53;
+    public static final int TIME_ZONE = 54;
+    public static final int TIME_ZONE_CONFIG = 55;
 
 }

@@ -652,7 +652,8 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                     startFileManageActivity();
                 } else {
                     //args already contain hostname, username, password
-                    String timezone = Integer.toString(TimeZone.getDefault().getRawOffset() / 3600000);
+//                    String timezone = Integer.toString(TimeZone.getDefault().getRawOffset() / 3600000);
+                    String timezone = TimeZone.getDefault().getID();
                     args.putString("nickname", getString(R.string.wizard_success));
                     args.putString("timezone", timezone);
                     getLoaderManager().restartLoader(LoaderID.WIZARD_INIT, args, LoginListActivity.this).forceLoad();

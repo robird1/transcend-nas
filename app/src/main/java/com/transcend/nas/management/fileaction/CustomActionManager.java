@@ -19,8 +19,10 @@ import com.transcend.nas.management.SmbFileDeleteLoader;
 import com.transcend.nas.management.SmbFileListLoader;
 import com.transcend.nas.management.SmbFileRenameLoader;
 import com.transcend.nas.management.firmware.ConfigNTPServerLoader;
+import com.transcend.nas.management.firmware.ConfigTimeZoneLoader;
 import com.transcend.nas.management.firmware.EventNotifyLoader;
 import com.transcend.nas.management.firmware.NTPServerLoader;
+import com.transcend.nas.management.firmware.TimeZoneLoader;
 import com.transcend.nas.management.firmware.TwonkyManager;
 import com.transcend.nas.settings.FirmwareVersionLoader;
 import com.transcend.nas.tutk.TutkLinkNasLoader;
@@ -93,6 +95,12 @@ public class CustomActionManager extends AbstractActionManager {
             case LoaderID.NTP_SERVER_CONFIG:
                 mProgressLayout.setVisibility(View.VISIBLE);
                 return new ConfigNTPServerLoader(mContext);
+            case LoaderID.TIME_ZONE:
+                mProgressLayout.setVisibility(View.VISIBLE);
+                return new TimeZoneLoader(mContext);
+            case LoaderID.TIME_ZONE_CONFIG:
+                mProgressLayout.setVisibility(View.VISIBLE);
+                return new ConfigTimeZoneLoader(mContext);
             default:
                 return null;
         }
@@ -142,19 +150,42 @@ public class CustomActionManager extends AbstractActionManager {
                     NASUtils.showFirmwareNotify(((Activity) mContext));
                 }
                 return true;
+            } else if (loader instanceof TimeZoneLoader) {
+                String timeZone = ((TimeZoneLoader) loader).getValue();
+                if (!isTimeZoneValid(timeZone)) {
+                    configTimeZone();
+                } else {
+                    checkNTPServer();
+                }
+                return true;
+
+            } else if (loader instanceof ConfigTimeZoneLoader) {
+                mProgressLayout.setVisibility(View.INVISIBLE);
+                String result = ((ConfigTimeZoneLoader) loader).getValue();
+                if ("update time zone".equals(result)) {
+                    checkNTPServer();
+                } else {
+                }
+                return true;
+
             } else if (loader instanceof NTPServerLoader) {
                 mProgressLayout.setVisibility(View.INVISIBLE);
-                String server = ((NTPServerLoader) loader).getNTPServer();
+                String server = ((NTPServerLoader) loader).getValue();
                 if ("time.windows.com".equals(server)) {
                     configNTPServer();
                 }
                 return true;
             } else if (loader instanceof ConfigNTPServerLoader) {
-                String result = ((ConfigNTPServerLoader) loader).getConfigResult();
+                String result = ((ConfigNTPServerLoader) loader).getValue();
 
                 NASUtils.reLogin(mContext);
                 mProgressLayout.setVisibility(View.INVISIBLE);
                 return true;
+            }
+        } else {
+            // force the execution of checking NTP server
+            if (loader instanceof TimeZoneLoader) {
+                checkNTPServer();
             }
         }
 
@@ -258,12 +289,26 @@ public class CustomActionManager extends AbstractActionManager {
         mPreviousLoaderArgs = null;
     }
 
+    private boolean isTimeZoneValid(String timeZone) {
+        return timeZone.length() > 2;
+    }
+
     public void checkFirmwareVersion() {
         Bundle args = new Bundle();
         ((Activity) mContext).getLoaderManager().restartLoader(LoaderID.FIRMWARE_VERSION, args, mCallbacks).forceLoad();
     }
 
-    public void checkNTPServer() {
+    public void checkTimeZone() {
+        Bundle args = new Bundle();
+        ((Activity) mContext).getLoaderManager().restartLoader(LoaderID.TIME_ZONE, args, mCallbacks).forceLoad();
+    }
+
+    private void configTimeZone() {
+        Bundle args = new Bundle();
+        ((Activity) mContext).getLoaderManager().restartLoader(LoaderID.TIME_ZONE_CONFIG, args, mCallbacks).forceLoad();
+    }
+
+    private void checkNTPServer() {
         Bundle args = new Bundle();
         ((Activity) mContext).getLoaderManager().restartLoader(LoaderID.NTP_SERVER, args, mCallbacks).forceLoad();
     }

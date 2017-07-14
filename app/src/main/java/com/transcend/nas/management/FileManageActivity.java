@@ -89,6 +89,9 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.TimeZone;
+
+import static android.R.attr.timeZone;
 
 public class FileManageActivity extends DrawerMenuActivity implements
         FileManageDropdownAdapter.OnDropdownItemSelectedListener,
@@ -171,9 +174,9 @@ public class FileManageActivity extends DrawerMenuActivity implements
             onReceiveIntent(getIntent());
             NASPref.setInitial(this, true);
 
-            if (isAdmin() && NASPref.getFirmwareNotify(this) == true) {
-                checkFirmwareVersion();
-            }
+//            if (isAdmin() && NASPref.getFirmwareNotify(this) == true) {
+//                checkFirmwareVersion();
+//            }
         } else {
             startSignInActivity();
         }
@@ -802,7 +805,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
 
                 if (mPath.equals(NASApp.ROOT_SMB)) {
                     if (isAdmin()) {
-                        checkNTPServer();
+                        checkTimeZone();
                     }
                 }
             } else {
@@ -1568,8 +1571,8 @@ public class FileManageActivity extends DrawerMenuActivity implements
         mCustomActionManager.checkFirmwareVersion();
     }
 
-    private void checkNTPServer() {
-        mCustomActionManager.checkNTPServer();
+    private void checkTimeZone() {
+        mCustomActionManager.checkTimeZone();
     }
 
     /**

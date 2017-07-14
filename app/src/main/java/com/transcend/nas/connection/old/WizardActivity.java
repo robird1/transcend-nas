@@ -184,7 +184,9 @@ public class WizardActivity extends AppCompatActivity implements LoaderManager.L
                     return;
                 }
 
-                String timezone = Integer.toString(TimeZone.getDefault().getRawOffset() / 3600000);
+//                String timezone = Integer.toString(TimeZone.getDefault().getRawOffset() / 3600000);
+                String timezone = TimeZone.getDefault().getID();
+                Log.d(TAG, "\n\ntimezone: "+ timezone+ "\n\n");
                 Bundle args = new Bundle();
                 args.putString("nickname", getString(R.string.wizard_success));
                 args.putString("hostname", mHostname);

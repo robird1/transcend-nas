@@ -3,28 +3,28 @@ package com.transcend.nas.management.firmware;
 import android.content.Context;
 
 /**
- * Created by steve_su on 2017/7/12.
+ * Created by steve_su on 2017/7/13.
  */
 
-public class NTPServerLoader extends GeneralPostLoader {
+public class TimeZoneLoader extends GeneralPostLoader {
 
-    public NTPServerLoader(Context context) {
+    public TimeZoneLoader(Context context) {
         super(context);
     }
 
     @Override
     protected String onRequestBody() {
-        return "hash="+ getHash();
+        return "hash=" + getHash();
     }
 
     @Override
     protected String onRequestUrl() {
-        return "http://"+ getHost()+"/nas/get/ntp";
+        return "http://" + getHost() + "/nas/get/zone";
     }
 
     @Override
     protected String onTagName() {
-        return "myntp";
+        return "zone";
     }
 
 }
