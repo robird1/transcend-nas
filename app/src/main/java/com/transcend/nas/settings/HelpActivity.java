@@ -74,8 +74,6 @@ public class HelpActivity extends DrawerMenuActivity {
             url = url.concat("JP/");
         } else if (current.equals(Locale.KOREAN)) {
             url = url.concat("KR/");
-        } else {
-            url = url.concat("EN/");
         }
         Log.d(TAG, "url: " + url);
         return url;

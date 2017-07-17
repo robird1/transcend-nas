@@ -41,7 +41,7 @@
         android:id="@+id/webview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/toolbar_shadow_view" />
+        android:layout_below="@+id/app_bar" />
 
     <RelativeLayout
         android:id="@+id/settings_progress_view"
