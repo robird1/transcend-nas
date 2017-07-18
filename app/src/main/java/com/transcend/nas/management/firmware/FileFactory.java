@@ -61,6 +61,13 @@ public class FileFactory {
             }
 
             for (FileInfo file : fileList) {
+                if (file.name.equals("USB")) {
+                    fileList.remove(file);
+                    break;
+                }
+            }
+
+            for (FileInfo file : fileList) {
                 if (file.name.equals("Public")) {
                     fileList.remove(file);
                     fileList.add(0, file);
