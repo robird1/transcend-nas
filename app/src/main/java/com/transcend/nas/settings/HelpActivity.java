@@ -49,6 +49,7 @@ public class HelpActivity extends DrawerMenuActivity {
         mProgress.setVisibility(View.VISIBLE);
         mWebView = (WebView) findViewById(R.id.webview);
         mWebView.setWebViewClient(new MyWebViewClient());
+        mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.loadUrl(getUrl());
     }
 
