@@ -12,7 +12,6 @@ import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.transcend.nas.R;
-import com.transcend.nas.management.firmware.FileFactory;
 import com.transcend.nas.management.firmware.PhotoFactory;
 
 import java.util.ArrayList;
@@ -53,6 +52,16 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
 
     public void updateList(ArrayList<FileInfo> list) {
         mList = list;
+    }
+
+    public void addFiles(ArrayList<FileInfo> list) {
+        if (mList != null) {
+            mList.addAll(list);
+        }
+    }
+
+    public ArrayList<FileInfo> getList() {
+        return mList;
     }
 
     @Override

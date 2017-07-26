@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout android:id="@+id/list_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="2dp"
+            android:layout_marginRight="2dp"
+            android:visibility="visible">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recycler_view"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/main_recycler_empty_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="top|center_horizontal"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/empty_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+                <!--android:visibility="gone" />-->
+
+            <TextView
+                android:id="@+id/empty_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="You have no files here."
+                android:textSize="30sp" />
+                <!--android:visibility="gone" />-->
+
+        </LinearLayout>
+
+
+
+        <!--<RelativeLayout android:id="@+id/loading_container"-->
+            <!--android:orientation="vertical"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:visibility="visible"-->
+            <!--android:gravity="center">-->
+
+            <!--<ProgressBar-->
+                <!--android:id="@+id/main_progress_bar"-->
+                <!--style="?android:attr/progressBarStyleLarge"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content" />-->
+
+
+        <!--</RelativeLayout>-->
+
+    </FrameLayout>
+
+</LinearLayout>

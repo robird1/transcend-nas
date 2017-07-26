@@ -20,7 +20,7 @@ import com.transcend.nas.connection.LoginActivity;
 import com.transcend.nas.common.AnimFactory;
 import com.transcend.nas.connection.LoginHelper;
 import com.transcend.nas.connection.LoginListActivity;
-import com.transcend.nas.management.FileManageActivity;
+import com.transcend.nas.management.browser.SJC_FileManageActivity;
 import com.transcend.nas.tutk.TutkGetNasLoader;
 import com.transcend.nas.tutk.TutkLinkNasLoader;
 import com.tutk.IOTC.P2PService;
@@ -231,7 +231,9 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
     private void startFileManageActivity() {
         mTextView.clearAnimation();
         Intent intent = new Intent();
-        intent.setClass(AutoLinkActivity.this, FileManageActivity.class);
+//        intent.setClass(AutoLinkActivity.this, FileManageActivity.class);
+        intent.setClass(AutoLinkActivity.this, SJC_FileManageActivity.class);
+
         startActivity(intent);
         finish();
     }
