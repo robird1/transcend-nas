@@ -18,7 +18,7 @@ import com.transcend.nas.NASApp;
 import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.management.FileManageActivity;
-import com.transcend.nas.management.FileManageFragmentActivity;
+import com.transcend.nas.management.browser.SJC_FileManageActivity;
 import com.transcend.nas.viewer.photo.ViewerPager;
 
 import java.io.File;
@@ -72,7 +72,7 @@ public class ExternalStorageLollipop extends AbstractExternalStorage {
         }
     }
     @Override
-    protected void onActivityResult(FileManageFragmentActivity activity, Intent data) {
+    protected void onActivityResult(SJC_FileManageActivity activity, Intent data) {
         if (activity == null || data == null) {
             return;
         }

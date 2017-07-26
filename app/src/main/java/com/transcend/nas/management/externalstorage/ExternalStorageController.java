@@ -8,7 +8,7 @@ import android.util.Log;
 
 import com.transcend.nas.DrawerMenuActivity;
 import com.transcend.nas.management.FileManageActivity;
-import com.transcend.nas.management.FileManageFragmentActivity;
+import com.transcend.nas.management.browser.SJC_FileManageActivity;
 
 /**
  * Created by steve_su on 2016/12/26.
@@ -31,7 +31,7 @@ public class ExternalStorageController {
     public void onActivityResult(FileManageActivity activity, Intent data) {
         mInstance.onActivityResult(activity, data);
     }
-    public void onActivityResult(FileManageFragmentActivity activity, Intent data) {
+    public void onActivityResult(SJC_FileManageActivity activity, Intent data) {
         mInstance.onActivityResult(activity, data);
     }
 

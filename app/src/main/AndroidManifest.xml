@@ -82,7 +82,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
         <activity
-            android:name=".management.FileManageFragmentActivity"
+            android:name=".management.browser.SJC_FileManageActivity"
             android:launchMode="singleTask"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
