@@ -21,6 +21,8 @@ import com.transcend.nas.R;
 import com.transcend.nas.management.FileActionLocateActivity;
 import com.transcend.nas.service.AutoBackupService;
 
+import java.io.File;
+
 
 /**
  * Created by ikelee on 16/11/25.
@@ -227,6 +229,13 @@ public class SettingBackupActivity extends AppCompatActivity {
             String key = getString(R.string.pref_backup_source);
             Preference pref = findPreference(key);
             pref.setSummary(location);
+
+            //check backup source folder exist or not
+            if (location != null) {
+                File dir = new File(location);
+                if (!dir.exists())
+                    pref.setSummary(location + " (" + getString(R.string.path_not_found)+ ")") ;
+            }
         }
 
         private void restartService() {

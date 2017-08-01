@@ -289,4 +289,7 @@
 
     <string name="clear">Clear</string>
     <string name="msg_conj_clear">%1$d item(s) will be cleared.</string>
+    <string name="path_not_found">Path not found</string>
+    <string name="msg_path_check">Please check path</string>
+
 </resources>
