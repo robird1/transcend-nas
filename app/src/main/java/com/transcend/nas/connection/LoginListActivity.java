@@ -31,6 +31,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
@@ -52,6 +53,8 @@ import com.tutk.IOTC.P2PService;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TimeZone;
+
+import static com.transcend.nas.NASPref.useBrowserMinFirmwareVersion;
 
 public class LoginListActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Boolean> {
 
@@ -192,7 +195,17 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
     private void startFileManageActivity() {
         if (getCallingActivity() == null) {
             Intent intent = new Intent();
-            intent.setClass(LoginListActivity.this, FileManageActivity.class);
+            Class navigationClass = FileManageActivity.class;
+
+            Server server = ServerManager.INSTANCE.getCurrentServer();
+            ServerInfo info = server.getServerInfo();
+            NASPref.setFirmwareVersion(this, info.firmwareVer);
+            int firmwareVer = Integer.valueOf(info.firmwareVer);
+            if (firmwareVer >= useBrowserMinFirmwareVersion) {
+//                navigationClass = BrowserActivity.class;
+            }
+
+            intent.setClass(LoginListActivity.this, navigationClass);
             startActivity(intent);
             finish();
         } else {

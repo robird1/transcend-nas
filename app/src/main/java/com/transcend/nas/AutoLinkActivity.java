@@ -9,17 +9,20 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerInfo;
+import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.common.AnimFactory;
 import com.transcend.nas.common.GoogleAnalysisFactory;
+import com.transcend.nas.connection.LoginActivity;
+import com.transcend.nas.connection.LoginHelper;
+import com.transcend.nas.connection.LoginListActivity;
+import com.transcend.nas.connection.NASListLoader;
 import com.transcend.nas.connection.old.GuideActivity;
 import com.transcend.nas.connection.old.NASListActivity;
-import com.transcend.nas.connection.NASListLoader;
 import com.transcend.nas.connection.old.StartActivity;
 import com.transcend.nas.introduce.FirstUseActivity;
 import com.transcend.nas.introduce.IntroduceActivity;
-import com.transcend.nas.connection.LoginActivity;
-import com.transcend.nas.common.AnimFactory;
-import com.transcend.nas.connection.LoginHelper;
-import com.transcend.nas.connection.LoginListActivity;
 import com.transcend.nas.management.FileManageActivity;
 import com.transcend.nas.tutk.TutkGetNasLoader;
 import com.transcend.nas.tutk.TutkLinkNasLoader;
@@ -27,6 +30,8 @@ import com.tutk.IOTC.P2PService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import static com.transcend.nas.NASPref.useBrowserMinFirmwareVersion;
 
 public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCallbacks<Boolean> {
 
@@ -231,7 +236,17 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
     private void startFileManageActivity() {
         mTextView.clearAnimation();
         Intent intent = new Intent();
-        intent.setClass(AutoLinkActivity.this, FileManageActivity.class);
+
+        Class navigationClass = FileManageActivity.class;
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        ServerInfo info = server.getServerInfo();
+        NASPref.setFirmwareVersion(this, info.firmwareVer);
+        int firmwareVer = Integer.valueOf(info.firmwareVer);
+        if (firmwareVer >= useBrowserMinFirmwareVersion) {
+//            navigationClass = BrowserActivity.class;
+        }
+
+        intent.setClass(AutoLinkActivity.this, navigationClass);
         startActivity(intent);
         finish();
     }
