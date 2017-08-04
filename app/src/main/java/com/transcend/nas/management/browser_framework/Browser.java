@@ -28,7 +28,6 @@ import com.transcend.nas.management.FileManageRecyclerAdapter;
 
 import java.util.ArrayList;
 
-import static android.view.KeyCharacterMap.load;
 import static com.transcend.nas.R.id.viewPager;
 
 
@@ -166,7 +165,7 @@ public abstract class Browser extends Fragment implements LoaderManager.LoaderCa
         return mViewPager.getCurrentItem();
     }
 
-    protected BrowserFragment getCurrentFragment() {
+    protected MediaFragment getCurrentFragment() {
         return mPagerAdapter.getRegisteredFragment(mViewPager.getCurrentItem());
     }
 
@@ -260,7 +259,7 @@ public abstract class Browser extends Fragment implements LoaderManager.LoaderCa
 
 
     private class MyPagerAdapter extends FragmentPagerAdapter {
-        SparseArray<BrowserFragment> mRegisteredFragments = new SparseArray<>();
+        SparseArray<MediaFragment> mRegisteredFragments = new SparseArray<>();
 
         MyPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -269,7 +268,7 @@ public abstract class Browser extends Fragment implements LoaderManager.LoaderCa
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
 //            Log.d(TAG, "[Enter] instantiateItem() position: "+ position);
-            BrowserFragment fragment = (BrowserFragment) super.instantiateItem(container, position);
+            MediaFragment fragment = (MediaFragment) super.instantiateItem(container, position);
             mRegisteredFragments.put(position, fragment);
             return fragment;
         }
@@ -277,7 +276,7 @@ public abstract class Browser extends Fragment implements LoaderManager.LoaderCa
         @Override
         public android.support.v4.app.Fragment getItem(final int position) {
 //            Log.d(TAG, "[Enter] getItem() position: "+ position);
-            return BrowserFragment.newInstance(position);
+            return MediaFragment.newInstance(position);
         }
 
         @Override
@@ -292,7 +291,7 @@ public abstract class Browser extends Fragment implements LoaderManager.LoaderCa
             super.destroyItem(container, position, object);
         }
 
-        BrowserFragment getRegisteredFragment(int key) {
+        MediaFragment getRegisteredFragment(int key) {
             return mRegisteredFragments.get(key);
         }
 

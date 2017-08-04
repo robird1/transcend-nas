@@ -1,6 +1,7 @@
 package com.transcend.nas.management.browser;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -81,13 +82,11 @@ public class MediaPhoto extends MediaType {
     }
 
     private void viewByAlbum() {
-//        StoreJetCloudData instance = mFragment.mModels.get(mFragment.getTabPosition());
-//        Bundle args = new Bundle();
-//        int startIndex = isLazyLoading ? instance.getLoadingIndex() : 0;
-//        Log.d(TAG, "startIndex: "+ startIndex);
-//        args.putInt("start", startIndex);
-//        args.putInt("type", instance.getTwonkyType());
-//        mFragment.getLoaderManager().restartLoader(mFragment.VIEW_ALBUM, args, mFragment);
+        StoreJetCloudData instance = StoreJetCloudData.PHOTO;
+        Bundle args = new Bundle();
+        args.putInt("start", 0);
+        args.putInt("type", instance.getTwonkyType());
+        mFragment.getLoaderManager().restartLoader(mFragment.VIEW_ALBUM, args, mFragment);
 
     }
 

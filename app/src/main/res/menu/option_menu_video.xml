@@ -29,12 +29,6 @@
                 app:showAsAction="never" />
 
             <item
-                android:id="@+id/option_menu_date"
-                android:icon="@drawable/ic_toolbar_sort_white"
-                android:title="@string/option_menu_date"
-                app:showAsAction="never" />
-
-            <item
                 android:id="@+id/option_menu_select"
                 android:icon="@drawable/ic_toolbar_sort_white"
                 android:title="@string/option_menu_select"

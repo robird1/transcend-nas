@@ -23,14 +23,17 @@ import static com.transcend.nas.management.browser_framework.Browser.VIEW_ALL;
 public abstract class MediaType {
     private static final String TAG = MediaType.class.getSimpleName();
     protected Context mContext;
-    protected SJC_FileManageActivity mActivity;
-    protected SJC_Browser mFragment;
+    protected BrowserActivity mActivity;
+    protected BrowserFragment mFragment;
 //    protected StoreJetCloudData mModel;
 
     MediaType(Context context) {
         mContext = context;
-        mActivity = (SJC_FileManageActivity) context;
-        mFragment = (SJC_Browser) mActivity.getSupportFragmentManager().findFragmentByTag(SJC_Browser.TAG);
+        mActivity = (BrowserActivity) context;
+
+        // TODO mFragment may be null
+        mFragment = (BrowserFragment) mActivity.getSupportFragmentManager().findFragmentByTag(BrowserFragment.TAG);
+        Log.d(TAG, "mFragment: "+ mFragment);
 //        mModel = StoreJetCloudData.getInstance(mFragment.getTabPosition());
     }
 

@@ -82,8 +82,9 @@
             android:launchMode="singleTask"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
+
         <activity
-            android:name=".management.browser.SJC_FileManageActivity"
+            android:name=".management.browser.BrowserActivity"
             android:launchMode="singleTask"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>

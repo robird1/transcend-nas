@@ -32,9 +32,6 @@ public class MediaVideo extends MediaType {
             case R.id.option_menu_album:
                 viewByAlbum();
                 return true;
-            case R.id.option_menu_date:
-                viewByDate();
-                return true;
             case R.id.option_menu_select:
                 doSelect();
                 return true;
@@ -63,9 +60,6 @@ public class MediaVideo extends MediaType {
             case 1:
                 viewByAlbum();
                 break;
-            case 2:
-                viewByDate();
-                break;
         }
     }
 
@@ -74,10 +68,6 @@ public class MediaVideo extends MediaType {
     }
 
     private void viewByAlbum() {
-
-    }
-
-    private void viewByDate() {
 
     }
 

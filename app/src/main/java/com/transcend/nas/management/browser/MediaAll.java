@@ -17,7 +17,6 @@ import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.R;
 import com.transcend.nas.management.FileActionPickerActivity;
-import com.transcend.nas.management.FileActionSearchDialog;
 import com.transcend.nas.management.FileActionSortDialog;
 import com.transcend.nas.management.FileInfo;
 import com.transcend.nas.management.FileInfoSort;
@@ -44,7 +43,6 @@ public class MediaAll extends MediaType {
     private RecyclerView mRecyclerView;
     private ArrayList<FileInfo> mFileList;
     protected FileManageRecyclerAdapter mRecyclerAdapter;
-    private SJC_Browser mFragment;
 
     MediaAll(Context context) {
         super(context);
@@ -52,12 +50,10 @@ public class MediaAll extends MediaType {
         mPath = mActivity.mPath;
         mFileActionManager = mActivity.mFileActionManager;
         mCastManager = mActivity.mCastManager;
-        mRecyclerView = mActivity.mRecyclerView;
         mFileList = mActivity.mFileList;
+
+        mRecyclerView = mActivity.mRecyclerView;
         mRecyclerAdapter = mActivity.mRecyclerAdapter;
-
-        mFragment = (SJC_Browser) mActivity.getSupportFragmentManager().findFragmentByTag(SJC_Browser.TAG);
-
     }
 
     @Override
