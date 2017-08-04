@@ -66,7 +66,7 @@ public class AutoBackupHelper {
 
     public ArrayList<String> getNeedUploadImageList(boolean filter) {
         ArrayList<String> list = searchAllImage(mPath);
-        if(filter){
+        if(list != null && filter){
             return filterUploadImageList(list);
         }
         return list;

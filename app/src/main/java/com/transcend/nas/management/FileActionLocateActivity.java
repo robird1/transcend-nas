@@ -93,11 +93,12 @@ public class FileActionLocateActivity extends AppCompatActivity implements
         initRecyclerView();
         initFabs();
         initProgressView();
-        doRefresh();
         toast(getHintResId(), Toast.LENGTH_SHORT);
 
         if (!NASApp.MODE_SMB.equals(mMode)) {
             checkExternalDeviceCount();
+        } else {
+            doRefresh();
         }
 
     }
@@ -112,12 +113,12 @@ public class FileActionLocateActivity extends AppCompatActivity implements
                 String device = data.getStringExtra("selected_device");
                 Log.d(TAG, "selected device: "+ device);
                 mPath = mDeviceMap.get(device);
-
                 doRefresh();
+                return;
             }
-        } else {
-            finish();
         }
+
+        finish();
     }
 
         /**

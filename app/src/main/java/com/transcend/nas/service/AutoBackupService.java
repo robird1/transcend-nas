@@ -26,6 +26,7 @@ import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.common.CustomNotificationManager;
 import com.transcend.nas.management.FileInfo;
+import com.transcend.nas.settings.SettingBackupActivity;
 import com.tutk.IOTC.P2PService;
 
 import java.io.File;
@@ -197,7 +198,14 @@ public class AutoBackupService extends Service implements RecursiveFileObserver.
                     mHelper = new AutoBackupHelper(getApplicationContext(), backupSource);
                 }
                 ArrayList<String> list = mHelper.getNeedUploadImageList(true);
-                if (list != null && list.size() > 0) {
+                if (list == null) {
+                    String title = getString(R.string.auto_backup);
+                    String contentText = getString(R.string.msg_path_check);
+                    CustomNotificationManager.updateResult(getApplicationContext(), NOTIFICATION_ID, title, contentText, null, SettingBackupActivity.class);
+                    return;
+                }
+
+                if (list.size() > 0) {
                     Log.d(TAG, "Clean upload task due to init backup");
                     AutoBackupQueue.getInstance().cleanUploadTask(getApplicationContext());
                     if (canAddTaskToQueue())

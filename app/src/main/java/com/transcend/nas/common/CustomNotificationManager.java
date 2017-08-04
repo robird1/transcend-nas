@@ -112,6 +112,10 @@ public class CustomNotificationManager {
     }
 
     public static void updateResult(Context context, int notificationID, String type, String result, String destination) {
+        updateResult(context, notificationID, type, result, destination, FileManageActivity.class);
+    }
+
+    public static void updateResult(Context context, int notificationID, String type, String result, String destination, Class targetActivity) {
         Log.w(TAG, "result: " + result);
 
         int icon = R.mipmap.ic_launcher;
@@ -120,7 +124,7 @@ public class CustomNotificationManager {
 
         NotificationManager ntfMgr = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         Intent intent = new Intent();
-        intent.setClass(context, FileManageActivity.class);
+        intent.setClass(context, targetActivity);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         if (destination != null && !destination.equals(""))
