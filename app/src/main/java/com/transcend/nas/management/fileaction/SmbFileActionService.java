@@ -10,13 +10,12 @@ import android.widget.Toast;
 
 import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASApp;
-import com.transcend.nas.NASPref;
 import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.management.FileDownloadLoader;
 import com.transcend.nas.management.FileInfo;
 import com.transcend.nas.management.FileShareLinkLoader;
-import com.transcend.nas.management.LocalFileUploadLoader;
+import com.transcend.nas.management.upload.LocalFileUploadLoader;
 import com.transcend.nas.management.SmbFileCopyLoader;
 import com.transcend.nas.management.SmbFileDeleteLoader;
 import com.transcend.nas.management.SmbFileListLoader;

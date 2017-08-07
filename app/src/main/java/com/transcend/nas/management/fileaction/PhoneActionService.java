@@ -14,7 +14,7 @@ import com.transcend.nas.management.LocalFileDeleteLoader;
 import com.transcend.nas.management.LocalFileListLoader;
 import com.transcend.nas.management.LocalFileMoveLoader;
 import com.transcend.nas.management.LocalFileRenameLoader;
-import com.transcend.nas.management.LocalFileUploadLoader;
+import com.transcend.nas.management.upload.LocalFileUploadLoader;
 import com.transcend.nas.management.LocalFolderCreateLoader;
 import com.transcend.nas.management.externalstorage.ExternalStorageLollipop;
 import com.transcend.nas.management.externalstorage.OTGFileCopyLoader;

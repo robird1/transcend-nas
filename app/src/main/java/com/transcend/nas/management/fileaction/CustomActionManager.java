@@ -14,7 +14,7 @@ import com.transcend.nas.NASPref;
 import com.transcend.nas.NASUtils;
 import com.transcend.nas.management.FileInfo;
 import com.transcend.nas.management.FileManageActivity;
-import com.transcend.nas.management.LocalFileUploadLoader;
+import com.transcend.nas.management.upload.LocalFileUploadLoader;
 import com.transcend.nas.management.SmbFileDeleteLoader;
 import com.transcend.nas.management.SmbFileListLoader;
 import com.transcend.nas.management.SmbFileRenameLoader;
