@@ -14,7 +14,6 @@ import android.view.MenuItem;
 
 import com.transcend.nas.common.ManageFactory;
 import com.transcend.nas.connection.LoginActivity;
-import com.transcend.nas.connection.old.StartActivity;
 import com.transcend.nas.management.FileManageActivity;
 import com.transcend.nas.management.FileRecentActivity;
 import com.transcend.nas.management.externalstorage.ExternalStorageController;
@@ -303,10 +302,7 @@ public abstract class DrawerMenuActivity extends AppCompatActivity implements
 
         //show SignIn activity
         Intent intent = new Intent();
-        if (NASPref.useNewLoginFlow)
-            intent.setClass(this, LoginActivity.class);
-        else
-            intent.setClass(this, StartActivity.class);
+        intent.setClass(this, LoginActivity.class);
         startActivity(intent);
         finishAffinity();
     }

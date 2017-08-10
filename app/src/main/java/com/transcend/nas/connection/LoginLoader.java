@@ -38,21 +38,18 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
     public Boolean loadInBackground() {
         boolean success = mServer.connect(true);
         if (success) {
-            if(mReplace) {
+            if (mReplace) {
                 updateServerManager();
                 updateLoginPreference();
-            }
-            else{
+            } else {
                 String uuid = mServer.getTutkUUID();
-                if(uuid != null && !uuid.equals("")) {
+                if (uuid != null && !uuid.equals("")) {
                     mArgs.putString("nasUUID", uuid);
                     NASPref.setUUID(getContext(), uuid);
-                }
-                else
+                } else
                     success = false;
             }
-        }
-        else{
+        } else {
             mError = mServer.getLoginError();
         }
         return success;
@@ -78,29 +75,27 @@ public class LoginLoader extends AsyncTaskLoader<Boolean> {
 
         ShareFolderManager.getInstance().cleanRealPathMap();
 
-        if(NASPref.useNewLoginFlow){
-            mLoginHelper = new LoginHelper(mContext);
-            LoginHelper.LoginInfo account = new LoginHelper.LoginInfo();
-            account.email = NASPref.getCloudUsername(mContext);
-            account.hostname = mServer.getHostname();
-            account.username = mServer.getUsername();
-            account.password = mServer.getPassword();
-            account.uuid = mServer.getTutkUUID();
-            ServerInfo info = mServer.getServerInfo();
-            account.macAddress = info.mac;
-            account.ip = info.ipAddress;
-            mLoginHelper.setAccount(account);
-        }
+        mLoginHelper = new LoginHelper(mContext);
+        LoginHelper.LoginInfo account = new LoginHelper.LoginInfo();
+        account.email = NASPref.getCloudUsername(mContext);
+        account.hostname = mServer.getHostname();
+        account.username = mServer.getUsername();
+        account.password = mServer.getPassword();
+        account.uuid = mServer.getTutkUUID();
+        ServerInfo info = mServer.getServerInfo();
+        account.macAddress = info.mac;
+        account.ip = info.ipAddress;
+        mLoginHelper.setAccount(account);
     }
 
-    public String getLoginError(){
-        if(mError != null && !mError.equals(""))
+    public String getLoginError() {
+        if (mError != null && !mError.equals(""))
             return mError;
         else
             return getContext().getString(R.string.network_error);
     }
 
-    public Bundle getBundleArgs(){
+    public Bundle getBundleArgs() {
         return mArgs;
     }
 }

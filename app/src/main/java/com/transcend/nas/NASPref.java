@@ -19,7 +19,6 @@ public class NASPref {
     public static final String defaultUserName = "admin";
     public static final String defaultFirmwareVersion = "20160524";
     public static final boolean useDefaultDownloadFolder = true;
-    public static final boolean useNewLoginFlow = true;
     public static final boolean useFacebookLogin = true;
     public static final boolean useConcurrentLogin = true;
     public static final int useTwonkyMinFirmwareVersion = 20161122;
