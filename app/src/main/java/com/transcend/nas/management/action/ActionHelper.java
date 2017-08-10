@@ -1,4 +1,4 @@
-package com.transcend.nas.management.fileaction;
+package com.transcend.nas.management.action;
 
 import android.content.Loader;
 import android.os.Build;
@@ -39,8 +39,10 @@ public class ActionHelper extends AbstractActionManager {
                 if(tmp != null && loader != null)
                     Log.d(TAG, "some loader is duplicate : " + id);
 
-                if(tmp != null)
+                if(tmp != null) {
+                    Log.w(TAG, "onCreateLoader: " + manager.getClass().getSimpleName() + " capture ");
                     loader = tmp;
+                }
             }
         }
 

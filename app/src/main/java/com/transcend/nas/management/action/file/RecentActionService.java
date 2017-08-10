@@ -1,4 +1,4 @@
-package com.transcend.nas.management.fileaction;
+package com.transcend.nas.management.action.file;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Created by ike_lee on 2016/12/21.
  */
-class RecentActionService extends SmbFileActionService {
+public class RecentActionService extends SmbFileActionService {
     public RecentActionService() {
         super();
         TAG = RecentActionService.class.getSimpleName();

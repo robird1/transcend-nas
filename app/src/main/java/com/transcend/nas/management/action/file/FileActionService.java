@@ -1,4 +1,4 @@
-package com.transcend.nas.management.fileaction;
+package com.transcend.nas.management.action.file;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Created by ike_lee on 2016/12/21.
  */
-abstract class FileActionService {
+public abstract class FileActionService {
     public String TAG = FileActionService.class.getSimpleName();
     protected String mMode;
     protected String mRoot;

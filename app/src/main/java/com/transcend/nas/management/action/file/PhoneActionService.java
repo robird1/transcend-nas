@@ -1,4 +1,4 @@
-package com.transcend.nas.management.fileaction;
+package com.transcend.nas.management.action.file;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
@@ -30,12 +30,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.transcend.nas.management.fileaction.FileActionService.FileAction.*;
+import static com.transcend.nas.management.action.file.FileActionService.FileAction.*;
 
 /**
  * Created by ike_lee on 2016/12/21.
  */
-class PhoneActionService extends FileActionService {
+public class PhoneActionService extends FileActionService {
     public PhoneActionService(){
         TAG = PhoneActionService.class.getSimpleName();
         mMode = NASApp.MODE_STG;

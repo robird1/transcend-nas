@@ -1,4 +1,4 @@
-package com.transcend.nas.management.fileaction;
+package com.transcend.nas.management.action;
 
 import android.app.Activity;
 import android.app.LoaderManager;
@@ -13,6 +13,11 @@ import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.NASUtils;
 import com.transcend.nas.management.FileInfo;
+import com.transcend.nas.management.action.file.FileActionService;
+import com.transcend.nas.management.action.file.PhoneActionService;
+import com.transcend.nas.management.action.file.RecentActionService;
+import com.transcend.nas.management.action.file.SdcardActionService;
+import com.transcend.nas.management.action.file.SmbFileActionService;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -23,13 +28,10 @@ import java.util.Map;
  * Created by ike_lee on 2016/12/21.
  */
 public class FileActionManager extends AbstractActionManager {
-    private static final String TAG = FileActionManager.class.getSimpleName();
-
-    private Context mContext;
+    private static String TAG = FileActionManager.class.getSimpleName();
     private FileActionService mFileActionService;
     private Map<FileActionServiceType, FileActionService> mFileActionServicePool;
     private FileActionServiceType mFileActionServiceType;
-    private LoaderManager.LoaderCallbacks<Boolean> mCallbacks;
     private boolean isLockType = false;
 
     public enum FileActionServiceType {
@@ -41,10 +43,8 @@ public class FileActionManager extends AbstractActionManager {
     }
 
     public FileActionManager(Context context, FileActionServiceType service, LoaderManager.LoaderCallbacks<Boolean> callbacks, RelativeLayout progressLayout) {
-        mContext = context;
+        super(context, callbacks, progressLayout);
         mFileActionServiceType = service;
-        mCallbacks = callbacks;
-        mProgressLayout = progressLayout;
         setServiceType(service);
         isLockType = false;
     }
@@ -84,7 +84,7 @@ public class FileActionManager extends AbstractActionManager {
             return;
 
         if (path.startsWith("/storage")) {
-            if (NASUtils.isSDCardPath(mContext, path))
+            if (NASUtils.isSDCardPath(getContext(), path))
                 setServiceType(FileActionManager.FileActionServiceType.SD);
             else
                 setServiceType(FileActionManager.FileActionServiceType.PHONE);
@@ -99,14 +99,14 @@ public class FileActionManager extends AbstractActionManager {
     public String getServiceRootPath() {
         String root = NASApp.ROOT_SMB;
         if (mFileActionService != null)
-            root = mFileActionService.getRootPath(mContext);
+            root = mFileActionService.getRootPath(getContext());
         return root;
     }
 
     public String getServiceMode() {
         String mode = NASApp.MODE_SMB;
         if (mFileActionService != null)
-            mode = mFileActionService.getMode(mContext);
+            mode = mFileActionService.getMode(getContext());
         return mode;
     }
 
@@ -117,10 +117,6 @@ public class FileActionManager extends AbstractActionManager {
     public void setCurrentPath(String path) {
         if (mFileActionService != null)
             mFileActionService.setCurrentPath(path);
-    }
-
-    public void setProgressLayout(RelativeLayout progressLayout) {
-        mProgressLayout = progressLayout;
     }
 
     public void open(String path) {
@@ -181,7 +177,7 @@ public class FileActionManager extends AbstractActionManager {
             }
             createLoader(FileActionService.FileAction.SHARE, null, dest, paths);
         } else {
-            NASUtils.shareLocalFile(mContext, files);
+            NASUtils.shareLocalFile(getContext(), files);
         }
     }
 
@@ -205,7 +201,7 @@ public class FileActionManager extends AbstractActionManager {
         if (type != null)
             args.putInt("actionType", id);
 
-        ((Activity) mContext).getLoaderManager().restartLoader(id, args, mCallbacks).forceLoad();
+        createLoader(id, args);
     }
 
     public Loader<Boolean> onCreateLoader(int id, Bundle args) {
@@ -215,8 +211,8 @@ public class FileActionManager extends AbstractActionManager {
             if (type > 0) {
                 FileActionService.FileAction action = mFileActionService.getFileAction(type);
                 if (action != null) {
-                    loader = mFileActionService.onCreateLoader(mContext, action, args);
-                    if (loader != null && mProgressLayout != null) {
+                    loader = mFileActionService.onCreateLoader(getContext(), action, args);
+                    if (loader != null) {
                         switch (action) {
                             case LIST:
                             case RENAME:
@@ -225,10 +221,10 @@ public class FileActionManager extends AbstractActionManager {
                             case SHARE:
                             case ShareLINK:
                             case OPEN:
-                                mProgressLayout.setVisibility(View.VISIBLE);
+                                showProgress();
                                 break;
                             default:
-                                mProgressLayout.setVisibility(View.INVISIBLE);
+                                hideProgress();
                                 break;
                         }
                     }
@@ -241,7 +237,7 @@ public class FileActionManager extends AbstractActionManager {
 
     public boolean onLoadFinished(Loader<Boolean> loader, Boolean success) {
         if (mFileActionService != null) {
-            return mFileActionService.onLoadFinished(mContext, mProgressLayout, loader, success);
+            return mFileActionService.onLoadFinished(getContext(), getProgressLayout(), loader, success);
         }
 
         return false;

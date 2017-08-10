@@ -59,15 +59,18 @@ import com.transcend.nas.R;
 import com.transcend.nas.common.GoogleAnalysisFactory;
 import com.transcend.nas.common.ManageFactory;
 import com.transcend.nas.connection.LoginListActivity;
+import com.transcend.nas.management.action.ConnectManager;
+import com.transcend.nas.management.action.TimeManager;
+import com.transcend.nas.management.action.file.FileActionService;
 import com.transcend.nas.management.download.AbstractDownloadManager;
 import com.transcend.nas.management.download.DownloadFactory;
 import com.transcend.nas.management.download.TempFileDownloadManager;
 import com.transcend.nas.management.externalstorage.ExternalStorageController;
 import com.transcend.nas.management.externalstorage.ExternalStorageLollipop;
-import com.transcend.nas.management.fileaction.AbstractActionManager;
-import com.transcend.nas.management.fileaction.ActionHelper;
-import com.transcend.nas.management.fileaction.CustomActionManager;
-import com.transcend.nas.management.fileaction.FileActionManager;
+import com.transcend.nas.management.action.AbstractActionManager;
+import com.transcend.nas.management.action.ActionHelper;
+import com.transcend.nas.management.action.FileSyncManager;
+import com.transcend.nas.management.action.FileActionManager;
 import com.transcend.nas.management.firmware.FileFactory;
 import com.transcend.nas.management.firmware.MediaFactory;
 import com.transcend.nas.management.firmware.TwonkyManager;
@@ -76,7 +79,6 @@ import com.transcend.nas.service.FileRecentFactory;
 import com.transcend.nas.service.FileRecentInfo;
 import com.transcend.nas.service.FileRecentManager;
 import com.transcend.nas.service.LanCheckManager;
-import com.transcend.nas.tutk.TutkLogoutLoader;
 import com.transcend.nas.view.ProgressDialog;
 import com.transcend.nas.viewer.music.MusicActivity;
 import com.transcend.nas.viewer.music.MusicManager;
@@ -89,9 +91,6 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.TimeZone;
-
-import static android.R.attr.timeZone;
 
 public class FileManageActivity extends DrawerMenuActivity implements
         FileManageDropdownAdapter.OnDropdownItemSelectedListener,
@@ -135,8 +134,10 @@ public class FileManageActivity extends DrawerMenuActivity implements
     protected ExternalStorageController mStorageController;
 
     protected ActionHelper mActionHelper;
+    protected ConnectManager mConnectActionManager;
+    protected TimeManager mTimeManager;
+    protected FileSyncManager mFileSyncManager;
     protected FileActionManager mFileActionManager;
-    protected CustomActionManager mCustomActionManager;
     protected FileActionManager.FileActionServiceType mDefaultType = FileActionManager.FileActionServiceType.SMB;
     protected boolean mChoiceAllSameTypeFile = true;
     protected boolean mCheckTimeSetting = false;
@@ -343,11 +344,33 @@ public class FileManageActivity extends DrawerMenuActivity implements
         mFileActionManager = new FileActionManager(this, mDefaultType, this);
         mPath = mFileActionManager.getServiceRootPath();
 
-        mCustomActionManager = new CustomActionManager(this, this);
+        mFileSyncManager = new FileSyncManager(this, this);
+        mTimeManager = new TimeManager(this, this);
+
+        mConnectActionManager = new ConnectManager(this, this);
+        mConnectActionManager.setListener(new ConnectManager.ConnectActionListener() {
+            @Override
+            public boolean finishNasHashKeyTimeOutCheck() {
+                return false;
+            }
+
+            @Override
+            public boolean finishNasTUTKLink() {
+                return false;
+            }
+
+            @Override
+            public boolean finishNasTUTKLogout() {
+                startSignInActivity();
+                return true;
+            }
+        });
 
         List<AbstractActionManager> actionManagerList = new ArrayList<>();
         actionManagerList.add(mFileActionManager);
-        actionManagerList.add(mCustomActionManager);
+        actionManagerList.add(mFileSyncManager);
+        actionManagerList.add(mTimeManager);
+        actionManagerList.add(mConnectActionManager);
         mActionHelper = new ActionHelper(actionManagerList);
 
         mCastManager = VideoCastManager.getInstance();
@@ -779,11 +802,6 @@ public class FileManageActivity extends DrawerMenuActivity implements
         if (mActionHelper.onLoadFinished(loader, success))
             return;
 
-        if (loader instanceof TutkLogoutLoader) {
-            super.onLoadFinished(loader, success);
-            return;
-        }
-
         if (success) {
             if (loader instanceof SmbFileListLoader || loader instanceof LocalFileListLoader) {
                 //file list change, stop previous image loader
@@ -819,38 +837,19 @@ public class FileManageActivity extends DrawerMenuActivity implements
                     return;
                 }
 
-                if (loader instanceof SmbAbstractLoader || loader instanceof LocalAbstractLoader) {
-                    String type;
-                    if (loader instanceof SmbAbstractLoader)
-                        type = ((SmbAbstractLoader) loader).getType();
-                    else
-                        type = ((LocalAbstractLoader) loader).getType();
-                    if (type != null && !type.equals("") && !type.equals(getString(R.string.download))) {
+                if (loader instanceof FileAbstractLoader) {
+                    String type = ((FileAbstractLoader) loader).getType();
+                    if (type != null && !type.equals("") && !type.equals(getString(R.string.download)))
                         Toast.makeText(FileManageActivity.this, type + " - " + getString(R.string.done), Toast.LENGTH_SHORT).show();
-                    }
                 }
             }
         } else {
-            if (LanCheckManager.getInstance().getLanConnect()) {
-                LanCheckManager.getInstance().startLanCheck();
-                if (loader instanceof SmbAbstractLoader) {
-                    Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                if (mCustomActionManager.getRecordCommandID() > 0 && mCustomActionManager.doNasTUTKLink(loader)) {
-                    //Toast.makeText(this, getString(R.string.try_remote_access), Toast.LENGTH_SHORT).show();
-                    return;
-                } else {
-                    LanCheckManager.getInstance().startLanCheck();
-                    Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            if (loader instanceof LocalFileCopyLoader || loader instanceof LocalFileMoveLoader || loader instanceof LocalFileRenameLoader ||
-                    loader instanceof LocalFileDeleteLoader || loader instanceof LocalFolderCreateLoader) {
+            if (loader instanceof SmbAbstractLoader) {
+                Toast.makeText(this, ((SmbAbstractLoader) loader).getExceptionMessage(), Toast.LENGTH_SHORT).show();
+            } else if (loader instanceof LocalAbstractLoader) {
                 mStorageController.handleWriteOperationFailed();
+            } else {
+                Toast.makeText(this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -966,9 +965,15 @@ public class FileManageActivity extends DrawerMenuActivity implements
     }
 
     public void doLoad(String path) {
-        if (mFileActionManager.isRemoteAction(path) && mCustomActionManager.doNasHashKeyTimeOutCheck(path)) {
-            return;
+        if (mFileActionManager.isRemoteAction(path)) {
+            int id = mFileActionManager.getFileActionService().getLoaderID(FileActionService.FileAction.LIST);
+            Bundle args = new Bundle();
+            args.putInt("actionType", id);
+            args.putString("path", path);
+            if (mConnectActionManager.doNasHashKeyTimeOutCheck(args))
+                return;
         }
+
         mFileActionManager.list(path);
     }
 
@@ -1517,7 +1522,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         if (mOriginMD5Checksum != null) {
             String checksum = getMD5Checksum();
             if (checksum != null && !mOriginMD5Checksum.equals(checksum)) {
-                mCustomActionManager.doOpenWithUpload(this, mFileInfo, mDownloadFilePath, mSmbFileListLoader);
+                mFileSyncManager.doOpenWithUpload(this, mFileInfo, mDownloadFilePath, mSmbFileListLoader);
             }
         }
 
@@ -1573,11 +1578,11 @@ public class FileManageActivity extends DrawerMenuActivity implements
     }
 
     private void checkFirmwareVersion() {
-        mCustomActionManager.checkFirmwareVersion();
+        mTimeManager.checkFirmwareVersion();
     }
 
     private void checkTimeZone() {
-        mCustomActionManager.checkTimeZone();
+        mTimeManager.checkTimeZone();
     }
 
     /**

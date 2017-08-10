@@ -17,7 +17,7 @@ import android.widget.Toast;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.R;
-import com.transcend.nas.management.fileaction.FileActionManager;
+import com.transcend.nas.management.action.FileActionManager;
 import com.transcend.nas.service.FileRecentInfo;
 import com.transcend.nas.service.FileRecentManager;
 
