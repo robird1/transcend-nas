@@ -45,17 +45,17 @@ public class FileDownloadLoader extends SmbAbstractLoader {
             return download();
         } catch (Exception e) {
             e.printStackTrace();
-            FileDownloadManager manager = (FileDownloadManager) DownloadFactory.getManager(mActivity, DownloadFactory.Type.PERSIST);
+            FileDownloadManager manager = (FileDownloadManager) DownloadFactory.getManager(getContext(), DownloadFactory.Type.PERSIST);
             if (manager != null)
                 manager.cancelByNotificationId(mNotificationID);
             setExceptionWithMessage(e, isDownloadDirectoryExist(getContext()) ? null : getContext().getString(R.string.download_location_error));
-            updateResult(mType, getContext().getString(R.string.error), mDest);
+            updateResult(getContext().getString(R.string.error), mDest);
         }
         return false;
     }
 
     private boolean download() throws IOException {
-        FileDownloadManager manager = (FileDownloadManager) DownloadFactory.getManager(mActivity, DownloadFactory.Type.PERSIST);
+        FileDownloadManager manager = (FileDownloadManager) DownloadFactory.getManager(getContext(), DownloadFactory.Type.PERSIST);
         if (manager != null)
             manager.setTotalTaskByNotificationId(mNotificationID, -1);
 
@@ -70,7 +70,7 @@ public class FileDownloadLoader extends SmbAbstractLoader {
         if (mCurrent == 0) {
             if (manager != null)
                 manager.cancelByNotificationId(mNotificationID);
-            updateResult(mType, getContext().getString(R.string.done), mDest);
+            updateResult(getContext().getString(R.string.done), mDest);
         } else {
             if (manager != null)
                 manager.setTotalTaskByNotificationId(mNotificationID, mCurrent);

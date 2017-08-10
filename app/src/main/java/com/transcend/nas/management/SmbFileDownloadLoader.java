@@ -61,7 +61,7 @@ public class SmbFileDownloadLoader extends SmbAbstractLoader {
         } catch (Exception e) {
             e.printStackTrace();
             setException(e);
-            updateResult(mType, getContext().getString(R.string.error), mDest);
+            updateResult(getContext().getString(R.string.error), mDest);
         } finally {
             try {
                 if (mOS != null) mOS.close();
@@ -82,7 +82,7 @@ public class SmbFileDownloadLoader extends SmbAbstractLoader {
                 downloadFile(source, mDest);
             mCurrent++;
         }
-        updateResult(mType, getContext().getString(R.string.done), mDest);
+        updateResult(getContext().getString(R.string.done), mDest);
         return true;
     }
 
@@ -116,7 +116,7 @@ public class SmbFileDownloadLoader extends SmbAbstractLoader {
         File target = new File(destination, name);
         mOS = new BufferedOutputStream(new FileOutputStream(target));
         mIS = new BufferedInputStream(source.getInputStream());
-        updateProgress(mType, name, count, total);
+        updateProgress(name, count, total);
         byte[] buffer = new byte[BUFFER_SIZE];
         int length = 0;
         while ((length = mIS.read(buffer)) != -1) {
@@ -133,7 +133,7 @@ public class SmbFileDownloadLoader extends SmbAbstractLoader {
         if (mForbidden)
             return;
         mForbidden = true;
-        updateProgress(mType, name, count, total);
+        updateProgress(name, count, total);
         mTimer = new Timer();
         mTimer.schedule(new TimerTask() {
             @Override

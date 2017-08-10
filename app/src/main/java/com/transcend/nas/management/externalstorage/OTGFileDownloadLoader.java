@@ -56,32 +56,32 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
             return download();
         } catch (Exception e) {
             e.printStackTrace();
-            FileDownloadManager manager = (FileDownloadManager) DownloadFactory.getManager(mActivity, DownloadFactory.Type.PERSIST);
+            FileDownloadManager manager = (FileDownloadManager) DownloadFactory.getManager(getContext(), DownloadFactory.Type.PERSIST);
             if (manager != null)
                 manager.cancelByNotificationId(mNotificationID);
             setException(e);
-            updateResult(mType, getContext().getString(R.string.error), mDest);
+            updateResult(getContext().getString(R.string.error), mDest);
         }
         return false;
     }
 
     private boolean download() throws IOException {
-        FileDownloadManager manager = (FileDownloadManager) DownloadFactory.getManager(mActivity, DownloadFactory.Type.PERSIST);
+        FileDownloadManager manager = (FileDownloadManager) DownloadFactory.getManager(getContext(), DownloadFactory.Type.PERSIST);
         if (manager != null)
             manager.setTotalTaskByNotificationId(mNotificationID, -1);
 
         for (String path : mSrcs) {
             SmbFile source = new SmbFile(getSmbUrl(path));
             if (source.isDirectory())
-                downloadDirectoryTask(mActivity, source, mDestFileItem);
+                downloadDirectoryTask(getContext(), source, mDestFileItem);
             else
-                downloadFileTask(mActivity, source, mDestFileItem);
+                downloadFileTask(getContext(), source, mDestFileItem);
         }
 
         if (mCurrent == 0) {
             if (manager != null)
                 manager.cancelByNotificationId(mNotificationID);
-            updateResult(mType, getContext().getString(R.string.done), mDest);
+            updateResult(getContext().getString(R.string.done), mDest);
         } else {
             if (manager != null)
                 manager.setTotalTaskByNotificationId(mNotificationID, mCurrent);
@@ -100,9 +100,9 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
 
             Log.d(TAG, "file.getPath(): " + file.getPath());
             if (file.isDirectory()) {
-                downloadDirectoryTask(mActivity, file, destDirectory);
+                downloadDirectoryTask(getContext(), file, destDirectory);
             } else {
-                downloadFileTask(mActivity, file, destDirectory);
+                downloadFileTask(getContext(), file, destDirectory);
             }
         }
     }

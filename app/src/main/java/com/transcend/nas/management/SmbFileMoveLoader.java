@@ -27,7 +27,6 @@ public class SmbFileMoveLoader extends SmbAbstractLoader {
 
     public SmbFileMoveLoader(Context context, List<String> srcs, String dest) {
         super(context);
-        mActivity = (Activity) context;
         mSrcs = srcs;
         mDest = dest;
         mNotificationID = CustomNotificationManager.getInstance().queryNotificationID(this);
@@ -44,7 +43,7 @@ public class SmbFileMoveLoader extends SmbAbstractLoader {
         } catch (Exception e) {
             e.printStackTrace();
             setException(e);
-            updateResult(mType, getContext().getString(R.string.error), mDest);
+            updateResult(getContext().getString(R.string.error), mDest);
         }
         return false;
     }
@@ -81,7 +80,7 @@ public class SmbFileMoveLoader extends SmbAbstractLoader {
             }
             mCurrent++;
         }
-        updateResult(mType, getContext().getString(R.string.done), mDest);
+        updateResult(getContext().getString(R.string.done), mDest);
         return true;
     }
 
@@ -116,7 +115,7 @@ public class SmbFileMoveLoader extends SmbAbstractLoader {
         String name = createRemoteUniqueName(source, destination);
         SmbFile target = new SmbFile(destination, name);
         source.renameTo(target);
-        updateProgress(mType, name, 0, 0, false);
+        updateProgress(name, 0, 0, false);
         return target;
     }
 }

@@ -1,24 +1,14 @@
 package com.transcend.nas.management;
 
-import android.app.Activity;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.AsyncTaskLoader;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import com.realtek.nasfun.api.SambaStatus;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.R;
-import com.transcend.nas.common.CustomNotificationManager;
-import com.transcend.nas.common.CustomNotificationReceiver;
-import com.transcend.nas.common.ManageFactory;
-import com.transcend.nas.utils.MathUtil;
 import com.tutk.IOTC.P2PService;
 
 import org.apache.commons.io.FilenameUtils;
@@ -37,31 +27,23 @@ import jcifs.smb.SmbFileFilter;
 /**
  * Created by silverhsu on 16/1/20.
  */
-public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
-
+public abstract class SmbAbstractLoader extends FileAbstractLoader {
     private static final String TAG = SmbAbstractLoader.class.getSimpleName();
-    protected Activity mActivity;
+
     protected Server mServer;
     protected String mUsername;
     protected String mPassword;
     protected String mHostname;
     protected Exception mException;
     protected String mExceptionMessage;
-    protected int mNotificationID = 0;
-    protected String mType = "";
-    protected int mTotal = 0;
-    protected int mCurrent = 0;
     protected HandlerThread mThread;
     protected Handler mHandler;
     protected Runnable mWatcher;
     protected boolean success = true;
     protected int mCount = 0;
-    private String[] mLoadingString = {".", "..", "..."};
-    private NotificationCompat.Builder mBuilder;
 
     public SmbAbstractLoader(Context context) {
         super(context);
-        mActivity = (Activity) context;
         //System.setProperty("jcifs.smb.client.dfs.disabled", "true");
         System.setProperty("jcifs.smb.client.soTimeout", "5000");
         System.setProperty("jcifs.smb.client.responseTimeout", "5000");
@@ -147,14 +129,6 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
         return message;
     }
 
-    public void setType(String type) {
-        mType = type;
-    }
-
-    public String getType() {
-        return mType;
-    }
-
     protected String createRemoteUniqueName(SmbFile source, String destination) throws MalformedURLException, SmbException {
         final boolean isDirectory = source.isDirectory();
         SmbFile dir = new SmbFile(destination);
@@ -217,7 +191,7 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
                 try {
                     SmbFile target = new SmbFile(destination, title);
                     int count = target.getContentLength();
-                    updateProgress(mType, title, count, total);
+                    updateProgress(title, count, total);
 
                     if (count >= mCount)
                         mCount = count;
@@ -245,51 +219,4 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
             mThread = null;
         }
     }
-
-    protected void updateProgress(String type, String name, int count, int total) {
-        updateProgress(type, name, count, total, true);
-    }
-
-    protected void updateProgress(String type, String name, int count, int total, boolean showProgress) {
-        if (isLoadInBackgroundCanceled()) {
-            return;
-        }
-
-        Log.w(TAG, mNotificationID + " progress: " + count + "/" + total + ", " + name);
-        if (mBuilder == null) {
-            mBuilder = CustomNotificationManager.createProgressBuilder(getContext(), mActivity, mNotificationID);
-        }
-
-        if (showProgress) {
-            int max = 100;
-            int progress = (total > 100) ? count / (total / 100) : 0;
-            boolean indeterminate = (total == 0);
-
-            String stat = String.format("%s / %s", MathUtil.getBytes(count), MathUtil.getBytes(total));
-            String text = String.format("%s - %s", type, stat);
-            String info = String.format("%d%%", progress);
-
-            mBuilder.setContentText(text);
-            mBuilder.setContentInfo(info);
-            mBuilder.setProgress(max, progress, indeterminate);
-        } else {
-            String loading = mLoadingString[mCurrent % mLoadingString.length];
-            mBuilder.setContentText(String.format("%s%s", type, loading));
-        }
-
-        String title = mTotal > 1 ? String.format("(%s/%s) " + name, mCurrent, mTotal) : name;
-        mBuilder.setContentTitle(title);
-
-        NotificationManager ntfMgr = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        ntfMgr.notify(mNotificationID, mBuilder.build());
-    }
-
-    protected void updateResult(String type, String result, String destination) {
-        if (isLoadInBackgroundCanceled()) {
-            return;
-        }
-
-        CustomNotificationManager.updateResult(getContext(), mNotificationID, type, result, destination);
-    }
-
 }

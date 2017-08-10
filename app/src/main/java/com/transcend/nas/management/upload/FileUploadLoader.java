@@ -63,7 +63,7 @@ public abstract class FileUploadLoader<T> extends SmbAbstractLoader {
         } catch (Exception e) {
             e.printStackTrace();
             setException(e);
-            updateResult(mType, getContext().getString(R.string.error), mDest);
+            updateResult(getContext().getString(R.string.error), mDest);
         } finally {
             try {
                 if (mOS != null) mOS.close();
@@ -98,12 +98,12 @@ public abstract class FileUploadLoader<T> extends SmbAbstractLoader {
                 if (mUniqueName != null && mIS != null) {
                     target = new SmbFile(getSmbUrl(mDest), mUniqueName);
                     mOS = new BufferedOutputStream(target.getOutputStream());
-                    success = upload(mType, mUniqueName, mIS, mOS);
+                    success = upload(getType(), mUniqueName, mIS, mOS);
                 }
             }
 
             if (!success) {
-                updateResult(mType, getContext().getString(R.string.error), mDest);
+                updateResult(getContext().getString(R.string.error), mDest);
                 return false;
             }
 
@@ -118,7 +118,7 @@ public abstract class FileUploadLoader<T> extends SmbAbstractLoader {
             }
             mCurrent++;
         }
-        updateResult(mType, getContext().getString(R.string.done), mDest);
+        updateResult(getContext().getString(R.string.done), mDest);
         return true;
     }
 
@@ -175,7 +175,7 @@ public abstract class FileUploadLoader<T> extends SmbAbstractLoader {
                     if (mUniqueName != null && mIS != null) {
                         target = new SmbFile(mUniqueName, getSmbUrl(mDest));
                         mOS = new BufferedOutputStream(target.getOutputStream());
-                        success = upload(mType, mUniqueName, mIS, mOS);
+                        success = upload(getType(), mUniqueName, mIS, mOS);
                     }
                 }
                 mCurrent++;
@@ -187,7 +187,7 @@ public abstract class FileUploadLoader<T> extends SmbAbstractLoader {
     private boolean upload(String type, String name, InputStream is, OutputStream os) throws IOException {
         int total = is.available();
         int count = 0;
-        updateProgress(type, name, 0, total);
+        updateProgress(name, 0, total);
 
         byte[] buffer = new byte[BUFFER_SIZE];
         int length = 0;
@@ -201,7 +201,7 @@ public abstract class FileUploadLoader<T> extends SmbAbstractLoader {
         }
         os.close();
         is.close();
-        updateProgress(type, name, count, total);
+        updateProgress(name, count, total);
         return true;
     }
 
@@ -209,7 +209,7 @@ public abstract class FileUploadLoader<T> extends SmbAbstractLoader {
         if (mForbidden)
             return;
         mForbidden = true;
-        updateProgress(mType, name, count, total);
+        updateProgress(name, count, total);
         mTimer = new Timer();
         mTimer.schedule(new TimerTask() {
             @Override
