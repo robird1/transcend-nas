@@ -20,6 +20,7 @@ import com.transcend.nas.settings.FirmwareVersionLoader;
  */
 public class TimeManager extends AbstractActionManager {
     private static String TAG = TimeManager.class.getSimpleName();
+
     public TimeManager(Context context, LoaderManager.LoaderCallbacks callbacks) {
         this(context, callbacks, null);
     }
@@ -60,28 +61,26 @@ public class TimeManager extends AbstractActionManager {
                 return true;
             } else if (loader instanceof TimeZoneLoader) {
                 String timeZone = ((TimeZoneLoader) loader).getValue();
-                if (!isTimeZoneValid(timeZone)) {
+                if (!isTimeZoneValid(timeZone))
                     configTimeZone();
-                } else {
+                else
                     checkNTPServer();
-                }
                 return true;
-
             } else if (loader instanceof ConfigTimeZoneLoader) {
-                String result = ((ConfigTimeZoneLoader) loader).getValue();
-                if ("update time zone".equals(result)) {
-                    checkNTPServer();
-                    return true;
-                }
+                //String result = ((ConfigTimeZoneLoader) loader).getValue();
+                //if ("update time zone".equals(result))
+                checkNTPServer();
+                return true;
             } else if (loader instanceof NTPServerLoader) {
                 String server = ((NTPServerLoader) loader).getValue();
-                if ("time.windows.com".equals(server)) {
+                if ("time.windows.com".equals(server))
                     configNTPServer();
-                    return true;
-                }
+                else
+                    hideProgress();
+                return true;
             } else if (loader instanceof ConfigNTPServerLoader) {
-                String result = ((ConfigNTPServerLoader) loader).getValue();
-                NASUtils.reLogin(getContext());
+                //String result = ((ConfigNTPServerLoader) loader).getValue();
+                //if ("update system time".equals(result))
                 hideProgress();
                 return true;
             }
@@ -89,6 +88,7 @@ public class TimeManager extends AbstractActionManager {
             // force the execution of checking NTP server
             if (loader instanceof TimeZoneLoader) {
                 checkNTPServer();
+                return true;
             }
         }
 
@@ -121,5 +121,4 @@ public class TimeManager extends AbstractActionManager {
     private void configNTPServer() {
         createLoader(LoaderID.NTP_SERVER_CONFIG, null);
     }
-
 }

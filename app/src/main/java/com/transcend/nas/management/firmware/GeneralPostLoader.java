@@ -23,8 +23,6 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 
-import static org.bouncycastle.crypto.tls.ConnectionEnd.server;
-
 /**
  * Created by steve_su on 2017/7/14.
  */
@@ -47,19 +45,16 @@ public abstract class GeneralPostLoader extends AsyncTaskLoader<Boolean> {
                 .url(onRequestUrl())
                 .post(body)
                 .addHeader("content-type", "application/x-www-form-urlencoded")
-                .addHeader("cache-control", "no-cache")
-                .addHeader("postman-token", "49c6768a-d0d4-bf48-6282-87fc446b971b")
                 .build();
 
         try {
             okhttp3.Response response = client.newCall(request).execute();
             ResponseBody message = response.body();
-            Log.d(TAG, "message: "+ message);
+            Log.d(TAG, "message: " + message);
             String value = doParse(message.string());
-            Log.d(TAG, "value: "+ value);
-
+            Log.d(TAG, "value: " + value);
+            onRequestFinish();
             return true;
-
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -90,7 +85,7 @@ public abstract class GeneralPostLoader extends AsyncTaskLoader<Boolean> {
 
             do {
                 String tagName = parser.getName();
-                Log.d(TAG, "tagName: "+ tagName);
+                Log.d(TAG, "tagName: " + tagName);
                 if (eventType == XmlPullParser.START_TAG) {
                     if (tagName.equals(onTagName())) {
                         parser.next();
@@ -117,7 +112,11 @@ public abstract class GeneralPostLoader extends AsyncTaskLoader<Boolean> {
     }
 
     protected abstract String onRequestBody();
+
     protected abstract String onRequestUrl();
+
     protected abstract String onTagName();
+
+    protected abstract boolean onRequestFinish();
 
 }

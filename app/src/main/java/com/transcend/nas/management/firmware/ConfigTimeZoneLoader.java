@@ -33,4 +33,9 @@ public class ConfigTimeZoneLoader extends GeneralPostLoader {
         return "date";
     }
 
+    @Override
+    protected boolean onRequestFinish() {
+        return false;
+    }
+
 }

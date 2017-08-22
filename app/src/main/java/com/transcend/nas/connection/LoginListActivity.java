@@ -320,7 +320,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
             case LoaderID.WIZARD_INIT:
                 return new WizardSetLoader(this, args);
             case LoaderID.LOGIN:
-                return new LoginLoader(this, args, true);
+                return new LoginLoader(this, args);
             case LoaderID.TUTK_NAS_CREATE:
                 return new TutkCreateNasLoader(this, args);
         }

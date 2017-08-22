@@ -151,7 +151,7 @@ public class FirmwareUpdateService extends Service {
             bundle.putString("hostname", getIP());
             bundle.putString("username", NASPref.getUsername(mContext));
             bundle.putString("password", NASPref.getPassword(mContext));
-            new LoginLoader(mContext, bundle, true).loadInBackground();
+            new LoginLoader(mContext, bundle).loadInBackground();
 
             return true;
         } else {

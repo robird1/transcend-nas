@@ -5,87 +5,34 @@ import android.content.Context;
 import android.os.Bundle;
 
 import com.realtek.nasfun.api.Server;
-import com.realtek.nasfun.api.ServerInfo;
-import com.realtek.nasfun.api.ServerManager;
-import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
-import com.transcend.nas.management.firmware.ShareFolderManager;
+import com.transcend.nas.management.firmware.FirmwareHelper;
 
 /**
  * Created by silverhsu on 16/1/5.
  */
 public class LoginLoader extends AsyncTaskLoader<Boolean> {
 
-    private Server mServer;
     private String mError;
     private Bundle mArgs;
-    private boolean mReplace = true;
-    private Context mContext;
-    private LoginHelper mLoginHelper;
 
-    public LoginLoader(Context context, Bundle args, boolean replaceServer) {
+    public LoginLoader(Context context, Bundle args) {
         super(context);
-        mContext = context;
         mArgs = args;
-        mReplace = replaceServer;
-        String hostname = args.getString("hostname");
-        String username = args.getString("username");
-        String password = args.getString("password");
-        mServer = new Server(hostname, username, password);
     }
 
     @Override
     public Boolean loadInBackground() {
-        boolean success = mServer.connect(true);
-        if (success) {
-            if (mReplace) {
-                updateServerManager();
-                updateLoginPreference();
-            } else {
-                String uuid = mServer.getTutkUUID();
-                if (uuid != null && !uuid.equals("")) {
-                    mArgs.putString("nasUUID", uuid);
-                    NASPref.setUUID(getContext(), uuid);
-                } else
-                    success = false;
-            }
-        } else {
-            mError = mServer.getLoginError();
-        }
+        String hostname = mArgs.getString("hostname");
+        String username = mArgs.getString("username");
+        String password = mArgs.getString("password");
+        Server server = new Server(hostname, username, password);
+
+        FirmwareHelper helper = new FirmwareHelper();
+        boolean success = helper.doLogin(getContext(), server, true);
+        if (!success)
+            mError = helper.getResult();
         return success;
-    }
-
-    private void updateServerManager() {
-        ServerManager.INSTANCE.saveServer(mServer);
-        ServerManager.INSTANCE.setCurrentServer(mServer);
-        Long time = System.currentTimeMillis();
-        NASPref.setSessionVerifiedTime(getContext(), Long.toString(time));
-        ShareFolderManager.getInstance().setHashCreateTime(time);
-    }
-
-    private void updateLoginPreference() {
-        NASPref.setHostname(getContext(), mServer.getHostname());
-        NASPref.setUsername(getContext(), mServer.getUsername());
-        NASPref.setPassword(getContext(), mServer.getPassword());
-        NASPref.setUUID(getContext(), mServer.getTutkUUID());
-        NASPref.setCloudUUID(getContext(), mServer.getTutkUUID());
-        NASPref.setMacAddress(getContext(), mServer.getServerInfo().mac);
-        NASPref.setDeviceName(getContext(), mServer.getServerInfo().hostName);
-        NASPref.setLocalHostname(getContext(), mServer.getServerInfo().ipAddress);
-
-        ShareFolderManager.getInstance().cleanRealPathMap();
-
-        mLoginHelper = new LoginHelper(mContext);
-        LoginHelper.LoginInfo account = new LoginHelper.LoginInfo();
-        account.email = NASPref.getCloudUsername(mContext);
-        account.hostname = mServer.getHostname();
-        account.username = mServer.getUsername();
-        account.password = mServer.getPassword();
-        account.uuid = mServer.getTutkUUID();
-        ServerInfo info = mServer.getServerInfo();
-        account.macAddress = info.mac;
-        account.ip = info.ipAddress;
-        mLoginHelper.setAccount(account);
     }
 
     public String getLoginError() {

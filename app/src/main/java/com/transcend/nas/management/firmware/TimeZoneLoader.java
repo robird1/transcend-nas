@@ -27,4 +27,9 @@ public class TimeZoneLoader extends GeneralPostLoader {
         return "zone";
     }
 
+    @Override
+    protected boolean onRequestFinish() {
+        return false;
+    }
+
 }

@@ -27,4 +27,9 @@ public class NTPServerLoader extends GeneralPostLoader {
         return "myntp";
     }
 
+    @Override
+    protected boolean onRequestFinish() {
+        return false;
+    }
+
 }

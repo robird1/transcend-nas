@@ -27,4 +27,11 @@ public class ConfigNTPServerLoader extends GeneralPostLoader {
         return "date";
     }
 
+    @Override
+    protected boolean onRequestFinish() {
+        FirmwareHelper helper = new FirmwareHelper();
+        helper.doReLogin(getContext());
+        return false;
+    }
+
 }

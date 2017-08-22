@@ -174,7 +174,6 @@ public class FileManageActivity extends DrawerMenuActivity implements
             initExternalStorageController();
             initDownloadManager();
             onReceiveIntent(getIntent());
-            NASPref.setInitial(this, true);
 
 //            if (isAdmin() && NASPref.getFirmwareNotify(this) == true) {
 //                checkFirmwareVersion();

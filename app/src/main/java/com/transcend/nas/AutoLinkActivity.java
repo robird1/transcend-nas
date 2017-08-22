@@ -16,7 +16,6 @@ import com.transcend.nas.common.GoogleAnalysisFactory;
 import com.transcend.nas.connection.LoginActivity;
 import com.transcend.nas.connection.LoginHelper;
 import com.transcend.nas.connection.LoginListActivity;
-import com.transcend.nas.connection.NASListLoader;
 import com.transcend.nas.introduce.FirstUseActivity;
 import com.transcend.nas.introduce.IntroduceActivity;
 import com.transcend.nas.management.FileManageActivity;
@@ -26,8 +25,6 @@ import com.tutk.IOTC.P2PService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import static com.transcend.nas.NASPref.useBrowserMinFirmwareVersion;
 
 public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCallbacks<Boolean> {
 
@@ -41,6 +38,9 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
 
+        mTextView = (TextView) findViewById(R.id.welcome_text);
+        mTextView.setText(getString(R.string.try_search_device));
+
         boolean isFirstUse = NASPref.getIsFirstUse(this);
         if (isFirstUse) {
             startFirstUseActivity();
@@ -53,23 +53,15 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
             return;
         }
 
-        mTextView = (TextView) findViewById(R.id.welcome_text);
-        mTextView.setText(getString(R.string.try_search_device));
-
         String email = NASPref.getCloudUsername(this);
         String pwd = NASPref.getCloudPassword(this);
         String token = NASPref.getCloudAuthToken(this);
-        if (!email.equals("") && !pwd.equals("") && !token.equals("")) {
-            Bundle args = getAccountInfo(false);
-            if (args != null) {
-                GoogleAnalysisFactory.getInstance(this).sendScreen(GoogleAnalysisFactory.VIEW.AUTO_LINK);
-                mTextView.startAnimation(AnimFactory.getInstance().getBlinkAnimation());
-                getLoaderManager().initLoader(LoaderID.AUTO_LINK, args, this).forceLoad();
-                return;
-            }
+        if ("".equals(email) || "".equals(pwd) || "".equals(token)) {
+            startLoginActivity();
+            return;
         }
 
-        startLoginActivity();
+        startAutoLinkLoader(false);
     }
 
     @Override
@@ -88,9 +80,6 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
             case LoaderID.TUTK_NAS_LINK:
                 mTextView.setText(getString(R.string.try_remote_access));
                 return new TutkLinkNasLoader(this, args);
-            case LoaderID.NAS_LIST:
-                mTextView.setText(getString(R.string.try_search_device));
-                return new NASListLoader(this);
             case LoaderID.TUTK_NAS_GET:
                 mTextView.setText(getString(R.string.try_remote_access));
                 String server = args.getString("server");
@@ -102,43 +91,35 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
 
     @Override
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
-        Log.d("IKE", "onLoadFinished " + loader.getClass().toString());
+        Log.d(TAG, "onLoadFinished " + loader.getClass().toString());
         if (loader instanceof AutoLinkLoader) {
             boolean isWizard = ((AutoLinkLoader) loader).isWizard();
             boolean isRemote = ((AutoLinkLoader) loader).isRemote();
-            if (success && isWizard) {
+            if (success) {
                 GoogleAnalysisFactory.getInstance(this).sendEvent(GoogleAnalysisFactory.VIEW.AUTO_LINK, GoogleAnalysisFactory.ACTION.LoginNas,
                         (isRemote ? GoogleAnalysisFactory.LABEL.AutoLinkRemote : GoogleAnalysisFactory.LABEL.AutoLinkLan) + "_" + GoogleAnalysisFactory.SUCCESS);
-                startFileManageActivity();
-            } else {
-                GoogleAnalysisFactory.getInstance(this).sendEvent(GoogleAnalysisFactory.VIEW.AUTO_LINK, GoogleAnalysisFactory.ACTION.LoginNas,
-                        (isRemote ? GoogleAnalysisFactory.LABEL.AutoLinkRemote : GoogleAnalysisFactory.LABEL.AutoLinkLan) + "_" + GoogleAnalysisFactory.FAIL);
-                if (isRemote) {
-                    startRemoteAccessListLoader();
-                } else {
-                    startTutkNasLinkLoader();
-                }
-            }
-        } else if (loader instanceof TutkLinkNasLoader) {
-            if (success) {
-                Bundle args = getAccountInfo(true);
-                if (args != null)
-                    getLoaderManager().restartLoader(LoaderID.AUTO_LINK, args, this).forceLoad();
+                if (isWizard)
+                    startFileManageActivity();
                 else
                     startLoginActivity();
             } else {
-                startRemoteAccessListLoader();
+                GoogleAnalysisFactory.getInstance(this).sendEvent(GoogleAnalysisFactory.VIEW.AUTO_LINK, GoogleAnalysisFactory.ACTION.LoginNas,
+                        (isRemote ? GoogleAnalysisFactory.LABEL.AutoLinkRemote : GoogleAnalysisFactory.LABEL.AutoLinkLan) + "_" + GoogleAnalysisFactory.FAIL);
+                if (isRemote)
+                    startRemoteAccessListLoader();
+                else
+                    startTutkNasLinkLoader();
             }
-        } else if (loader instanceof NASListLoader) {
+        } else if (loader instanceof TutkLinkNasLoader) {
             if (success)
-                startLoginListActivity(((NASListLoader) loader).getList(), false);
+                startAutoLinkLoader(true);
             else
                 startRemoteAccessListLoader();
         } else if (loader instanceof TutkGetNasLoader) {
             TutkGetNasLoader listLoader = (TutkGetNasLoader) loader;
             String code = listLoader.getCode();
             String status = listLoader.getStatus();
-            if (success && code.equals(""))
+            if (success && "".equals(code))
                 startLoginListActivity(listLoader.getNasArrayList(), true);
             else
                 startLoginActivity();
@@ -182,6 +163,19 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
         }
     }
 
+    private void startAutoLinkLoader(boolean isRemote) {
+        Bundle args = getAccountInfo(isRemote);
+        if (args != null) {
+            if (!isRemote) {
+                GoogleAnalysisFactory.getInstance(this).sendScreen(GoogleAnalysisFactory.VIEW.AUTO_LINK);
+                mTextView.startAnimation(AnimFactory.getInstance().getBlinkAnimation());
+            }
+            getLoaderManager().restartLoader(LoaderID.AUTO_LINK, args, this).forceLoad();
+        } else {
+            startLoginActivity();
+        }
+    }
+
     private void startTutkNasLinkLoader() {
         Bundle args = new Bundle();
         String uuid = NASPref.getUUID(this);
@@ -205,7 +199,7 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
         ServerInfo info = server.getServerInfo();
         NASPref.setFirmwareVersion(this, info.firmwareVer);
         int firmwareVer = Integer.valueOf(info.firmwareVer);
-        if (firmwareVer >= useBrowserMinFirmwareVersion) {
+        if (firmwareVer >= NASPref.useBrowserMinFirmwareVersion) {
 //            navigationClass = BrowserActivity.class;
         }
 

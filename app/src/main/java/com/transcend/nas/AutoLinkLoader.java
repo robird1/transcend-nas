@@ -9,8 +9,7 @@ import android.util.Log;
 
 import com.realtek.nasfun.api.HttpClientManager;
 import com.realtek.nasfun.api.Server;
-import com.realtek.nasfun.api.ServerManager;
-import com.transcend.nas.management.firmware.ShareFolderManager;
+import com.transcend.nas.management.firmware.FirmwareHelper;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -33,55 +32,57 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
 
     private static final String TAG = AutoLinkLoader.class.getSimpleName();
 
-    private ConnectivityManager mConnMgr;
-    private Server mServer;
     private boolean isWizard = false;
     private boolean isRemote = false;
-    private Context mContext;
-    private String mHostname;
-    private String mUsername;
-    private String mPassword;
-
-    public enum LinkType {
-        NO_LINK, INTRANET, INTERNET
-    }
+    private Bundle mArgs;
 
     public AutoLinkLoader(Context context, Bundle args) {
         super(context);
-        mContext = context;
-        mConnMgr = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-        mHostname = args.getString("hostname");
-        mUsername = args.getString("username");
-        mPassword = args.getString("password");
-        isRemote = args.getBoolean("RemoteAccess");
+        mArgs = args;
+        if (args != null)
+            isRemote = args.getBoolean("RemoteAccess");
     }
 
     @Override
     public Boolean loadInBackground() {
-        Log.d(TAG, "AutoLink : " + mHostname + ", " + mUsername + "," + mPassword);
-        if (checkNetworkAvailable()) {
-            if (mHostname.isEmpty() || mUsername.isEmpty() || mPassword.isEmpty()) {
-            } else {
-                if (doWizardCheck(mHostname)) {
-                    if (isWizard) {
-                        return login(mHostname, mUsername, mPassword);
-                    }
-                }
-            }
+        if (mArgs == null)
+            return false;
+
+        String hostname = mArgs.getString("hostname");
+        String username = mArgs.getString("username");
+        String password = mArgs.getString("password");
+        Log.d(TAG, "AutoLink : " + hostname + ", " + username + "," + password);
+        if (hostname.isEmpty() || username.isEmpty() || password.isEmpty())
+            return false;
+
+        if (!checkNetworkAvailable())
+            return false;
+
+        if (!doWizardCheck(hostname))
+            return false;
+
+        if (isWizard) {
+            Server server = new Server(hostname, username, password);
+            FirmwareHelper helper = new FirmwareHelper();
+            return helper.doLogin(getContext(), server, false);
         }
+
         return false;
     }
 
     private boolean checkNetworkAvailable() {
-        NetworkInfo info = mConnMgr.getActiveNetworkInfo();
+        ConnectivityManager connMgr = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = connMgr.getActiveNetworkInfo();
         if (info == null)
             return false;
-        boolean isWiFi = (info.getType() == ConnectivityManager.TYPE_WIFI);
-        boolean isMobile = (info.getType() == ConnectivityManager.TYPE_MOBILE);
+
+        boolean isWiFi = (ConnectivityManager.TYPE_WIFI == info.getType());
+        boolean isMobile = (ConnectivityManager.TYPE_MOBILE == info.getType());
+        boolean isAvailable = isWiFi || (isRemote ? isMobile : false);
         Log.w(TAG, "Wi-Fi: " + isWiFi);
         Log.w(TAG, "Mobile: " + isMobile);
-        Log.w(TAG, "checkNetworkAvailable: " + (isWiFi || (isRemote ? isMobile : false)));
-        return isWiFi || (isRemote ? isMobile : false);
+        Log.w(TAG, "checkNetworkAvailable: " + isAvailable);
+        return isAvailable;
     }
 
     private boolean doWizardCheck(String hostname) {
@@ -151,34 +152,11 @@ public class AutoLinkLoader extends AsyncTaskLoader<Boolean> {
         return success;
     }
 
-    private boolean login(String hostname, String username, String password) {
-        mServer = new Server(hostname, username, password);
-        boolean isConnected = mServer.connect(false);
-        if (isConnected) {
-            updateServerManager();
-            NASPref.setHostname(getContext(), hostname);
-        }
-
-        Log.d(TAG, "AutoLink : " + isConnected);
-        Log.d(TAG, "AutoLink ip: " + hostname);
-        Log.d(TAG, "AutoLink username: " + username);
-        Log.d(TAG, "AutoLink password: " + password);
-        return isConnected;
-    }
-
-    private void updateServerManager() {
-        ServerManager.INSTANCE.saveServer(mServer);
-        ServerManager.INSTANCE.setCurrentServer(mServer);
-        Long time = System.currentTimeMillis();
-        NASPref.setSessionVerifiedTime(getContext(), Long.toString(time));
-        ShareFolderManager.getInstance().setHashCreateTime(time);
-    }
-
     public boolean isWizard() {
         return isWizard;
     }
 
-    public boolean isRemote(){
+    public boolean isRemote() {
         return isRemote;
     }
 
