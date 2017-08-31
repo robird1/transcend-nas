@@ -1,6 +1,5 @@
 package com.transcend.nas.service;
 
-import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -20,7 +19,7 @@ public class LanCheckReceiver extends BroadcastReceiver {
             String action = intent.getAction();
             Log.d(TAG, "onReceiver: " + action);
             LanCheckManager.getInstance().startLanCheck();
-            DownloadFactory.getManager(context, DownloadFactory.Type.PERSIST).cancel();
+            DownloadFactory.getManager(context, DownloadFactory.Type.PERSIST).cancel(context);
         }
     }
 }

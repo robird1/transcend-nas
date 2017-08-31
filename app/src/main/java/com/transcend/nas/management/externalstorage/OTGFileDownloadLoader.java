@@ -122,7 +122,7 @@ public class OTGFileDownloadLoader extends SmbAbstractLoader {
             data.putString(AbstractDownloadManager.KEY_TARGET_PATH, destPath);
             data.putString(AbstractDownloadManager.KEY_FILE_NAME, uniqueName);
             data.putInt(AbstractDownloadManager.KEY_TASK_ID, mNotificationID);
-            DownloadFactory.getManager(context, DownloadFactory.Type.PERSIST).start(data);
+            DownloadFactory.getManager(context, DownloadFactory.Type.PERSIST).start(getContext(), data);
             mCurrent++;
             return true;
         } else if (srcFileItem.isDirectory()) {

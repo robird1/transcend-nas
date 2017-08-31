@@ -1493,7 +1493,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     }
 
     private void clearDownloadTask() {
-        DownloadFactory.getManager(mContext, DownloadFactory.Type.TEMPORARY).cancel();
+        DownloadFactory.getManager(mContext, DownloadFactory.Type.TEMPORARY).cancel(this);
     }
 
     public void openFileBy3rdApp(Context context, FileInfo fileInfo) {
@@ -1513,7 +1513,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
 
             Bundle data = new Bundle();
             data.putString(AbstractDownloadManager.KEY_SOURCE_PATH, fileInfo.path);
-            DownloadFactory.getManager(context, DownloadFactory.Type.TEMPORARY).start(data);
+            DownloadFactory.getManager(context, DownloadFactory.Type.TEMPORARY).start(this, data);
         }
     }
 

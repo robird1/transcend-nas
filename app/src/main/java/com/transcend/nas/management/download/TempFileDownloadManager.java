@@ -25,8 +25,8 @@ public class TempFileDownloadManager extends AbstractDownloadManager {
     }
 
     @Override
-    protected String onDownloadDestination(Bundle data) {
-        return NASUtils.getCacheFilesLocation(getContext());
+    protected String onDownloadDestination(Context context, Bundle data) {
+        return NASUtils.getCacheFilesLocation(context);
     }
 
     public void setOpenFileListener(OpenFileListener l) {

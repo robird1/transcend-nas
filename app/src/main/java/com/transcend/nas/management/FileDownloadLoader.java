@@ -107,7 +107,7 @@ public class FileDownloadLoader extends SmbAbstractLoader {
         data.putString(AbstractDownloadManager.KEY_TARGET_PATH, destination);
         data.putString(AbstractDownloadManager.KEY_FILE_NAME, name);
         data.putInt(AbstractDownloadManager.KEY_TASK_ID, mNotificationID);
-        DownloadFactory.getManager(mContext, DownloadFactory.Type.PERSIST).start(data);
+        DownloadFactory.getManager(mContext, DownloadFactory.Type.PERSIST).start(getContext(), data);
         mCurrent++;
     }
 

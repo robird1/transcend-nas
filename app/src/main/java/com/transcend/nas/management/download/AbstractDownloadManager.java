@@ -18,14 +18,12 @@ public abstract class AbstractDownloadManager {
     public static final String KEY_TARGET_PATH = "target_path";
     public static final String KEY_FILE_NAME = "file_name";
     public static final String KEY_TASK_ID = "task_id";
-    protected Context mContext;
     protected DownloadManager mDownloadManager;
     private long mDownloadId;
     private Bundle mData;
     private String mFileTargetPath;
 
     AbstractDownloadManager(Context context) {
-        mContext = context;
         mDownloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
     }
 
@@ -36,21 +34,21 @@ public abstract class AbstractDownloadManager {
      *
      * @param data The related download data.
      */
-    public void start(Bundle data) {
+    public void start(Context context, Bundle data) {
         if (data == null) {
             return;
         }
         mData = data;
-        Uri uri = MediaFactory.createUri(getContext(), data.getString(KEY_SOURCE_PATH));
+        Uri uri = MediaFactory.createUri(context, data.getString(KEY_SOURCE_PATH));
         DownloadManager.Request request = new DownloadManager.Request(uri);
-        mFileTargetPath = setRequestDestinationUri(request, data);
+        mFileTargetPath = setRequestDestinationUri(context, request, data);
 
         onPreProcess();
         enqueue(request);
         onPostProcess();
     }
 
-    public long cancel() {
+    public long cancel(Context context) {
         if (mDownloadId != 0L) {
             long id = mDownloadManager.remove(mDownloadId);
             mDownloadId = 0L;
@@ -63,17 +61,13 @@ public abstract class AbstractDownloadManager {
         return mDownloadId = mDownloadManager.enqueue(request);
     }
 
-    private String setRequestDestinationUri(DownloadManager.Request request, Bundle data) {
-        File dir = new File(onDownloadDestination(data));
+    private String setRequestDestinationUri(Context context, DownloadManager.Request request, Bundle data) {
+        File dir = new File(onDownloadDestination(context, data));
         String filename = onFileName(data);
         String filePath = dir.toString().concat("/").concat(filename);
         request.setTitle(filename);
         request.setDestinationUri(Uri.fromFile(new File(filePath)));
         return filePath;
-    }
-
-    protected Context getContext() {
-        return mContext;
     }
 
     protected long getDownloadId() {
@@ -88,7 +82,7 @@ public abstract class AbstractDownloadManager {
         return mFileTargetPath;
     }
 
-    protected String onDownloadDestination(Bundle data) {
+    protected String onDownloadDestination(Context context, Bundle data) {
         return data.getString(KEY_TARGET_PATH);
     }
 
