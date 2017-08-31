@@ -204,7 +204,7 @@ public class LanCheckManager implements LanCheckTask.LanCheckCallback {
                     mServiceInfoList.add(service);
                     if (!isStartResolve) {
                         isStartResolve = true;
-                        if (mNsdManager != null)
+                        if (mNsdManager != null && mResolveListener != null)
                             mNsdManager.resolveService(service, mResolveListener);
                     }
                 }

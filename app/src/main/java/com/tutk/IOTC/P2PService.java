@@ -3,7 +3,6 @@ package com.tutk.IOTC;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.transcend.nas.NASPref;
 import com.transcend.nas.service.LanCheckManager;
 import com.tutk.IOTC.P2PTunnelAPIs.IP2PTunnelCallback;
 
@@ -94,7 +93,7 @@ public class P2PService implements IP2PTunnelCallback {
         return start >= 0;
     }
 
-    public int startP2PConnect(String strUID) {
+    synchronized public int startP2PConnect(String strUID) {
         if (strUID.length() < 20) {
             Log.d(TAG, "P2P UID is short < 20");
             return P2PTunnelAPIs.TUNNEL_ER_INITIALIZED;
@@ -105,8 +104,10 @@ public class P2PService implements IP2PTunnelCallback {
             m_commApis = new P2PTunnelAPIs(this);
             m_nInit = m_commApis.P2PTunnelAgentInitialize(4);
             Log.d(TAG, "P2PTunnel m_nInit=" + m_nInit);
-            if (m_commApis == null)
+            if (m_commApis == null) {
+                stopP2PConnect();
                 return nStart;
+            }
 
             String username = "Tutk.com", password = "P2P Platform";
             //P2P Platform
@@ -126,31 +127,34 @@ public class P2PService implements IP2PTunnelCallback {
             nStart = m_commApis.P2PTunnelAgent_Connect(strUID, baAuthData, baAuthData.length, pnErrFromDeviceCB);
             Log.d(TAG, "P2PTunnelAgent_Connect(.)=" + nStart);
             Log.d(TAG, "P2PTunnelAgent_Connect(.) Error Message=" + pnErrFromDeviceCB[0]);
-            if (nStart >= 0) {
-                int ret = m_commApis.P2PTunnel_SetBufSize(nStart, mBufferSize);
-                //Log.d(TAG,"P2PTunnel_SetBufSize SID[" + nStart + "], result=>" + ret);
+            if (nStart < 0) {
+                stopP2PConnect();
+                return nStart;
+            }
 
-                for (P2PProtocal protocal : mProtocal) {
-                    int retry = protocal.getMaxPortRetry();
-                    int localPort = protocal.getLocalPort();
-                    int remotePort = protocal.getRemotePort();
-                    for (int j = 0; j < retry; j++) {
-                        if (j == retry - 1) {
-                            stopP2PConnect();
-                            return P2PTunnelAPIs.TUNNEL_ER_INITIALIZED;
-                        }
+            int ret = m_commApis.P2PTunnel_SetBufSize(nStart, mBufferSize);
+            //Log.d(TAG,"P2PTunnel_SetBufSize SID[" + nStart + "], result=>" + ret);
 
-                        int port = localPort + j;
-                        int mapIndex = m_commApis.P2PTunnelAgent_PortMapping(nStart, port, remotePort);
-                        Log.d(TAG, "P2PTunnelAgent_PortMapping(" + port + "," + remotePort + ")=" + mapIndex);
-                        if (mapIndex >= 0) {
-                            protocal.setMapIndex(mapIndex);
-                            protocal.setLocalPort(port);
-                            break;
-                        }
+            for (P2PProtocal protocal : mProtocal) {
+                int retry = protocal.getMaxPortRetry();
+                int localPort = protocal.getLocalPort();
+                int remotePort = protocal.getRemotePort();
+                for (int j = 0; j < retry; j++) {
+                    if (j == retry - 1) {
+                        stopP2PConnect();
+                        return P2PTunnelAPIs.TUNNEL_ER_INITIALIZED;
                     }
-                    //Log.d(TAG,"vist:"+ mLocalHost + ":"+protocal.getLocalPort());
+
+                    int port = localPort + j;
+                    int mapIndex = m_commApis.P2PTunnelAgent_PortMapping(nStart, port, remotePort);
+                    Log.d(TAG, "P2PTunnelAgent_PortMapping(" + port + "," + remotePort + ")=" + mapIndex);
+                    if (mapIndex >= 0) {
+                        protocal.setMapIndex(mapIndex);
+                        protocal.setLocalPort(port);
+                        break;
+                    }
                 }
+                //Log.d(TAG,"vist:"+ mLocalHost + ":"+protocal.getLocalPort());
             }
         } else {
             Log.d(TAG, "P2PTunnel Already Connect");
@@ -184,7 +188,7 @@ public class P2PService implements IP2PTunnelCallback {
 
     public String getIP(String hostname, P2PProtocalType type) {
         if (LanCheckManager.getInstance().getLanConnect()) {
-            if(type == P2PProtocalType.TWONKY)
+            if (type == P2PProtocalType.TWONKY)
                 hostname = LanCheckManager.getInstance().getLanIP() + ":9000";
             else
                 hostname = LanCheckManager.getInstance().getLanIP();
@@ -194,7 +198,7 @@ public class P2PService implements IP2PTunnelCallback {
         return hostname;
     }
 
-    public void stopP2PConnect() {
+    synchronized public void stopP2PConnect() {
         if (m_commApis != null) {
             for (P2PProtocal protocal : mProtocal) {
                 int mapIndex = protocal.getMapIndex();

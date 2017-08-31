@@ -676,7 +676,6 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
             @Override
             public void onCancel() {
                 getLoaderManager().destroyLoader(mLoaderID);
-                P2PService.getInstance().stopP2PConnect();
                 hideDialog(true);
             }
         };
@@ -703,7 +702,6 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
             @Override
             public void onCancel() {
                 getLoaderManager().destroyLoader(mLoaderID);
-                P2PService.getInstance().stopP2PConnect();
                 hideDialog(true);
             }
         };

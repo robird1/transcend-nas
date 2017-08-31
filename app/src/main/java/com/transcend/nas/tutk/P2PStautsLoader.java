@@ -4,6 +4,7 @@ import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.util.Log;
 
+import com.tutk.IOTC.P2PService;
 import com.tutk.IOTC.P2PTunnelAPIs;
 import com.tutk.IOTC.IOTCAPIs;
 
@@ -39,6 +40,7 @@ public class P2PStautsLoader extends AsyncTaskLoader<Boolean> {
         if (mNasList == null || mNasList.size() == 0)
             return false;
 
+        P2PService.getInstance().stopP2PConnect();
         return useIOTCModule ? checkStatusWithIOTCModules() : checkStatusWithP2PModules();
     }
 
