@@ -55,29 +55,6 @@
         </activity>
 
         <activity
-            android:name=".connection.old.GuideActivity"
-            android:screenOrientation="portrait"
-            android:configChanges="orientation|keyboardHidden|screenSize">
-        </activity>
-
-        <activity
-            android:name=".connection.old.WizardActivity"
-            android:screenOrientation="portrait"
-            android:configChanges="orientation|keyboardHidden|screenSize">
-        </activity>
-
-        <activity
-            android:name=".connection.old.NASListActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize">
-        </activity>
-
-        <activity
-            android:name=".connection.old.StartActivity"
-            android:screenOrientation="portrait"
-            android:configChanges="orientation|keyboardHidden|screenSize">
-        </activity>
-
-        <activity
             android:name=".management.FileManageActivity"
             android:launchMode="singleTask"
             android:configChanges="orientation|keyboardHidden|screenSize">

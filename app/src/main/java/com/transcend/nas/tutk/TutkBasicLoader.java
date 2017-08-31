@@ -44,7 +44,6 @@ import javax.net.ssl.X509TrustManager;
 public abstract class TutkBasicLoader extends AsyncTaskLoader<Boolean> {
 
     public static final String TAG = TutkBasicLoader.class.getSimpleName();
-    public Activity mActivity;
     private String mServer = "https://www.storejetcloud.com/1";
     private String mCode = "";
     private String mStatus = "";
@@ -52,12 +51,10 @@ public abstract class TutkBasicLoader extends AsyncTaskLoader<Boolean> {
 
     public TutkBasicLoader(Context context) {
         super(context);
-        mActivity = (Activity) context;
     }
 
     public TutkBasicLoader(Context context, String server) {
         super(context);
-        mActivity = (Activity) context;
         mServer = server;
     }
 

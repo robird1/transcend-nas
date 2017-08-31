@@ -18,11 +18,9 @@ public class TutkLinkNasLoader extends TutkBasicLoader {
     private Bundle mArgs;
     private String mUUID;
     private String mError = "";
-    private Context mContext;
 
     public TutkLinkNasLoader(Context context, Bundle args) {
         super(context);
-        mContext = context;
         mArgs = args;
         mUUID = args.getString("hostname");
     }
@@ -30,7 +28,7 @@ public class TutkLinkNasLoader extends TutkBasicLoader {
     @Override
     public Boolean loadInBackground() {
         //check network status
-        ConnectivityManager connectivityManager = (ConnectivityManager) mActivity.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connectivityManager = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = connectivityManager.getActiveNetworkInfo();
         if (info != null && info.isAvailable()) {
             P2PService.getInstance().stopP2PConnect();
@@ -42,11 +40,11 @@ public class TutkLinkNasLoader extends TutkBasicLoader {
             else if (result == P2PTunnelAPIs.TUNNEL_ER_UID_UNLICENSE)
                 mError = "Sorry, this UID is illegal";
             else
-                mError = mActivity.getString(R.string.network_error);;
+                mError = getContext().getString(R.string.network_error);;
             return result >= 0;
         }
         else {
-            mError = mActivity.getString(R.string.network_error);
+            mError = getContext().getString(R.string.network_error);
             return false;
         }
     }

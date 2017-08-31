@@ -302,7 +302,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
                 return new TutkGetNasLoader(this, server, token);
             case LoaderID.TUTK_NAS_ONLINE_CHECK:
                 mProgressView.setVisibility(View.VISIBLE);
-                return new P2PStautsLoader(LoginListActivity.this, mNASList, 3000);
+                return new P2PStautsLoader(this, mNASList, 3000);
             case LoaderID.TUTK_NAS_DELETE:
                 mProgressView.setVisibility(View.VISIBLE);
                 server = args.getString("server");
