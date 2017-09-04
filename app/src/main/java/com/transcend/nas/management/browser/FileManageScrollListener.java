@@ -1,6 +1,5 @@
-package com.transcend.nas.management;
+package com.transcend.nas.management.browser;
 
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -17,26 +16,24 @@ public abstract class FileManageScrollListener extends RecyclerView.OnScrollList
     private int visibleThreshold = 5; // The minimum amount of items to have below your current scroll position before loading more.
     int firstVisibleItem, visibleItemCount, totalItemCount;
     private int current_page = 1;
-    private GridLayoutManager mLayoutManager;
 
     public FileManageScrollListener() {
 
     }
 
-//    public FileManageScrollListener(GridLayoutManager layoutManager) {
-//        this.mLayoutManager = layoutManager;
-//    }
-
     @Override
     public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
         super.onScrolled(recyclerView, dx, dy);
         if (recyclerView.getLayoutManager() instanceof LinearLayoutManager) {
-
             LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
             visibleItemCount = recyclerView.getChildCount();
             totalItemCount = layoutManager.getItemCount();
             firstVisibleItem = layoutManager.findFirstVisibleItemPosition();
             Log.d(TAG, "loading: "+ loading+ " totalItemCount: " + totalItemCount+ " previousTotal: "+ previousTotal+ " firstVisibleItem: "+ firstVisibleItem);
+
+            if (isSwipeRefresh()) {
+                return;
+            }
 
             if (loading) {
                 if (totalItemCount > previousTotal) {
@@ -61,6 +58,15 @@ public abstract class FileManageScrollListener extends RecyclerView.OnScrollList
             }
         }
 
+    }
+
+    private boolean isSwipeRefresh() {
+        if (firstVisibleItem == -1 && totalItemCount < previousTotal) {
+//            loading = true;
+            previousTotal = 0;
+            return true;
+        }
+        return false;
     }
 
     public abstract void onLoadMore(int current_page);

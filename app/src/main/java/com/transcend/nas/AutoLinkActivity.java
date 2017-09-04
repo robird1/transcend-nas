@@ -26,6 +26,8 @@ import com.tutk.IOTC.P2PService;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static com.transcend.nas.NASPref.useBrowserMinFirmwareVersion;
+
 public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCallbacks<Boolean> {
 
     private static final String TAG = AutoLinkActivity.class.getSimpleName();
@@ -193,6 +195,7 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
     private void startFileManageActivity() {
         mTextView.clearAnimation();
         Intent intent = new Intent();
+
 
         Class navigationClass = FileManageActivity.class;
         Server server = ServerManager.INSTANCE.getCurrentServer();

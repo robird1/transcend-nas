@@ -18,7 +18,6 @@ import com.transcend.nas.NASApp;
 import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.management.FileManageActivity;
-import com.transcend.nas.management.FileManageFragmentActivity;
 import com.transcend.nas.viewer.photo.ViewerPager;
 
 import java.io.File;
@@ -59,20 +58,6 @@ public class ExternalStorageLollipop extends AbstractExternalStorage {
 
     @Override
     protected void onActivityResult(FileManageActivity activity, Intent data) {
-        if (activity == null || data == null) {
-            return;
-        }
-
-        boolean isValid = checkSelectedFolder(data);
-        if (isValid) {
-            activity.doLoad(getSDLocation(mContext));
-        } else {
-            Toast.makeText(mContext, R.string.dialog_grant_permission_failed, Toast.LENGTH_LONG).show();
-            requestPermissionDialog(activity);
-        }
-    }
-    @Override
-    protected void onActivityResult(FileManageFragmentActivity activity, Intent data) {
         if (activity == null || data == null) {
             return;
         }

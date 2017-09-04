@@ -85,9 +85,6 @@ import com.transcend.nas.viewer.music.MusicManager;
 import com.transcend.nas.viewer.photo.ViewerActivity;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -107,9 +104,9 @@ public class FileManageActivity extends DrawerMenuActivity implements
     protected AppCompatSpinner mDropdown;
     protected FileManageDropdownAdapter mDropdownAdapter;
     protected SwipeRefreshLayout mRecyclerRefresh;
-    protected RecyclerView mRecyclerView;
-    protected LinearLayout mRecyclerEmptyView;
-    protected FileManageRecyclerAdapter mRecyclerAdapter;
+    public RecyclerView mRecyclerView;
+    public LinearLayout mRecyclerEmptyView;
+    public FileManageRecyclerAdapter mRecyclerAdapter;
     protected FloatingActionButton mFab;
     protected RelativeLayout mProgressView;
     protected ProgressBar mProgressBar;
@@ -119,11 +116,11 @@ public class FileManageActivity extends DrawerMenuActivity implements
     protected TextView mEditorModeTitle;
     protected Toast mToast;
 
-    protected String mPath;
-    protected ArrayList<FileInfo> mFileList;
+    public String mPath;
+    public ArrayList<FileInfo> mFileList;
     protected boolean isDownloadFolder = false;
 
-    protected VideoCastManager mCastManager;
+    public VideoCastManager mCastManager;
     protected VideoCastConsumer mCastConsumer;
 
     protected SmbFileListLoader mSmbFileListLoader;
@@ -482,7 +479,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         });
     }
 
-    private void initProgressView() {
+    protected void initProgressView() {
         mProgressView = (RelativeLayout) findViewById(R.id.main_progress_view);
         mProgressView.setVisibility(View.VISIBLE);
         mProgressBar = (ProgressBar) findViewById(R.id.main_progress_bar);
@@ -839,7 +836,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
                 if (loader instanceof FileAbstractLoader) {
                     String type = ((FileAbstractLoader) loader).getType();
                     if (type != null && !type.equals("") && !type.equals(getString(R.string.download)))
-                        Toast.makeText(FileManageActivity.this, type + " - " + getString(R.string.done), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, type + " - " + getString(R.string.done), Toast.LENGTH_SHORT).show();
                 }
             }
         } else {
@@ -867,7 +864,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
      * FILE BROWSER
      */
 
-    protected void doRefresh() {
+    public void doRefresh() {
         Log.w(TAG, "doRefresh");
         doLoad(mPath);
     }
@@ -901,7 +898,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
             @Override
             public void onConfirm(String keyword) {
                 keyword = keyword.toLowerCase();
-                ArrayList<FileInfo> fileInfo = new ArrayList<FileInfo>();
+                ArrayList<FileInfo> fileInfo = new ArrayList<>();
                 for (FileInfo file : mFileList) {
                     if (file.name.toLowerCase().contains(keyword)) {
                         fileInfo.add(file);
@@ -922,7 +919,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     }
 
     private void doNewFolder() {
-        List<String> folderNames = new ArrayList<String>();
+        List<String> folderNames = new ArrayList<>();
         for (FileInfo file : mFileList) {
             if (file.type.equals(FileInfo.TYPE.DIR))
                 folderNames.add(file.name.toLowerCase());
@@ -948,7 +945,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     }
 
     protected ArrayList<String> getSelectedPaths() {
-        ArrayList<String> paths = new ArrayList<String>();
+        ArrayList<String> paths = new ArrayList<>();
         for (FileInfo file : mFileList) {
             if (file.checked) paths.add(file.path);
         }
@@ -956,7 +953,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     }
 
     protected ArrayList<FileInfo> getSelectedFiles() {
-        ArrayList<FileInfo> files = new ArrayList<FileInfo>();
+        ArrayList<FileInfo> files = new ArrayList<>();
         for (FileInfo file : mFileList) {
             if (file.checked) files.add(file);
         }
@@ -985,7 +982,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     }
 
     private void doRename() {
-        List<String> names = new ArrayList<String>();
+        List<String> names = new ArrayList<>();
         FileInfo target = new FileInfo();
         for (FileInfo file : mFileList) {
             if (file.checked)
@@ -1014,7 +1011,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         new ProgressDialog(mContext, value) {
             @Override
             public void onConfirm() {
-                mFileActionManager.share(NASPref.getShareLocation(FileManageActivity.this), files);
+                mFileActionManager.share(NASPref.getShareLocation(mContext), files);
                 dismiss();
             }
 
@@ -1096,7 +1093,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         mRecyclerEmptyView.setVisibility((mFileList != null && mFileList.size() > 0) ? View.GONE : View.VISIBLE);
     }
 
-    protected void updateListView(boolean update) {
+    public void updateListView(boolean update) {
         LinearLayoutManager list = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(list);
         if (update) {
@@ -1105,7 +1102,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         }
     }
 
-    protected void updateGridView(boolean update) {
+    public void updateGridView(boolean update) {
         int orientation = getResources().getConfiguration().orientation;
         int spanCount = (orientation == Configuration.ORIENTATION_PORTRAIT)
                 ? GRID_PORTRAIT : GRID_LANDSCAPE;
@@ -1150,7 +1147,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
             mSnackbar.setAction(R.string.exit, new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    FileManageActivity.this.finish();
+                    finish();
                 }
             });
             mSnackbar.show();
@@ -1160,7 +1157,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         }
     }
 
-    private void startEditorMode() {
+    public void startEditorMode() {
         if (mEditorMode == null)
             startSupportActionMode(this);
     }
@@ -1186,7 +1183,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         toggleFabSelectAll(selectAll);
     }
 
-    private void toggleSelectAll() {
+    public void toggleSelectAll() {
         int count = getSelectedCount();
         boolean selectAll = (count != 0) && (count == mFileList.size());
         if (selectAll)
@@ -1305,7 +1302,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
             args.putString("root", root);
             args.putString("path", path);
             Intent intent = new Intent();
-            intent.setClass(FileManageActivity.this, FileActionLocateActivity.class);
+            intent.setClass(this, FileActionLocateActivity.class);
             intent.putExtras(args);
             startActivityForResult(intent, FileActionLocateActivity.REQUEST_CODE);
         }
@@ -1333,7 +1330,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     }
 
     public void startMusicPrepare(String path) {
-        ArrayList<FileInfo> list = new ArrayList<FileInfo>();
+        ArrayList<FileInfo> list = new ArrayList<>();
         int index = -1;
         if (mChoiceAllSameTypeFile) {
             for (FileInfo info : mFileList) {
@@ -1387,7 +1384,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         args.putString("mode", mode);
         args.putString("root", root);
         Intent intent = new Intent();
-        intent.setClass(FileManageActivity.this, MusicActivity.class);
+        intent.setClass(this, MusicActivity.class);
         intent.putExtras(args);
         startActivityForResult(intent, MusicActivity.REQUEST_CODE);
     }
@@ -1418,7 +1415,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     }
 
     public void startViewerPrepare(String path) {
-        ArrayList<FileInfo> list = new ArrayList<FileInfo>();
+        ArrayList<FileInfo> list = new ArrayList<>();
         if (mChoiceAllSameTypeFile) {
             for (FileInfo info : mFileList) {
                 if (FileInfo.TYPE.PHOTO.equals(info.type))
@@ -1442,7 +1439,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         args.putString("mode", mode);
         args.putString("root", root);
         Intent intent = new Intent();
-        intent.setClass(FileManageActivity.this, ViewerActivity.class);
+        intent.setClass(this, ViewerActivity.class);
         intent.putExtras(args);
         startActivityForResult(intent, ViewerActivity.REQUEST_CODE);
     }
@@ -1451,7 +1448,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         Bundle args = new Bundle();
         args.putSerializable("info", info);
         Intent intent = new Intent();
-        intent.setClass(FileManageActivity.this, FileInfoActivity.class);
+        intent.setClass(this, FileInfoActivity.class);
         intent.putExtras(args);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
             startActivityForResult(intent, FileInfoActivity.REQUEST_CODE, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
@@ -1469,7 +1466,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        mOriginMD5Checksum = getMD5Checksum();
+                        mOriginMD5Checksum = getMD5Checksum(new File(mDownloadFilePath));
                     }
                 }).start();
 
@@ -1478,7 +1475,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
                     mProgressBar.setVisibility(View.VISIBLE);
                 }
 
-                NASUtils.showAppChooser(FileManageActivity.this, destUri);
+                NASUtils.showAppChooser(mContext, destUri);
             }
 
             @Override
@@ -1519,7 +1516,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
 
     private void checkCacheFileState() {
         if (mOriginMD5Checksum != null) {
-            String checksum = getMD5Checksum();
+            String checksum = getMD5Checksum(new File(mDownloadFilePath));
             if (checksum != null && !mOriginMD5Checksum.equals(checksum)) {
                 mFileSyncManager.doOpenWithUpload(this, mFileInfo, mDownloadFilePath, mSmbFileListLoader);
             }
@@ -1528,66 +1525,18 @@ public class FileManageActivity extends DrawerMenuActivity implements
         mOriginMD5Checksum = null;
     }
 
-    private String getMD5Checksum() {
-        String checksum = null;
-        try {
-            MessageDigest md5Digest = MessageDigest.getInstance("MD5");
-            checksum = getFileChecksum(md5Digest, new File(mDownloadFilePath));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return checksum;
-
-    }
-
-    private String getFileChecksum(MessageDigest digest, File file) throws IOException {
-        //Get file input stream for reading the file content
-        FileInputStream fis = new FileInputStream(file);
-
-        //Create byte array to read data in chunks
-        byte[] byteArray = new byte[1024];
-        int bytesCount = 0;
-
-        //Read file data and update in message digest
-        while ((bytesCount = fis.read(byteArray)) != -1) {
-            digest.update(byteArray, 0, bytesCount);
-        }
-
-        //close the stream; We don't need it now.
-        fis.close();
-
-        //Get the hash's bytes
-        byte[] bytes = digest.digest();
-
-        //This bytes[] has bytes in decimal format;
-        //Convert it to hexadecimal format
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < bytes.length; i++) {
-            sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
-        }
-
-        //return complete hash
-        return sb.toString();
-    }
-
-    private boolean isAdmin() {
-        Server server = ServerManager.INSTANCE.getCurrentServer();
-        return NASPref.defaultUserName.equals(server.getUsername());
-    }
-
     private void checkFirmwareVersion() {
         mTimeManager.checkFirmwareVersion();
     }
 
-    private void checkTimeZone() {
+    protected void checkTimeZone() {
         mTimeManager.checkTimeZone();
     }
 
     /**
      * GRID LAYOUT MANAGER SPAN SIZE LOOKUP
      */
-    private class SpanSizeLookup extends GridLayoutManager.SpanSizeLookup {
+    protected class SpanSizeLookup extends GridLayoutManager.SpanSizeLookup {
 
         private int spanSize;
 

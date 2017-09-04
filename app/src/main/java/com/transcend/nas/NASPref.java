@@ -5,6 +5,7 @@ import android.os.Build;
 import android.os.Environment;
 
 import com.transcend.nas.management.FileManageRecyclerAdapter;
+import com.transcend.nas.management.browser_framework.Browser;
 import com.transcend.nas.utils.PrefUtil;
 import com.transcend.nas.viewer.music.MusicActivity;
 
@@ -591,13 +592,37 @@ public class NASPref {
 
     public static int getViewMode(Context context, String key) {
         String name = context.getString(R.string.pref_name);
-        int def = FileManageRecyclerAdapter.LayoutType.LIST.ordinal();
+        int def = Browser.LayoutType.LIST.ordinal();
         return PrefUtil.read(context, name, key, def);
     }
 
     public static void setViewMode(Context context, String key, int mode) {
         String name = context.getString(R.string.pref_name);
         PrefUtil.write(context, name, key, mode);
+    }
+
+    public static int getViewPreference(Context context, String key) {
+        String name = context.getString(R.string.pref_name);
+        int def = 0;
+        return PrefUtil.read(context, name, key, def);
+    }
+
+    public static void setViewPreference(Context context, String key, int menuPosition) {
+        String name = context.getString(R.string.pref_name);
+        PrefUtil.write(context, name, key, menuPosition);
+    }
+
+    public static String getFirmwareVersion(Context context) {
+        String name = context.getString(R.string.pref_name);
+        String key = "firmware_version";
+        String def = defaultFirmwareVersion;
+        return PrefUtil.read(context, name, key, def);
+    }
+
+    public static void setFirmwareVersion(Context context, String version) {
+        String name = context.getString(R.string.pref_name);
+        String key = "firmware_version";
+        PrefUtil.write(context, name, key, version);
     }
 
 }

@@ -6,7 +6,6 @@ import android.net.Uri;
 
 import com.transcend.nas.DrawerMenuActivity;
 import com.transcend.nas.management.FileManageActivity;
-import com.transcend.nas.management.FileManageFragmentActivity;
 
 import java.io.File;
 
@@ -46,10 +45,6 @@ public abstract class AbstractExternalStorage {
     }
 
     protected void onActivityResult(FileManageActivity activity, Intent data) {
-
-    }
-
-    protected void onActivityResult(FileManageFragmentActivity activity, Intent data) {
 
     }
 
