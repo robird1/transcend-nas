@@ -35,9 +35,11 @@ import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.common.GoogleAnalysisFactory;
 import com.transcend.nas.LoaderID;
+import com.transcend.nas.management.browser.BrowserActivity;
 import com.transcend.nas.tutk.P2PStautsLoader;
 import com.transcend.nas.tutk.TutkCodeID;
 import com.transcend.nas.management.FileManageActivity;
@@ -195,17 +197,17 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
     private void startFileManageActivity() {
         if (getCallingActivity() == null) {
             Intent intent = new Intent();
-            Class navigationClass = FileManageActivity.class;
-
-            Server server = ServerManager.INSTANCE.getCurrentServer();
-            ServerInfo info = server.getServerInfo();
-            NASPref.setFirmwareVersion(this, info.firmwareVer);
-            int firmwareVer = Integer.valueOf(info.firmwareVer);
-            if (firmwareVer >= useBrowserMinFirmwareVersion) {
+//            Class navigationClass = FileManageActivity.class;
+//
+//            Server server = ServerManager.INSTANCE.getCurrentServer();
+//            ServerInfo info = server.getServerInfo();
+//            NASPref.setFirmwareVersion(this, info.firmwareVer);
+//            int firmwareVer = Integer.valueOf(info.firmwareVer);
+//            if (firmwareVer >= useBrowserMinFirmwareVersion) {
 //                navigationClass = BrowserActivity.class;
-            }
+//            }
 
-            intent.setClass(LoginListActivity.this, navigationClass);
+            intent.setClass(LoginListActivity.this, NASUtils.getFileManageClass());
             startActivity(intent);
             finish();
         } else {

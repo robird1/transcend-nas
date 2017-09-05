@@ -24,6 +24,7 @@ import com.transcend.nas.connection.old.StartActivity;
 import com.transcend.nas.introduce.FirstUseActivity;
 import com.transcend.nas.introduce.IntroduceActivity;
 import com.transcend.nas.management.FileManageActivity;
+import com.transcend.nas.management.browser.BrowserActivity;
 import com.transcend.nas.tutk.TutkGetNasLoader;
 import com.transcend.nas.tutk.TutkLinkNasLoader;
 import com.tutk.IOTC.P2PService;
@@ -237,16 +238,16 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
         mTextView.clearAnimation();
         Intent intent = new Intent();
 
-        Class navigationClass = FileManageActivity.class;
-        Server server = ServerManager.INSTANCE.getCurrentServer();
-        ServerInfo info = server.getServerInfo();
-        NASPref.setFirmwareVersion(this, info.firmwareVer);
-        int firmwareVer = Integer.valueOf(info.firmwareVer);
-        if (firmwareVer >= useBrowserMinFirmwareVersion) {
+//        Class navigationClass = FileManageActivity.class;
+//        Server server = ServerManager.INSTANCE.getCurrentServer();
+//        ServerInfo info = server.getServerInfo();
+//        NASPref.setFirmwareVersion(this, info.firmwareVer);
+//        int firmwareVer = Integer.valueOf(info.firmwareVer);
+//        if (firmwareVer >= useBrowserMinFirmwareVersion) {
 //            navigationClass = BrowserActivity.class;
-        }
+//        }
 
-        intent.setClass(AutoLinkActivity.this, navigationClass);
+        intent.setClass(AutoLinkActivity.this, NASUtils.getFileManageClass());
         startActivity(intent);
         finish();
     }

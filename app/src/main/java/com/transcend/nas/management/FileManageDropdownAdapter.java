@@ -41,8 +41,8 @@ public class FileManageDropdownAdapter extends BaseAdapter {
             getString(R.string.app_name);
 
     private Spinner mDropdown;
-    private List<String> mList;
-    private List<String> mDisplayList;
+    protected List<String> mList;
+    protected List<String> mDisplayList;
 
     private OnDropdownItemSelectedListener mCallback;
     private Context mContext;

@@ -292,4 +292,15 @@
     <string name="path_not_found">找不到路徑</string>
     <string name="msg_path_check">請確認路徑</string>
 
+    <string name="option_menu_all_photo">View all photos</string>
+    <string name="option_menu_date">View by date</string>
+    <string name="option_menu_folder">View by folder</string>
+    <string name="option_menu_album">View by album</string>
+    <string name="option_menu_select">Select</string>
+    <string name="option_menu_select_all">Select all</string>
+    <string name="option_menu_all_tracks">View all tracks</string>
+    <string name="option_menu_artist">View by artist</string>
+    <string name="option_menu_genre">View by genre</string>
+    <string name="option_menu_all_videos">View all videos</string>
+
 </resources>

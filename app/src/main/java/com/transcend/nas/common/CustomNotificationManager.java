@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.management.FileManageActivity;
 
@@ -140,4 +141,13 @@ public class CustomNotificationManager {
         ntfMgr.notify(notificationID, builder.build());
         CustomNotificationManager.getInstance().releaseNotificationID(notificationID);
     }
+
+    public static void updateResult(Context context, int notificationID, String type, String result, String destination, boolean isRemoteAction) {
+        Class targetClass = FileManageActivity.class;
+        if (isRemoteAction) {
+            targetClass = NASUtils.getFileManageClass();
+        }
+        updateResult(context, notificationID, type, result, destination, targetClass);
+    }
+
 }

@@ -289,7 +289,8 @@ public abstract class SmbAbstractLoader extends AsyncTaskLoader<Boolean> {
             return;
         }
 
-        CustomNotificationManager.updateResult(getContext(), mNotificationID, type, result, destination);
+//        CustomNotificationManager.updateResult(getContext(), mNotificationID, type, result, destination);
+        CustomNotificationManager.updateResult(getContext(), mNotificationID, type, result, destination, true);
     }
 
 }
