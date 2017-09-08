@@ -196,7 +196,11 @@ public abstract class DrawerMenuActivity extends AppCompatActivity implements
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                Intent intent = new Intent(DrawerMenuActivity.this, FileManageActivity.class);
+                Class clazz = FileManageActivity.class;
+                if (itemId == R.id.nav_storage) {
+                    clazz = NASUtils.getFileManageClass();
+                }
+                Intent intent = new Intent(DrawerMenuActivity.this, clazz);
                 intent.putExtra("selectedItemId", itemId);
                 intent.putExtra("path", path);
                 startActivity(intent);

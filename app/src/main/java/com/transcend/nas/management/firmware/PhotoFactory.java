@@ -52,6 +52,10 @@ public class PhotoFactory {
         }
     }
 
+    public void displayPhoto(String path, ImageView view) {
+        ImageLoader.getInstance().displayImage(path, view);
+    }
+
     private void displayLocalPhoto(Context context, boolean thumbnail, String path, ImageView view) {
         String url = getPhotoPath(context, thumbnail, path);
         FileInfo.TYPE type = FileInfo.getType(path);

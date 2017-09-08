@@ -34,6 +34,10 @@ public class FileInfo implements Serializable {
     public Long size;
     private String lastModifiedTime;
     public boolean checked;
+    public boolean isTwonkyIndexFolder = false;
+    public String twonkyFolderPath;
+    public int twonkyIndexCount;
+    public String thumbnail;
 
     public FileInfo() {
 

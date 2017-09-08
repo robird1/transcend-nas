@@ -1,6 +1,5 @@
 package com.transcend.nas.management;
 
-import android.app.Activity;
 import android.content.Context;
 import android.text.TextUtils;
 
@@ -46,6 +45,15 @@ public class SmbFileMoveLoader extends SmbAbstractLoader {
             updateResult(getContext().getString(R.string.error), mDest);
         }
         return false;
+    }
+
+    @Override
+    protected void updateResult(String result, String destination) {
+        if(isLoadInBackgroundCanceled()) {
+            return;
+        }
+
+        CustomNotificationManager.updateResult(getContext(), mNotificationID, getType(), result, destination, true);
     }
 
     private boolean move() throws MalformedURLException, SmbException {

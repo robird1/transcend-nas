@@ -9,8 +9,10 @@ import android.content.Intent;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
+import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.management.FileManageActivity;
+import com.transcend.nas.management.browser.BrowserActivity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -130,6 +132,10 @@ public class CustomNotificationManager {
         if (destination != null && !destination.equals(""))
             intent.putExtra("path", destination);
 
+        if ("BrowserActivity".equals(targetActivity.getSimpleName())) {
+            intent.putExtra("isTargetBrowser", true);
+        }
+
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
         builder.setSmallIcon(icon);
@@ -140,4 +146,13 @@ public class CustomNotificationManager {
         ntfMgr.notify(notificationID, builder.build());
         CustomNotificationManager.getInstance().releaseNotificationID(notificationID);
     }
+
+    public static void updateResult(Context context, int notificationID, String type, String result, String destination, boolean isTargetRemote) {
+        Class targetClass = FileManageActivity.class;
+        if (isTargetRemote) {
+            targetClass = NASUtils.getFileManageClass();
+        }
+        updateResult(context, notificationID, type, result, destination, targetClass);
+    }
+
 }
