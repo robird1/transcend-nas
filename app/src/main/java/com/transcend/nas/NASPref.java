@@ -24,7 +24,7 @@ public class NASPref {
     public static final boolean useConcurrentLogin = true;
     public static final int useTwonkyMinFirmwareVersion = 20161122;
     public static final int useShareLinkMinFirmwareVersion = 20170714;
-    public static final int useBrowserMinFirmwareVersion = 20170727;
+    public static final int useBrowserMinFirmwareVersion = 20170803;
 
     public static boolean useTwonkyServer = true;
     public static boolean useSwitchNas = false;
@@ -610,19 +610,6 @@ public class NASPref {
     public static void setViewPreference(Context context, String key, int menuPosition) {
         String name = context.getString(R.string.pref_name);
         PrefUtil.write(context, name, key, menuPosition);
-    }
-
-    public static String getFirmwareVersion(Context context) {
-        String name = context.getString(R.string.pref_name);
-        String key = "firmware_version";
-        String def = defaultFirmwareVersion;
-        return PrefUtil.read(context, name, key, def);
-    }
-
-    public static void setFirmwareVersion(Context context, String version) {
-        String name = context.getString(R.string.pref_name);
-        String key = "firmware_version";
-        PrefUtil.write(context, name, key, version);
     }
 
 }

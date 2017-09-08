@@ -6,14 +6,13 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.transcend.nas.R;
-import com.transcend.nas.management.FileManageRecyclerAdapter;
+import com.transcend.nas.management.browser.BrowserRecyclerAdapter;
 
 import java.util.ArrayList;
 
@@ -24,7 +23,6 @@ import static com.transcend.nas.management.browser_framework.Browser.LayoutType;
  */
 
 public class MediaFragment extends Fragment {
-    private static final String TAG = MediaFragment.class.getSimpleName();
     private int mPosition;
     private RecyclerView mRecyclerView;
     private LinearLayout mRecyclerEmptyView;
@@ -58,18 +56,16 @@ public class MediaFragment extends Fragment {
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.d(TAG, "[Enter] onCreateView instance: "+ BrowserData.getInstance(mPosition).toString());
-
         View rootView = inflater.inflate(R.layout.fragment_pager, null);
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
         mRecyclerEmptyView = (LinearLayout) rootView.findViewById(R.id.main_recycler_empty_view);
-        RecyclerView.LayoutManager lm = initLayoutManager(mPosition);
+        RecyclerView.LayoutManager lm = initLayoutManager();
         mRecyclerView.setLayoutManager(lm);
 
         ArrayList data = BrowserData.getInstance(mPosition).getFileList();
 
         // TODO FileManageRecyclerAdapter
-        mRecyclerView.setAdapter(new FileManageRecyclerAdapter(getContext(), data));
+        mRecyclerView.setAdapter(new BrowserRecyclerAdapter(getContext(), data));
 
         Browser browser = ((Browser) getParentFragment());
         browser.onNotifyState(mPosition);
@@ -77,15 +73,13 @@ public class MediaFragment extends Fragment {
         return rootView;
     }
 
-    private RecyclerView.LayoutManager initLayoutManager(int position) {
-        LayoutType mode = BrowserData.getInstance(position).getViewMode(getContext());
-        if (mode == LayoutType.LIST) {
-            return new LinearLayoutManager(getContext());
-        } else {
-            int orientation = getActivity().getResources().getConfiguration().orientation;
-//            int spanCount = (orientation == Configuration.ORIENTATION_PORTRAIT) ? GRID_PORTRAIT : GRID_LANDSCAPE;
+    private RecyclerView.LayoutManager initLayoutManager() {
+        LayoutType mode = BrowserData.getInstance(mPosition).getLayout();
+        if (mode == LayoutType.GRID) {
             int spanCount = 3;
             return new GridLayoutManager(getContext(), spanCount);
+        } else {
+            return new LinearLayoutManager(getContext());
         }
     }
 

@@ -21,12 +21,12 @@ import java.util.ArrayList;
  */
 public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRecyclerAdapter.ViewHolder> {
 
-    private static final int ITEM_VIEW_TYPE_CONTENT = 0;
-    private static final int ITEM_VIEW_TYPE_FOOTER  = 1;
+    protected static final int ITEM_VIEW_TYPE_CONTENT = 0;
+    protected static final int ITEM_VIEW_TYPE_FOOTER  = 1;
 
-    private Context mContext;
-    private ArrayList<FileInfo> mList;
-    private LayoutType mLayoutType = LayoutType.LIST;
+    protected Context mContext;
+    protected ArrayList<FileInfo> mList;
+    protected LayoutType mLayoutType = LayoutType.LIST;
 
     private OnRecyclerItemCallbackListener mCallback;
 
@@ -185,18 +185,18 @@ public class FileManageRecyclerAdapter extends RecyclerView.Adapter<FileManageRe
         return resId;
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
-        int viewType;
+        public int viewType;
 
-        View itemView;
-        View background;
-        ImageView mark;
-        ImageView icon;
-        ImageView info;
-        ImageView indicate;
-        TextView title;
-        TextView subtitle;
+        public View itemView;
+        public View background;
+        public ImageView mark;
+        public ImageView icon;
+        public ImageView info;
+        public ImageView indicate;
+        public TextView title;
+        public TextView subtitle;
 
         public ViewHolder(View itemView, int viewType) {
             super(itemView);

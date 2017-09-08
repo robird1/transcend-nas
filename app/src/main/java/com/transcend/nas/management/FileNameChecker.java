@@ -6,7 +6,8 @@ package com.transcend.nas.management;
 
 public class FileNameChecker {
     private static final Character[] INVALID_CHARS = {'!', '*', '\'', ';', ':', '@', '&', '=', '+', '$', ',', '/', '?', '#',
-            '<', '>', '%','|', '\\', '^', '`'};
+            '<', '>', '%','|', '\\', '^', '`', '！', '＊', '；', '：', '＠', '＆', '＝', '＋', '＄', '，', '／', '？', '＃',
+            '＜', '＞', '％','｜', '︿', '‘'};
 
     private String mInput;
 

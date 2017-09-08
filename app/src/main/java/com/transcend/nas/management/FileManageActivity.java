@@ -89,6 +89,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.transcend.nas.NASUtils.getMD5Checksum;
+
 public class FileManageActivity extends DrawerMenuActivity implements
         FileManageDropdownAdapter.OnDropdownItemSelectedListener,
         FileManageRecyclerAdapter.OnRecyclerItemCallbackListener,
@@ -102,7 +104,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     protected Context mContext;
     protected Toolbar mToolbar;
     protected AppCompatSpinner mDropdown;
-    protected FileManageDropdownAdapter mDropdownAdapter;
+    public FileManageDropdownAdapter mDropdownAdapter;
     protected SwipeRefreshLayout mRecyclerRefresh;
     public RecyclerView mRecyclerView;
     public LinearLayout mRecyclerEmptyView;
@@ -134,7 +136,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
     protected ConnectManager mConnectActionManager;
     protected TimeManager mTimeManager;
     protected FileSyncManager mFileSyncManager;
-    protected FileActionManager mFileActionManager;
+    public FileActionManager mFileActionManager;
     protected FileActionManager.FileActionServiceType mDefaultType = FileActionManager.FileActionServiceType.SMB;
     protected boolean mChoiceAllSameTypeFile = true;
     protected boolean mCheckTimeSetting = false;
@@ -430,7 +432,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
 
-    private void initDropdown() {
+    public void initDropdown() {
         mDropdownAdapter = new FileManageDropdownAdapter(this);
         mDropdownAdapter.setOnDropdownItemSelectedListener(this);
         mDropdownAdapter.updateList(mPath, mFileActionManager.getServiceMode());
@@ -585,7 +587,13 @@ public class FileManageActivity extends DrawerMenuActivity implements
             // browser
             String mode = mFileActionManager.getServiceMode();
             String root = mFileActionManager.getServiceRootPath();
-            FileInfo fileInfo = mFileList.get(position);
+//            FileInfo fileInfo = mFileList.get(position);
+            FileInfo fileInfo = mRecyclerAdapter.getList().get(position);
+
+            if (fileInfo.isTwonkyIndexFolder) {
+                return;
+            }
+
             if (FileInfo.TYPE.DIR.equals(fileInfo.type)) {
                 doLoad(fileInfo.path);
             } else if (FileInfo.TYPE.PHOTO.equals(fileInfo.type)) {
@@ -819,7 +827,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
                 toggleDrawerCheckedItem();
 
                 if (!mCheckTimeSetting && mFileActionManager.isRemoteAction(mPath)
-                        && mFileActionManager.isTopDirectory(mPath) && isAdmin()) {
+                        && mFileActionManager.isTopDirectory(mPath) && NASUtils.isAdmin()) {
                     mCheckTimeSetting = true;
                     checkEmptyView();
                     mProgressBar.setVisibility(View.VISIBLE);
@@ -1089,7 +1097,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         mDrawerController.setDrawerIndicatorEnabled(mFileActionManager.isTopDirectory(mPath) || (isDownloadFolder && mFileActionManager.isDownloadDirectory(this, mPath)));
     }
 
-    protected void checkEmptyView() {
+    public void checkEmptyView() {
         mRecyclerEmptyView.setVisibility((mFileList != null && mFileList.size() > 0) ? View.GONE : View.VISIBLE);
     }
 
@@ -1162,17 +1170,17 @@ public class FileManageActivity extends DrawerMenuActivity implements
             startSupportActionMode(this);
     }
 
-    protected void closeEditorMode() {
+    public void closeEditorMode() {
         if (mEditorMode != null)
             mEditorMode.finish();
     }
 
-    private void updateEditorModeTitle(int count) {
+    protected void updateEditorModeTitle(int count) {
         String format = getResources().getString(count <= 1 ? R.string.msg_file_selected : R.string.msg_files_selected);
         mEditorModeTitle.setText(String.format(format, count));
     }
 
-    private void selectAtPosition(int position) {
+    protected void selectAtPosition(int position) {
         boolean checked = mFileList.get(position).checked;
         mFileList.get(position).checked = !checked;
         mRecyclerAdapter.notifyItemChanged(position);
@@ -1197,7 +1205,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         toggleFabSelectAll(selectAll);
     }
 
-    private void checkAllSelection() {
+    protected void checkAllSelection() {
         for (FileInfo file : mFileList)
             file.checked = true;
         mRecyclerAdapter.notifyDataSetChanged();
@@ -1269,6 +1277,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         final String path
                 = NASApp.ACT_UPLOAD.equals(type) ? NASApp.ROOT_SMB
                 : NASApp.ACT_DOWNLOAD.equals(type) ? NASPref.getDownloadLocation(this)
+                : mPath.contains("||") ? NASApp.ROOT_SMB
                 : mPath;
 
         //for Action Download, we use default download folder
@@ -1444,7 +1453,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         startActivityForResult(intent, ViewerActivity.REQUEST_CODE);
     }
 
-    private void startFileInfoActivity(FileInfo info) {
+    protected void startFileInfoActivity(FileInfo info) {
         Bundle args = new Bundle();
         args.putSerializable("info", info);
         Intent intent = new Intent();
@@ -1466,7 +1475,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        mOriginMD5Checksum = getMD5Checksum(new File(mDownloadFilePath));
+                        mOriginMD5Checksum = NASUtils.getMD5Checksum(new File(mDownloadFilePath));
                     }
                 }).start();
 
@@ -1489,7 +1498,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         });
     }
 
-    private void clearDownloadTask() {
+    protected void clearDownloadTask() {
         DownloadFactory.getManager(mContext, DownloadFactory.Type.TEMPORARY).cancel(this);
     }
 

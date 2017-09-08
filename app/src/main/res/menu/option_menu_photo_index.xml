@@ -8,6 +8,12 @@
         app:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
         app:showAsAction="always"/>
 
+    <item android:id="@+id/my_search"
+        android:title="Search"
+        android:icon="@drawable/ic_toolbar_search_white"
+        app:showAsAction="always|collapseActionView"
+        app:actionViewClass="com.transcend.nas.management.browser.BrowserSearchView" />
+
     <item
         android:id="@+id/file_manage_viewer_action_more"
         android:icon="@drawable/ic_toolbar_more_white"
@@ -29,22 +35,22 @@
                 app:showAsAction="never" />
 
             <item
-                android:id="@+id/option_menu_album"
+                android:id="@+id/option_menu_folder"
                 android:icon="@drawable/ic_toolbar_sync_white"
-                android:title="@string/option_menu_album"
+                android:title="@string/option_menu_folder"
                 app:showAsAction="never" />
 
-            <item
-                android:id="@+id/option_menu_select"
-                android:icon="@drawable/ic_toolbar_sync_white"
-                android:title="@string/option_menu_select"
-                app:showAsAction="never" />
+            <!--<item-->
+                <!--android:id="@+id/option_menu_select"-->
+                <!--android:icon="@drawable/ic_toolbar_sync_white"-->
+                <!--android:title="@string/option_menu_select"-->
+                <!--app:showAsAction="never" />-->
 
-            <item
-                android:id="@+id/option_menu_select_all"
-                android:icon="@drawable/ic_toolbar_sync_white"
-                android:title="@string/option_menu_select_all"
-                app:showAsAction="never" />
+            <!--<item-->
+                <!--android:id="@+id/option_menu_select_all"-->
+                <!--android:icon="@drawable/ic_toolbar_sync_white"-->
+                <!--android:title="@string/option_menu_select_all"-->
+                <!--app:showAsAction="never" />-->
         </menu>
 
     </item>

@@ -3,14 +3,6 @@ package com.transcend.nas.management.browser;
 import android.content.Context;
 
 import com.transcend.nas.NASPref;
-import com.transcend.nas.R;
-import com.transcend.nas.management.FileInfo;
-import com.transcend.nas.management.browser_framework.Browser;
-import com.transcend.nas.management.browser_framework.BrowserData;
-
-import java.util.ArrayList;
-
-import static android.R.attr.mode;
 
 /**
  * Created by steve_su on 2017/7/18.
@@ -22,19 +14,13 @@ public enum StoreJetCloudData {
     MUSIC(2, 1, "view_preference_music"),
     VIDEO(3, 3, "view_preference_video");
 
-//    private BrowserData mData;
-//    private int mPosition;
-//    private int mLoadingIndex = 0;
-//
-//    StoreJetCloudData(BrowserData instance) {
-//        mData = instance;
-//        mPosition = instance.getTabPosition();
-//    }
-
     private int mTabPosition;
     private int mTwonkyType;
     private String mViewKey;
     private int mLoadingIndex = 0;
+    private String mPath;
+    private boolean mIsFabEnabled;
+
     StoreJetCloudData(int tabPosition, int twonkyType, String viewKey) {
         mTabPosition = tabPosition;
         mTwonkyType = twonkyType;
@@ -59,17 +45,6 @@ public enum StoreJetCloudData {
     }
 
     public int getTwonkyType() {
-//        BrowserData instance = BrowserData.getInstance(mPosition);
-//        if (instance == BrowserData.ALL) {
-//            return 0;
-//        } else if (instance == BrowserData.PHOTO) {
-//            return 2;
-//        } else if (instance == BrowserData.MUSIC) {
-//            return 1;
-//        } else if (instance == BrowserData.VIDEO) {
-//            return 3;
-//        }
-//        return 0;
         return mTwonkyType;
     }
 
@@ -82,5 +57,20 @@ public enum StoreJetCloudData {
         return mode;
     }
 
+    public void setPath(String path) {
+        mPath = path;
+    }
+
+    public String getPath() {
+        return mPath;
+    }
+
+    public void setFabEnabled(boolean isEnabled) {
+        mIsFabEnabled = isEnabled;
+    }
+
+    public boolean getFabEnabled() {
+        return mIsFabEnabled;
+    }
 
 }

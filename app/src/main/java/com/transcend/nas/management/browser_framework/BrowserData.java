@@ -1,9 +1,5 @@
 package com.transcend.nas.management.browser_framework;
 
-import android.content.Context;
-import android.util.Log;
-
-import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
 import com.transcend.nas.management.FileInfo;
 
@@ -20,12 +16,11 @@ public enum BrowserData {
     VIDEO(R.drawable.ic_browser_filetype_video, "view_mode_video"),
     FILE(R.drawable.ic_browser_filetype_video, "view_mode_file");
 
-    private static final String TAG = BrowserData.class.getSimpleName();
     private final int mIconId;
     private final String mViewModeKey;
     private int mTabPosition;
     private ArrayList<FileInfo> mFileList = new ArrayList<>();
-    private String mPath;
+    private Browser.LayoutType mLayout;
 
     BrowserData(int iconId, String viewModeKey) {
         mIconId = iconId;
@@ -51,17 +46,6 @@ public enum BrowserData {
         return mIconId;
     }
 
-    // TODO
-    public void setViewMode(Context context, Browser.LayoutType mode) {
-        NASPref.setViewMode(context, mViewModeKey, mode.ordinal());
-    }
-
-    // TODO
-    public Browser.LayoutType getViewMode(Context context) {
-        int mode = NASPref.getViewMode(context, mViewModeKey);
-        return (mode == Browser.LayoutType.LIST.ordinal()) ? Browser.LayoutType.LIST: Browser.LayoutType.GRID;
-    }
-
     void setTabPosition(int position) {
         mTabPosition = position;
     }
@@ -74,20 +58,31 @@ public enum BrowserData {
         return mFileList;
     }
 
-    public void updateFileList(ArrayList<FileInfo> list, boolean isReset) {
-        Log.d(TAG, "\n[Enter] BrowserData.updateFileList "+ this.toString());
-        Log.d(TAG, "mFileList size before: "+ mFileList.size());
-        if (isReset) {
-            mFileList.clear();
-            mFileList.addAll(list);
-        } else {
-            mFileList.addAll(list);
+    public void addFiles(ArrayList<FileInfo> list) {
+        if (list == null) {
+            return;
         }
-        Log.d(TAG, "mFileList size after: "+ mFileList.size());
+        mFileList.addAll(list);
+    }
+
+    public void updateFileList(ArrayList<FileInfo> list) {
+        if (list == null) {
+            return;
+        }
+        mFileList.clear();
+        mFileList.addAll(list);
     }
 
     void clearFileList() {
         mFileList.clear();
+    }
+
+    public void setLayout(Browser.LayoutType type) {
+        mLayout = type;
+    }
+
+    public Browser.LayoutType getLayout() {
+        return mLayout;
     }
 
 }

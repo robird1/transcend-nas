@@ -1,21 +1,19 @@
 package com.transcend.nas.management.browser;
 
 import android.content.Context;
-import android.os.Bundle;
-import android.support.v4.content.Loader;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.transcend.nas.management.FileInfo;
+import com.transcend.nas.management.browser_framework.Browser;
 import com.transcend.nas.management.browser_framework.BrowserData;
-
-import java.util.ArrayList;
 
 /**
  * Created by steve_su on 2017/7/20.
  */
 
 public class MediaController {
-    private MediaType mControl;
+    private MediaGeneral mControl;
     private Context mContext;
 
     public MediaController(Context context, int position) {
@@ -35,17 +33,35 @@ public class MediaController {
         mControl.onPrepareOptionsMenu(menu);
     }
 
-    public void load(int position) { mControl.load(position);}
-
-    public Loader onCreateLoader(int id, Bundle args) {
-        return mControl.onCreateLoader(id, args);
+    public Browser.LayoutType onViewAllLayout() {
+        return mControl.onViewAllLayout();
     }
 
-    public void onLoadFinished(Loader loader, ArrayList data) {
-        mControl.onLoadFinished(loader, data);
+    public void onRecyclerItemClick(FileInfo fileInfo) {
+        mControl.onRecyclerItemClick(fileInfo);
     }
 
-    private MediaType getInstance(int position) {
+    public void onBackPressed() {
+        mControl.onBackPressed();
+    }
+
+    public void refresh(boolean showProgress) {
+        mControl.refresh(showProgress);
+    }
+
+    public void onPageChanged() {
+        mControl.onPageChanged();
+    }
+
+    public void onCreateActionMode(Menu menu) {
+        mControl.onCreateActionMode(menu);
+    }
+
+    public void lazyLoad() {
+        mControl.lazyLoad();
+    }
+
+    private MediaGeneral getInstance(int position) {
         if (position == BrowserData.ALL.getTabPosition()) {
             return new MediaAll(mContext);
         } else if (position == BrowserData.PHOTO.getTabPosition()) {

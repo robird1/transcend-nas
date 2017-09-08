@@ -75,6 +75,15 @@ public abstract class FileUploadLoader<T> extends SmbAbstractLoader {
         return false;
     }
 
+    @Override
+    protected void updateResult(String result, String destination) {
+        if(isLoadInBackgroundCanceled()) {
+            return;
+        }
+
+        CustomNotificationManager.updateResult(getContext(), mNotificationID, getType(), result, destination, true);
+    }
+
     protected void init() {
         mCurrent = 0;
         mTotal = mSrcs != null ? mSrcs.size() : 0;

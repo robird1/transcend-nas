@@ -1,44 +1,46 @@
 package com.transcend.nas.management.browser;
 
+import android.content.Intent;
 import android.content.Loader;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.view.ActionMode;
+import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
+import com.transcend.nas.management.FileInfo;
 import com.transcend.nas.management.FileManageActivity;
-import com.transcend.nas.management.FileManageRecyclerAdapter;
+import com.transcend.nas.management.FileManageDropdownAdapter;
 import com.transcend.nas.management.FileManageRecyclerListener;
 import com.transcend.nas.management.SmbFileListLoader;
-import com.transcend.nas.management.browser_framework.Browser;
 import com.transcend.nas.management.browser_framework.BrowserData;
 import com.transcend.nas.management.browser_framework.MediaFragment;
+import com.transcend.nas.management.externalstorage.ExternalStorageController;
 
 import java.io.File;
+import java.util.ArrayList;
+
+import static android.R.attr.mode;
 
 /**
  * Created by steve_su on 2017/6/3.
  */
 
 public class BrowserActivity extends FileManageActivity {
-
-    private static final String TAG = BrowserActivity.class.getSimpleName();
     private static final int FRAGMENT_COUNT_ONE = 1;
     private static final int FRAGMENT_COUNT_TWO = 2;
     MediaController mMediaControl;
+    int mTabPosition;
+    boolean mIsSelectAll = false;
 
     @Override
     public int onLayoutID() {
@@ -54,27 +56,52 @@ public class BrowserActivity extends FileManageActivity {
             replaceFragment(new RootFragment(), RootFragment.TAG);
 
             // TODO check this statement
-            Log.d(TAG, "[Enter]  new MediaController");
             mMediaControl = new MediaController(this, BrowserData.ALL.getTabPosition());
+            mTabPosition = BrowserData.ALL.getTabPosition();
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+//        mMediaControl.refresh(true);
+        toggleDrawerCheckedItem();
+
+        boolean isTargetBrowser = intent.getBooleanExtra("isTargetBrowser", false);
+        if (isTargetBrowser) {
+            navigateToTarget(intent);
+        }
+    }
+
+    private void navigateToTarget(Intent intent) {
+        String path = intent.getStringExtra("path");
+        BrowserFragment fragment = (BrowserFragment) getSupportFragmentManager().findFragmentByTag(BrowserFragment.TAG);
+        if (fragment != null) {
+            fragment.setCurrentPage(BrowserData.ALL.getTabPosition());
+            doLoad(path);
+        } else {
+            replaceFragment(new BrowserFragment(), BrowserFragment.TAG);
+            doLoad(path);
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        Log.d(TAG, "[Enter] onCreateOptionsMenu");              // TODO onCreateOptionsMenu is been called many times
         return mMediaControl.createOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        return mMediaControl.optionsItemSelected(item);
+        boolean isConsumed = super.onOptionsItemSelected(item);
+        if (!isConsumed) {
+            return mMediaControl.optionsItemSelected(item);
+        }
+        return true;
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        Log.d(TAG, "[Enter] onPrepareOptionsMenu");
         mMediaControl.onPrepareOptionsMenu(menu);
-        return super.onPrepareOptionsMenu(menu);
+        return true;
     }
 
     @Override
@@ -87,71 +114,224 @@ public class BrowserActivity extends FileManageActivity {
 
     @Override
     public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
-        Log.d(TAG, "[Enter] onLoadFinished loader: "+ loader.toString());
         super.onLoadFinished(loader, success);
 
         if (success) {
             if (loader instanceof SmbFileListLoader) {
-                BrowserData.getInstance(BrowserData.ALL.getTabPosition()).updateFileList(mFileList, true);
+                BrowserData.getInstance(BrowserData.ALL.getTabPosition()).updateFileList(mFileList);
+                StoreJetCloudData.getInstance(BrowserData.ALL.getTabPosition()).setPath(mPath);
                 postCheckFragment();
+
+                // TODO check this statement
+                // Always enable the drawer indicator
+                mDrawerController.setDrawerIndicatorEnabled(true);
+                enableFabEdit(mFileActionManager.isDirectorySupportFileAction(mPath));
             }
         }
     }
 
+    /**
+     * This function does nothing. RecyclerView will be initialized after calling
+     * onRecyclerViewInit().
+     *
+     */
     @Override
     protected void initRecyclerView() {
 
     }
 
-//    @Override
-//    protected void initProgressView() {
-//        mProgressView = (RelativeLayout) findViewById(R.id.main_progress_view);
-//        mProgressBar = (ProgressBar) findViewById(R.id.main_progress_bar);
-//        mActionHelper.setProgressLayout(mProgressView);
-//    }
+    @Override
+    public void onRecyclerItemClick(int position) {
+        super.onRecyclerItemClick(position);
 
-    public void onRecyclerViewInit(MediaFragment fragment) {
-        Log.d(TAG, "[Enter] onRecyclerViewInit");
-        mRecyclerView = fragment.getRecyclerView();
-        mRecyclerEmptyView = fragment.getRecyclerEmptyView();
-
-        Browser.LayoutType type = BrowserData.getInstance(fragment.getPosition()).getViewMode(this);
-        if (type == Browser.LayoutType.GRID) {
-            updateGridView(false, mRecyclerView);
-        } else {
-            updateListView(false, mRecyclerView);
+        if (mEditorMode == null) {
+            FileInfo fileInfo = mRecyclerAdapter.getList().get(position);
+            if (FileInfo.TYPE.DIR.equals(fileInfo.type) && fileInfo.isTwonkyIndexFolder) {
+                mMediaControl.onRecyclerItemClick(fileInfo);
+            }
         }
-
-        mRecyclerAdapter = (FileManageRecyclerAdapter) mRecyclerView.getAdapter();
-        mRecyclerAdapter.setOnRecyclerItemCallbackListener(this);
-        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        mRecyclerView.addOnScrollListener(new FileManageRecyclerListener(ImageLoader.getInstance(), true, false));
-
-        mFileList = mRecyclerAdapter.getList();
-        mRecyclerAdapter.updateList(mFileList);
-        mRecyclerAdapter.notifyDataSetChanged();
-
-        mMediaControl = new MediaController(this, fragment.getPosition());
-        Log.d(TAG, "[Enter] invalidateOptionsMenu");
-        invalidateOptionsMenu();
 
     }
 
-    void onRecyclerViewInit() {
-        FileManageRecyclerAdapter.LayoutType type = NASPref.getFileViewType(this);
-        switch (type) {
-            case GRID:
-                updateGridView(false);
-                break;
-            default:
-                updateListView(false);
-                break;
+    @Override
+    public void onRecyclerItemLongClick(int position) {
+        if (mTabPosition == BrowserData.ALL.getTabPosition()) {
+            super.onRecyclerItemLongClick(position);
+        } else {
+            boolean isTwonkyIndexFolder = mFileList.get(position).isTwonkyIndexFolder;
+            if (!isTwonkyIndexFolder) {
+                if (mEditorMode == null) {
+                    startEditorMode();
+                    selectAtPosition(position);
+                }
+            }
         }
-        mRecyclerAdapter.setOnRecyclerItemCallbackListener(this);
 
+    }
+
+    @Override
+    public void onRecyclerItemInfoClick(int position) {
+        if (mTabPosition == BrowserData.ALL.getTabPosition()) {
+            super.onRecyclerItemInfoClick(position);
+        } else {
+            FileInfo fileInfo = mFileList.get(position);
+            if (fileInfo.isTwonkyIndexFolder) {
+                if (mEditorMode == null) {
+                    mMediaControl.onRecyclerItemClick(fileInfo);
+                } else {
+                    selectAtPosition(position);
+                }
+            } else {
+                startFileInfoActivity(fileInfo);
+            }
+        }
+    }
+
+    @Override
+    public void onRecyclerItemIconClick(int position) {
+        if (mTabPosition == BrowserData.ALL.getTabPosition()) {
+            super.onRecyclerItemIconClick(position);
+        } else {
+            FileInfo fileInfo = mFileList.get(position);
+            if (!fileInfo.isTwonkyIndexFolder) {
+                if (mEditorMode == null) {
+                    startEditorMode();
+                }
+                selectAtPosition(position);
+            }
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mTabPosition == BrowserData.ALL.getTabPosition()) {
+            super.onBackPressed();
+        } else {
+            if (mPath == null) {
+                return;
+            }
+
+            clearDownloadTask();
+            toggleDrawerCheckedItem();
+            if (!stopRunningLoader()) {               // TODO check this statement
+                if (!mDrawerController.isDrawerOpen()) {
+                    mMediaControl.onBackPressed();
+                } else {
+                    mDrawerController.closeDrawer();
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void enableFabEdit(boolean enabled) {
+        super.enableFabEdit(enabled);
+        StoreJetCloudData.getInstance(mTabPosition).setFabEnabled(enabled);
+    }
+
+    @Override
+    public void onDropdownItemSelected(int position) {
+        if (mTabPosition == BrowserData.ALL.getTabPosition()) {
+            super.onDropdownItemSelected(position);
+        } else {
+            // do nothing
+        }
+    }
+
+    @Override
+    public void doRefresh() {
+        if (mTabPosition == BrowserData.ALL.getTabPosition()) {
+            doLoad(mPath);
+        } else {
+            mMediaControl.refresh(true);
+        }
+    }
+
+    @Override
+    protected void initMenu(Menu menu) {
+        if (mTabPosition == BrowserData.ALL.getTabPosition()) {
+            super.initMenu(menu);
+        } else {
+            mMediaControl.onCreateActionMode(menu);
+        }
+    }
+
+    @Override
+    public void onDestroyActionMode(ActionMode mode) {
+        super.onDestroyActionMode(mode);
+        mIsSelectAll = false;
+    }
+
+    @Override
+    public void toggleSelectAll() {
+        super.toggleSelectAll();
+        int count = getSelectedCount();
+        mIsSelectAll = (count != 0) && (count == mFileList.size());
+    }
+
+    void updateSelectAll() {
+        for (FileInfo file : mFileList)
+            file.checked = true;
+
+        updateEditorModeTitle(mFileList.size());
+    }
+
+    /**
+     * update spinner after switching between pages of ViewPager.
+     *
+     * @param position
+     */
+    void updateSpinner(int position) {
+        if (position != 0) {
+            mDropdownAdapter = new BrowserDropdownAdapter(this);
+        } else {
+            mDropdownAdapter = new FileManageDropdownAdapter(this);
+        }
+
+        mDropdownAdapter.updateList(mPath, mFileActionManager.getServiceMode());
+        mDropdownAdapter.setOnDropdownItemSelectedListener(this);
+        mDropdown = (AppCompatSpinner) findViewById(R.id.main_dropdown);
+        mDropdown.setAdapter(mDropdownAdapter);
+        mDropdown.setDropDownVerticalOffset(10);
+        mDropdownAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * update spinner after onLoadFinished().
+     *
+     * @param path
+     */
+    void updateSpinner(String path) {
+        mDropdownAdapter.updateList(path, mFileActionManager.getServiceMode());
+        mDropdownAdapter.notifyDataSetChanged();
+    }
+
+    public void onRecyclerViewInit(MediaFragment fragment) {
+        mRecyclerView = fragment.getRecyclerView();
+        mRecyclerEmptyView = fragment.getRecyclerEmptyView();
+        mRecyclerAdapter = (BrowserRecyclerAdapter) mRecyclerView.getAdapter();
+        mRecyclerAdapter.setOnRecyclerItemCallbackListener(this);
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        mRecyclerView.addOnScrollListener(new FileManageRecyclerListener(ImageLoader.getInstance(), true, false));
+        mFileList = new ArrayList<>(mRecyclerAdapter.getList());
+        mTabPosition = fragment.getPosition();
+        mMediaControl = new MediaController(this, mTabPosition);
+        invalidateOptionsMenu();
+        mPath = StoreJetCloudData.getInstance(mTabPosition).getPath();
+        updateSpinner(mTabPosition);
+        boolean isFabEnabled = StoreJetCloudData.getInstance(mTabPosition).getFabEnabled();
+        enableFabEdit(isFabEnabled);
+    }
+
+    void onRecyclerViewInit() {
+        updateListView(false);
+        mRecyclerAdapter.setOnRecyclerItemCallbackListener(this);
         mRecyclerView.setAdapter(mRecyclerAdapter);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.addOnScrollListener(new FileManageRecyclerListener(ImageLoader.getInstance(), true, false));
+        mTabPosition = BrowserData.ALL.getTabPosition();
+        mMediaControl = new MediaController(this, mTabPosition);
+        updateSpinner(mTabPosition);
     }
 
     void onProgressViewInit(RootFragment fragment) {
@@ -161,6 +341,7 @@ public class BrowserActivity extends FileManageActivity {
         mRecyclerRefresh = fragment.mSwipeRefreshLayout;
         mActionHelper.setProgressLayout(mProgressView);
     }
+
     void onProgressViewInit(BrowserFragment fragment) {
         mProgressView = fragment.mProgressView;
         mProgressBar = fragment.mProgressBar;
@@ -168,37 +349,12 @@ public class BrowserActivity extends FileManageActivity {
         mActionHelper.setProgressLayout(mProgressView);
     }
 
-    // TODO check super.updateListView
-    protected void updateListView(boolean update, RecyclerView view) {
-        mRecyclerView.setLayoutManager(view.getLayoutManager());
-        if (update) {
-            mRecyclerView.getRecycledViewPool().clear();
-            mRecyclerAdapter.notifyDataSetChanged();
-        }
-    }
-
-    // TODO check super.updateGridView
-    protected void updateGridView(boolean update, RecyclerView view) {
-        GridLayoutManager grid = (GridLayoutManager) view.getLayoutManager();
-        grid.setSpanSizeLookup(new SpanSizeLookup(grid.getSpanCount()));
-        mRecyclerView.setLayoutManager(grid);
-        if (update) {
-            mRecyclerView.getRecycledViewPool().clear();
-            mRecyclerAdapter.notifyDataSetChanged();
-        }
-    }
-
     private void replaceFragment(Fragment fragment, String tag) {
-        Log.d(TAG, "[Enter] replaceFragment");
-//        if (fragment instanceof BrowserFragment) {
-//            Log.d(TAG, "[Enter] enableFabEdit mPath: "+ mPath);
-//            enableFabEdit(mFileActionManager.isDirectorySupportFileAction(mPath));
-//        }
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 //        transaction.setCustomAnimations(R.anim.appear, 0);
         transaction.replace(R.id.fragment_container, fragment, tag);
         transaction.addToBackStack(null);
-        transaction.commit();
+        transaction.commitAllowingStateLoss();
         getSupportFragmentManager().executePendingTransactions();
     }
 

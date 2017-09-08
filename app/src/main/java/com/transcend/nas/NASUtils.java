@@ -24,10 +24,13 @@ import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
 import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.connection.LoginHelper;
 import com.transcend.nas.connection.LoginLoader;
 import com.transcend.nas.management.FileInfo;
+import com.transcend.nas.management.FileManageActivity;
+import com.transcend.nas.management.browser.BrowserActivity;
 import com.transcend.nas.management.firmwareupdate.FirmwareUpdateService;
 import com.transcend.nas.service.FileRecentManager;
 import com.transcend.nas.utils.MimeUtil;
@@ -47,6 +50,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.support.v7.app.AlertDialog.Builder;
+import static com.transcend.nas.NASPref.useBrowserMinFirmwareVersion;
 
 /**
  * Created by steve_su on 2016/12/2.
@@ -469,6 +473,16 @@ public final class NASUtils {
     public static boolean isAdmin() {
         Server server = ServerManager.INSTANCE.getCurrentServer();
         return NASPref.defaultUserName.equals(server.getUsername());
+    }
+
+    public static Class getFileManageClass() {
+        Class navigationClass = FileManageActivity.class;
+        ServerInfo info = ServerManager.INSTANCE.getCurrentServer().getServerInfo();
+        int firmwareVer = Integer.valueOf(info.firmwareVer);
+        if (firmwareVer >= useBrowserMinFirmwareVersion) {
+            navigationClass = BrowserActivity.class;
+        }
+        return navigationClass;
     }
 
 }

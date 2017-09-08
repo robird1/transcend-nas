@@ -1,25 +1,38 @@
 package com.transcend.nas.management.browser;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.transcend.nas.R;
+import com.transcend.nas.management.browser_framework.Browser;
 
 /**
  * Created by steve_su on 2017/7/20.
  */
 
-public class MediaMusic extends MediaType {
-    private static final String TAG = MediaMusic.class.getSimpleName();
-    private StoreJetCloudData mModel;
+public class MediaMusic extends MediaGeneral {
 
     MediaMusic(Context context) {
         super(context);
-        mActivity.mPath = "/twonky/";
         mModel = StoreJetCloudData.MUSIC;
+        mRequestControl = new RequestMusic(mActivity);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        menu.clear();
+        MenuInflater inflater = mActivity.getMenuInflater();
+
+        if ("view_all".equals(mRequestControl.getAPIName(mActivity.mPath)) ||
+                "get_music".equals(mRequestControl.getAPIName(mActivity.mPath))) {
+            inflater.inflate(R.menu.option_menu_music_file, menu);
+        } else {
+            inflater.inflate(R.menu.option_menu_music_index, menu);
+        }
+
+        super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -28,15 +41,19 @@ public class MediaMusic extends MediaType {
         switch (id) {
             case R.id.option_menu_all_tracks:
                 viewAllTrack();
+                mModel.setViewPreference(mContext, 0);
                 return true;
             case R.id.option_menu_artist:
                 viewByArtist();
+                mModel.setViewPreference(mContext, 1);
                 return true;
             case R.id.option_menu_album:
                 viewByAlbum();
+                mModel.setViewPreference(mContext, 2);
                 return true;
             case R.id.option_menu_genre:
                 viewByGenre();
+                mModel.setViewPreference(mContext, 3);
                 return true;
             case R.id.option_menu_select:
                 doSelect();
@@ -44,21 +61,21 @@ public class MediaMusic extends MediaType {
             case R.id.option_menu_select_all:
                 doSelectAll();
                 return true;
+            case R.id.option_menu_refresh:
+                mRequestControl.refresh(true);
+                return true;
         }
         return false;
     }
 
     @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        menu.clear();
-        MenuInflater inflater = mActivity.getMenuInflater();
-        inflater.inflate(R.menu.option_menu_music, menu);
+    protected Browser.LayoutType onViewAllLayout() {
+        return Browser.LayoutType.LIST;
     }
 
     @Override
-    public void load(int position) {
+    public void onPageChanged() {
         int menuPosition = mModel.getViewPreference(mContext);
-        Log.d(TAG, "menuPosition: "+ menuPosition+ " ==========================================");
         switch (menuPosition) {
             case 0:
                 viewAllTrack();
@@ -71,23 +88,31 @@ public class MediaMusic extends MediaType {
                 break;
             case 3:
                 viewByGenre();
+                break;
         }
+
+    }
+
+    @Override
+    public void lazyLoad() {
+        mRequestControl.lazyLoad();
     }
 
     private void viewAllTrack() {
-        viewAll();
+        mRequestControl.viewAll();
     }
 
     private void viewByArtist() {
-
+        mRequestControl.viewByArtist();
     }
 
     private void viewByAlbum() {
-
+        mRequestControl.viewByAlbum();
     }
 
     private void viewByGenre() {
-
+        mRequestControl.viewByGenre();
     }
+
 
 }

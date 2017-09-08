@@ -195,18 +195,7 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
     private void startFileManageActivity() {
         mTextView.clearAnimation();
         Intent intent = new Intent();
-
-
-        Class navigationClass = FileManageActivity.class;
-        Server server = ServerManager.INSTANCE.getCurrentServer();
-        ServerInfo info = server.getServerInfo();
-        NASPref.setFirmwareVersion(this, info.firmwareVer);
-        int firmwareVer = Integer.valueOf(info.firmwareVer);
-        if (firmwareVer >= NASPref.useBrowserMinFirmwareVersion) {
-//            navigationClass = BrowserActivity.class;
-        }
-
-        intent.setClass(AutoLinkActivity.this, navigationClass);
+        intent.setClass(AutoLinkActivity.this, NASUtils.getFileManageClass());
         startActivity(intent);
         finish();
     }

@@ -117,6 +117,8 @@ public abstract class GeneralPostLoader extends AsyncTaskLoader<Boolean> {
 
     protected abstract String onTagName();
 
-    protected abstract boolean onRequestFinish();
+    protected boolean onRequestFinish() {
+        return false;
+    }
 
 }

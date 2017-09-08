@@ -294,6 +294,7 @@
 
     <string name="option_menu_all_photo">View all photos</string>
     <string name="option_menu_date">View by date</string>
+    <string name="option_menu_folder">View by folder</string>
     <string name="option_menu_album">View by album</string>
     <string name="option_menu_select">Select</string>
     <string name="option_menu_select_all">Select all</string>

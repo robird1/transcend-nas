@@ -43,6 +43,15 @@ public class SmbFileCopyLoader extends SmbAbstractLoader {
         return false;
     }
 
+    @Override
+    protected void updateResult(String result, String destination) {
+        if(isLoadInBackgroundCanceled()) {
+            return;
+        }
+
+        CustomNotificationManager.updateResult(getContext(), mNotificationID, getType(), result, destination, true);
+    }
+
     private boolean copy() throws MalformedURLException, SmbException {
         for (String path : mSrcs) {
             if(isLoadInBackgroundCanceled())

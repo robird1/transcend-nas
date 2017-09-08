@@ -2,47 +2,57 @@ package com.transcend.nas.management.browser;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.Toast;
 
-import com.transcend.nas.management.FileInfo;
-import com.transcend.nas.management.FileManageRecyclerAdapter;
+import com.transcend.nas.R;
 import com.transcend.nas.management.browser_framework.Browser;
 import com.transcend.nas.management.browser_framework.BrowserData;
 import com.transcend.nas.management.browser_framework.MediaFragment;
 
 import java.util.ArrayList;
 
+import static com.transcend.nas.management.browser.RequestAction.TWONKY_CUSTOM;
+import static com.transcend.nas.management.browser.RequestAction.TWONKY_INDEX;
+import static com.transcend.nas.management.browser.RequestAction.TWONKY_VIEW_ALL;
+
 
 /**
  * Created by steve_su on 2017/7/10.
  */
 
-public class BrowserFragment extends Browser implements Browser.StateMonitor {
+public class BrowserFragment extends Browser implements LoaderManager.LoaderCallbacks<Boolean>, Browser.StateMonitor {
     static final String TAG = BrowserFragment.class.getSimpleName();
     private BrowserActivity mActivity;
+    private int mRunningLoaderID = -1;
+    private String mSystemPath;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-//        Log.d(TAG, "[Enter] onCreate");
         super.onCreate(savedInstanceState);
-
         mActivity = (BrowserActivity) getActivity();
+
+        // shared folder path
+        mSystemPath = "/home".concat(mActivity.mPath);
+
+        mActivity.mDrawerController.setDrawerIndicatorEnabled(true);
 
         setStateMonitor(this);
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-//        Log.d(TAG, "[Enter] onViewCreated");
         super.onViewCreated(view, savedInstanceState);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                Log.d(TAG, "\n\n[Enter] onRefresh");
-                load(getTabPosition());
+                mActivity.mMediaControl.refresh(false);
             }
         });
         mProgressView.setVisibility(View.INVISIBLE);
@@ -56,53 +66,160 @@ public class BrowserFragment extends Browser implements Browser.StateMonitor {
 
     @Override
     public Loader onCreateLoader(int id, Bundle args) {
-        return mActivity.mMediaControl.onCreateLoader(id, args);
+        Loader loader = null;
+        if (id == TWONKY_VIEW_ALL) {
+            loader = new TwonkyViewAllLoader(getContext(), args);
+        } else if (id == TWONKY_INDEX) {
+            loader = new TwonkyIndexLoader(getContext(), args);
+        } else if (id == TWONKY_CUSTOM) {
+            loader = new TwonkyCustomLoader(getContext(), args);
+        }
+
+        if (loader != null) {
+            mRunningLoaderID = id;
+        }
+        return loader;
     }
 
     @Override
-    public void onLoadFinished(Loader loader, ArrayList data) {
-        super.onLoadFinished(loader, data);
+    public void onLoadFinished(Loader loader, Boolean isSuccess) {
+        mProgressView.setVisibility(View.INVISIBLE);
+        mSwipeRefreshLayout.setRefreshing(false);
 
-        mActivity.mMediaControl.onLoadFinished(loader, data);
+        if (!isSuccess) {
+            Toast.makeText(mActivity, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (loader instanceof TwonkyViewAllLoader) {
+            updateUIViewAll(loader);
+
+        } else if (loader instanceof TwonkyIndexLoader) {
+            updateUIIndex(loader);
+
+        } else if (loader instanceof TwonkyCustomLoader) {
+            updateUICustom(loader);
+        }
+
+        mActivity.checkEmptyView();
+    }
+
+    private void updateUICustom(Loader loader) {
+        BrowserRecyclerAdapter adapter = (BrowserRecyclerAdapter) getRecyclerViewAdapter();
+        TwonkyCustomLoader ld = (TwonkyCustomLoader) loader;
+        adapter.updateList(ld.getFileList());
+        mActivity.mPath = ld.getPath();
+        mActivity.mFileList = new ArrayList<>(ld.getFileList());
+        changeViewLayout(mActivity.mMediaControl.onViewAllLayout(), false);
+        mActivity.invalidateOptionsMenu();
+        mActivity.updateSpinner(ld.getPath());
+        mActivity.enableFabEdit(true);
+        adapter.notifyDataSetChanged();
+        BrowserData.getInstance(getTabPosition()).updateFileList(adapter.getList());
+        StoreJetCloudData.getInstance(getTabPosition()).setPath(mActivity.mPath);
+
+    }
+
+    private void updateUIIndex(Loader loader) {
+        BrowserRecyclerAdapter adapter = (BrowserRecyclerAdapter) getRecyclerViewAdapter();
+        TwonkyIndexLoader ld = (TwonkyIndexLoader) loader;
+        adapter.updateList(ld.getFileList());
+        mActivity.mPath = ld.getPath();
+        mActivity.mFileList = new ArrayList<>(ld.getFileList());
+        changeViewLayout(LayoutType.LIST, true);
+        mActivity.invalidateOptionsMenu();
+        mActivity.updateSpinner(ld.getPath());
+        mActivity.enableFabEdit(false);
+        adapter.notifyDataSetChanged();
+        BrowserData.getInstance(getTabPosition()).updateFileList(adapter.getList());
+        StoreJetCloudData.getInstance(getTabPosition()).setPath(mActivity.mPath);
+
+    }
+
+    private void updateUIViewAll(Loader loader) {
+        BrowserRecyclerAdapter adapter = (BrowserRecyclerAdapter) getRecyclerViewAdapter();
+        TwonkyViewAllLoader ld = (TwonkyViewAllLoader) loader;
+        mActivity.mPath = ld.getPath();
+
+        if (ld.getStartIndex() == 0) {
+            adapter.updateList(ld.getFileList());
+            mActivity.mFileList = new ArrayList<>(ld.getFileList());
+            changeViewLayout(mActivity.mMediaControl.onViewAllLayout(), false);
+            mActivity.invalidateOptionsMenu();
+            mActivity.updateSpinner(ld.getPath());
+            mActivity.enableFabEdit(true);
+
+        } else {  // lazy loading case
+            adapter.addFiles(ld.getFileList());
+            mActivity.mFileList.addAll(ld.getFileList());
+
+            if (mActivity.mIsSelectAll) {
+                mActivity.updateSelectAll();
+            }
+        }
+
+        int nextLoadingIndex = ld.nextLoadingIndex();
+        StoreJetCloudData.getInstance(getTabPosition()).setLoadingIndex(nextLoadingIndex);
+
+        adapter.notifyDataSetChanged();
+        BrowserData.getInstance(getTabPosition()).updateFileList(adapter.getList());
+        StoreJetCloudData.getInstance(getTabPosition()).setPath(mActivity.mPath);
+
     }
 
     @Override
     public void onLoaderReset(Loader loader) {
-        Log.d(TAG, "[Enter] onLoaderReset");
-
-    }
-
-    public void load(int position) {
-        Log.d(TAG, "[Enter] load(int position)");
-        FileManageRecyclerAdapter adapter = (FileManageRecyclerAdapter) getRecyclerViewAdapter();
-        if (adapter.getItemCount() > 0) {
-            adapter.updateList(new ArrayList<FileInfo>());
-            adapter.notifyDataSetChanged();
-        }
-
-        mActivity.mMediaControl.load(position);
+        //TODO
     }
 
     @Override
     protected void onPageChanged(int lastPosition, int currentPosition) {
+        mActivity.closeEditorMode();
         updateViewReference();
-        super.onPageChanged(lastPosition, currentPosition);
-//        updateViewReference();
+        mProgressView.setVisibility(View.INVISIBLE);
 
-        if (getLoaderManager().hasRunningLoaders()) {
-            Log.d(TAG, "[Enter] destroyLoader VIEW_ALL");
-
-            // TODO
-            getLoaderManager().destroyLoader(VIEW_ALL);
-        }
-
+        stopRunningLoader();
         boolean isFirstSwitch = getRecyclerViewAdapter().getItemCount() == 0;
         if (isFirstSwitch) {
-            Log.d(TAG, "[Enter] isFirstSwitch");
-            mProgressView.setVisibility(View.VISIBLE);
-            load(currentPosition);
+            mActivity.mMediaControl.onPageChanged();
+        }
+    }
+
+    @Override
+    public void onFinishCreateView(int position) {
+        if (position == 0 && getTabPosition() == 0) {          // TODO
+            updateViewReference();
         }
 
+        getRecyclerView().addOnScrollListener(new RecyclerScrollListener() {
+            @Override
+            public void onLoadMore(int current_page) {
+                int viewPreference = StoreJetCloudData.getInstance(getTabPosition()).getViewPreference(mActivity);
+                boolean isViewAll = viewPreference == 0;
+                if (isViewAll) {
+                    if (!BrowserSearchView.mIsSearchMode) {
+                        mActivity.mMediaControl.lazyLoad();
+                    } else {
+                        this.cancelLoadMore();
+                    }
+                } else {
+                    this.cancelLoadMore();
+                }
+            }
+        });
+
+    }
+
+    void stopRunningLoader() {
+        boolean hasRunningLoaders = getLoaderManager().hasRunningLoaders();
+        if (hasRunningLoaders) {
+            getLoaderManager().destroyLoader(mRunningLoaderID);
+            mRunningLoaderID = -1;
+        }
+    }
+
+    String getSystemPath() {
+        return mSystemPath;
     }
 
     private void updateViewReference() {
@@ -111,44 +228,37 @@ public class BrowserFragment extends Browser implements Browser.StateMonitor {
         mActivity.onProgressViewInit(this);
     }
 
-    @Override
-    public void onFinishCreateView(int position) {
-//        Log.d(TAG, "[Enter] onFinishCreateView");
+    private void changeViewLayout(LayoutType mode, boolean isForce) {
+        RecyclerView.LayoutManager lm = null;
+        if (isForce) {
+            if (mode == LayoutType.GRID) {
+                int spanCount = 3;
+                lm = new GridLayoutManager(getContext(), spanCount);
 
-        // TODO check this statement
-//        checkFirstSubFragment(position);
-        if (position == 0 && getTabPosition() == 0) {
-            updateViewReference();
+            } else {
+                lm = new LinearLayoutManager(getContext());
+            }
+
+        } else {
+            RecyclerView.LayoutManager currentLayout = getRecyclerView().getLayoutManager();
+            if (currentLayout instanceof GridLayoutManager) {
+                if (mode == LayoutType.LIST) {
+                    lm = new LinearLayoutManager(getContext());
+                }
+            } else if (currentLayout instanceof LinearLayoutManager) {
+                if (mode == LayoutType.GRID) {
+                    int spanCount = 3;
+                    lm = new GridLayoutManager(getContext(), spanCount);
+                }
+            }
         }
 
-//        getRecyclerView().addOnScrollListener(new FileManageScrollListener() {
-//            @Override
-//            public void onLoadMore(int current_page) {
-//                Log.d(TAG, "[Enter] onLoadMore fragment: "+ getCurrentFragment().getPosition());
-//                load(getTabPosition(), true);
-//            }
-//        });
-
-    }
-
-    public void viewALL() {
-        clearData();
-
-        StoreJetCloudData instance = StoreJetCloudData.getInstance(getTabPosition());
-        Bundle args = new Bundle();
-        args.putInt("start", 0);
-        args.putInt("type", instance.getTwonkyType());
-        getLoaderManager().restartLoader(VIEW_ALL, args, this);
-    }
-
-    public void lazyLoad() {
-        StoreJetCloudData instance = StoreJetCloudData.getInstance(getTabPosition());
-        Bundle args = new Bundle();
-        int startIndex = instance.getLoadingIndex();
-        Log.d(TAG, "startIndex: "+ startIndex);
-        args.putInt("start", startIndex);
-        args.putInt("type", instance.getTwonkyType());
-        getLoaderManager().restartLoader(VIEW_ALL, args, this);
+        if (lm != null) {
+            getRecyclerView().setLayoutManager(lm);
+            getRecyclerView().getRecycledViewPool().clear();
+            getRecyclerViewAdapter().notifyDataSetChanged();
+        }
+        BrowserData.getInstance(getTabPosition()).setLayout(mode);
     }
 
 }
