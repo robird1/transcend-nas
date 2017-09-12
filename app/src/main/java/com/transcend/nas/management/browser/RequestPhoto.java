@@ -33,6 +33,7 @@ class RequestPhoto extends RequestAction {
             args.putString("op", "get_photo");
             args.putString("api_args", arg);
             args.putString("path", path);
+            args.putBoolean("force_top", true);
             startLoader(TWONKY_CUSTOM, args);
 
         } else if ("get_photo_album".equals(apiName)) {

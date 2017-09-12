@@ -73,6 +73,10 @@ public abstract class RequestAction {
         viewAll(true);
     }
 
+    /**
+     * onPageChanged, refresh after file operation, option menu refresh, SwipeRefreshLayout
+     *
+     */
     void viewAll(boolean showProgress) {
 //        mFragment.clearData();
         StoreJetCloudData instance = StoreJetCloudData.getInstance(mFragment.getTabPosition());
@@ -80,6 +84,7 @@ public abstract class RequestAction {
         args.putInt("start", 0);
         args.putInt("type", instance.getTwonkyType());
         args.putString("path", "||view_all?".concat(String.valueOf(instance.getTwonkyType())));
+        args.putInt("count", instance.getListSize());
         setOrderBy(instance, args);
         startLoader(TWONKY_VIEW_ALL, args, showProgress);
     }

@@ -39,6 +39,7 @@ class RequestMusic extends RequestAction {
             args.putString("op", "get_music");
             args.putString("api_args", arg);
             args.putString("path", path);
+            args.putBoolean("force_top", true);
             startLoader(TWONKY_CUSTOM, args);
 
         } else if ("get_music_genre".equals(apiName)) {

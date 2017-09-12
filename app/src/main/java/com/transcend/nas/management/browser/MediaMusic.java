@@ -40,6 +40,7 @@ public class MediaMusic extends MediaGeneral {
         int id = item.getItemId();
         switch (id) {
             case R.id.option_menu_all_tracks:
+                mModel.setListSize(0);
                 viewAllTrack();
                 mModel.setViewPreference(mContext, 0);
                 return true;

@@ -20,6 +20,7 @@ public enum StoreJetCloudData {
     private int mLoadingIndex = 0;
     private String mPath;
     private boolean mIsFabEnabled;
+    private int mListSize;
 
     StoreJetCloudData(int tabPosition, int twonkyType, String viewKey) {
         mTabPosition = tabPosition;
@@ -71,6 +72,14 @@ public enum StoreJetCloudData {
 
     public boolean getFabEnabled() {
         return mIsFabEnabled;
+    }
+
+    public void setListSize(int size) {
+        mListSize = size;
+    }
+
+    public int getListSize() {
+        return mListSize;
     }
 
 }

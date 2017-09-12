@@ -31,6 +31,11 @@ public abstract class RecyclerScrollListener extends RecyclerView.OnScrollListen
                 return;
             }
 
+            if (mTotalItemCount < mPreviousTotal) {
+                reset();
+                return;
+            }
+
             if (mLoading) {
                 if (mTotalItemCount > mPreviousTotal) {
                     mLoading = false;
@@ -65,5 +70,14 @@ public abstract class RecyclerScrollListener extends RecyclerView.OnScrollListen
     public void cancelLoadMore() {
         mCurrentPage--;
         mLoading = false;
+    }
+
+    private void reset() {
+        mPreviousTotal = 0;
+        mLoading = true;
+        mFirstVisibleItem = 0;
+        mVisibleItemCount= 0;
+        mTotalItemCount = 0;
+        mCurrentPage = 1;
     }
 }

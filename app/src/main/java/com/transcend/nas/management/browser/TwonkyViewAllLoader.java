@@ -19,7 +19,8 @@ import java.util.ArrayList;
 
 class TwonkyViewAllLoader extends TwonkyGeneralPostLoader {
     private static final String TAG = TwonkyViewAllLoader.class.getSimpleName();
-    private static final int COUNT = 100;
+    private static final int COUNT_LAZY_LOAD = 100;
+    private int mCount;
     private int mStart;
     private int mLoadedCount;
     private boolean mIsLoadingFinish = false;
@@ -78,9 +79,9 @@ class TwonkyViewAllLoader extends TwonkyGeneralPostLoader {
             }
             setFileList(list);
 
-            if (mLoadedCount < COUNT) {
-                mIsLoadingFinish = true;
-            }
+//            if (mLoadedCount < COUNT) {
+//                mIsLoadingFinish = true;
+//            }
 
             return true;
 
@@ -109,8 +110,13 @@ class TwonkyViewAllLoader extends TwonkyGeneralPostLoader {
         String systemPath = args.getString("system_path");
         // twonky path
         mPath = args.getString("path", "");
+        mCount = args.getInt("count");
 
-        return "hash=" + getHash() + "&fmt=json&start=" + mStart + "&count=" + COUNT +
+        if (mCount == 0) {
+            mCount = COUNT_LAZY_LOAD;
+        }
+        
+        return "hash=" + getHash() + "&fmt=json&start=" + mStart + "&count=" + mCount +
                 "&login=" + userName + "&path="+ systemPath+ "&type=" + type + "&orderby="+ orderby;
     }
 

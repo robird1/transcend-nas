@@ -110,6 +110,16 @@ public abstract class Browser extends Fragment {
         return mPagerAdapter.getRegisteredFragment(mViewPager.getCurrentItem());
     }
 
+    /**
+     * Get the fragment of certain tab.
+     *
+     * @param position
+     * @return
+     */
+    public MediaFragment getFragment(int position) {
+        return mPagerAdapter.getRegisteredFragment(position);
+    }
+
     public RecyclerView getRecyclerView() {
         return getCurrentFragment().getRecyclerView();
     }

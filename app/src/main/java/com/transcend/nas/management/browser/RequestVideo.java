@@ -25,6 +25,7 @@ class RequestVideo extends RequestAction {
             args.putString("op", "get_video");
             args.putString("api_args", "folder="+ fileInfo.twonkyFolderPath);
             args.putString("path", path);
+            args.putBoolean("force_top", true);
             startLoader(TWONKY_CUSTOM, args);
         }
     }

@@ -19,12 +19,14 @@ public class TwonkyCustomLoader extends TwonkyGeneralPostLoader {
     private String mPath;
     private String mOperation;
     private String mApiArgs;
+    private boolean mForceTop;
 
     TwonkyCustomLoader(Context context, Bundle args) {
         super(context, args);
         mOperation = args.getString("op");
         mApiArgs = args.getString("api_args");
         mPath = args.getString("path");
+        mForceTop = args.getBoolean("force_top", false);
     }
 
     @Override
@@ -71,6 +73,10 @@ public class TwonkyCustomLoader extends TwonkyGeneralPostLoader {
 
     public String getPath() {
         return mPath;
+    }
+
+    public boolean isForceTop() {
+        return mForceTop;
     }
 
 }

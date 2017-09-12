@@ -110,7 +110,7 @@ public class BrowserFragment extends Browser implements LoaderManager.LoaderCall
         adapter.updateList(ld.getFileList());
         mActivity.mPath = ld.getPath();
         mActivity.mFileList = new ArrayList<>(ld.getFileList());
-        changeViewLayout(mActivity.mMediaControl.onViewAllLayout(), false);
+        updateLayout(mActivity.mMediaControl.onViewAllLayout(), ld.isForceTop());
         mActivity.invalidateOptionsMenu();
         mActivity.updateSpinner(ld.getPath());
         mActivity.enableFabEdit(true);
@@ -126,7 +126,7 @@ public class BrowserFragment extends Browser implements LoaderManager.LoaderCall
         adapter.updateList(ld.getFileList());
         mActivity.mPath = ld.getPath();
         mActivity.mFileList = new ArrayList<>(ld.getFileList());
-        changeViewLayout(LayoutType.LIST, true);
+        updateLayout(LayoutType.LIST, true);
         mActivity.invalidateOptionsMenu();
         mActivity.updateSpinner(ld.getPath());
         mActivity.enableFabEdit(false);
@@ -144,7 +144,7 @@ public class BrowserFragment extends Browser implements LoaderManager.LoaderCall
         if (ld.getStartIndex() == 0) {
             adapter.updateList(ld.getFileList());
             mActivity.mFileList = new ArrayList<>(ld.getFileList());
-            changeViewLayout(mActivity.mMediaControl.onViewAllLayout(), false);
+            updateLayout(mActivity.mMediaControl.onViewAllLayout(), false);
             mActivity.invalidateOptionsMenu();
             mActivity.updateSpinner(ld.getPath());
             mActivity.enableFabEdit(true);
@@ -160,6 +160,7 @@ public class BrowserFragment extends Browser implements LoaderManager.LoaderCall
 
         int nextLoadingIndex = ld.nextLoadingIndex();
         StoreJetCloudData.getInstance(getTabPosition()).setLoadingIndex(nextLoadingIndex);
+        StoreJetCloudData.getInstance(getTabPosition()).setListSize(adapter.getList().size());
 
         adapter.notifyDataSetChanged();
         BrowserData.getInstance(getTabPosition()).updateFileList(adapter.getList());
@@ -191,22 +192,25 @@ public class BrowserFragment extends Browser implements LoaderManager.LoaderCall
             updateViewReference();
         }
 
-        getRecyclerView().addOnScrollListener(new RecyclerScrollListener() {
-            @Override
-            public void onLoadMore(int current_page) {
-                int viewPreference = StoreJetCloudData.getInstance(getTabPosition()).getViewPreference(mActivity);
-                boolean isViewAll = viewPreference == 0;
-                if (isViewAll) {
-                    if (!BrowserSearchView.mIsSearchMode) {
-                        mActivity.mMediaControl.lazyLoad();
+        MediaFragment fragment = getFragment(position);
+        if (fragment != null) {
+            fragment.getRecyclerView().addOnScrollListener(new RecyclerScrollListener() {
+                @Override
+                public void onLoadMore(int current_page) {
+                    int viewPreference = StoreJetCloudData.getInstance(getTabPosition()).getViewPreference(mActivity);
+                    boolean isViewAll = viewPreference == 0;
+                    if (isViewAll) {
+                        if (!BrowserSearchView.mIsSearchMode) {
+                            mActivity.mMediaControl.lazyLoad();
+                        } else {
+                            this.cancelLoadMore();
+                        }
                     } else {
                         this.cancelLoadMore();
                     }
-                } else {
-                    this.cancelLoadMore();
                 }
-            }
-        });
+            });
+        }
 
     }
 
@@ -228,7 +232,12 @@ public class BrowserFragment extends Browser implements LoaderManager.LoaderCall
         mActivity.onProgressViewInit(this);
     }
 
-    private void changeViewLayout(LayoutType mode, boolean isForce) {
+    /**
+     *
+     * @param mode
+     * @param isForce : true if the first visible item is the first item of RecyclerView.
+     */
+    private void updateLayout(LayoutType mode, boolean isForce) {
         RecyclerView.LayoutManager lm = null;
         if (isForce) {
             if (mode == LayoutType.GRID) {
