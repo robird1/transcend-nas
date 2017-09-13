@@ -1,10 +1,13 @@
 package com.transcend.nas.management.browser;
 
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -12,6 +15,8 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AutoCompleteTextView;
+import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.transcend.nas.NASApp;
@@ -24,12 +29,10 @@ import com.transcend.nas.management.FileManageRecyclerListener;
 import com.transcend.nas.management.SmbFileListLoader;
 import com.transcend.nas.management.browser_framework.BrowserData;
 import com.transcend.nas.management.browser_framework.MediaFragment;
-import com.transcend.nas.management.externalstorage.ExternalStorageController;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
-
-import static android.R.attr.mode;
 
 /**
  * Created by steve_su on 2017/6/3.
@@ -39,8 +42,10 @@ public class BrowserActivity extends FileManageActivity {
     private static final int FRAGMENT_COUNT_ONE = 1;
     private static final int FRAGMENT_COUNT_TWO = 2;
     MediaController mMediaControl;
-    int mTabPosition;
     boolean mIsSelectAll = false;
+    private int mTabPosition;
+    private MenuItem mMenuSearchItem;
+    private BrowserSearchView mSearchView;
 
     @Override
     public int onLayoutID() {
@@ -91,6 +96,7 @@ public class BrowserActivity extends FileManageActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        collapseSearchView();
         boolean isConsumed = super.onOptionsItemSelected(item);
         if (!isConsumed) {
             return mMediaControl.optionsItemSelected(item);
@@ -252,7 +258,7 @@ public class BrowserActivity extends FileManageActivity {
         if (mTabPosition == BrowserData.ALL.getTabPosition()) {
             super.initMenu(menu);
         } else {
-            mMediaControl.onCreateActionMode(menu);
+            getMenuInflater().inflate(R.menu.twonky_editor, menu);
         }
     }
 
@@ -267,6 +273,27 @@ public class BrowserActivity extends FileManageActivity {
         super.toggleSelectAll();
         int count = getSelectedCount();
         mIsSelectAll = (count != 0) && (count == mFileList.size());
+    }
+
+    @Override
+    protected void selectAtPosition(int position) {
+        boolean checked = mRecyclerAdapter.getList().get(position).checked;
+        mRecyclerAdapter.getList().get(position).checked = !checked;
+        mRecyclerAdapter.notifyItemChanged(position);
+        int count = getSelectedCount();
+        boolean selectAll = (count == mRecyclerAdapter.getList().size());
+        updateEditorModeTitle(count);
+        toggleEditorModeAction(count);
+        toggleFabSelectAll(selectAll);
+    }
+
+    @Override
+    protected int getSelectedCount() {
+        int count = 0;
+        for (FileInfo file : mRecyclerAdapter.getList()) {
+            if (file.checked) count++;
+        }
+        return count;
     }
 
     void updateSelectAll() {
@@ -306,7 +333,7 @@ public class BrowserActivity extends FileManageActivity {
         mDropdownAdapter.notifyDataSetChanged();
     }
 
-    public void onRecyclerViewInit(MediaFragment fragment) {
+    void onRecyclerViewInit(MediaFragment fragment) {
         mRecyclerView = fragment.getRecyclerView();
         mRecyclerEmptyView = fragment.getRecyclerEmptyView();
         mRecyclerAdapter = (BrowserRecyclerAdapter) mRecyclerView.getAdapter();
@@ -347,6 +374,41 @@ public class BrowserActivity extends FileManageActivity {
         mProgressBar = fragment.mProgressBar;
         mRecyclerRefresh = fragment.mSwipeRefreshLayout;
         mActionHelper.setProgressLayout(mProgressView);
+    }
+
+    void configSearchView(Menu menu) {
+        mMenuSearchItem = menu.findItem(R.id.my_search);
+        // Get the SearchView and set the searchable configuration
+        mSearchView = (BrowserSearchView) mMenuSearchItem.getActionView();
+        mSearchView.setActivity(this);
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        // Assumes current activity is the searchable activity
+        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        mSearchView.setIconifiedByDefault(true);
+        mSearchView.setOnQueryTextListener(mSearchView);
+        MenuItemCompat.setOnActionExpandListener(mMenuSearchItem, mSearchView);
+    }
+
+    void configSearchCursor() {
+        AutoCompleteTextView searchTextView = (AutoCompleteTextView) mSearchView.findViewById(
+                android.support.v7.appcompat.R.id.search_src_text);
+        try {
+            Field mCursorDrawableRes = TextView.class.getDeclaredField("mCursorDrawableRes");
+            mCursorDrawableRes.setAccessible(true);
+
+            //This sets the cursor resource ID to 0 or @null which will make it visible on white background
+            mCursorDrawableRes.set(searchTextView, R.drawable.color_cursor);
+        } catch (Exception e) {
+            // do nothing
+        }
+    }
+
+    void collapseSearchView() {
+        if (mMenuSearchItem != null) {
+            if (mMenuSearchItem.isActionViewExpanded()) {
+                mMenuSearchItem.collapseActionView();
+            }
+        }
     }
 
     private void replaceFragment(Fragment fragment, String tag) {

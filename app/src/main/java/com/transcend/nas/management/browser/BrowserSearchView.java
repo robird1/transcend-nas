@@ -14,7 +14,7 @@ public class BrowserSearchView extends SearchView implements SearchView.OnQueryT
         MenuItemCompat.OnActionExpandListener {
 
     static boolean mIsSearchMode = false;
-    protected BrowserActivity mActivity;
+    private BrowserActivity mActivity;
 
     public BrowserSearchView(Context context) {
         super(context);

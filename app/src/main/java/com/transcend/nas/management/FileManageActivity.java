@@ -1140,7 +1140,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         mFab.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
     }
 
-    private void toggleFabSelectAll(boolean selectAll) {
+    protected void toggleFabSelectAll(boolean selectAll) {
         int resId = selectAll
                 ? R.drawable.ic_floating_unselectall_white
                 : R.drawable.ic_floating_selectall_white;

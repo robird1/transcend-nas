@@ -192,24 +192,8 @@ public class BrowserFragment extends Browser implements LoaderManager.LoaderCall
             updateViewReference();
         }
 
-        MediaFragment fragment = getFragment(position);
-        if (fragment != null) {
-            fragment.getRecyclerView().addOnScrollListener(new RecyclerScrollListener() {
-                @Override
-                public void onLoadMore(int current_page) {
-                    int viewPreference = StoreJetCloudData.getInstance(getTabPosition()).getViewPreference(mActivity);
-                    boolean isViewAll = viewPreference == 0;
-                    if (isViewAll) {
-                        if (!BrowserSearchView.mIsSearchMode) {
-                            mActivity.mMediaControl.lazyLoad();
-                        } else {
-                            this.cancelLoadMore();
-                        }
-                    } else {
-                        this.cancelLoadMore();
-                    }
-                }
-            });
+        if (position != BrowserData.ALL.getTabPosition()) {
+            addScrollListener(position);
         }
 
     }
@@ -227,9 +211,39 @@ public class BrowserFragment extends Browser implements LoaderManager.LoaderCall
     }
 
     private void updateViewReference() {
+        mActivity.collapseSearchView();
         MediaFragment fragment = getCurrentFragment();
         mActivity.onRecyclerViewInit(fragment);
         mActivity.onProgressViewInit(this);
+    }
+
+    private void addScrollListener(int position) {
+        MediaFragment fragment = getFragment(position);
+        if (fragment != null) {
+            fragment.getRecyclerView().addOnScrollListener(new RecyclerScrollListener() {
+                @Override
+                public void onLoadMore(int current_page) {
+                    if (isLoadMoreEnabled()) {
+                        mActivity.mMediaControl.lazyLoad();
+                    }
+                }
+
+                private boolean isLoadMoreEnabled() {
+                    int viewPreference = StoreJetCloudData.getInstance(getTabPosition()).getViewPreference(mActivity);
+                    boolean isViewAll = viewPreference == 0;
+                    if (isViewAll) {
+                        if (!BrowserSearchView.mIsSearchMode) {
+                            return true;
+                        } else {
+                            this.cancelLoadMore();
+                        }
+                    } else {
+                        this.cancelLoadMore();
+                    }
+                    return false;
+                }
+            });
+        }
     }
 
     /**

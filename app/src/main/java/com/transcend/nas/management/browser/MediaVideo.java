@@ -17,7 +17,6 @@ public class MediaVideo extends MediaGeneral {
         super(context);
         mModel = StoreJetCloudData.VIDEO;
         mRequestControl = new RequestVideo(mActivity);
-
     }
 
     @Override
@@ -72,14 +71,8 @@ public class MediaVideo extends MediaGeneral {
                 viewByFolder();
                 break;
         }
-
     }
-
-    @Override
-    public void lazyLoad() {
-        mRequestControl.lazyLoad();
-    }
-
+    
     private void viewAllVideo() {
         mRequestControl.viewAll();
     }

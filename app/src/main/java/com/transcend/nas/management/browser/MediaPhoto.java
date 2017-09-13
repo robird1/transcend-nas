@@ -90,12 +90,6 @@ public class MediaPhoto extends MediaGeneral {
                 viewByFolder();
                 break;
         }
-
-    }
-
-    @Override
-    public void lazyLoad() {
-        mRequestControl.lazyLoad();
     }
 
 }

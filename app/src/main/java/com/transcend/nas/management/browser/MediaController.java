@@ -53,10 +53,6 @@ public class MediaController {
         mControl.onPageChanged();
     }
 
-    public void onCreateActionMode(Menu menu) {
-        mControl.onCreateActionMode(menu);
-    }
-
     public void lazyLoad() {
         mControl.lazyLoad();
     }

@@ -121,7 +121,7 @@ public class BrowserRecyclerAdapter extends FileManageRecyclerAdapter implements
                 }
                 results.count = filterList.size();
                 results.values = filterList;
-            } else {                                               // TODO
+            } else {
                 results.count = mStringFilterList.size();
                 results.values = mStringFilterList;
             }
@@ -130,8 +130,7 @@ public class BrowserRecyclerAdapter extends FileManageRecyclerAdapter implements
         }
 
         @Override
-        protected void publishResults(CharSequence constraint,
-                                      FilterResults results) {
+        protected void publishResults(CharSequence constraint, FilterResults results) {
             mList = (ArrayList<FileInfo>) results.values;
             notifyDataSetChanged();
         }

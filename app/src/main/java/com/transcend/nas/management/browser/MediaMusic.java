@@ -70,7 +70,7 @@ public class MediaMusic extends MediaGeneral {
     }
 
     @Override
-    protected Browser.LayoutType onViewAllLayout() {
+    public Browser.LayoutType onViewAllLayout() {
         return Browser.LayoutType.LIST;
     }
 
@@ -91,12 +91,6 @@ public class MediaMusic extends MediaGeneral {
                 viewByGenre();
                 break;
         }
-
-    }
-
-    @Override
-    public void lazyLoad() {
-        mRequestControl.lazyLoad();
     }
 
     private void viewAllTrack() {
@@ -114,6 +108,5 @@ public class MediaMusic extends MediaGeneral {
     private void viewByGenre() {
         mRequestControl.viewByGenre();
     }
-
 
 }
