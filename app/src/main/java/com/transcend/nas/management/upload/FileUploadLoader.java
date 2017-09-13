@@ -99,13 +99,14 @@ public abstract class FileUploadLoader<T> extends SmbAbstractLoader {
 
             boolean success = false;
             SmbFile target = null;
+            String destination = getSmbUrl(mDest);
             if (isDirectory(src)) {
-                success = uploadDirectory(src, getSmbUrl(mDest));
+                success = uploadDirectory(src, destination);
             } else {
-                mUniqueName = createUniqueName(src, getSmbUrl(mDest));
+                mUniqueName = createUniqueName(src, destination);
                 mIS = createInputStream(src);
                 if (mUniqueName != null && mIS != null) {
-                    target = new SmbFile(getSmbUrl(mDest), mUniqueName);
+                    target = new SmbFile(destination, mUniqueName);
                     mOS = new BufferedOutputStream(target.getOutputStream());
                     success = upload(getType(), mUniqueName, mIS, mOS);
                 }
@@ -179,10 +180,10 @@ public abstract class FileUploadLoader<T> extends SmbAbstractLoader {
                 if (isDirectory(file)) {
                     uploadDirectory(file, path);
                 } else {
-                    mUniqueName = createUniqueName(file, getSmbUrl(mDest));
+                    mUniqueName = createUniqueName(file, path);
                     mIS = createInputStream(file);
                     if (mUniqueName != null && mIS != null) {
-                        target = new SmbFile(mUniqueName, getSmbUrl(mDest));
+                        target = new SmbFile(path, mUniqueName);
                         mOS = new BufferedOutputStream(target.getOutputStream());
                         success = upload(getType(), mUniqueName, mIS, mOS);
                     }
