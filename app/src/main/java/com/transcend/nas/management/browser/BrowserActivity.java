@@ -38,7 +38,7 @@ import java.util.ArrayList;
  * Created by steve_su on 2017/6/3.
  */
 
-public class BrowserActivity extends FileManageActivity {
+public class BrowserActivity extends FileManageActivity implements BrowserRecyclerAdapter.FilterNotify{
     private static final int FRAGMENT_COUNT_ONE = 1;
     private static final int FRAGMENT_COUNT_TWO = 2;
     MediaController mMediaControl;
@@ -275,27 +275,6 @@ public class BrowserActivity extends FileManageActivity {
         mIsSelectAll = (count != 0) && (count == mFileList.size());
     }
 
-    @Override
-    protected void selectAtPosition(int position) {
-        boolean checked = mRecyclerAdapter.getList().get(position).checked;
-        mRecyclerAdapter.getList().get(position).checked = !checked;
-        mRecyclerAdapter.notifyItemChanged(position);
-        int count = getSelectedCount();
-        boolean selectAll = (count == mRecyclerAdapter.getList().size());
-        updateEditorModeTitle(count);
-        toggleEditorModeAction(count);
-        toggleFabSelectAll(selectAll);
-    }
-
-    @Override
-    protected int getSelectedCount() {
-        int count = 0;
-        for (FileInfo file : mRecyclerAdapter.getList()) {
-            if (file.checked) count++;
-        }
-        return count;
-    }
-
     void updateSelectAll() {
         for (FileInfo file : mFileList)
             file.checked = true;
@@ -338,6 +317,7 @@ public class BrowserActivity extends FileManageActivity {
         mRecyclerEmptyView = fragment.getRecyclerEmptyView();
         mRecyclerAdapter = (BrowserRecyclerAdapter) mRecyclerView.getAdapter();
         mRecyclerAdapter.setOnRecyclerItemCallbackListener(this);
+        ((BrowserRecyclerAdapter) mRecyclerAdapter).setFilterListener(this);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.addOnScrollListener(new FileManageRecyclerListener(ImageLoader.getInstance(), true, false));
         mFileList = new ArrayList<>(mRecyclerAdapter.getList());
@@ -445,6 +425,11 @@ public class BrowserActivity extends FileManageActivity {
                 // do nothing
                 break;
         }
+    }
+
+    @Override
+    public void publishResults(ArrayList list) {
+        mFileList = list;
     }
 
 }

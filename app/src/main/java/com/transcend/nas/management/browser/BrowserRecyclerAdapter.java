@@ -19,15 +19,20 @@ import java.util.ArrayList;
  */
 
 public class BrowserRecyclerAdapter extends FileManageRecyclerAdapter implements Filterable {
-    ValueFilter valueFilter;
-    ArrayList<FileInfo> mStringFilterList;
+    private ValueFilter valueFilter;
+    private ArrayList<FileInfo> mStringFilterList;
+    private FilterNotify mListener;
+
+    interface FilterNotify {
+        void publishResults(ArrayList list);
+    }
 
     public BrowserRecyclerAdapter(Context context, ArrayList<FileInfo> list) {
         super(context, list);
     }
 
     @Override
-    public void updateList(ArrayList list) {
+    public void updateList(ArrayList<FileInfo> list) {
         super.updateList(list);
         mStringFilterList = list;
     }
@@ -70,9 +75,7 @@ public class BrowserRecyclerAdapter extends FileManageRecyclerAdapter implements
                     holder.indicate.setVisibility(View.GONE);
                 }
             }
-
         }
-
     }
 
     @NonNull
@@ -104,6 +107,10 @@ public class BrowserRecyclerAdapter extends FileManageRecyclerAdapter implements
         return valueFilter;
     }
 
+    void setFilterListener(FilterNotify listener) {
+        mListener = listener;
+    }
+
 
     private class ValueFilter extends Filter {
 
@@ -132,6 +139,9 @@ public class BrowserRecyclerAdapter extends FileManageRecyclerAdapter implements
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
             mList = (ArrayList<FileInfo>) results.values;
+            if (mListener != null) {
+                mListener.publishResults(mList);
+            }
             notifyDataSetChanged();
         }
 
