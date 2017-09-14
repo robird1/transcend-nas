@@ -24,7 +24,7 @@ public class TwonkyCustomLoader extends TwonkyGeneralPostLoader {
     TwonkyCustomLoader(Context context, Bundle args) {
         super(context, args);
         mOperation = args.getString("op");
-        mApiArgs = args.getString("api_args");
+        mApiArgs = "path="+ args.getString("system_path") + "&"+  args.getString("api_args");
         mPath = args.getString("path");
         mForceTop = args.getBoolean("force_top", false);
     }

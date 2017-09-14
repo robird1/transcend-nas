@@ -12,8 +12,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static android.text.TextUtils.concat;
-
 /**
  * Created by steve_su on 2017/8/9.
  */

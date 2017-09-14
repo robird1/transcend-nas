@@ -105,9 +105,7 @@ public abstract class RequestAction {
     }
 
     void startLoader(int loaderID, Bundle args, boolean showProgress) {
-        if (loaderID == TWONKY_VIEW_ALL || loaderID == TWONKY_INDEX) {
-            args.putString("system_path", URLEncoder.encode(mFragment.getSystemPath()));
-        }
+        args.putString("system_path", URLEncoder.encode(mFragment.getSystemPath()));
         mFragment.mProgressView.setVisibility(showProgress? View.VISIBLE : View.INVISIBLE);
         mFragment.stopRunningLoader();
         mFragment.getLoaderManager().restartLoader(loaderID, args, mFragment).forceLoad();

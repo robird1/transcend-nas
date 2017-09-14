@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
@@ -87,6 +89,20 @@ public class BrowserActivity extends FileManageActivity implements BrowserRecycl
             replaceFragment(new BrowserFragment(), BrowserFragment.TAG);
             doLoad(path);
         }
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        final int id = item.getItemId();
+        switch (id) {
+            case R.id.nav_storage:
+                BrowserFragment fragment = (BrowserFragment) getSupportFragmentManager().findFragmentByTag(BrowserFragment.TAG);
+                if (fragment != null) {
+                    backToRootFragment();
+                    return true;
+                }
+        }
+        return super.onNavigationItemSelected(item);
     }
 
     @Override
@@ -275,6 +291,11 @@ public class BrowserActivity extends FileManageActivity implements BrowserRecycl
         mIsSelectAll = (count != 0) && (count == mFileList.size());
     }
 
+    @Override
+    public void publishResults(ArrayList list) {
+        mFileList = list;
+    }
+
     void updateSelectAll() {
         for (FileInfo file : mFileList)
             file.checked = true;
@@ -427,9 +448,17 @@ public class BrowserActivity extends FileManageActivity implements BrowserRecycl
         }
     }
 
-    @Override
-    public void publishResults(ArrayList list) {
-        mFileList = list;
+    private void backToRootFragment() {
+        mDrawerController.closeDrawer();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                getSupportFragmentManager().popBackStackImmediate();
+                mPath = NASApp.ROOT_SMB;
+                doLoad(mPath);
+                mProgressView.setVisibility(View.INVISIBLE);
+            }
+        }, 280);
     }
 
 }
