@@ -132,6 +132,8 @@ public class OpenWithUploadHandler {
 //        Log.d(TAG, "source.getName(): "+ source.getName());
 
         SmbFile[] files = getDestinationDirFiles();
+        if(files == null)
+            return false;
 
         for (SmbFile file : files) {
             Log.d(TAG, "file.getName(): " + file.getName());
