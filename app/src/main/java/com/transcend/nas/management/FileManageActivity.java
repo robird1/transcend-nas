@@ -90,6 +90,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.transcend.nas.NASUtils.getMD5Checksum;
+import static com.transcend.nas.NASUtils.isAdmin;
 
 public class FileManageActivity extends DrawerMenuActivity implements
         FileManageDropdownAdapter.OnDropdownItemSelectedListener,
@@ -174,9 +175,9 @@ public class FileManageActivity extends DrawerMenuActivity implements
             initDownloadManager();
             onReceiveIntent(getIntent());
 
-//            if (isAdmin() && NASPref.getFirmwareNotify(this) == true) {
-//                checkFirmwareVersion();
-//            }
+            if (isAdmin() && NASPref.getFirmwareNotify(this) == true) {
+                checkFirmwareVersion();
+            }
         } else {
             startSignInActivity();
         }
@@ -827,7 +828,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
                 toggleDrawerCheckedItem();
 
                 if (!mCheckTimeSetting && mFileActionManager.isRemoteAction(mPath)
-                        && mFileActionManager.isTopDirectory(mPath) && NASUtils.isAdmin()) {
+                        && mFileActionManager.isTopDirectory(mPath) && isAdmin()) {
                     mCheckTimeSetting = true;
                     checkEmptyView();
                     mProgressBar.setVisibility(View.VISIBLE);

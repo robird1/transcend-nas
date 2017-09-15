@@ -14,7 +14,7 @@ public enum BrowserData {
     PHOTO(R.drawable.ic_browser_filetype_image, "view_mode_photo"),
     MUSIC(R.drawable.ic_browser_filetype_music, "view_mode_music"),
     VIDEO(R.drawable.ic_browser_filetype_video, "view_mode_video"),
-    FILE(R.drawable.ic_browser_filetype_video, "view_mode_file");
+    DOCUMENT(R.drawable.ic_browser_filetype_document, "view_mode_document");
 
     private final int mIconId;
     private final String mViewModeKey;

@@ -112,7 +112,7 @@ class TwonkyViewAllLoader extends TwonkyGeneralPostLoader {
         mPath = args.getString("path", "");
         mCount = args.getInt("count");
 
-        if (mCount == 0) {
+        if (mCount == 0 || mCount < COUNT_LAZY_LOAD) {
             mCount = COUNT_LAZY_LOAD;
         }
         

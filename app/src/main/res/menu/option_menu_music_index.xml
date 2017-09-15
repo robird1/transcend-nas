@@ -24,25 +24,21 @@
 
             <item
                 android:id="@+id/option_menu_all_tracks"
-                android:icon="@drawable/ic_toolbar_module_white"
                 android:title="@string/option_menu_all_tracks"
                 app:showAsAction="never" />
 
             <item
                 android:id="@+id/option_menu_artist"
-                android:icon="@drawable/ic_toolbar_module_white"
                 android:title="@string/option_menu_artist"
                 app:showAsAction="never" />
 
             <item
                 android:id="@+id/option_menu_album"
-                android:icon="@drawable/ic_toolbar_module_white"
                 android:title="@string/option_menu_album"
                 app:showAsAction="never" />
 
             <item
                 android:id="@+id/option_menu_genre"
-                android:icon="@drawable/ic_toolbar_module_white"
                 android:title="@string/option_menu_genre"
                 app:showAsAction="never" />
 

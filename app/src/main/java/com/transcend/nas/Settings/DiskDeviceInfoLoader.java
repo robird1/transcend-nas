@@ -168,7 +168,11 @@ public class DiskDeviceInfoLoader extends AsyncTaskLoader<Boolean> {
                             } else if (tagName.equals("device") && device != null) {
                                 //revise device model name
                                 if (device.raid != null) {
-                                    String model = device.infos.get("model") + " (" + device.raid.infos.get("level") + ")";
+//                                    String model = device.infos.get("model") + " (" + device.raid.infos.get("level") + ")";
+                                    String model = device.raid.infos.get("level");
+                                    if (model != null) {
+                                        model = model.toUpperCase();
+                                    }
                                     device.infos.put("model", model);
                                 }
                                 //calculate device total size

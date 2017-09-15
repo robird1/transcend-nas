@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -36,6 +37,8 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
+import static android.R.attr.fragment;
+
 /**
  * Created by steve_su on 2017/6/3.
  */
@@ -44,7 +47,6 @@ public class BrowserActivity extends FileManageActivity implements BrowserRecycl
     private static final int FRAGMENT_COUNT_ONE = 1;
     private static final int FRAGMENT_COUNT_TWO = 2;
     MediaController mMediaControl;
-    boolean mIsSelectAll = false;
     private int mTabPosition;
     private MenuItem mMenuSearchItem;
     private BrowserSearchView mSearchView;
@@ -246,12 +248,6 @@ public class BrowserActivity extends FileManageActivity implements BrowserRecycl
     }
 
     @Override
-    protected void enableFabEdit(boolean enabled) {
-        super.enableFabEdit(enabled);
-        StoreJetCloudData.getInstance(mTabPosition).setFabEnabled(enabled);
-    }
-
-    @Override
     public void onDropdownItemSelected(int position) {
         if (mTabPosition == BrowserData.ALL.getTabPosition()) {
             super.onDropdownItemSelected(position);
@@ -279,28 +275,27 @@ public class BrowserActivity extends FileManageActivity implements BrowserRecycl
     }
 
     @Override
-    public void onDestroyActionMode(ActionMode mode) {
-        super.onDestroyActionMode(mode);
-        mIsSelectAll = false;
+    protected void toggleFabSelectAll(boolean selectAll) {
+        if (mTabPosition == BrowserData.ALL.getTabPosition()) {
+            super.toggleFabSelectAll(selectAll);
+        } else {
+            mFab.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
-    public void toggleSelectAll() {
-        super.toggleSelectAll();
-        int count = getSelectedCount();
-        mIsSelectAll = (count != 0) && (count == mFileList.size());
+    protected void enableFabEdit(boolean enabled) {
+        if (mTabPosition == BrowserData.ALL.getTabPosition()) {
+            super.enableFabEdit(enabled);
+        } else {
+            mFab.setVisibility(View.INVISIBLE);
+        }
+//        StoreJetCloudData.getInstance(mTabPosition).setFabEnabled(enabled);
     }
 
     @Override
     public void publishResults(ArrayList list) {
         mFileList = list;
-    }
-
-    void updateSelectAll() {
-        for (FileInfo file : mFileList)
-            file.checked = true;
-
-        updateEditorModeTitle(mFileList.size());
     }
 
     /**
@@ -347,8 +342,8 @@ public class BrowserActivity extends FileManageActivity implements BrowserRecycl
         invalidateOptionsMenu();
         mPath = StoreJetCloudData.getInstance(mTabPosition).getPath();
         updateSpinner(mTabPosition);
-        boolean isFabEnabled = StoreJetCloudData.getInstance(mTabPosition).getFabEnabled();
-        enableFabEdit(isFabEnabled);
+//        boolean isFabEnabled = StoreJetCloudData.getInstance(mTabPosition).getFabEnabled();
+//        enableFabEdit(isFabEnabled);
     }
 
     void onRecyclerViewInit() {

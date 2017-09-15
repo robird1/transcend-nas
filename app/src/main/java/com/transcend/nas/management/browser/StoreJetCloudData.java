@@ -66,13 +66,13 @@ public enum StoreJetCloudData {
         return mPath;
     }
 
-    public void setFabEnabled(boolean isEnabled) {
-        mIsFabEnabled = isEnabled;
-    }
-
-    public boolean getFabEnabled() {
-        return mIsFabEnabled;
-    }
+//    public void setFabEnabled(boolean isEnabled) {
+//        mIsFabEnabled = isEnabled;
+//    }
+//
+//    public boolean getFabEnabled() {
+//        return mIsFabEnabled;
+//    }
 
     public void setListSize(int size) {
         mListSize = size;

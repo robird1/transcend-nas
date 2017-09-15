@@ -54,9 +54,9 @@ public class MediaPhoto extends MediaGeneral {
             case R.id.option_menu_select:
                 doSelect();
                 return true;
-            case R.id.option_menu_select_all:
-                doSelectAll();
-                return true;
+//            case R.id.option_menu_select_all:
+//                doSelectAll();
+//                return true;
             case R.id.option_menu_refresh:
                 mRequestControl.refresh(true);
                 return true;

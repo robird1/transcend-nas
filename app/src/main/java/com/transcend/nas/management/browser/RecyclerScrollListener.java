@@ -13,6 +13,7 @@ public abstract class RecyclerScrollListener extends RecyclerView.OnScrollListen
     private int mVisibleThreshold = 5; // The minimum amount of items to have below your current scroll position before loading more.
     private int mFirstVisibleItem, mVisibleItemCount, mTotalItemCount;
     private int mCurrentPage = 1;
+    private boolean mIsFirstWaiting;
 
     public RecyclerScrollListener() {
 
@@ -40,20 +41,44 @@ public abstract class RecyclerScrollListener extends RecyclerView.OnScrollListen
                 if (mTotalItemCount > mPreviousTotal) {
                     mLoading = false;
                     mPreviousTotal = mTotalItemCount;
+
+                } else {
+                    doWaitingProcess();
                 }
+
             } else {
                 if ((mTotalItemCount - mVisibleItemCount) <= (mFirstVisibleItem + mVisibleThreshold)) {
                     // End has been reached
                     mCurrentPage++;
                     mLoading = true;
-
+                    mIsFirstWaiting = true;
                     onLoadMore(mCurrentPage);
-
 //                    mLoading = true;
                 }
             }
         }
 
+    }
+
+    private void doWaitingProcess() {
+        if (mIsFirstWaiting) {
+            mIsFirstWaiting = false;
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(20000);
+
+                        if (mLoading == true) {
+                            mLoading = false;
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        }
     }
 
     private boolean isSwipeRefresh() {
@@ -80,4 +105,5 @@ public abstract class RecyclerScrollListener extends RecyclerView.OnScrollListen
         mTotalItemCount = 0;
         mCurrentPage = 1;
     }
+
 }

@@ -11,10 +11,13 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Toast;
 
+import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.R;
 import com.transcend.nas.management.browser_framework.Browser;
 import com.transcend.nas.management.browser_framework.BrowserData;
 import com.transcend.nas.management.browser_framework.MediaFragment;
+import com.transcend.nas.management.firmware.ShareFolderManager;
 
 import java.util.ArrayList;
 
@@ -39,7 +42,13 @@ public class BrowserFragment extends Browser implements LoaderManager.LoaderCall
         mActivity = (BrowserActivity) getActivity();
 
         // shared folder path
-        mSystemPath = "/home".concat(mActivity.mPath);
+        String realPath = ShareFolderManager.getInstance().getRealPath(mActivity.mPath);
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        String username = server.getUsername();
+        if (mActivity.mPath.equals(realPath) && mActivity.mPath.startsWith("/" + username + "/"))
+            realPath = "/home" + mActivity.mPath;
+
+        mSystemPath = realPath;
 
         mActivity.mDrawerController.setDrawerIndicatorEnabled(true);
 
@@ -113,7 +122,7 @@ public class BrowserFragment extends Browser implements LoaderManager.LoaderCall
         updateLayout(mActivity.mMediaControl.onViewAllLayout(), ld.isForceTop());
         mActivity.invalidateOptionsMenu();
         mActivity.updateSpinner(ld.getPath());
-        mActivity.enableFabEdit(true);
+//        mActivity.enableFabEdit(true);
         adapter.notifyDataSetChanged();
         BrowserData.getInstance(getTabPosition()).updateFileList(adapter.getList());
         StoreJetCloudData.getInstance(getTabPosition()).setPath(mActivity.mPath);
@@ -129,7 +138,7 @@ public class BrowserFragment extends Browser implements LoaderManager.LoaderCall
         updateLayout(LayoutType.LIST, true);
         mActivity.invalidateOptionsMenu();
         mActivity.updateSpinner(ld.getPath());
-        mActivity.enableFabEdit(false);
+//        mActivity.enableFabEdit(false);
         adapter.notifyDataSetChanged();
         BrowserData.getInstance(getTabPosition()).updateFileList(adapter.getList());
         StoreJetCloudData.getInstance(getTabPosition()).setPath(mActivity.mPath);
@@ -147,15 +156,11 @@ public class BrowserFragment extends Browser implements LoaderManager.LoaderCall
             updateLayout(mActivity.mMediaControl.onViewAllLayout(), false);
             mActivity.invalidateOptionsMenu();
             mActivity.updateSpinner(ld.getPath());
-            mActivity.enableFabEdit(true);
+//            mActivity.enableFabEdit(true);
 
         } else {  // lazy loading case
             adapter.addFiles(ld.getFileList());
             mActivity.mFileList.addAll(ld.getFileList());
-
-            if (mActivity.mIsSelectAll) {
-                mActivity.updateSelectAll();
-            }
         }
 
         int nextLoadingIndex = ld.nextLoadingIndex();
@@ -176,6 +181,11 @@ public class BrowserFragment extends Browser implements LoaderManager.LoaderCall
     @Override
     protected void onPageChanged(int lastPosition, int currentPosition) {
         mActivity.closeEditorMode();
+        if (getTabPosition() == BrowserData.ALL.getTabPosition()) {
+            mActivity.enableFabEdit(true);
+        } else {
+            mActivity.enableFabEdit(false);
+        }
         updateViewReference();
         mProgressView.setVisibility(View.INVISIBLE);
 
@@ -190,6 +200,7 @@ public class BrowserFragment extends Browser implements LoaderManager.LoaderCall
     public void onFinishCreateView(int position) {
         if (position == 0 && getTabPosition() == 0) {          // TODO
             updateViewReference();
+            mActivity.checkEmptyView();
         }
 
         if (position != BrowserData.ALL.getTabPosition()) {

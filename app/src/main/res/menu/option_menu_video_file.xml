@@ -24,31 +24,27 @@
 
             <item
                 android:id="@+id/option_menu_all_videos"
-                android:icon="@drawable/ic_toolbar_sort_white"
                 android:title="@string/option_menu_all_videos"
                 app:showAsAction="never" />
 
             <item
                 android:id="@+id/option_menu_folder"
-                android:icon="@drawable/ic_toolbar_sort_white"
                 android:title="@string/option_menu_folder"
                 app:showAsAction="never" />
 
             <item
                 android:id="@+id/option_menu_select"
-                android:icon="@drawable/ic_toolbar_sort_white"
                 android:title="@string/option_menu_select"
                 app:showAsAction="never" />
 
-            <item
-                android:id="@+id/option_menu_select_all"
-                android:icon="@drawable/ic_toolbar_sort_white"
-                android:title="@string/option_menu_select_all"
-                app:showAsAction="never" />
+            <!--<item-->
+                <!--android:id="@+id/option_menu_select_all"-->
+                <!--android:icon="@drawable/ic_toolbar_sort_white"-->
+                <!--android:title="@string/option_menu_select_all"-->
+                <!--app:showAsAction="never" />-->
 
             <item
                 android:id="@+id/option_menu_refresh"
-                android:icon="@drawable/ic_toolbar_sync_white"
                 android:title="@string/refresh"
                 app:showAsAction="never" />
 

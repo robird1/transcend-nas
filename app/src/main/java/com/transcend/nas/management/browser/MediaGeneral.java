@@ -3,6 +3,7 @@ package com.transcend.nas.management.browser;
 import android.content.Context;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.transcend.nas.R;
 import com.transcend.nas.management.FileInfo;
@@ -69,9 +70,9 @@ public abstract class MediaGeneral {
         mActivity.startEditorMode();
     }
 
-    protected void doSelectAll() {
-        mActivity.startEditorMode();
-        mActivity.toggleSelectAll();
-    }
+//    protected void doSelectAll() {
+//        mActivity.startEditorMode();
+//        mActivity.toggleSelectAll();
+//    }
 
 }
