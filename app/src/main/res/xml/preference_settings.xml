@@ -37,11 +37,11 @@
             android:summary="@string/loading"
             android:title="@string/settings_firmware_version_title" />
 
-        <!--<Preference-->
-            <!--android:key="@string/pref_firmware_update"-->
-            <!--android:layout="@layout/preference_item"-->
-            <!--android:summary="@string/settings_firmware_summary_update"-->
-            <!--android:title="@string/dialog_firmware_title_notify" />-->
+        <Preference
+            android:key="@string/pref_firmware_update"
+            android:layout="@layout/preference_item"
+            android:summary="@string/settings_firmware_summary_update"
+            android:title="@string/dialog_firmware_title_notify" />
 
         <Preference
             android:key="@string/pref_device_info"
