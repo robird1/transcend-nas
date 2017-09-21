@@ -101,6 +101,7 @@ class RequestMusic extends RequestAction {
             args.putString("api_args", getAPIArgs(mActivity.mPath));
             args.putString("path", mActivity.mPath);
             startLoader(TWONKY_CUSTOM, args, showProgress);
+
         } else if ("get_music_genre".equals(apiName)) {
             args.putString("op", "get_music_genre");
             args.putString("path", mActivity.mPath);
@@ -109,6 +110,48 @@ class RequestMusic extends RequestAction {
         } else {  // View all music
             viewAll(showProgress);
         }
+    }
+
+    @Override
+    public void search(String text) {
+        String apiName = getAPIName(mActivity.mPath);
+        Bundle args = new Bundle();
+        if ("get_music_artists".equals(apiName) || "get_music_genre".equals(apiName)) {
+            // search under view by artist / view by genre
+            args.putInt("type", StoreJetCloudData.MUSIC.getTwonkyType());
+            args.putString("search_key", text);
+            startLoader(TWONKY_VIEW_ALL, args);
+
+        } else if ("get_music_album".equals(apiName)) {
+            String param = getAPIArgs(mActivity.mPath);
+            if (TextUtils.isEmpty(param)) {
+                // search under view by album
+                args.putInt("type", StoreJetCloudData.MUSIC.getTwonkyType());
+                args.putString("search_key", text);
+                startLoader(TWONKY_VIEW_ALL, args);
+
+            } else {
+                // search under (view by artist -> selected artist) / (view by genre -> selected genre)
+                args.putString("op", "get_music");
+                args.putString("api_args", getAPIArgs(mActivity.mPath));
+                args.putString("search_key", text);
+                startLoader(TWONKY_CUSTOM, args);
+            }
+
+        } else if ("get_music".equals(apiName)) {
+            // search under view by selected album
+            args.putString("op", "get_music");
+            args.putString("api_args", getAPIArgs(mActivity.mPath));
+            args.putString("search_key", text);
+            startLoader(TWONKY_CUSTOM, args);
+
+        } else {
+            // search under view all tracks
+            args.putInt("type", StoreJetCloudData.MUSIC.getTwonkyType());
+            args.putString("search_key", text);
+            startLoader(TWONKY_VIEW_ALL, args);
+        }
+
     }
 
     @Override

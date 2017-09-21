@@ -8,13 +8,6 @@
         app:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
         app:showAsAction="always"/>
 
-    <item android:id="@+id/my_search"
-        android:title="Search"
-        android:icon="@drawable/ic_toolbar_search_white"
-        app:showAsAction="always|collapseActionView"
-        app:actionViewClass="com.transcend.nas.management.browser.BrowserSearchView"
-        android:textCursorDrawable="@drawable/color_cursor"/>
-
     <item
         android:id="@+id/file_manage_viewer_action_more"
         android:icon="@drawable/ic_toolbar_more_white"
@@ -28,7 +21,7 @@
                 android:icon="@drawable/ic_toolbar_sync_white"
                 android:title="@string/refresh"
                 app:showAsAction="never" />
-            
+
             <item
                 android:id="@+id/file_manage_viewer_action_sort"
                 android:icon="@drawable/ic_toolbar_sort_white"

@@ -3,7 +3,6 @@ package com.transcend.nas.management.browser;
 import android.content.Context;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.transcend.nas.R;
 import com.transcend.nas.management.FileInfo;
@@ -22,11 +21,6 @@ public abstract class MediaGeneral {
     MediaGeneral(Context context) {
         mContext = context;
         mActivity = (BrowserActivity) context;
-    }
-
-    public boolean createOptionsMenu(Menu menu) {
-        mActivity.getMenuInflater().inflate(R.menu.option_menu_all_file, menu);
-        return true;
     }
 
     public void onPrepareOptionsMenu(Menu menu) {
@@ -52,6 +46,13 @@ public abstract class MediaGeneral {
 
     public void refresh(boolean showProgress) {
         mRequestControl.refresh(showProgress);
+    }
+
+    public void search(String text) {
+        if (!(mActivity.mFragment instanceof FragmentSearch)) {
+            mActivity.addFragment(new FragmentSearch());
+        }
+        mRequestControl.search(text);
     }
 
     public void onPageChanged() {

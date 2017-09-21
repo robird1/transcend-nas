@@ -3,7 +3,6 @@ package com.transcend.nas.management.browser;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
-import android.view.View;
 
 import com.transcend.nas.management.FileInfo;
 
@@ -17,13 +16,12 @@ public abstract class RequestAction {
     static final int TWONKY_VIEW_ALL = 168;
     static final int TWONKY_INDEX = 169;
     static final int TWONKY_CUSTOM = 170;
+    static final int SMB_SEARCH = 171;
     static final String PATH_TOKEN = "||";
     protected BrowserActivity mActivity;
-    protected BrowserFragment mFragment;
 
     RequestAction(BrowserActivity activity) {
         mActivity = activity;
-        mFragment = (BrowserFragment) mActivity.getSupportFragmentManager().findFragmentByTag(BrowserFragment.TAG);
     }
 
     static String getAPIName(String path) {
@@ -40,7 +38,6 @@ public abstract class RequestAction {
                 name = temp[0];
             }
         }
-
         return name;
     }
 
@@ -58,7 +55,6 @@ public abstract class RequestAction {
                 args = temp[1];
             }
         }
-
         return args;
     }
 
@@ -78,8 +74,7 @@ public abstract class RequestAction {
      *
      */
     void viewAll(boolean showProgress) {
-//        mFragment.clearData();
-        StoreJetCloudData instance = StoreJetCloudData.getInstance(mFragment.getTabPosition());
+        StoreJetCloudData instance = StoreJetCloudData.getInstance(mActivity.mTabPosition);
         Bundle args = new Bundle();
         args.putInt("start", 0);
         args.putInt("type", instance.getTwonkyType());
@@ -90,7 +85,7 @@ public abstract class RequestAction {
     }
 
     void lazyLoad() {
-        StoreJetCloudData instance = StoreJetCloudData.getInstance(mFragment.getTabPosition());
+        StoreJetCloudData instance = StoreJetCloudData.getInstance(mActivity.mTabPosition);
         Bundle args = new Bundle();
         int startIndex = instance.getLoadingIndex();
         args.putInt("start", startIndex);
@@ -105,14 +100,11 @@ public abstract class RequestAction {
     }
 
     void startLoader(int loaderID, Bundle args, boolean showProgress) {
-        args.putString("system_path", URLEncoder.encode(mFragment.getSystemPath()));
-        mFragment.mProgressView.setVisibility(showProgress? View.VISIBLE : View.INVISIBLE);
-        mFragment.stopRunningLoader();
-        mFragment.getLoaderManager().restartLoader(loaderID, args, mFragment).forceLoad();
+        mActivity.startLoader(loaderID, args, showProgress);
     }
 
     void stopLoader() {
-        mFragment.stopRunningLoader();
+        mActivity.stopLoader();
     }
 
     @NonNull
@@ -131,6 +123,7 @@ public abstract class RequestAction {
     abstract public void onRecyclerItemClick(FileInfo fileInfo);
     abstract public void onBackPressed();
     abstract public void refresh(boolean showProgress);
+    abstract public void search(String text);
 
     protected void viewByDate() {
 
@@ -151,6 +144,5 @@ public abstract class RequestAction {
     protected void viewByGenre() {
 
     }
-
 
 }

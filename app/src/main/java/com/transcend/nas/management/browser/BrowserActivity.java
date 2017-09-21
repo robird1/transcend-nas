@@ -8,10 +8,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.view.ActionMode;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.text.TextUtils;
@@ -22,6 +21,8 @@ import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASPref;
 import com.transcend.nas.R;
@@ -32,24 +33,33 @@ import com.transcend.nas.management.FileManageRecyclerListener;
 import com.transcend.nas.management.SmbFileListLoader;
 import com.transcend.nas.management.browser_framework.BrowserData;
 import com.transcend.nas.management.browser_framework.MediaFragment;
+import com.transcend.nas.management.firmware.ShareFolderManager;
 
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
-import static android.R.attr.fragment;
+import static com.transcend.nas.management.browser.BrowserSearchView.mIsSearchMode;
 
 /**
  * Created by steve_su on 2017/6/3.
  */
 
-public class BrowserActivity extends FileManageActivity implements BrowserRecyclerAdapter.FilterNotify{
+public class BrowserActivity extends FileManageActivity implements FragmentManager.OnBackStackChangedListener {
     private static final int FRAGMENT_COUNT_ONE = 1;
     private static final int FRAGMENT_COUNT_TWO = 2;
+    private static final int FRAGMENT_COUNT_THREE = 3;
     MediaController mMediaControl;
-    private int mTabPosition;
+    int mTabPosition;
+    Fragment mFragment;
+    String mSystemPath;
     private MenuItem mMenuSearchItem;
     private BrowserSearchView mSearchView;
+
+    interface FragmentLoader {
+        void startLoader(int loaderID, Bundle args);
+        void stopRunningLoader();
+    }
 
     @Override
     public int onLayoutID() {
@@ -62,7 +72,8 @@ public class BrowserActivity extends FileManageActivity implements BrowserRecycl
 
         String password = NASPref.getPassword(this);
         if (!TextUtils.isEmpty(password)) {
-            replaceFragment(new RootFragment(), RootFragment.TAG);
+            getSupportFragmentManager().addOnBackStackChangedListener(this);
+            replaceFragment(new FragmentSharedFolder(), FragmentSharedFolder.TAG);
 
             // TODO check this statement
             mMediaControl = new MediaController(this, BrowserData.ALL.getTabPosition());
@@ -81,24 +92,12 @@ public class BrowserActivity extends FileManageActivity implements BrowserRecycl
         }
     }
 
-    private void navigateToTarget(Intent intent) {
-        String path = intent.getStringExtra("path");
-        BrowserFragment fragment = (BrowserFragment) getSupportFragmentManager().findFragmentByTag(BrowserFragment.TAG);
-        if (fragment != null) {
-            fragment.setCurrentPage(BrowserData.ALL.getTabPosition());
-            doLoad(path);
-        } else {
-            replaceFragment(new BrowserFragment(), BrowserFragment.TAG);
-            doLoad(path);
-        }
-    }
-
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         final int id = item.getItemId();
         switch (id) {
             case R.id.nav_storage:
-                BrowserFragment fragment = (BrowserFragment) getSupportFragmentManager().findFragmentByTag(BrowserFragment.TAG);
+                FragmentBrowser fragment = (FragmentBrowser) getSupportFragmentManager().findFragmentByTag(FragmentBrowser.TAG);
                 if (fragment != null) {
                     backToRootFragment();
                     return true;
@@ -109,7 +108,8 @@ public class BrowserActivity extends FileManageActivity implements BrowserRecycl
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        return mMediaControl.createOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.option_menu_shared_folder, menu);
+        return true;
     }
 
     @Override
@@ -124,16 +124,10 @@ public class BrowserActivity extends FileManageActivity implements BrowserRecycl
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        mMediaControl.onPrepareOptionsMenu(menu);
+        if (!(mFragment instanceof FragmentSharedFolder)) {
+            mMediaControl.onPrepareOptionsMenu(menu);
+        }
         return true;
-    }
-
-    @Override
-    public Loader<Boolean> onCreateLoader(int id, Bundle args) {
-        Loader<Boolean> loader = mActionHelper.onCreateLoader(id, args);
-        if (loader instanceof SmbFileListLoader)
-            mSmbFileListLoader = (SmbFileListLoader) loader;
-        return loader;
     }
 
     @Override
@@ -142,11 +136,12 @@ public class BrowserActivity extends FileManageActivity implements BrowserRecycl
 
         if (success) {
             if (loader instanceof SmbFileListLoader) {
-                BrowserData.getInstance(BrowserData.ALL.getTabPosition()).updateFileList(mFileList);
-                StoreJetCloudData.getInstance(BrowserData.ALL.getTabPosition()).setPath(mPath);
+                if (!mIsSearchMode) {
+                    BrowserData.getInstance(BrowserData.ALL.getTabPosition()).updateFileList(mFileList);
+                    StoreJetCloudData.getInstance(BrowserData.ALL.getTabPosition()).setPath(mPath);
+                }
                 postCheckFragment();
 
-                // TODO check this statement
                 // Always enable the drawer indicator
                 mDrawerController.setDrawerIndicatorEnabled(true);
                 enableFabEdit(mFileActionManager.isDirectorySupportFileAction(mPath));
@@ -293,11 +288,6 @@ public class BrowserActivity extends FileManageActivity implements BrowserRecycl
 //        StoreJetCloudData.getInstance(mTabPosition).setFabEnabled(enabled);
     }
 
-    @Override
-    public void publishResults(ArrayList list) {
-        mFileList = list;
-    }
-
     /**
      * update spinner after switching between pages of ViewPager.
      *
@@ -313,8 +303,10 @@ public class BrowserActivity extends FileManageActivity implements BrowserRecycl
         mDropdownAdapter.updateList(mPath, mFileActionManager.getServiceMode());
         mDropdownAdapter.setOnDropdownItemSelectedListener(this);
         mDropdown = (AppCompatSpinner) findViewById(R.id.main_dropdown);
-        mDropdown.setAdapter(mDropdownAdapter);
-        mDropdown.setDropDownVerticalOffset(10);
+        if (mDropdown != null) {
+            mDropdown.setAdapter(mDropdownAdapter);
+            mDropdown.setDropDownVerticalOffset(10);
+        }
         mDropdownAdapter.notifyDataSetChanged();
     }
 
@@ -333,7 +325,6 @@ public class BrowserActivity extends FileManageActivity implements BrowserRecycl
         mRecyclerEmptyView = fragment.getRecyclerEmptyView();
         mRecyclerAdapter = (BrowserRecyclerAdapter) mRecyclerView.getAdapter();
         mRecyclerAdapter.setOnRecyclerItemCallbackListener(this);
-        ((BrowserRecyclerAdapter) mRecyclerAdapter).setFilterListener(this);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.addOnScrollListener(new FileManageRecyclerListener(ImageLoader.getInstance(), true, false));
         mFileList = new ArrayList<>(mRecyclerAdapter.getList());
@@ -357,7 +348,7 @@ public class BrowserActivity extends FileManageActivity implements BrowserRecycl
         updateSpinner(mTabPosition);
     }
 
-    void onProgressViewInit(RootFragment fragment) {
+    void onProgressViewInit(FragmentSharedFolder fragment) {
         mProgressView.setVisibility(View.INVISIBLE);
         mProgressView = fragment.mProgressView;
         mProgressBar = fragment.mProgressBar;
@@ -365,7 +356,7 @@ public class BrowserActivity extends FileManageActivity implements BrowserRecycl
         mActionHelper.setProgressLayout(mProgressView);
     }
 
-    void onProgressViewInit(BrowserFragment fragment) {
+    void onProgressViewInit(FragmentBrowser fragment) {
         mProgressView = fragment.mProgressView;
         mProgressBar = fragment.mProgressBar;
         mRecyclerRefresh = fragment.mSwipeRefreshLayout;
@@ -407,13 +398,65 @@ public class BrowserActivity extends FileManageActivity implements BrowserRecycl
         }
     }
 
-    private void replaceFragment(Fragment fragment, String tag) {
+    void closeSearchResult() {
+        if (mFragment instanceof FragmentSearch) {
+            getSupportFragmentManager().popBackStackImmediate();
+        }
+    }
+
+    void setSystemPath() {
+        // shared folder path
+        String realPath = ShareFolderManager.getInstance().getRealPath(mPath);
+        Server server = ServerManager.INSTANCE.getCurrentServer();
+        String username = server.getUsername();
+        if (mPath.equals(realPath) && mPath.startsWith("/" + username + "/")) {
+            realPath = "/home" + mPath;
+        }
+        mSystemPath = realPath;
+    }
+
+    void startLoader(int loaderID, Bundle args, boolean showProgress) {
+        mProgressView.setVisibility(showProgress? View.VISIBLE : View.INVISIBLE);
+        ((FragmentLoader) mFragment).startLoader(loaderID, args);
+    }
+
+    void stopLoader() {
+        ((FragmentLoader) mFragment).stopRunningLoader();
+    }
+
+    @Override
+    public void onBackStackChanged() {
+        mFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+    }
+
+    void replaceFragment(Fragment fragment, String tag) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 //        transaction.setCustomAnimations(R.anim.appear, 0);
         transaction.replace(R.id.fragment_container, fragment, tag);
         transaction.addToBackStack(null);
         transaction.commitAllowingStateLoss();
         getSupportFragmentManager().executePendingTransactions();
+    }
+
+    void addFragment(Fragment fragment) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+//        transaction.setCustomAnimations(R.anim.appear, 0);
+        transaction.add(R.id.fragment_container, fragment);
+        transaction.addToBackStack(null);
+        transaction.commitAllowingStateLoss();
+        getSupportFragmentManager().executePendingTransactions();
+    }
+
+    private void navigateToTarget(Intent intent) {
+        String path = intent.getStringExtra("path");
+        FragmentBrowser fragment = (FragmentBrowser) getSupportFragmentManager().findFragmentByTag(FragmentBrowser.TAG);
+        if (fragment != null) {
+            fragment.setCurrentPage(BrowserData.ALL.getTabPosition());
+            doLoad(path);
+        } else {
+            replaceFragment(new FragmentBrowser(), FragmentBrowser.TAG);
+            doLoad(path);
+        }
     }
 
     /**
@@ -423,19 +466,28 @@ public class BrowserActivity extends FileManageActivity implements BrowserRecycl
     private void postCheckFragment() {
         switch (getSupportFragmentManager().getBackStackEntryCount()) {
             case FRAGMENT_COUNT_ONE:
+                // change to browser view from shared folder list
                 boolean isNavigateFromRoot = NASApp.ROOT_SMB.equals(new File(mPath).getParent());
-
                 if (isNavigateFromRoot) {
-                    replaceFragment(new BrowserFragment(), BrowserFragment.TAG);
+                    replaceFragment(new FragmentBrowser(), FragmentBrowser.TAG);
                 }
                 break;
             case FRAGMENT_COUNT_TWO:
-                // back to root fragment
+                // back to shared folder list from browser view
                 if (NASApp.ROOT_SMB.equals(mPath)) {
                     getSupportFragmentManager().popBackStackImmediate();
                     updateScreen();
                     mProgressView.setVisibility(View.INVISIBLE);
                 }
+                break;
+            case FRAGMENT_COUNT_THREE:
+                // change the view of search result to browser view if user clicks a folder from
+                // the search result.
+                getSupportFragmentManager().popBackStackImmediate();
+                updateListView(false);
+                updateScreen();
+                mProgressView.setVisibility(View.INVISIBLE);
+                mIsSearchMode = false;
                 break;
             default:
                 // do nothing

@@ -26,12 +26,12 @@ public class BrowserSearchView extends SearchView implements SearchView.OnQueryT
 
     @Override
     public boolean onQueryTextSubmit(String query) {
+        mActivity.mMediaControl.search(query);
         return false;
     }
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        ((BrowserRecyclerAdapter) mActivity.mRecyclerAdapter).getFilter().filter(newText);
         return false;
     }
 
@@ -55,6 +55,7 @@ public class BrowserSearchView extends SearchView implements SearchView.OnQueryT
     @Override
     public boolean onMenuItemActionCollapse(MenuItem item) {
         mIsSearchMode = false;
+        mActivity.closeSearchResult();
         return true;
     }
 }

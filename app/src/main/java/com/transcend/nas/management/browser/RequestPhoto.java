@@ -107,6 +107,32 @@ class RequestPhoto extends RequestAction {
     }
 
     @Override
+    public void search(String text) {
+        String apiName = getAPIName(mActivity.mPath);
+        Bundle args = new Bundle();
+        if ("get_photo_years".equals(apiName) || "get_photo_album".equals(apiName)) {
+            // search under view by date / view by folder
+            args.putInt("type", StoreJetCloudData.PHOTO.getTwonkyType());
+            args.putString("search_key", text);
+            startLoader(TWONKY_VIEW_ALL, args);
+
+        } else if ("get_photo".equals(apiName) || "get_photo_months".equals(apiName)) {
+            // search under view by selected year / view by selected month / view by selected folder
+            args.putString("op", "get_photo");
+            args.putString("api_args", getAPIArgs(mActivity.mPath));
+            args.putString("search_key", text);
+            startLoader(TWONKY_CUSTOM, args);
+
+        } else {
+            // search under view all photos
+            args.putInt("type", StoreJetCloudData.PHOTO.getTwonkyType());
+            args.putString("search_key", text);
+            startLoader(TWONKY_VIEW_ALL, args);
+        }
+
+    }
+
+    @Override
     public void viewByDate() {
         Bundle args = new Bundle();
         args.putString("op", "get_photo_years");

@@ -21,10 +21,6 @@ public class MediaController {
         mControl = getInstance(position);
     }
 
-    public boolean createOptionsMenu(Menu menu) {
-        return mControl.createOptionsMenu(menu);
-    }
-
     public boolean optionsItemSelected(MenuItem item) {
         return mControl.optionsItemSelected(item);
     }
@@ -49,6 +45,10 @@ public class MediaController {
         mControl.refresh(showProgress);
     }
 
+    public void search(String text) {
+        mControl.search(text);
+    }
+
     public void onPageChanged() {
         mControl.onPageChanged();
     }
@@ -59,7 +59,7 @@ public class MediaController {
 
     private MediaGeneral getInstance(int position) {
         if (position == BrowserData.ALL.getTabPosition()) {
-            return new MediaAll(mContext);
+            return new MediaFolder(mContext);
         } else if (position == BrowserData.PHOTO.getTabPosition()) {
             return new MediaPhoto(mContext);
         } else if (position == BrowserData.MUSIC.getTabPosition()) {
@@ -67,6 +67,6 @@ public class MediaController {
         } else if (position == BrowserData.VIDEO.getTabPosition()) {
             return new MediaVideo(mContext);
         }
-        return new MediaAll(mContext);
+        return new MediaFolder(mContext);
     }
 }

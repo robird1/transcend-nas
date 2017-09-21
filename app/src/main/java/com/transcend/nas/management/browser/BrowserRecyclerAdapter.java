@@ -5,8 +5,6 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.Filter;
-import android.widget.Filterable;
 
 import com.transcend.nas.management.FileInfo;
 import com.transcend.nas.management.FileManageRecyclerAdapter;
@@ -18,14 +16,7 @@ import java.util.ArrayList;
  * Created by steve_su on 2017/8/17.
  */
 
-public class BrowserRecyclerAdapter extends FileManageRecyclerAdapter implements Filterable {
-    private ValueFilter valueFilter;
-    private ArrayList<FileInfo> mStringFilterList;
-    private FilterNotify mListener;
-
-    interface FilterNotify {
-        void publishResults(ArrayList list);
-    }
+public class BrowserRecyclerAdapter extends FileManageRecyclerAdapter {
 
     public BrowserRecyclerAdapter(Context context, ArrayList<FileInfo> list) {
         super(context, list);
@@ -34,7 +25,6 @@ public class BrowserRecyclerAdapter extends FileManageRecyclerAdapter implements
     @Override
     public void updateList(ArrayList<FileInfo> list) {
         super.updateList(list);
-        mStringFilterList = list;
     }
 
     @Override
@@ -97,54 +87,6 @@ public class BrowserRecyclerAdapter extends FileManageRecyclerAdapter implements
             }
         }
         return unit;
-    }
-
-    @Override
-    public Filter getFilter() {
-        if (valueFilter == null) {
-            valueFilter = new ValueFilter();
-        }
-        return valueFilter;
-    }
-
-    void setFilterListener(FilterNotify listener) {
-        mListener = listener;
-    }
-
-
-    private class ValueFilter extends Filter {
-
-        @Override
-        protected FilterResults performFiltering(CharSequence constraint) {
-            FilterResults results = new FilterResults();
-
-            if (constraint != null && constraint.length() > 0) {
-                ArrayList<FileInfo> filterList = new ArrayList<>();
-                for (int i = 0; i < mStringFilterList.size(); i++) {
-                    String name = mStringFilterList.get(i).name.toUpperCase();
-                    if (name.contains(constraint.toString().toUpperCase())) {
-                        filterList.add(mStringFilterList.get(i));
-                    }
-                }
-                results.count = filterList.size();
-                results.values = filterList;
-            } else {
-                results.count = mStringFilterList.size();
-                results.values = mStringFilterList;
-            }
-            return results;
-
-        }
-
-        @Override
-        protected void publishResults(CharSequence constraint, FilterResults results) {
-            mList = (ArrayList<FileInfo>) results.values;
-            if (mListener != null) {
-                mListener.publishResults(mList);
-            }
-            notifyDataSetChanged();
-        }
-
     }
 
 }

@@ -111,8 +111,8 @@ public class FileManageActivity extends DrawerMenuActivity implements
     public LinearLayout mRecyclerEmptyView;
     public FileManageRecyclerAdapter mRecyclerAdapter;
     protected FloatingActionButton mFab;
-    protected RelativeLayout mProgressView;
-    protected ProgressBar mProgressBar;
+    public RelativeLayout mProgressView;
+    public ProgressBar mProgressBar;
     protected Snackbar mSnackbar;
     protected ActionMode mEditorMode;
     protected RelativeLayout mEditorModeView;
@@ -797,7 +797,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
         Loader<Boolean> loader = mActionHelper.onCreateLoader(id, args);
         if (loader instanceof SmbFileListLoader)
             mSmbFileListLoader = (SmbFileListLoader) loader;
-        if (mRecyclerRefresh.isRefreshing())
+        if (mRecyclerRefresh != null && mRecyclerRefresh.isRefreshing())
             mProgressBar.setVisibility(View.INVISIBLE);
         return loader;
     }

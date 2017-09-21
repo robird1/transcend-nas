@@ -2,6 +2,7 @@ package com.transcend.nas.management.browser;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.TextUtils;
 
 import com.transcend.nas.management.FileInfo;
 
@@ -25,6 +26,10 @@ public class TwonkyCustomLoader extends TwonkyGeneralPostLoader {
         super(context, args);
         mOperation = args.getString("op");
         mApiArgs = "path="+ args.getString("system_path") + "&"+  args.getString("api_args");
+        String searchKey = args.getString("search_key");
+        if (!TextUtils.isEmpty(searchKey)) {
+            mApiArgs = mApiArgs + "&search_key="+ searchKey;
+        }
         mPath = args.getString("path");
         mForceTop = args.getBoolean("force_top", false);
     }

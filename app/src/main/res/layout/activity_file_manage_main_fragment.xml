@@ -53,15 +53,14 @@
                 android:background="@color/colorPrimary" />
 
         </android.support.v4.widget.SwipeRefreshLayout>
-        <LinearLayout
+
+        <FrameLayout
             android:id="@+id/fragment_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/main_toolbar_shadow"
             android:layout_weight="1.00"
             android:orientation="vertical" />
-
-
 
         <!--<LinearLayout-->
             <!--android:id="@+id/main_recycler_empty_view"-->

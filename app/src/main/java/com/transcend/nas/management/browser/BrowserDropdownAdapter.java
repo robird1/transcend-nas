@@ -21,7 +21,7 @@ public class BrowserDropdownAdapter extends FileManageDropdownAdapter {
     }
 
     /**
-     * Called after BrowserFragment.onLoadFinished() been invoked.
+     * Called after FragmentBrowser.onLoadFinished() been invoked.
      *
      * @param path
      */

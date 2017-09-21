@@ -2,6 +2,7 @@ package com.transcend.nas.management.browser;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.realtek.nasfun.api.ServerManager;
@@ -25,6 +26,7 @@ class TwonkyViewAllLoader extends TwonkyGeneralPostLoader {
     private int mLoadedCount;
     private boolean mIsLoadingFinish = false;
     private String mPath;
+    private boolean mIsSearchMode;
 
     TwonkyViewAllLoader(Context context, Bundle args) {
         super(context, args);
@@ -40,7 +42,13 @@ class TwonkyViewAllLoader extends TwonkyGeneralPostLoader {
 
     @Override
     protected String onRequestBody() {
-        return getRequestContent(mArgs);
+        String searchKey = mArgs.getString("search_key");
+        if (!TextUtils.isEmpty(searchKey)) {
+            mIsSearchMode = true;
+            return getSearchRequest(searchKey);
+        }
+        mIsSearchMode = false;
+        return getRequestContent();
     }
 
     @Override
@@ -97,27 +105,8 @@ class TwonkyViewAllLoader extends TwonkyGeneralPostLoader {
         return mStart + mLoadedCount;
     }
 
-    public boolean isLoadingFinish() {
+    boolean isLoadingFinish() {
         return mIsLoadingFinish;
-    }
-
-    private String getRequestContent(Bundle args) {
-        mStart = args.getInt("start", 0);
-        String userName = ServerManager.INSTANCE.getCurrentServer().getUsername();
-        int type = args.getInt("type", -1);
-        String orderby = args.getString("orderby", "title_asc");
-        // shared folder path
-        String systemPath = args.getString("system_path");
-        // twonky path
-        mPath = args.getString("path", "");
-        mCount = args.getInt("count");
-
-        if (mCount == 0 || mCount < COUNT_LAZY_LOAD) {
-            mCount = COUNT_LAZY_LOAD;
-        }
-        
-        return "hash=" + getHash() + "&fmt=json&start=" + mStart + "&count=" + mCount +
-                "&login=" + userName + "&path="+ systemPath+ "&type=" + type + "&orderby="+ orderby;
     }
 
     int getStartIndex() {
@@ -129,8 +118,54 @@ class TwonkyViewAllLoader extends TwonkyGeneralPostLoader {
      *
      * @return
      */
-    public String getPath() {
+    String getPath() {
         return mPath;
     }
+
+    boolean isSearchMode() {
+        return mIsSearchMode;
+    }
+
+    private String getRequestContent() {
+        mStart = mArgs.getInt("start", 0);
+        // twonky path
+        mPath = mArgs.getString("path", "");
+        mCount = mArgs.getInt("count");
+
+        if (mCount == 0 || mCount < COUNT_LAZY_LOAD) {
+            mCount = COUNT_LAZY_LOAD;
+        }
+
+        return "hash=" + getHash() + "&fmt=json&start=" + mStart + "&count=" + mCount +
+                "&login=" + getUserName() + "&path="+ getSystemPath()+ "&type=" + getMediaType() +
+                "&orderby="+ getOrderBy();
+    }
+
+    private String getSearchRequest(String searchKey) {
+//        // twonky path
+//        mPath = mArgs.getString("path", "");
+        return "hash=" + getHash() + "&fmt=json" + "&login=" + getUserName() + "&path="+ getSystemPath()+
+                "&type=" + getMediaType() + "&orderby="+ getOrderBy() + "&search_key="+ searchKey;
+    }
+
+    /**
+     * shared folder path
+     */
+    private String getSystemPath() {
+        return mArgs.getString("system_path");
+    }
+
+    private String getOrderBy() {
+        return mArgs.getString("orderby", "title_asc");
+    }
+
+    private int getMediaType() {
+        return mArgs.getInt("type", -1);
+    }
+
+    private String getUserName() {
+        return ServerManager.INSTANCE.getCurrentServer().getUsername();
+    }
+
 
 }

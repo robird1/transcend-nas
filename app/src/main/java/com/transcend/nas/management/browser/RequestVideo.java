@@ -67,6 +67,32 @@ class RequestVideo extends RequestAction {
     }
 
     @Override
+    public void search(String text) {
+        String apiName = getAPIName(mActivity.mPath);
+        Bundle args = new Bundle();
+        if ("get_video_album".equals(apiName)) {
+            // search under view by folder
+            args.putInt("type", StoreJetCloudData.VIDEO.getTwonkyType());
+            args.putString("search_key", text);
+            startLoader(TWONKY_VIEW_ALL, args);
+
+        } else if ("get_video".equals(apiName)) {
+            // search under view by selected folder
+            args.putString("op", "get_video");
+            args.putString("api_args", getAPIArgs(mActivity.mPath));
+            args.putString("search_key", text);
+            startLoader(TWONKY_CUSTOM, args);
+
+        } else {
+            // search under view all videos
+            args.putInt("type", StoreJetCloudData.VIDEO.getTwonkyType());
+            args.putString("search_key", text);
+            startLoader(TWONKY_VIEW_ALL, args);
+        }
+
+    }
+
+    @Override
     public void viewByFolder() {
         Bundle args = new Bundle();
         args.putString("op", "get_video_album");
