@@ -401,6 +401,9 @@ public class BrowserActivity extends FileManageActivity implements FragmentManag
     void closeSearchResult() {
         if (mFragment instanceof FragmentSearch) {
             getSupportFragmentManager().popBackStackImmediate();
+            if (mTabPosition == BrowserData.ALL.getTabPosition()) {
+                doRefresh();
+            }
         }
     }
 
