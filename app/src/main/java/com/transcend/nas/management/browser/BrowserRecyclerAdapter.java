@@ -6,6 +6,8 @@ import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
 
+import com.realtek.nasfun.api.Server;
+import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.management.FileInfo;
 import com.transcend.nas.management.FileManageRecyclerAdapter;
 import com.transcend.nas.management.firmware.PhotoFactory;
@@ -51,8 +53,18 @@ public class BrowserRecyclerAdapter extends FileManageRecyclerAdapter {
                 }
             }
 
+            // display thumbnail when viewing on photo / music / video mode
             if (!TextUtils.isEmpty(fileInfo.thumbnail)) {
-                PhotoFactory.getInstance().displayPhoto(fileInfo.thumbnail, holder.icon);
+                String path;
+                if (!fileInfo.type.equals(FileInfo.TYPE.VIDEO)) {
+                    // photo thumbnail is a Twonky url
+                    path = fileInfo.thumbnail;
+                } else {
+                    // video thumbnail is a WebDav url
+                    Server server = ServerManager.INSTANCE.getCurrentServer();
+                    path = fileInfo.thumbnail+ "?hash="+ server.getHash();
+                }
+                PhotoFactory.getInstance().displayPhoto(path, holder.icon);
             }
 
             // show video subtitle
