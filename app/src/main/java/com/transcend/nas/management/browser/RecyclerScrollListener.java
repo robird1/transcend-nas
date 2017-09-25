@@ -8,7 +8,7 @@ import android.support.v7.widget.RecyclerView;
  */
 
 public abstract class RecyclerScrollListener extends RecyclerView.OnScrollListener {
-    public static final int TIMEOUT_LOADING = 20000;
+    private static final int TIMEOUT_LOADING = 20000;
     private int mPreviousTotal = 0; // The total number of items in the dataset after the last load
     private boolean mLoading = true; // True if we are still waiting for the last set of data to load.
     private int mVisibleThreshold = 5; // The minimum amount of items to have below your current scroll position before loading more.

@@ -1,6 +1,5 @@
 package com.transcend.nas.management.browser;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
@@ -9,10 +8,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.transcend.nas.R;
@@ -40,14 +36,7 @@ public class FragmentBrowser extends Browser implements LoaderManager.LoaderCall
     private int mRunningLoaderID = -1;
 
     @Override
-    public void onAttach(Context context) {
-        Log.d(TAG, "[Enter] onAttach");
-        super.onAttach(context);
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "[Enter] onCreate");
         super.onCreate(savedInstanceState);
         mActivity = (BrowserActivity) getActivity();
         mActivity.setSystemPath();
@@ -57,7 +46,6 @@ public class FragmentBrowser extends Browser implements LoaderManager.LoaderCall
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        Log.d(TAG, "[Enter] onViewCreated");
         super.onViewCreated(view, savedInstanceState);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -66,59 +54,6 @@ public class FragmentBrowser extends Browser implements LoaderManager.LoaderCall
             }
         });
         mProgressView.setVisibility(View.INVISIBLE);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.d(TAG, "[Enter] onCreateView");
-        return super.onCreateView(inflater, container, savedInstanceState);
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        Log.d(TAG, "[Enter] onActivityCreated");
-        super.onActivityCreated(savedInstanceState);
-    }
-
-    @Override
-    public void onStart() {
-        Log.d(TAG, "[Enter] onStart");
-        super.onStart();
-    }
-
-    @Override
-    public void onPause() {
-        Log.d(TAG, "[Enter] onPause");
-
-        super.onPause();
-    }
-
-    @Override
-    public void onStop() {
-        Log.d(TAG, "[Enter] onStop");
-
-        super.onStop();
-    }
-
-    @Override
-    public void onDestroyView() {
-        Log.d(TAG, "[Enter] onDestroyView");
-
-        super.onDestroyView();
-    }
-
-    @Override
-    public void onDestroy() {
-        Log.d(TAG, "[Enter] onDestroy");
-
-        super.onDestroy();
-    }
-
-    @Override
-    public void onDetach() {
-        Log.d(TAG, "[Enter] onDetach");
-
-        super.onDetach();
     }
 
     @Override
@@ -161,7 +96,6 @@ public class FragmentBrowser extends Browser implements LoaderManager.LoaderCall
 
     @Override
     public void onLoadFinished(Loader loader, Boolean isSuccess) {
-        Log.d(TAG, "[Enter] onLoadFinished loader: "+ loader.toString());
         mProgressView.setVisibility(View.INVISIBLE);
         mSwipeRefreshLayout.setRefreshing(false);
 
@@ -175,11 +109,8 @@ public class FragmentBrowser extends Browser implements LoaderManager.LoaderCall
             if (!isSearchMode) {
                 updateUIViewAll(loader);
             } else {
-//                Log.d(TAG, "[Enter] isSearchMode");
                 BrowserRecyclerAdapter adapter = (BrowserRecyclerAdapter) getRecyclerViewAdapter();
                 TwonkyViewAllLoader ld = (TwonkyViewAllLoader) loader;
-//                Log.d(TAG, "[Enter] ld.getFileList().size(): "+ ld.getFileList().size());
-
                 adapter.updateList(ld.getFileList());
                 mActivity.mFileList = new ArrayList<>(ld.getFileList());
                 adapter.notifyDataSetChanged();
@@ -198,8 +129,6 @@ public class FragmentBrowser extends Browser implements LoaderManager.LoaderCall
     private void updateUICustom(Loader loader) {
         BrowserRecyclerAdapter adapter = (BrowserRecyclerAdapter) getRecyclerViewAdapter();
         TwonkyCustomLoader ld = (TwonkyCustomLoader) loader;
-//        Log.d(TAG, "[Enter] ld.getFileList().size(): "+ ld.getFileList().size());
-
         adapter.updateList(ld.getFileList());
         mActivity.mPath = ld.getPath();
         mActivity.mFileList = new ArrayList<>(ld.getFileList());
@@ -216,8 +145,6 @@ public class FragmentBrowser extends Browser implements LoaderManager.LoaderCall
     private void updateUIIndex(Loader loader) {
         BrowserRecyclerAdapter adapter = (BrowserRecyclerAdapter) getRecyclerViewAdapter();
         TwonkyIndexLoader ld = (TwonkyIndexLoader) loader;
-//        Log.d(TAG, "[Enter] ld.getFileList().size(): "+ ld.getFileList().size());
-
         adapter.updateList(ld.getFileList());
         mActivity.mPath = ld.getPath();
         mActivity.mFileList = new ArrayList<>(ld.getFileList());
@@ -267,11 +194,7 @@ public class FragmentBrowser extends Browser implements LoaderManager.LoaderCall
     @Override
     protected void onPageChanged(int lastPosition, int currentPosition) {
         mActivity.closeEditorMode();
-        if (getTabPosition() == BrowserData.ALL.getTabPosition()) {
-            mActivity.enableFabEdit(true);
-        } else {
-            mActivity.enableFabEdit(false);
-        }
+        configFab();
         updateViewReference();
         mProgressView.setVisibility(View.INVISIBLE);
 
@@ -284,7 +207,8 @@ public class FragmentBrowser extends Browser implements LoaderManager.LoaderCall
 
     @Override
     public void onFinishCreateView(int position) {
-        if (position == 0 && getTabPosition() == 0) {          // TODO
+        int folderIndex = BrowserData.ALL.getTabPosition();
+        if (position == folderIndex && getTabPosition() == folderIndex) {
             updateViewReference();
             mActivity.checkEmptyView();
         }
@@ -367,6 +291,14 @@ public class FragmentBrowser extends Browser implements LoaderManager.LoaderCall
             getRecyclerViewAdapter().notifyDataSetChanged();
         }
         BrowserData.getInstance(getTabPosition()).setLayout(mode);
+    }
+
+    private void configFab() {
+        if (getTabPosition() == BrowserData.ALL.getTabPosition()) {
+            mActivity.enableFabEdit(true);
+        } else {
+            mActivity.enableFabEdit(false);
+        }
     }
 
 }

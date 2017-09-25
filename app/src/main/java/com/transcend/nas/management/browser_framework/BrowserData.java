@@ -69,8 +69,7 @@ public enum BrowserData {
         if (list == null) {
             return;
         }
-        mFileList.clear();
-        mFileList.addAll(list);
+        mFileList = new ArrayList<>(list);
     }
 
     void clearFileList() {

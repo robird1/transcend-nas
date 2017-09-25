@@ -1086,6 +1086,11 @@ public class FileManageActivity extends DrawerMenuActivity implements
      * UX CONTROL
      */
     protected void updateScreen() {
+        if (mRecyclerView.getLayoutManager() instanceof GridLayoutManager) {
+            updateGridView(false);
+        } else if (mRecyclerView.getLayoutManager() instanceof LinearLayoutManager) {
+            updateListView(false);
+        }
         mDropdownAdapter.updateList(mPath, mFileActionManager.getServiceMode());
         mDropdownAdapter.notifyDataSetChanged();
         mRecyclerAdapter.updateList(mFileList);
