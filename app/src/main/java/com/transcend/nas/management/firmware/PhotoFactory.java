@@ -11,6 +11,7 @@ import android.widget.ProgressBar;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.realtek.nasfun.api.Server;
@@ -53,7 +54,13 @@ public class PhotoFactory {
     }
 
     public void displayPhoto(String path, ImageView view) {
-        ImageLoader.getInstance().displayImage(path, view);
+        DisplayImageOptions options = new DisplayImageOptions.Builder()
+                .cacheInMemory(true)
+                .cacheOnDisk(false)
+                .bitmapConfig(Bitmap.Config.RGB_565)
+                .imageScaleType(ImageScaleType.IN_SAMPLE_INT)
+                .build();
+        ImageLoader.getInstance().displayImage(path, view, options);
     }
 
     private void displayLocalPhoto(Context context, boolean thumbnail, String path, ImageView view) {
@@ -128,7 +135,8 @@ public class PhotoFactory {
             };
             ImageLoader.getInstance().displayImage(url, view, options, simpleImageLoadingListener, imageLoadingProgressListener);
         } else {
-            ImageLoader.getInstance().displayImage(url, view);
+//            ImageLoader.getInstance().displayImage(url, view);
+            displayPhoto(url, view);
         }
     }
 

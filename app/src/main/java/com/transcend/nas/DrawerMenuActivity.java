@@ -12,24 +12,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import com.transcend.nas.common.ManageFactory;
-import com.transcend.nas.connection.LoginActivity;
+import com.transcend.nas.connection.LoginActivityNew;
 import com.transcend.nas.management.FileManageActivity;
 import com.transcend.nas.management.FileRecentActivity;
 import com.transcend.nas.management.externalstorage.ExternalStorageController;
 import com.transcend.nas.management.externalstorage.SDCardReceiver;
-import com.transcend.nas.management.firmware.ShareFolderManager;
-import com.transcend.nas.management.firmware.TwonkyManager;
-import com.transcend.nas.management.firmwareupdate.FirmwareUpdateService;
-import com.transcend.nas.service.AutoBackupService;
-import com.transcend.nas.service.LanCheckManager;
-import com.transcend.nas.settings.DiskFactory;
 import com.transcend.nas.settings.FeedbackActivity;
 import com.transcend.nas.settings.HelpActivity;
 import com.transcend.nas.settings.SettingsActivity;
 import com.transcend.nas.tutk.TutkLogoutLoader;
 import com.transcend.nas.view.NotificationDialog;
-import com.transcend.nas.viewer.music.MusicService;
 
 /**
  * Created by steve_su on 2016/12/12.
@@ -258,55 +250,13 @@ public abstract class DrawerMenuActivity extends AppCompatActivity implements
         };
     }
 
-    protected void clearDataAfterSwitch() {
-        NASPref.clearDataAfterSwitch(this);
-
-        //stop auto backup service
-        if (ManageFactory.isServiceRunning(this, AutoBackupService.class)) {
-            Intent intent = new Intent(this, AutoBackupService.class);
-            stopService(intent);
-        }
-
-        //stop music service
-        if (ManageFactory.isServiceRunning(this, MusicService.class)) {
-            Intent intent = new Intent(this, MusicService.class);
-            stopService(intent);
-        }
-
-        //stop firmware update service
-        if (ManageFactory.isServiceRunning(this, FirmwareUpdateService.class)) {
-            Intent intent = new Intent(this, FirmwareUpdateService.class);
-            stopService(intent);
-        }
-
-        //clean disk info
-        DiskFactory.getInstance().cleanDiskDevices();
-
-        //clean path map
-        ShareFolderManager.getInstance().cleanRealPathMap();
-
-        //clean twonky map
-        TwonkyManager.getInstance().cleanTwonky();
-
-        //clean lan check
-        LanCheckManager.getInstance().destroy();
-    }
-
-    protected void clearDataAfterLogout() {
-        clearDataAfterSwitch();
-
-        //clean email and account information
-        if (NASPref.useFacebookLogin && NASPref.getFBAccountStatus(this))
-            NASUtils.logOutFB(this);
-        NASUtils.clearDataAfterLogout(this);
-    }
 
     protected void startSignInActivity() {
-        clearDataAfterLogout();
+        NASUtils.clearAfterLogout(this.getApplicationContext());
 
         //show SignIn activity
         Intent intent = new Intent();
-        intent.setClass(this, LoginActivity.class);
+        intent.setClass(this, LoginActivityNew.class);
         startActivity(intent);
         finishAffinity();
     }

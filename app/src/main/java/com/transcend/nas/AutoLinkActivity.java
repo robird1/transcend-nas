@@ -14,6 +14,7 @@ import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.common.AnimFactory;
 import com.transcend.nas.common.GoogleAnalysisFactory;
 import com.transcend.nas.connection.LoginActivity;
+import com.transcend.nas.connection.LoginActivityNew;
 import com.transcend.nas.connection.LoginHelper;
 import com.transcend.nas.connection.LoginListActivity;
 import com.transcend.nas.introduce.FirstUseActivity;
@@ -217,7 +218,7 @@ public class AutoLinkActivity extends Activity implements LoaderManager.LoaderCa
     private void startLoginActivity() {
         mTextView.clearAnimation();
         Intent intent = new Intent();
-        intent.setClass(AutoLinkActivity.this, LoginActivity.class);
+        intent.setClass(AutoLinkActivity.this, LoginActivityNew.class);
         startActivity(intent);
         finish();
     }

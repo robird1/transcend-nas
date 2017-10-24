@@ -61,5 +61,6 @@ public class LoaderID {
     public static final int NTP_SERVER_CONFIG = 53;
     public static final int TIME_ZONE = 54;
     public static final int TIME_ZONE_CONFIG = 55;
+    public static final int FIRMWARE_RELEASE_NOTE = 56;
 
 }

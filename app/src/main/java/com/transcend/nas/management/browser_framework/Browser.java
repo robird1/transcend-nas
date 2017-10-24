@@ -6,7 +6,7 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
@@ -161,7 +161,7 @@ public abstract class Browser extends Fragment {
     protected abstract BrowserData[] onTabInstance();
 
 
-    private class MyPagerAdapter extends FragmentPagerAdapter {
+    private class MyPagerAdapter extends FragmentStatePagerAdapter {
         SparseArray<MediaFragment> mRegisteredFragments = new SparseArray<>();
 
         MyPagerAdapter(FragmentManager fm) {

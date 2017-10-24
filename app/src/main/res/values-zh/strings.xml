@@ -278,8 +278,8 @@
 
     <string name="settings_firmware_summary_update">有新版韌體可供更新</string>
     <string name="dialog_firmware_title_notify">韌體更新</string>
-    <string name="dialog_firmware_button_update">升級</string>
-    <string name="dialog_firmware_button_remind">不再提醒</string>
+    <!--<string name="dialog_firmware_button_update">升級</string>-->
+    <!--<string name="dialog_firmware_button_remind">不再提醒</string>-->
     <string name="dialog_firmware_message_notify">有新版韌體可供更新。是否更新至最新版本?</string>
     <string name="dialog_firmware_title_updating">更新韌體中</string>
     <string name="dialog_firmware_message_success">韌體更新完成，系統重新開機中</string>
@@ -291,5 +291,29 @@
     <string name="msg_conj_clear">%1$d個項目將被清除</string>
     <string name="path_not_found">找不到路徑</string>
     <string name="msg_path_check">請確認路徑</string>
+
+    <string name="option_menu_all_photo">檢視所有照片</string>
+    <string name="option_menu_date">按日期檢視</string>
+    <string name="option_menu_folder">按資料夾檢視</string>
+    <string name="option_menu_album">按專輯檢視</string>
+    <string name="option_menu_select">選取</string>
+    <string name="option_menu_select_all">選取全部</string>
+    <string name="option_menu_all_tracks">檢視所有歌曲</string>
+    <string name="option_menu_artist">按演出者檢視</string>
+    <string name="option_menu_genre">按類型檢視</string>
+    <string name="option_menu_all_videos">檢視所有影片</string>
+
+    <string name="browser_unit_photo">張照片</string>
+    <string name="browser_unit_video">個影片</string>
+    <string name="browser_unit_song">首歌曲</string>
+    <string name="browser_unit_album">張專輯</string>
+
+    <string name="login_or">或</string>
+    <string name="login_create_account">建立帳戶</string>
+    <string name="login_activate_account_message">請檢查您的信箱並激活新建立的帳戶，然後點選登入以繼續</string>
+    <string name="login_resend_activate_mail">重送認證信</string>
+
+    <string name="release_note_button_update">下載並安裝</string>
+    <string name="release_note_title">更新日誌</string>
 
 </resources>

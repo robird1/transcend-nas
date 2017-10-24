@@ -2,12 +2,14 @@ package com.transcend.nas.management.browser;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
 
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.R;
 import com.transcend.nas.management.FileInfo;
 import com.transcend.nas.management.FileManageRecyclerAdapter;
 import com.transcend.nas.management.firmware.PhotoFactory;
@@ -35,25 +37,29 @@ public class BrowserRecyclerAdapter extends FileManageRecyclerAdapter {
 
         if (holder.viewType == ITEM_VIEW_TYPE_CONTENT) {
             FileInfo fileInfo = mList.get(position);
-            if (holder.subtitle != null) {
+            // show video title
+            if (fileInfo.type.equals(FileInfo.TYPE.VIDEO) && mLayoutType == LayoutType.GRID) {
+                holder.title.setVisibility(View.VISIBLE);
+                holder.title.setText(fileInfo.name);
 
-                // show total count under the index folder
+                // disable indicate icon
+                if (holder.indicate != null) {
+                    holder.indicate.setVisibility(View.GONE);
+                }
+            }
+
+            if (holder.subtitle != null) {
+                // show total count of the index folder
                 if (fileInfo.isTwonkyIndexFolder && fileInfo.twonkyIndexCount != 0) {
                     holder.title.setGravity(Gravity.BOTTOM);
                     holder.subtitle.setVisibility(View.VISIBLE);
                     holder.subtitle.setText(String.valueOf(fileInfo.twonkyIndexCount) + " " +
                             getTwonkyFolderUnit(fileInfo));
-                } else {
-                    String time = fileInfo.time;
-                    // show total count under the index folder
-                    if (!TextUtils.isEmpty(time)) {
-                        holder.subtitle.setVisibility(View.VISIBLE);
-                        holder.subtitle.setText(time);
-                    }
                 }
             }
 
-            // display thumbnail when viewing on photo / music / video mode
+            // To display thumbnail when viewing on photo / video mode.
+            // The thumbnail of music mode will be handled in the FileManageRecyclerAdapter.
             if (!TextUtils.isEmpty(fileInfo.thumbnail)) {
                 String path;
                 if (!fileInfo.type.equals(FileInfo.TYPE.VIDEO)) {
@@ -65,18 +71,9 @@ public class BrowserRecyclerAdapter extends FileManageRecyclerAdapter {
                     path = fileInfo.thumbnail+ "?hash="+ server.getHash();
                 }
                 PhotoFactory.getInstance().displayPhoto(path, holder.icon);
+
             }
 
-            // show video subtitle
-            if (fileInfo.type.equals(FileInfo.TYPE.VIDEO) && mLayoutType == LayoutType.GRID) {
-                holder.title.setVisibility(View.VISIBLE);
-                holder.title.setText(fileInfo.name);
-
-                // disable indicate icon
-                if (holder.indicate != null) {
-                    holder.indicate.setVisibility(View.GONE);
-                }
-            }
         }
     }
 
@@ -85,16 +82,16 @@ public class BrowserRecyclerAdapter extends FileManageRecyclerAdapter {
         String unit = "";
         if (fileInfo.path != null) {
             if (fileInfo.path.startsWith("||get_photo")) {
-                unit = "photos";
+                unit = mContext.getString(R.string.browser_unit_photo);
             } else if (fileInfo.path.startsWith("||get_video")) {
-                unit = "videos";
+                unit = mContext.getString(R.string.browser_unit_video);
             } else if (fileInfo.path.startsWith("||get_music")) {
                 String apiName = RequestAction.getAPIName(fileInfo.path);
                 if ("get_music_album".equals(apiName)) {
-                    unit = "songs";
+                    unit = mContext.getString(R.string.browser_unit_song);
                 } else if ("get_music_artists".equals(apiName) ||
                         "get_music_genre".equals(apiName)) {
-                    unit = "albums";
+                    unit = mContext.getString(R.string.browser_unit_album);
                 }
             }
         }

@@ -223,13 +223,13 @@ public class BrowserActivity extends FileManageActivity implements FragmentManag
 
     @Override
     public void onBackPressed() {
+        if (mPath == null) {
+            return;
+        }
+
         if (mTabPosition == BrowserData.ALL.getTabPosition()) {
             super.onBackPressed();
         } else {
-            if (mPath == null) {
-                return;
-            }
-
             clearDownloadTask();
             toggleDrawerCheckedItem();
             if (!stopRunningLoader()) {               // TODO check this statement

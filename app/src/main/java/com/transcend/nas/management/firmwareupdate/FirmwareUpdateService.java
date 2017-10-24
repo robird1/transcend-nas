@@ -3,21 +3,15 @@ package com.transcend.nas.management.firmwareupdate;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import com.realtek.nasfun.api.Server;
-import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.NASApp;
-import com.transcend.nas.NASPref;
 import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
-import com.transcend.nas.connection.LoginLoader;
-import com.tutk.IOTC.P2PService;
 
 /**
  * Created by steve_su on 2017/6/28.
@@ -63,15 +57,6 @@ public class FirmwareUpdateService extends Service {
                 if (isSuccess) {
                     startStatusLoader(loader);
                 } else {
-                    if (!loader.isHashValid()) {
-                        boolean result = reLogin();
-                        if (result) {
-                            requestFirmwareDownload();
-                        } else {
-                            showDialog(FirmwareDialogActivity.FAILED);
-                        }
-                        return;
-                    }
                     showDialog(FirmwareDialogActivity.FAILED);
                 }
             }
@@ -103,16 +88,6 @@ public class FirmwareUpdateService extends Service {
             return;
         }
 
-        if (!loader.isHashValid()) {
-            boolean isSuccess = reLogin();
-            if (isSuccess) {
-                startStatusLoader(loader);
-            } else {
-                showDialog(FirmwareDialogActivity.FAILED);
-            }
-            return;
-        }
-
         String msg = NASUtils.startP2PService(mContext);
         if (msg == null) {
             showDialog(FirmwareDialogActivity.FAILED);
@@ -140,22 +115,6 @@ public class FirmwareUpdateService extends Service {
             stopSelf();
         } else {
             showDialog(FirmwareDialogActivity.FAILED);
-        }
-    }
-
-    private boolean reLogin() {
-        String msg = NASUtils.startP2PService(mContext);
-        boolean isP2PSuccess = "".equals(msg);
-        if (isP2PSuccess) {
-            Bundle bundle = new Bundle();
-            bundle.putString("hostname", getIP());
-            bundle.putString("username", NASPref.getUsername(mContext));
-            bundle.putString("password", NASPref.getPassword(mContext));
-            new LoginLoader(mContext, bundle).loadInBackground();
-
-            return true;
-        } else {
-            return false;
         }
     }
 
@@ -200,11 +159,6 @@ public class FirmwareUpdateService extends Service {
 
     private boolean isUnknownError(String returnCode) {
         return "1".equals(returnCode);
-    }
-
-    private String getIP() {
-        Server server = ServerManager.INSTANCE.getCurrentServer();
-        return P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
     }
 
 }

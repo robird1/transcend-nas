@@ -1,8 +1,10 @@
 package com.transcend.nas.management.firmwareupdate;
 
+import android.app.LoaderManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.Loader;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -13,22 +15,27 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.transcend.nas.LoaderID;
 import com.transcend.nas.NASApp;
 import com.transcend.nas.NASUtils;
 import com.transcend.nas.R;
 import com.transcend.nas.common.ManageFactory;
+import com.transcend.nas.connection.LoginActivityNew;
+import com.transcend.nas.tutk.TutkLogoutLoader;
 
 /**
  * Created by steve_su on 2017/6/29.
  */
 
-public class FirmwareDialogActivity extends AppCompatActivity {
+public class FirmwareDialogActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Boolean> {
+    private static final String TAG = FirmwareDialogActivity.class.getSimpleName();
     static final String UPDATING = "updating";
     static final String FAILED = "failed";
     static final String SUCCESS = "success";
     static final String PROGRESS = "progress";
     private Context mContext;
     private AlertDialog mUpdatingDialog;
+    private AlertDialog mSuccessDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -55,6 +62,35 @@ public class FirmwareDialogActivity extends AppCompatActivity {
         NASApp app = (NASApp) this.getApplicationContext();
         app.mIsInBackground = true;
         super.onStop();
+    }
+
+    @Override
+    public Loader<Boolean> onCreateLoader(int id, Bundle args) {
+        switch (id) {
+            case LoaderID.TUTK_LOGOUT:
+                return new TutkLogoutLoader(this);
+        }
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Boolean> loader, Boolean isSuccess) {
+        if (loader instanceof TutkLogoutLoader) {
+            if (mSuccessDialog != null) {
+                mSuccessDialog.dismiss();
+            }
+
+            if (mUpdatingDialog != null) {
+                mUpdatingDialog.dismiss();
+            }
+
+            startSignInActivity();
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Boolean> loader) {
+
     }
 
     private void showDialog(Intent intent) {
@@ -125,16 +161,13 @@ public class FirmwareDialogActivity extends AppCompatActivity {
         builder.setMessage(R.string.dialog_firmware_message_success);
         builder.setPositiveButton(R.string.confirm, null);
         builder.setCancelable(false);
-        final AlertDialog dialog = builder.show();
-        Button posBtn = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        mSuccessDialog = builder.show();
+        Button posBtn = mSuccessDialog.getButton(DialogInterface.BUTTON_POSITIVE);
         posBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dialog.dismiss();
-                if (mUpdatingDialog != null) {
-                    mUpdatingDialog.dismiss();
-                }
-                finish();
+                Bundle args = new Bundle();
+                getLoaderManager().restartLoader(LoaderID.TUTK_LOGOUT, args, FirmwareDialogActivity.this).forceLoad();
             }
         });
     }
@@ -160,5 +193,14 @@ public class FirmwareDialogActivity extends AppCompatActivity {
         }
     }
 
+    private void startSignInActivity() {
+        NASUtils.clearAfterLogout(this.getApplicationContext());
+
+        //show SignIn activity
+        Intent intent = new Intent();
+        intent.setClass(this, LoginActivityNew.class);
+        startActivity(intent);
+        finishAffinity();
+    }
 
 }

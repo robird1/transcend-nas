@@ -33,24 +33,27 @@
 
         <Preference
             android:key="@string/pref_firmware_version"
+            android:order="0"
             android:layout="@layout/preference_item"
             android:summary="@string/loading"
             android:title="@string/settings_firmware_version_title" />
 
-        <Preference
-            android:key="@string/pref_firmware_update"
-            android:layout="@layout/preference_item"
-            android:summary="@string/settings_firmware_summary_update"
-            android:title="@string/dialog_firmware_title_notify" />
+        <!--<Preference-->
+            <!--android:key="@string/pref_firmware_update"-->
+            <!--android:layout="@layout/preference_item"-->
+            <!--android:summary="@string/settings_firmware_summary_update"-->
+            <!--android:title="@string/dialog_firmware_title_notify" />-->
 
         <Preference
             android:key="@string/pref_device_info"
+            android:order="2"
             android:layout="@layout/preference_item"
             android:summary="@string/settings_device_info_subtitle"
             android:title="@string/device_information" />
 
         <Preference
             android:key="@string/pref_disk_info"
+            android:order="3"
             android:layout="@layout/preference_item"
             android:summary="@string/settings_disk_info_subtitle"
             android:title="@string/disk_info" />

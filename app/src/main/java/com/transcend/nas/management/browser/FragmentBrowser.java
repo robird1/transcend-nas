@@ -172,6 +172,9 @@ public class FragmentBrowser extends Browser implements LoaderManager.LoaderCall
 //            mActivity.enableFabEdit(true);
 
         } else {  // lazy loading case
+            if (ld.getFileList().size() == 0) {
+                return;
+            }
             adapter.addFiles(ld.getFileList());
             mActivity.mFileList.addAll(ld.getFileList());
         }

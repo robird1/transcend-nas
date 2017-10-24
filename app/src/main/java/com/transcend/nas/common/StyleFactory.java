@@ -25,7 +25,7 @@ public class StyleFactory {
     private static Runnable runnable;
 
     private enum TouchColor {
-        WHITE, BLUE, RED
+        WHITE, BLUE, RED, Grey
     }
 
     public static void set_button_Drawable_left(final Context context, final Button button, final int imageID, final int spacing) {
@@ -120,13 +120,17 @@ public class StyleFactory {
         set_button_touch_effect(context, button, TouchColor.RED);
     }
 
+    public static void set_grey_button_touch_effect(Context context, Button button) {
+        set_button_touch_effect(context, button, TouchColor.Grey);
+    }
+
     public static void set_button_touch_effect(final Context context, final Button button, final TouchColor color) {
         button.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        button.setBackgroundResource(R.drawable.button_press);
+                        button.setBackgroundResource(R.drawable.button_press_new);
                         break;
                     case MotionEvent.ACTION_UP:
                         switch (color) {
@@ -134,7 +138,10 @@ public class StyleFactory {
                                 button.setBackgroundResource(R.drawable.button_normal_red);
                                 break;
                             case BLUE:
-                                button.setBackgroundResource(R.drawable.button_normal_blue);
+                                button.setBackgroundResource(R.drawable.button_normal_blue_new);
+                                break;
+                            case Grey:
+                                button.setBackgroundResource(R.drawable.button_normal_grey);
                                 break;
                             default:
                                 button.setBackgroundResource(R.drawable.button_normal);

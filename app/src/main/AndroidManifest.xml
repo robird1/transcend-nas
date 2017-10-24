@@ -30,7 +30,17 @@
         </activity>
 
         <activity
+            android:name=".connection.LoginActivityNew"
+            android:screenOrientation="portrait">
+        </activity>
+
+        <activity
             android:name=".connection.LoginByEmailActivity"
+            android:screenOrientation="portrait">
+        </activity>
+
+        <activity
+            android:name=".connection.LoginByEmailActivityNew"
             android:screenOrientation="portrait">
         </activity>
 
@@ -205,6 +215,11 @@
             android:name=".management.firmwareupdate.FirmwareDialogActivity"
             android:theme="@style/FirmwareDialog"
             android:launchMode="singleTask"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
+
+        <activity
+            android:name=".management.firmwareupdate.ReleaseNoteActivity"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 

@@ -59,7 +59,11 @@ import com.transcend.nas.R;
 import com.transcend.nas.common.GoogleAnalysisFactory;
 import com.transcend.nas.common.ManageFactory;
 import com.transcend.nas.connection.LoginListActivity;
+import com.transcend.nas.management.action.AbstractActionManager;
+import com.transcend.nas.management.action.ActionHelper;
 import com.transcend.nas.management.action.ConnectManager;
+import com.transcend.nas.management.action.FileActionManager;
+import com.transcend.nas.management.action.FileSyncManager;
 import com.transcend.nas.management.action.TimeManager;
 import com.transcend.nas.management.action.file.FileActionService;
 import com.transcend.nas.management.download.AbstractDownloadManager;
@@ -67,10 +71,6 @@ import com.transcend.nas.management.download.DownloadFactory;
 import com.transcend.nas.management.download.TempFileDownloadManager;
 import com.transcend.nas.management.externalstorage.ExternalStorageController;
 import com.transcend.nas.management.externalstorage.ExternalStorageLollipop;
-import com.transcend.nas.management.action.AbstractActionManager;
-import com.transcend.nas.management.action.ActionHelper;
-import com.transcend.nas.management.action.FileSyncManager;
-import com.transcend.nas.management.action.FileActionManager;
 import com.transcend.nas.management.firmware.FileFactory;
 import com.transcend.nas.management.firmware.MediaFactory;
 import com.transcend.nas.management.firmware.TwonkyManager;
@@ -175,7 +175,8 @@ public class FileManageActivity extends DrawerMenuActivity implements
             initDownloadManager();
             onReceiveIntent(getIntent());
 
-            if (isAdmin() && NASPref.getFirmwareNotify(this) == true) {
+            if (isAdmin()) {
+//                if (isAdmin() && NASPref.getFirmwareNotify(this) == true) {
                 checkFirmwareVersion();
             }
         } else {
@@ -292,7 +293,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
             }
         } else if (requestCode == LoginListActivity.REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                clearDataAfterSwitch();
+                NASUtils.clearDataAfterSwitch(mContext);
                 if (Build.VERSION.SDK_INT >= 11) {
                     recreate();
                 } else {

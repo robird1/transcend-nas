@@ -2,6 +2,7 @@ package com.transcend.nas.settings;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.util.Log;
 
 import com.realtek.nasfun.api.HttpClientManager;
 import com.realtek.nasfun.api.Server;
@@ -45,7 +46,11 @@ public class FirmwareVersionLoader extends AsyncTaskLoader<Boolean> {
     @Override
     public Boolean loadInBackground() {
         mVersion = getFirmwareVersion();
-        return true;
+        if ("-1".equals(mVersion)) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     public String getVersion(){
@@ -57,7 +62,7 @@ public class FirmwareVersionLoader extends AsyncTaskLoader<Boolean> {
     }
 
     private String getFirmwareVersion() {
-        String firmwareVersion = null;
+        String firmwareVersion = "-1";
         HttpEntity entity = sendPostRequest();
         InputStream inputStream = null;
         String inputEncoding = null;
@@ -83,6 +88,7 @@ public class FirmwareVersionLoader extends AsyncTaskLoader<Boolean> {
     }
 
     private HttpEntity sendPostRequest() {
+        Log.d(TAG, "[Enter] sendPostRequest");
         HttpEntity entity = null;
         Server server = ServerManager.INSTANCE.getCurrentServer();
         String hostname = P2PService.getInstance().getIP(server.getHostname(), P2PService.P2PProtocalType.HTTP);
@@ -106,6 +112,9 @@ public class FirmwareVersionLoader extends AsyncTaskLoader<Boolean> {
         } catch (ClientProtocolException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            Log.d(TAG, "[Enter] IOException =================================");
+            Log.d(TAG, e.toString());
+
             e.printStackTrace();
         }
 
@@ -113,7 +122,7 @@ public class FirmwareVersionLoader extends AsyncTaskLoader<Boolean> {
     }
 
     private String doParse(InputStream inputStream, String inputEncoding) {
-        String firmwareVersion = null;
+        String firmwareVersion = "-1";
         XmlPullParserFactory factory;
 
         try {

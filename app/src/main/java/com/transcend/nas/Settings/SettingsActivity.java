@@ -22,8 +22,6 @@ import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.utils.StorageUtils;
-import com.realtek.nasfun.api.Server;
-import com.realtek.nasfun.api.ServerManager;
 import com.transcend.nas.DrawerMenuActivity;
 import com.transcend.nas.DrawerMenuController;
 import com.transcend.nas.LoaderID;
@@ -35,6 +33,8 @@ import com.transcend.nas.management.FileActionLocateActivity;
 import com.transcend.nas.management.firmware.FileFactory;
 
 import java.io.File;
+
+import static com.transcend.nas.NASUtils.isAdmin;
 
 
 /**
@@ -69,13 +69,8 @@ public class SettingsActivity extends DrawerMenuActivity {
 
         mFragment = new SettingsFragment();
         getFragmentManager().beginTransaction().replace(R.id.settings_frame, mFragment).commit();
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        //start firmware version loader
-        if (mFragment.isAdmin()) {
+        if (isAdmin()) {
             getLoaderManager().restartLoader(LoaderID.FIRMWARE_VERSION, null, this).forceLoad();
         }
     }
@@ -119,19 +114,30 @@ public class SettingsActivity extends DrawerMenuActivity {
     }
 
     @Override
-    public void onLoadFinished(Loader<Boolean> loader, Boolean success) {
-        if (loader instanceof FirmwareVersionLoader) {
-            String version = ((FirmwareVersionLoader) loader).getVersion();
-            String isUpgrade = ((FirmwareVersionLoader) loader).getIsUpgrade();
-            if (!TextUtils.isEmpty(version)) {
-                mFragment.refreshFirmwareVersion(version);
-            }
+    public void onLoadFinished(Loader<Boolean> loader, Boolean isSuccess) {
+        if (isSuccess) {
+            if (loader instanceof FirmwareVersionLoader) {
+                String version = ((FirmwareVersionLoader) loader).getVersion();
+                String isUpgrade = ((FirmwareVersionLoader) loader).getIsUpgrade();
+                if (!TextUtils.isEmpty(version)) {
+                    mFragment.refreshFirmwareVersion(version);
+                }
 
-            if ("no".equals(isUpgrade) || "".equals(isUpgrade)) {
-                mFragment.removeFirmwareUpdate();
+                if ("yes".equals(isUpgrade)) {
+                    PreferenceScreen screen = mFragment.getPreferenceScreen();
+                    PreferenceCategory prefCategory = (PreferenceCategory) mFragment.findPreference(getString(R.string.pref_firmware));
+                    Preference fwUpdateBtn = new Preference(screen.getContext());
+                    fwUpdateBtn.setKey(getResources().getString(R.string.pref_firmware_update));
+                    fwUpdateBtn.setTitle(R.string.dialog_firmware_title_notify);
+                    fwUpdateBtn.setSummary(R.string.settings_firmware_summary_update);
+                    fwUpdateBtn.setLayoutResource(R.layout.preference_item);
+                    fwUpdateBtn.setOrder(1);
+                    prefCategory.addPreference(fwUpdateBtn);
+                }
+
+            } else {
+                super.onLoadFinished(loader, isSuccess);
             }
-        } else {
-            super.onLoadFinished(loader, success);
         }
     }
 
@@ -157,6 +163,7 @@ public class SettingsActivity extends DrawerMenuActivity {
             getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
             refreshColumnDownloadLocation();
             refreshColumnCacheUseSize();
+
             if (!isAdmin()) {
                 PreferenceCategory pref = (PreferenceCategory) findPreference(getString(R.string.pref_firmware));
                 getPreferenceScreen().removePreference(pref);
@@ -323,19 +330,6 @@ public class SettingsActivity extends DrawerMenuActivity {
         private void refreshFirmwareVersion(String version) {
             Preference pref = findPreference(getString(R.string.pref_firmware_version));
             pref.setSummary(version);
-        }
-
-        private void removeFirmwareUpdate() {
-            PreferenceCategory prefCategory = (PreferenceCategory) findPreference(getString(R.string.pref_firmware));
-            Preference pref = findPreference(getString(R.string.pref_firmware_update));
-            if (prefCategory != null && pref != null) {
-                prefCategory.removePreference(pref);
-            }
-        }
-
-        private boolean isAdmin() {
-            Server server = ServerManager.INSTANCE.getCurrentServer();
-            return NASPref.defaultUserName.equals(server.getUsername());
         }
 
     }

@@ -10,7 +10,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Environment;
 import android.os.storage.StorageManager;
 import android.support.annotation.NonNull;
@@ -26,14 +25,21 @@ import com.facebook.login.LoginManager;
 import com.realtek.nasfun.api.Server;
 import com.realtek.nasfun.api.ServerInfo;
 import com.realtek.nasfun.api.ServerManager;
+import com.transcend.nas.common.ManageFactory;
 import com.transcend.nas.connection.LoginHelper;
-import com.transcend.nas.connection.LoginLoader;
 import com.transcend.nas.management.FileInfo;
 import com.transcend.nas.management.FileManageActivity;
 import com.transcend.nas.management.browser.BrowserActivity;
+import com.transcend.nas.management.firmware.ShareFolderManager;
+import com.transcend.nas.management.firmware.TwonkyManager;
 import com.transcend.nas.management.firmwareupdate.FirmwareUpdateService;
+import com.transcend.nas.management.firmwareupdate.ReleaseNoteActivity;
+import com.transcend.nas.service.AutoBackupService;
 import com.transcend.nas.service.FileRecentManager;
+import com.transcend.nas.service.LanCheckManager;
+import com.transcend.nas.settings.DiskFactory;
 import com.transcend.nas.utils.MimeUtil;
+import com.transcend.nas.viewer.music.MusicService;
 import com.tutk.IOTC.P2PService;
 import com.tutk.IOTC.P2PTunnelAPIs;
 
@@ -64,6 +70,49 @@ public final class NASUtils {
 
     public static String getCacheFilesLocation(Context context) {
         return context.getExternalCacheDir().getPath();
+    }
+
+    public static void clearAfterLogout(Context context) {
+        clearDataAfterSwitch(context);
+
+        //clean email and account information
+        if (NASPref.useFacebookLogin && NASPref.getFBAccountStatus(context))
+            NASUtils.logOutFB(context);
+        NASUtils.clearDataAfterLogout(context);
+    }
+
+    public static void clearDataAfterSwitch(Context context) {
+        NASPref.clearDataAfterSwitch(context);
+
+        //stop auto backup service
+        if (ManageFactory.isServiceRunning(context, AutoBackupService.class)) {
+            Intent intent = new Intent(context, AutoBackupService.class);
+            context.stopService(intent);
+        }
+
+        //stop music service
+        if (ManageFactory.isServiceRunning(context, MusicService.class)) {
+            Intent intent = new Intent(context, MusicService.class);
+            context.stopService(intent);
+        }
+
+        //stop firmware update service
+        if (ManageFactory.isServiceRunning(context, FirmwareUpdateService.class)) {
+            Intent intent = new Intent(context, FirmwareUpdateService.class);
+            context.stopService(intent);
+        }
+
+        //clean disk info
+        DiskFactory.getInstance().cleanDiskDevices();
+
+        //clean path map
+        ShareFolderManager.getInstance().cleanRealPathMap();
+
+        //clean twonky map
+        TwonkyManager.getInstance().cleanTwonky();
+
+        //clean lan check
+        LanCheckManager.getInstance().destroy();
     }
 
     public static void clearDataAfterLogout(Context context) {
@@ -107,11 +156,7 @@ public final class NASUtils {
                     .Callback() {
                 @Override
                 public void onCompleted(GraphResponse graphResponse) {
-
                     LoginManager.getInstance().logOut();
-
-                    Log.d(TAG, "LoginManager.getInstance().logOut()");
-
                 }
             }).executeAsync();
         }
@@ -386,15 +431,19 @@ public final class NASUtils {
         Builder builder = new Builder(activity);
         builder.setTitle(activity.getString(R.string.dialog_firmware_title_notify));
         builder.setMessage(R.string.dialog_firmware_message_notify);
-        builder.setNegativeButton(R.string.dialog_firmware_button_remind, null);
-        builder.setPositiveButton(R.string.dialog_firmware_button_update, null);
+        builder.setNegativeButton(R.string.cancel, null);
+        builder.setPositiveButton(R.string.ok, null);
         builder.setCancelable(true);
         final android.support.v7.app.AlertDialog dialog = builder.show();
         Button posBtn = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
         posBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showUpdateConfirm(activity);
+                if (NASUtils.getFirmwareVersion() >= NASPref.releaseNoteMinFirmwareVersion) {
+                    showReleaseNote(activity);
+                } else {
+                    showUpdateConfirm(activity);
+                }
                 dialog.dismiss();
 
             }
@@ -403,10 +452,14 @@ public final class NASUtils {
         negBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                NASPref.setFirmwareNotify(activity, false);
                 dialog.dismiss();
             }
         });
+    }
+
+    private static void showReleaseNote(Activity activity) {
+        Intent intent = new Intent(activity, ReleaseNoteActivity.class);
+        activity.startActivity(intent);
     }
 
     private static void showUpdateConfirm(final Activity activity) {
@@ -477,12 +530,15 @@ public final class NASUtils {
 
     public static Class getFileManageClass() {
         Class navigationClass = FileManageActivity.class;
-        ServerInfo info = ServerManager.INSTANCE.getCurrentServer().getServerInfo();
-        int firmwareVer = Integer.valueOf(info.firmwareVer);
-        if (firmwareVer >= useBrowserMinFirmwareVersion) {
+        if (getFirmwareVersion() >= useBrowserMinFirmwareVersion) {
             navigationClass = BrowserActivity.class;
         }
         return navigationClass;
+    }
+
+    public static int getFirmwareVersion() {
+        ServerInfo info = ServerManager.INSTANCE.getCurrentServer().getServerInfo();
+        return Integer.valueOf(info.firmwareVer);
     }
 
 }

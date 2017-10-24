@@ -183,7 +183,7 @@ public class LoginListActivity extends AppCompatActivity implements LoaderManage
     private void startLoginActivity() {
         if (getCallingActivity() == null) {
             Intent intent = new Intent();
-            intent.setClass(LoginListActivity.this, LoginActivity.class);
+            intent.setClass(LoginListActivity.this, LoginActivityNew.class);
             startActivity(intent);
             finish();
         } else {

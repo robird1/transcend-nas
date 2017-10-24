@@ -278,8 +278,8 @@
 
     <string name="settings_firmware_summary_update">A newer firmware version is available</string>
     <string name="dialog_firmware_title_notify">Firmware Update</string>
-    <string name="dialog_firmware_button_update">Update</string>
-    <string name="dialog_firmware_button_remind">Not remind again</string>
+    <!--<string name="dialog_firmware_button_update">Update</string>-->
+    <!--<string name="dialog_firmware_button_remind">Not remind again</string>-->
     <string name="dialog_firmware_message_notify">A newer firmware version is available. Update to the latest version?</string>
     <string name="dialog_firmware_title_updating">Firmware is updating</string>
     <string name="dialog_firmware_message_success">Firmware has been successfully updated. Please wait for system reboot.</string>
@@ -303,6 +303,17 @@
     <string name="option_menu_genre">View by genre</string>
     <string name="option_menu_all_videos">View all videos</string>
 
+    <string name="browser_unit_photo">photos</string>
+    <string name="browser_unit_video">videos</string>
+    <string name="browser_unit_song">songs</string>
+    <string name="browser_unit_album">albums</string>
 
+    <string name="login_or">or</string>
+    <string name="login_create_account">Create account</string>
+    <string name="login_activate_account_message">Please check your mailbox and activate your account, then click login to continue.</string>
+    <string name="login_resend_activate_mail">Resend certified mail</string>
+
+    <string name="release_note_button_update">Download and Install</string>
+    <string name="release_note_title">Release Note</string>
 
 </resources>
