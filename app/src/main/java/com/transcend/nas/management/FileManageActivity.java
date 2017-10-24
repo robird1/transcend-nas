@@ -1035,14 +1035,19 @@ public class FileManageActivity extends DrawerMenuActivity implements
 
     private void doShareLink(final ArrayList<FileInfo> files) {
         Bundle value = new Bundle();
-        value.putString(ProgressDialog.DIALOG_TITLE, "Share Link");
+        value.putString(ProgressDialog.DIALOG_TITLE, getString(R.string.share_link_title));
         value.putInt(ProgressDialog.DIALOG_ICON, R.drawable.ic_toolbar_share_gray);
         String format = mContext.getResources().getString(files.size() <= 1 ? R.string.msg_file_selected : R.string.msg_files_selected);
         value.putString(ProgressDialog.DIALOG_MESSAGE, String.format(format, files.size()));
         new ProgressDialog(mContext, value) {
             @Override
             public void onConfirm() {
-                mFileActionManager.shareLink(files);
+                long fileSize = files.get(0).size;
+                if (files.get(0).size < 50 * 1024 * 1024) {
+                    mFileActionManager.shareLink(files);
+                } else {
+                    Toast.makeText(mContext, getString(R.string.share_link_invalid_file_size), Toast.LENGTH_SHORT).show();
+                }
                 dismiss();
             }
 
@@ -1239,8 +1244,8 @@ public class FileManageActivity extends DrawerMenuActivity implements
         }
         mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_rename).setVisible(visible);
         mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_share).setVisible(!containFolder & visible);
-        //mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_share_link).setVisible(!containFolder & !containFile & visible);
-        mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_share_link).setVisible(false);
+        mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_share_link).setVisible(!containFolder & !containFile & visible);
+//        mEditorMode.getMenu().findItem(R.id.file_manage_editor_action_share_link).setVisible(false);
     }
 
     @Override

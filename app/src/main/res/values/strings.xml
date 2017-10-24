@@ -316,4 +316,8 @@
     <string name="release_note_button_update">Download and Install</string>
     <string name="release_note_title">Release Note</string>
 
+    <string name="share_link_title">Share Link</string>
+    <string name="share_link_invalid_file_size">The shared file is over the max allowed size 50MB</string>
+
+
 </resources>

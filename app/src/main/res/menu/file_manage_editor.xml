@@ -31,7 +31,7 @@
             <item
                 android:id="@+id/file_manage_editor_action_share_link"
                 android:icon="@drawable/ic_toolbar_sharelink_white"
-                android:title="Share Link"
+                android:title="@string/share_link_title"
                 app:showAsAction="never" />
 
             <item
