@@ -5,8 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ScaleDrawable;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -140,10 +145,8 @@ public class LoginActivityNew extends AppCompatActivity implements
         //init progress view
         mProgressView = (RelativeLayout) findViewById(R.id.login_progress_view);
 
-        //init login layout
-        Button facebookLogin = (Button) findViewById(R.id.login_by_facebook);
-        facebookLogin.setOnClickListener(this);
-        StyleFactory.set_blue_button_touch_effect(this, facebookLogin);
+        configFacebookButton();
+
         mInputLayoutEmail = (TextInputLayout) findViewById(R.id.input_layout_email);
         mInputLayoutPassword = (TextInputLayout) findViewById(R.id.input_layout_password);
         mEditTextEmail = (EditText) findViewById(R.id.edit_text_email);
@@ -152,9 +155,11 @@ public class LoginActivityNew extends AppCompatActivity implements
         Button emailLogin = (Button) findViewById(R.id.login_by_email);
         emailLogin.setOnClickListener(this);
         StyleFactory.set_grey_button_touch_effect(this, emailLogin);
+
         Button createAccount = (Button) findViewById(R.id.create_account);
         createAccount.setOnClickListener(this);
         StyleFactory.set_blue_button_touch_effect(this, createAccount);
+
         TextView tvForget = (TextView) findViewById(R.id.forget_password);
         tvForget.setOnClickListener(this);
         StyleFactory.set_blue_text_touch_effect(this, tvForget);
@@ -170,6 +175,16 @@ public class LoginActivityNew extends AppCompatActivity implements
                 mEditTextPassword.setText(pwd);
             }
         }
+    }
+
+    private void configFacebookButton() {
+        //init login layout
+        Button facebookLogin = (Button) findViewById(R.id.login_by_facebook);
+        facebookLogin.setOnClickListener(this);
+        StyleFactory.set_blue_button_touch_effect(this, facebookLogin);
+        Drawable fbIcon = getResources().getDrawable(R.drawable.com_facebook_button_icon);
+        fbIcon.setBounds(0,0,60,60);
+        facebookLogin.setCompoundDrawables(fbIcon, null,null,null);
     }
 
     private void checkLoginNASResult(TutkLoginLoader loader) {
@@ -499,7 +514,7 @@ public class LoginActivityNew extends AppCompatActivity implements
 //        Log.d(TAG, "displayMetrics.density: " + displayMetrics.density);
 //        Log.d(TAG, "height: " + height);
 //        Log.d(TAG, "width: " + width);
-        Bitmap bitmap = StyleFactory.decodeSampledBitmapFromResource(this.getResources(), R.drawable.sjc_bg3_logo, width, height);
+        Bitmap bitmap = StyleFactory.decodeSampledBitmapFromResource(this.getResources(), R.drawable.img_sjc_bg, width, height);
         backgroundImage.setImageBitmap(bitmap);
     }
 

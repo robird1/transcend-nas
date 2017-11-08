@@ -1043,7 +1043,7 @@ public class FileManageActivity extends DrawerMenuActivity implements
             @Override
             public void onConfirm() {
                 long fileSize = files.get(0).size;
-                if (files.get(0).size < 50 * 1024 * 1024) {
+                if (fileSize < 50 * 1024 * 1024) {
                     mFileActionManager.shareLink(files);
                 } else {
                     Toast.makeText(mContext, getString(R.string.share_link_invalid_file_size), Toast.LENGTH_SHORT).show();

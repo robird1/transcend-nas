@@ -2,7 +2,6 @@ package com.transcend.nas.management.browser;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;

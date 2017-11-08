@@ -319,5 +319,6 @@
     <string name="share_link_title">Share Link</string>
     <string name="share_link_invalid_file_size">The shared file is over the max allowed size 50MB</string>
 
+    <string name="login_with_facebook">Log in with facebook</string>
 
 </resources>

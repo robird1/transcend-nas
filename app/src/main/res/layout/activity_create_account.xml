@@ -12,21 +12,31 @@
         android:layout_centerHorizontal="true"
         android:adjustViewBounds="true"/>
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/remote_access_register_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="280dp"
-        android:paddingBottom="50dp"
-        android:paddingLeft="30dp"
-        android:paddingRight="30dp"
+        android:layout_height="match_parent"
         android:visibility="gone">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/remote_access_register_email">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:background="@drawable/img_login_cloud"/>
+        </RelativeLayout>
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/remote_access_register_email"
-            android:layout_width="260dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingLeft="54dp"
+            android:paddingRight="54dp"
+            android:layout_centerInParent="true"
             android:layout_gravity="center_horizontal"
             android:hint="@string/email">
 
@@ -39,8 +49,11 @@
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/remote_access_register_password"
-            android:layout_width="260dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingLeft="54dp"
+            android:paddingRight="54dp"
+            android:layout_below="@id/remote_access_register_email"
             android:layout_gravity="center_horizontal"
             android:hint="@string/password">
 
@@ -52,8 +65,11 @@
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/remote_access_register_password_confirm"
-            android:layout_width="260dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingLeft="54dp"
+            android:paddingRight="54dp"
+            android:layout_below="@id/remote_access_register_password"
             android:layout_gravity="center_horizontal"
             android:hint="@string/confrim_password"
             android:visibility="visible">
@@ -68,16 +84,17 @@
             android:id="@+id/remote_access_register_submit"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_marginLeft="24dp"
-            android:layout_marginRight="24dp"
+            android:layout_marginLeft="54dp"
+            android:layout_marginRight="54dp"
             android:layout_marginTop="20dp"
+            android:layout_below="@id/remote_access_register_password_confirm"
             android:layout_gravity="center_horizontal"
             android:background="@drawable/button_normal_blue_new"
             android:text="@string/submit"
             android:textAllCaps="false"
             android:textSize="18sp"
             android:textColor="@color/colorPrimary"/>
-    </LinearLayout>
+    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/remote_access_normal_layout"
@@ -85,19 +102,32 @@
         android:layout_height="match_parent"
         android:visibility="visible">
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/account_layout">
+
+            <ImageView
+                android:id="@+id/cloud_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:background="@drawable/img_login_cloud"/>
+        </RelativeLayout>
+
         <LinearLayout
             android:id="@+id/account_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_marginTop="280dp">
+            android:layout_centerInParent="true"
+            android:gravity="center">
 
             <ImageView
                 android:id="@+id/account_image"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:src="@drawable/icon_account_24dp"/>
+                android:src="@drawable/ic_page_portrait"/>
 
             <TextView
                 android:id="@+id/start_account_title"
@@ -111,7 +141,7 @@
 
         <TextView
             android:id="@+id/mail_confirm_text"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/account_layout"
             android:layout_marginLeft="54dp"
@@ -151,7 +181,8 @@
         android:id="@+id/settings_progress_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/app_bar"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
         android:clickable="true"
         android:visibility="invisible">
 

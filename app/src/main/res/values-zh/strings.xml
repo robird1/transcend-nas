@@ -319,4 +319,6 @@
     <string name="share_link_title">分享連結</string>
     <string name="share_link_invalid_file_size">分享的檔案超過檔案大小上限50MB</string>
 
+    <string name="login_with_facebook">使用Facebook登入</string>
+
 </resources>

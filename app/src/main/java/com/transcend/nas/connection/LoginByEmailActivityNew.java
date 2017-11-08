@@ -46,7 +46,7 @@ public class LoginByEmailActivityNew extends AppCompatActivity implements
     public static final String TAG = LoginByEmailActivityNew.class.getSimpleName();
 
     private RelativeLayout mProgressView;
-    private LinearLayout registerLayout;
+    private RelativeLayout registerLayout;
     private RelativeLayout mIdentifyLayout;
 
     private TextInputLayout tlEmail;
@@ -264,7 +264,7 @@ public class LoginByEmailActivityNew extends AppCompatActivity implements
     }
 
     private void initView() {
-        registerLayout = (LinearLayout) findViewById(R.id.remote_access_register_layout);
+        registerLayout = (RelativeLayout) findViewById(R.id.remote_access_register_layout);
         mIdentifyLayout = (RelativeLayout) findViewById(R.id.remote_access_normal_layout);
 
         if (isSignUp) {
@@ -416,7 +416,7 @@ public class LoginByEmailActivityNew extends AppCompatActivity implements
         windowmanager.getDefaultDisplay().getMetrics(displayMetrics);
         int height = Math.round(displayMetrics.heightPixels / displayMetrics.density);
         int width = Math.round(displayMetrics.widthPixels / displayMetrics.density);
-        Bitmap bitmap = StyleFactory.decodeSampledBitmapFromResource(this.getResources(), R.drawable.sjc_bg3_logo, width, height);
+        Bitmap bitmap = StyleFactory.decodeSampledBitmapFromResource(this.getResources(), R.drawable.img_sjc_bg, width, height);
         backgroundImage.setImageBitmap(bitmap);
     }
 
